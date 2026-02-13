@@ -1,0 +1,79 @@
+function build_resistivity_analysis_table(title_str, TC, RRR, drop, dropN)
+% BUILD_RESISTIVITY_ANALYSIS_TABLE
+% Displays a styled summary table for resistivity analysis
+% (UI-only, no LaTeX, no physics decisions)
+
+% ===============================
+% META (RAW, untouched)
+% ===============================
+fig_summary = figure( ...
+    'Name', title_str, ...          % ← META ONLY
+    'NumberTitle','off', ...
+    'Color','w', ...
+    'Position',[150 150 1000 380]);
+
+% ===============================
+% DISPLAY TITLE (human-readable)
+% ===============================
+displayTitle = 'Resistivity | Analysis table';
+
+annotation(fig_summary,'textbox',[0 0.88 1 0.1], ...
+    'String', displayTitle, ...
+    'Interpreter','none', ...
+    'EdgeColor','none', ...
+    'HorizontalAlignment','center', ...
+    'FontWeight','bold', ...
+    'FontSize',18);
+
+% ===============================
+% TABLE DATA (UI text only)
+% ===============================
+summaryData = {
+    'T_C (K)',                sprintf('%.2f', TC),   'Transition temperature';
+    'RRR = ρ(TH) / ρ(T_C)',   sprintf('%.3g', RRR),  'Residual Resistivity Ratio';
+    'Drop = ρ(T_C) / ρ(T_L)', sprintf('%.3g', drop), ...
+                               'Ratio between T_C and low-T resistivity';
+    'Drop normalized',        sprintf('%.3g', dropN), ...
+                               'Drop / RRR';
+};
+
+columnNames = {'Parameter','Value','Definition'};
+
+% ===============================
+% TABLE
+% ===============================
+t = uitable('Parent',fig_summary, ...
+    'Data', summaryData, ...
+    'ColumnName', columnNames, ...
+    'ColumnWidth', {280,130,460}, ...
+    'RowName', [], ...
+    'FontSize', 15, ...
+    'FontWeight','normal', ...
+    'ForegroundColor',[0 0 0], ...
+    'BackgroundColor',[1 1 1; 0.94 0.94 0.94], ...
+    'Position',[35 65 930 230]);
+
+drawnow; % ensure UI created
+
+% ===============================
+% HEADER FONT (best-effort)
+% ===============================
+try
+    jScroll = findall(allchild(0),'Tag','UITableScrollPane');
+    jtable  = jScroll(1).getViewport.getView;
+    jtable.getTableHeader.setFont( ...
+        java.awt.Font('SansSerif', java.awt.Font.BOLD, 16));
+    jtable.getTableHeader.setPreferredSize( ...
+        java.awt.Dimension(100,35));
+catch
+    % silently ignore if Java access fails
+end
+
+% ===============================
+% SOFT BORDER
+% ===============================
+annotation(fig_summary,'rectangle',[0.03 0.15 0.94 0.68], ...
+    'Color',[0.7 0.7 0.7], ...
+    'LineWidth',1);
+
+end

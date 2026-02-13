@@ -1,0 +1,2 @@
+Ok, now I want to add to the main program a fixed variable, as a vector with values.
+I also want an option to choose this new fixed var, the units. they can be K, Deg, T for the temperature, angle, and field accordingly. also I want to use this vector values as the end of each Legend.
