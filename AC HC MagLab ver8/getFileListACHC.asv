@@ -1,0 +1,43 @@
+function [fileList, sortedFields, colors, mass] = getFileListACHC(directory,enter_sample_details)
+% Get list of files in the directory
+files = dir(fullfile(directory, '*.Dat'));
+fileList = {files.name};
+
+% Sort fileList by field (assumes the field is the last number before ".Dat")
+sortedFields = zeros(length(fileList), 1);
+
+for i = 1:length(fileList)
+    % Extract the field (last part before the file extension)
+    [~, filename, ~] = fileparts(fileList{i});
+    % Assuming the field is the last part of the filename (e.g., "14T")
+    field_str = regexp(filename, '\d+T', 'match');
+    if ~isempty(field_str)
+        sortedFields(i) = str2double(regexprep(field_str{1}, 'T', ''));
+    else
+        sortedFields(i) = NaN; % Handle if field isn't found properly
+    end
+end
+
+% Sort based on field values
+[sortedFields, sortIdx] = sort(sortedFields);
+fileList = fileList(sortIdx);
+
+% Colors for plotting, 'parula' colormap
+colors = parula(length(fileList));
+
+% Extract mass from the first file
+firstFilename = fileList{1};
+if(~enter_sample_details)
+    mass_str = regexp(firstFilename, '\d+p\d+mg', 'match'); % Find "Xpmg" pattern
+    if ~isempty(mass_str)
+        % Convert the string (e.g., "7p71mg") to a numeric value (e.g., 7.71)
+        mass_str_clean = regexprep(mass_str{1}, 'mg', ''); % Remove "mg"
+        mass_str_clean = strrep(mass_str_clean, 'p', '.'); % Replace 'p' with '.'
+        mass = str2double(mass_str_clean); % Convert to double
+    else
+        error('Mass could not be extracted from the filename.');
+    end
+else
+    mass=NaN;
+end
+end

@@ -1,0 +1,195 @@
+function applyColormapToFigures(mapName, folder, spreadMode)
+% APPLYCOLORMAPTOFIGURES
+% Unified colormap application engine with:
+%   • MATLAB colormaps
+%   • cmocean colormaps
+%   • Custom soft colormaps
+%   • Spread modes (start/full/reverse/middle/middle-reverse)
+%   • Colorbar slice consistency
+
+%% ---------------------------------------------------------------
+% PREPARE variables that nested functions MUST see
+%% ---------------------------------------------------------------
+cmap = [];           % main colormap (full)
+cmap_slice = [];     % sliced colormap for colorbars
+
+if nargin < 1, error('mapName missing'); end
+if nargin < 3 || isempty(spreadMode), spreadMode = 'start'; end
+if nargin < 2, folder = []; end
+
+%% ---------------------------------------------------------------
+% CUSTOM COLORMAPS
+%% ---------------------------------------------------------------
+customNames = {'softyellow','softgreen','softred','softblue', ...
+               'softpurple','softorange','softcyan','softgray'};
+
+if any(strcmpi(mapName, customNames))
+    cmap = makeCustomColormap(mapName);
+    goto_ready();
+    return;
+end
+
+%% ---------------------------------------------------------------
+% BUILTIN MATLAB or cmocean
+%% ---------------------------------------------------------------
+try
+    if exist(mapName,'builtin') || exist(mapName,'file')
+        cmap = feval(mapName,256);
+    elseif contains(lower(mapName),'cmocean')
+        cmap = eval(mapName);
+    else
+        error('Unknown colormap name.');
+    end
+catch
+    error('Invalid colormap or cmocean not installed.');
+end
+
+goto_ready();   % now apply
+return;
+
+
+%% ---------------------------------------------------------------
+% NESTED: Custom map generator
+%% ---------------------------------------------------------------
+function C = makeCustomColormap(name)
+
+    n = 256;
+
+    switch lower(name)
+        case 'softyellow'
+            C = [linspace(0.4,0.9,n)', linspace(0.4,0.9,n)', linspace(0.1,0.2,n)'];
+
+        case 'softgreen'
+            C = [linspace(0.1,0.4,n)', linspace(0.3,0.7,n)', linspace(0.1,0.3,n)'];
+
+        case 'softred'
+            C = [linspace(0.4,0.9,n)', linspace(0.1,0.3,n)', linspace(0.1,0.3,n)'];
+
+        case 'softblue'
+            C = [linspace(0.1,0.3,n)', linspace(0.1,0.3,n)', linspace(0.4,0.9,n)'];
+
+        case 'softpurple'
+            C = [linspace(0.4,0.7,n)', linspace(0.2,0.3,n)', linspace(0.5,0.8,n)'];
+
+        case 'softorange'
+            C = [linspace(0.7,0.95,n)', linspace(0.4,0.6,n)', linspace(0.1,0.2,n)'];
+
+        case 'softcyan'
+            C = [linspace(0.1,0.2,n)', linspace(0.5,0.9,n)', linspace(0.8,0.95,n)'];
+
+        case 'softgray'
+            C = repmat(linspace(0.3,0.9,n)',1,3);
+
+        otherwise
+            error('Unknown custom colormap.');
+    end
+end
+
+
+%% ---------------------------------------------------------------
+% NESTED: Apply operation
+%% ---------------------------------------------------------------
+function goto_ready()
+
+    % OPEN FIGURES
+    if isempty(folder)
+        figs = findall(0,'Type','figure');
+        for f = figs'
+            applyToSingleFigure(f, cmap, spreadMode);
+        end
+        return;
+    end
+
+    % FOLDER MODE
+    figs = dir(fullfile(folder,'*.fig'));
+    for i = 1:numel(figs)
+        fig = openfig(fullfile(folder,figs(i).name),'invisible');
+        applyToSingleFigure(fig, cmap, spreadMode);
+        savefig(fig, fullfile(folder,figs(i).name));
+        close(fig);
+    end
+end
+
+
+%% ---------------------------------------------------------------
+% NESTED: Apply to ONE figure
+%% ---------------------------------------------------------------
+function applyToSingleFigure(fig, cmapFull, spreadMode)
+
+    axList = findall(fig,'Type','axes');
+
+    for ax = axList'
+
+        % lines found
+        lines = findall(ax,'Type','line');
+        N = numel(lines);
+
+        % apply line colors
+        for k = 1:N
+            set(lines(k),'Color', cmap_slice(k,:));
+        end
+
+        % apply colormap slice
+        colormap(ax, cmap_slice);
+
+        % update colorbars using SAME SLICE
+        cb = findall(fig,'Type','colorbar');
+        for c = cb'
+            colormap(c, cmap_slice);
+        end
+    end
+    % ---- Update all colorbars ----
+cbList = findall(fig, 'Type', 'colorbar');
+
+for cb = cbList'
+
+    % NEW MODE: reverse ONLY the colorbar
+    if strcmpi(spreadMode, 'colorbar-reverse')
+        cb.Colormap = flipud(cmap);   % reverse only the bar
+    
+    % Normal behavior (match axes colormap)
+    else
+        cb.Colormap = cmap;
+    end
+
+end
+
+end
+
+
+%% ---------------------------------------------------------------
+% NESTED: Compute slicing of colormap
+%% ---------------------------------------------------------------
+function idx = getSliceIndices(M, N, mode)
+
+    switch lower(mode)
+        case 'start'
+            idx = round(linspace(1, min(64,M), N));
+
+        case 'full'
+            idx = round(linspace(1, M, N));
+
+        case 'reverse'
+            idx = round(linspace(1, M, N));
+            idx = fliplr(idx);
+
+        case 'middle'
+            s = floor(M/4); e = floor(M*3/4);
+            idx = round(linspace(s,e,N));
+
+        case 'middle-reverse'
+            s = floor(M/4); e = floor(M*3/4);
+            idx = round(linspace(s,e,N));
+            idx = fliplr(idx);
+
+                    case 'colorbar-reverse'
+            % No change to line colors
+            % Only modify colorbar AFTER loop
+            colors = []; % dummy (not used)
+
+        otherwise
+            error('Unknown spreadMode.');
+    end
+end
+
+end   % ← END MAIN FUNCTION

@@ -1,0 +1,305 @@
+function stability = analyzeSwitchingStability( ...
+    stored_data, sortedValues, delay_between_pulses_ms, safety_margin_percent, opts)
+% analyzeSwitchingStability
+% Computes multiple stability metrics for switching traces, with optional debug plots.
+%
+% INPUTS
+%   stored_data: cell(Nfiles,5) from processFilesSwitching:
+%       {i,1} data_unf  = [t_rel, Rch...]
+%       {i,2} data_filt = [t_rel, Rch...]
+%       {i,3} data_cent = [t_rel, Rch...]
+%       {i,4} valid_indices_of_all_pulses (logical)
+%       {i,5} intervel_avg_res (numPulses x numCh) plateau means (from UNFILTERED in your pipeline)
+%   sortedValues: vector of the sweep variable for each file (T or B or config index)
+%   delay_between_pulses_ms: scalar (ms)
+%   safety_margin_percent: scalar (%) used to exclude regions near pulses
+%   opts: struct with optional fields:
+%       .debugMode (false)
+%       .debugEveryN (1)
+%       .useFiltered (true) -> use stored_data{:,2}; if false use {:,1} (unfiltered)
+%       .useCentered (false) -> if true use stored_data{:,3}
+%       .stateMethod ("cluster" | "alternating")
+%       .minPtsFit (10)
+%       .settleFrac (0.9)  % for settling-time metric
+%       .skipFirstPlateaus (1)  % ignore first plateau(s) for stability stats
+%       .skipLastPlateaus  (0)  % optionally ignore last plateau(s)
+%
+% OUTPUT
+%   stability: struct with fields:
+%       .perFile(i).metrics(ch)  (struct with fields below)
+%       .summaryTable            (table: sortedValue, channel, metrics...)
+%       .opts                    (copy of opts actually used)
+%
+% Metrics computed per file & channel:
+%   - plateauStdMean: std of plateau means (on included plateaus)
+%   - stateStdHigh/stateStdLow: std of plateau means within each state (High/Low), included plateaus only
+%   - driftStd: std of plateau-mean drift relative to first INCLUDED plateau
+%   - slopeRMS: RMS of linear slope within each INCLUDED plateau (|dR/dt|)
+%   - withinRMS: RMS of within-plateau std for INCLUDED plateaus
+%   - settleTimeMean: mean settling time for INCLUDED transitions only
+
+% ---------------- Defaults ----------------
+if nargin < 5 || isempty(opts), opts = struct(); end
+if ~isfield(opts,'debugMode'),          opts.debugMode = false; end
+if ~isfield(opts,'debugEveryN'),        opts.debugEveryN = 1; end
+if ~isfield(opts,'useFiltered'),        opts.useFiltered = true; end
+if ~isfield(opts,'useCentered'),        opts.useCentered = false; end
+if ~isfield(opts,'stateMethod'),        opts.stateMethod = "cluster"; end
+if ~isfield(opts,'minPtsFit'),          opts.minPtsFit = 10; end
+if ~isfield(opts,'settleFrac'),         opts.settleFrac = 0.9; end
+if ~isfield(opts,'skipFirstPlateaus'),  opts.skipFirstPlateaus = 1; end
+if ~isfield(opts,'skipLastPlateaus'),   opts.skipLastPlateaus = 0; end
+
+Nfiles = size(stored_data,1);
+safety_margin_ms = delay_between_pulses_ms * (safety_margin_percent/100);
+
+rows = [];
+
+stability = struct();
+stability.opts = opts;
+stability.perFile = repmat(struct('sortedValue',NaN,'metrics',[]), Nfiles, 1);
+
+for i = 1:Nfiles
+    sv = sortedValues(i);
+    stability.perFile(i).sortedValue = sv;
+
+    % choose signal
+    if opts.useCentered
+        data = stored_data{i,3};
+    elseif opts.useFiltered
+        data = stored_data{i,2};
+    else
+        data = stored_data{i,1};
+    end
+
+    if isempty(data) || size(data,2) < 2
+        continue;
+    end
+
+    t = data(:,1);              % relative time
+    R = data(:,2:end);          % channels
+    numCh = size(R,2);
+
+    plateauMeans = stored_data{i,5};   % (numPulses x numCh)
+    if isempty(plateauMeans)
+        continue;
+    end
+    numPulses = size(plateauMeans,1);
+
+    % pulse times (relative)
+    pulse_times = t(1) + (0:numPulses-1) * delay_between_pulses_ms;
+
+    % plateau windows
+    plateauWin = cell(numPulses,1);
+    for j = 1:numPulses
+        if j < numPulses
+            t1 = pulse_times(j)   + safety_margin_ms;
+            t2 = pulse_times(j+1) - safety_margin_ms;
+        else
+            t1 = pulse_times(j) + safety_margin_ms;
+            t2 = t(end);
+        end
+        plateauWin{j} = (t >= t1) & (t <= t2);
+    end
+
+    metricsCh = repmat(struct( ...
+        'plateauStdMean',NaN, ...
+        'stateStdHigh',NaN,'stateStdLow',NaN, ...
+        'driftStd',NaN, ...
+        'slopeRMS',NaN, ...
+        'withinRMS',NaN, ...
+        'settleTimeMean',NaN, ...
+        'stateMethod',string(opts.stateMethod), ...
+        'skipFirstPlateaus',opts.skipFirstPlateaus, ...
+        'skipLastPlateaus',opts.skipLastPlateaus), 1, numCh);
+
+    for k = 1:numCh
+        pm = plateauMeans(:,k);
+        pm = pm(:);
+
+        % -------- define included plateau indices (exclude "training" plateaus) --------
+        j0 = 1 + max(0, opts.skipFirstPlateaus);
+        j1 = numPulses - max(0, opts.skipLastPlateaus);
+
+        useJ = false(numPulses,1);
+        if j0 <= j1
+            useJ(j0:j1) = true;
+        end
+        useJ = useJ & ~isnan(pm);
+
+        % ----- classify states (High/Low) -----
+        stateLabel = nan(numPulses,1); % 1=Low, 2=High
+        validPm = ~isnan(pm);
+
+        if sum(validPm) >= 4
+            switch string(opts.stateMethod)
+                case "alternating"
+                    idx = find(validPm);
+                    for jj = 1:numel(idx)
+                        stateLabel(idx(jj)) = 1 + mod(jj-1,2);
+                    end
+
+                otherwise % "cluster"
+                    x = pm(validPm);
+                    if numel(x) >= 4
+                        try
+                            [cIdx, cC] = kmeans(x,2,'Replicates',5,'MaxIter',200);
+                            [~, ord] = sort(cC);
+                            lowCluster  = ord(1);
+                            highCluster = ord(2);
+
+                            tmp = nan(numel(x),1);
+                            tmp(cIdx==lowCluster)  = 1;
+                            tmp(cIdx==highCluster) = 2;
+
+                            stateLabel(validPm) = tmp;
+                        catch
+                            medx = median(x,'omitnan');
+                            stateLabel(validPm & pm<=medx) = 1;
+                            stateLabel(validPm & pm> medx) = 2;
+                        end
+                    end
+            end
+        end
+
+        % ----- metric: scatter of plateau means (included only) -----
+        metricsCh(k).plateauStdMean = std(pm(useJ), 'omitnan');
+
+        pmLow  = pm(useJ & stateLabel==1);
+        pmHigh = pm(useJ & stateLabel==2);
+        if numel(pmLow)  >= 2, metricsCh(k).stateStdLow  = std(pmLow,'omitnan');  end
+        if numel(pmHigh) >= 2, metricsCh(k).stateStdHigh = std(pmHigh,'omitnan'); end
+
+        % drift relative to first INCLUDED plateau mean
+        firstIdx = find(useJ, 1, 'first');
+        if ~isempty(firstIdx)
+            drift = pm - pm(firstIdx);
+            metricsCh(k).driftStd = std(drift(useJ), 'omitnan');
+        end
+
+        % ----- within-plateau metrics from time trace (included plateaus only) -----
+        slopes    = nan(numPulses,1);
+        withinStd = nan(numPulses,1);
+        settleT   = nan(numPulses-1,1);
+
+        for j = 1:numPulses
+            if ~useJ(j)
+                continue; % exclude early/late plateaus from stability stats
+            end
+
+            idx = plateauWin{j};
+            vals = R(idx,k);
+            tt   = t(idx);
+
+            if numel(vals) >= opts.minPtsFit
+                p = polyfit(tt, vals, 1);
+                slopes(j)    = p(1);
+                withinStd(j) = std(vals,'omitnan');
+            end
+
+            % settling time: include only transitions between INCLUDED plateaus
+            if j < numPulses && useJ(j) && useJ(j+1)
+                tPulse = pulse_times(j);
+                tStop  = pulse_times(j+1) - safety_margin_ms;
+                idxA   = (t >= tPulse) & (t <= tStop);
+
+                if any(idxA) && ~isnan(pm(j)) && ~isnan(pm(j+1))
+                    y  = R(idxA,k);
+                    ttA = t(idxA);
+
+                    y0 = pm(j);
+                    y1 = pm(j+1);
+                    dy = y1 - y0;
+
+                    if dy ~= 0
+                        frac = opts.settleFrac;
+                        yTarget = y0 + frac*dy;
+
+                        if dy > 0
+                            idxCross = find(y >= yTarget, 1, 'first');
+                        else
+                            idxCross = find(y <= yTarget, 1, 'first');
+                        end
+
+                        if ~isempty(idxCross)
+                            settleT(j) = ttA(idxCross) - tPulse;
+                        end
+                    end
+                end
+            end
+        end
+
+        metricsCh(k).slopeRMS        = sqrt(mean(slopes(useJ).^2, 'omitnan'));
+        metricsCh(k).withinRMS       = sqrt(mean(withinStd(useJ).^2, 'omitnan'));
+        metricsCh(k).settleTimeMean  = mean(settleT, 'omitnan');
+
+        % ----- debug plotting -----
+        if opts.debugMode && (mod(i-1, opts.debugEveryN)==0)
+            figure('Name',sprintf('Stability debug | file %d | sv=%.6g | ch=%d', i, sv, k));
+            plot(t, R(:,k), '-'); hold on;
+            yl = ylim;
+
+            for j = 1:numPulses
+                idx = plateauWin{j};
+                if any(idx)
+                    x1 = t(find(idx,1,'first'));
+                    x2 = t(find(idx,1,'last'));
+
+                    % lighter patch for excluded plateaus
+                    if useJ(j)
+                        fa = 0.06;
+                    else
+                        fa = 0.02;
+                    end
+
+                    patch([x1 x2 x2 x1], [yl(1) yl(1) yl(2) yl(2)], ...
+                          'k', 'FaceAlpha', fa, 'EdgeColor', 'none');
+                end
+
+                if ~isnan(pm(j))
+                    % color by state label, gray if excluded
+                    if ~useJ(j)
+                        mk = [0.55 0.55 0.55];
+                    else
+                        if stateLabel(j)==2
+                            mk = 'r';
+                        elseif stateLabel(j)==1
+                            mk = 'b';
+                        else
+                            mk = 'k';
+                        end
+                    end
+
+                    if any(idx)
+                        xm = mean([x1 x2]);
+                    else
+                        xm = t(1);
+                    end
+
+                    plot(xm, pm(j), 'o', 'MarkerEdgeColor', mk, 'MarkerFaceColor', mk);
+                end
+            end
+
+            title(sprintf(['sv=%.6g | plateauStd=%.3g | lowStd=%.3g | highStd=%.3g | ' ...
+                           'slopeRMS=%.3g | skipFirst=%d'], ...
+                sv, metricsCh(k).plateauStdMean, metricsCh(k).stateStdLow, ...
+                metricsCh(k).stateStdHigh, metricsCh(k).slopeRMS, opts.skipFirstPlateaus));
+
+            xlabel('t (ms)');
+            ylabel('R (arb.)');
+            grid on;
+        end
+
+        rows = [rows; {sv, k, metricsCh(k).plateauStdMean, metricsCh(k).stateStdLow, ...
+            metricsCh(k).stateStdHigh, metricsCh(k).driftStd, metricsCh(k).slopeRMS, ...
+            metricsCh(k).withinRMS, metricsCh(k).settleTimeMean}]; %#ok<AGROW>
+    end
+
+    stability.perFile(i).metrics = metricsCh;
+end
+
+stability.summaryTable = cell2table(rows, 'VariableNames', ...
+    {'depValue','channel','plateauStdMean','stateStdLow','stateStdHigh', ...
+     'driftStd','slopeRMS','withinRMS','settleTimeMean'});
+
+end

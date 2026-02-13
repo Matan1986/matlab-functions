@@ -1,0 +1,181 @@
+%% intro
+clc;
+close all
+% Add folders and subfolders to MATLAB path
+baseFolder = 'I:\My Drive\Quantum materials lab\Matlab functions';
+addpath(genpath(baseFolder));
+import=false;
+if(import)
+    clear;
+    % Replace 'your_data_file.dat' with the actual file name\ path
+    filename = 'I:\My Drive\Quantum materials lab\Projects\Magnetic Intercalated TMD\Co1_3TaS2\MG 131\MG131 FIB3 Out of Plan to In Plane Rotator zfAMR like\zfAMR like with 5T again 4\MG_131_CoxTaS2_Vxy1_Vxx2_Ixx_0p1mAmp_f_277p77Hz_Field_5T_Temp_4K_zfAMR like.dat';
+    % filename = 'H:\My Drive\Quantum materials lab\Projects\Magnetic Intercalated TMD\Co1_3TaS2\MG 131\MG131 FIB3 Out of Plan to In Plane Rotator zfAMR like\zfAMR like with different fields 2\MG_131_CoxTaS2_Vxy1_Vxx2_Ixx_0p1mAmp_f_277p77Hz_Field_0p1Tto5T_Temp_4K_zfAMRlike.dat';
+    [Timems, FieldT, TemperatureK, Angledeg, LI1_XV, LI1_theta, LI2_XV, LI2_theta, LI3_XV, LI3_theta, LI4_XV, LI4_theta] = read_data(filename);
+end
+added_files=true;
+if(added_files)
+    Timems=(Timems(1):(Timems(2)-Timems(1)):Timems(end))';
+    if length(Timems)>length(Angledeg)
+        Timems=Timems(1:length(Angledeg));
+    end
+end
+plan_measured_strings=['In plane','Out of plane'];
+plane_measured=2; % Choose 1 In plane, Choose 2 Out of plane
+plan_measured_str=choose_plane(plan_measured_strings,plane_measured);
+%% Plots for debuging
+plot_the_founded_angle_segments=false;
+plot_the_founded_field_segments=false;
+plot_the_founded_temp_segments=false;
+plot_the_extracted_segments=false;
+plot_the_extracted_segments_with_points=false;
+excluded_fields = NaN; % Replace with the actual field value you want to exclude, for empty place NaN
+angles_to_exclude_within_specific_field = struct(...
+    'field', NaN, ... % Replace with the actual field value you want to specify, for empty place NaN
+    'angles',NaN ... % Replace with the actual angles you want to exclude, can be vector [0,45]
+    );
+%% Plots
+resistivity_vs_temp=false;
+choose_plot_zfAMR_and_fcAMR=true; % if false we will save the data
+polar_plots=true;
+%% Initialize variables (MG 131 FIB3)
+I = 0.1 * 10^-3; % Current [A]
+d = 0.6 * 10^-6; % Thickness [m]
+l = 35 * 10^-6; % Length (100*10^-6m)
+w = 20 * 10^-6; % Width (100*10^-6m)
+A = w * d; % Cross-section 10^-8m^2)
+convinient_units = 10^8;
+Scaling_factor = A / l * convinient_units; % scaling factor for resistivity
+%% Define temperature points
+temp_labels = {'TL', 'TC1', 'TC2', 'TH'};
+temp_values = [4,26,37,50];
+temp_values_to_plot_zfAMR=[4,26,37,50];
+temp_values_to_plot_fcAMR=[4,26,37,50];
+%% Resistivities
+Rxy1 = LI1_XV / I * Scaling_factor;
+Rxx2 = LI2_XV / I * Scaling_factor;
+Rxx3 = LI3_XV / I * Scaling_factor;
+Rxx3_all_zeros = all(Rxx3 == 0);
+swip_Rxy_Rxx=true; % usually I put LI1_XV as Rxy1, if I put else choose true
+if(swip_Rxy_Rxx)
+    R=Rxy1;
+    Rxy1=Rxx2;
+    Rxx2=R;
+end
+Normalize_to=2; % choose 2 or 3 for Rxx2 Rxx3
+%% Filter the noisy signal (the +-180 phase create a Labveiw bug - like noise)
+Rxy1 = medfilt1(Rxy1, 100);
+Rxx2 = medfilt1(Rxx2, 100);
+Rxx3 = medfilt1(Rxx3, 100);
+filtered_angle = medfilt1(Angledeg, 10);
+filtered_field = medfilt1(FieldT,100);
+filtered_temp = medfilt1(TemperatureK, 120);
+%% Find Angle segments
+delta_Angle = 15; % Define delta_Angle here
+angle_threshold = 1;
+min_segment_length_angle = 100;
+[segments_angle, rounded_smoothed_angle_deg, unique_rounded_smoothed_angle_deg] =...
+    find_angle_segments(delta_Angle, angle_threshold, filtered_angle, min_segment_length_angle);
+%% Find Temperature segments
+delta_T = 0.2; % some uncertainty in T
+min_temp_change = 0.01; % Minimum temperature change to consider as a segment
+temp_stabilization_window = 100; % Number of data points to consider for stabilization
+min_segment_length_temp=1000;
+% Find Warming segments
+[segments_increasing_temp] = ...
+    find_increasing_temperature_segments(filtered_temp, min_segment_length_temp, temp_values(end), min_temp_change, temp_stabilization_window,delta_T);
+% Find Cooling segments
+[segments_decreasing_temp] = ...
+    find_decreasing_temperature_segments(filtered_temp, min_segment_length_temp, temp_values(1), min_temp_change, temp_stabilization_window,delta_T);
+%% Find Field segments
+min_field_threshold = 0.001;
+min_diff_field_threshold = 0.001;
+min_segment_length_field = 100000;
+field_stabilization_window= 10000;
+[segments_field_max, rounded_unique_field_max_values, rounded_field_max_values_vec] = find_field_segments(filtered_field, min_field_threshold, min_diff_field_threshold, min_segment_length_field, field_stabilization_window);
+%% Plot the founded angle segments
+if(plot_the_founded_angle_segments)
+    plot_founded_angle_segments(Timems, TemperatureK, FieldT, segments_angle, rounded_smoothed_angle_deg, unique_rounded_smoothed_angle_deg);
+end
+%% Plot the founded field segments
+if(plot_the_founded_field_segments)
+    plot_founded_field_segments(Timems, TemperatureK, FieldT,filtered_field, segments_field_max, rounded_field_max_values_vec, rounded_unique_field_max_values);
+end
+%% Plot the founded temperature segments
+if(plot_the_founded_temp_segments)
+    plot_founded_increasing_temperature_segments(Timems, TemperatureK, FieldT,segments_increasing_temp,filtered_temp);
+    plot_founded_decreasing_temperature_segments(Timems, TemperatureK, FieldT,segments_decreasing_temp,filtered_temp);
+end
+%% Extract the warming segments intersections for resistivity curves
+warming_tables = ...
+    extract_warming_segments(segments_angle, rounded_smoothed_angle_deg, unique_rounded_smoothed_angle_deg, segments_increasing_temp, ...
+    segments_field_max, rounded_unique_field_max_values, filtered_field);
+%% Extract the cooling segments intersections for resistivity curves
+cooling_tables = ...
+    extract_cooling_segments(segments_angle, rounded_smoothed_angle_deg, unique_rounded_smoothed_angle_deg, segments_decreasing_temp, ...
+    segments_field_max, rounded_unique_field_max_values, filtered_field);
+%% Plot Extracted Segments
+if(plot_the_extracted_segments)
+    plot_extracted_warming_segments(Timems, TemperatureK, FieldT, warming_tables, filtered_temp, unique_rounded_smoothed_angle_deg,delta_Angle);
+    plot_extracted_cooling_segments(Timems, TemperatureK, FieldT, cooling_tables, filtered_temp, unique_rounded_smoothed_angle_deg,delta_Angle);
+end
+%% Extract points for warming and cooling segments
+warming_points_table = extract_warming_segments_with_points(Timems, warming_tables, TemperatureK, unique_rounded_smoothed_angle_deg, temp_values, delta_T);
+cooling_points_table = extract_cooling_segments_with_points(Timems, cooling_tables, TemperatureK, unique_rounded_smoothed_angle_deg, temp_values, delta_T);
+%% Plot warming and cooling segments with temperature points
+if(plot_the_extracted_segments_with_points)
+    plot_warming_segments_with_points(Timems, FieldT, warming_points_table, TemperatureK, unique_rounded_smoothed_angle_deg, rounded_unique_field_max_values);
+    plot_cooling_segments_with_points(Timems, FieldT, cooling_points_table, TemperatureK, unique_rounded_smoothed_angle_deg, rounded_unique_field_max_values);
+end
+%% Build Resistivities
+[resistivity_warming_tables, resistivity_cooling_tables] = build_resistivity_tables(warming_tables, cooling_tables, TemperatureK, Rxy1, Rxx2, Rxx3);
+% Plot resistivities warming and cooling
+if(resistivity_vs_temp)
+    plot_resistivity_warming_segments(resistivity_warming_tables, rounded_unique_field_max_values,Rxx3_all_zeros, plan_measured_str);
+    plot_resistivity_cooling_segments(resistivity_cooling_tables, rounded_unique_field_max_values,Rxx3_all_zeros, plan_measured_str);
+end
+% Optional: Uncomment this if interactive plotting is needed
+% interactive_plot_warming_cooling(resistivity_warming_tables, resistivity_cooling_tables, unique_rounded_smoothed_angle_deg, rounded_unique_field_max_values, plan_measured);
+%% Build Resistivities
+[resistivity_warming_tables, resistivity_cooling_tables] = build_resistivity_tables(warming_tables, cooling_tables, TemperatureK, Rxy1, Rxx2, Rxx3);
+% Plot resistivities warming and cooling
+if(resistivity_vs_temp)
+    plot_resistivity_warming_segments(resistivity_warming_tables, rounded_unique_field_max_values, Rxx3_all_zeros, plan_measured_str);
+    plot_resistivity_cooling_segments(resistivity_cooling_tables, rounded_unique_field_max_values, Rxx3_all_zeros, plan_measured_str);
+end
+% Optional: Uncomment this if interactive plotting is needed
+% interactive_plot_warming_cooling(resistivity_warming_tables, resistivity_cooling_tables, unique_rounded_smoothed_angle_deg, rounded_unique_field_max_values, plan_measured);
+%% Build resistivity points tables for zfAMR
+resistivity_warming_points_tables = build_resistivity_warming_points_tables(warming_points_table, Rxy1, Rxx2, Rxx3);
+resistivity_cooling_points_tables = build_resistivity_cooling_points_tables(cooling_points_table, Rxy1, Rxx2, Rxx3);
+
+% Calculate averages for warming and cooling points tables
+resistivity_warming_points_averages = calculate_resistivity_points_averages(resistivity_warming_points_tables, angles_to_exclude_within_specific_field, rounded_unique_field_max_values);
+resistivity_cooling_points_averages = calculate_resistivity_points_averages(resistivity_cooling_points_tables, angles_to_exclude_within_specific_field, rounded_unique_field_max_values);
+
+% Calculate deviation percentages for warming and cooling points tables
+resistivity_warming_deviation_percent_tables = calculate_resistivity_deviation_percent(resistivity_warming_points_tables, resistivity_warming_points_averages, Normalize_to, angles_to_exclude_within_specific_field, rounded_unique_field_max_values);
+resistivity_cooling_deviation_percent_tables = calculate_resistivity_deviation_percent(resistivity_cooling_points_tables, resistivity_cooling_points_averages, Normalize_to, angles_to_exclude_within_specific_field, rounded_unique_field_max_values);
+
+if(choose_plot_zfAMR_and_fcAMR)
+    % Plot zfAMR for warming points tables
+    for temp_index = 1:length(temp_values_to_plot_zfAMR)
+        plot_zfAMR(resistivity_warming_deviation_percent_tables, unique_rounded_smoothed_angle_deg, rounded_unique_field_max_values, temp_index, temp_labels{temp_index}, temp_values(temp_index), Normalize_to, Rxx3_all_zeros, excluded_fields, plan_measured_str);
+    end
+    if polar_plots
+        for temp_index = 1:length(temp_values_to_plot_zfAMR)
+            plot_zfAMR_polar(resistivity_warming_deviation_percent_tables, unique_rounded_smoothed_angle_deg, rounded_unique_field_max_values, temp_index, temp_labels{temp_index}, temp_values(temp_index), Normalize_to, Rxx3_all_zeros, excluded_fields, plan_measured_str);
+        end
+    end
+    
+    % Plot fcAMR for cooling points tables
+    for temp_index = 1:length(temp_values_to_plot_fcAMR)
+        plot_fcAMR(resistivity_cooling_deviation_percent_tables, unique_rounded_smoothed_angle_deg, rounded_unique_field_max_values, temp_index, temp_labels{temp_index}, temp_values(temp_index), Normalize_to, Rxx3_all_zeros, excluded_fields, plan_measured_str);
+    end
+    if polar_plots
+        for temp_index = 1:length(temp_values_to_plot_fcAMR)
+            plot_fcAMR_polar(resistivity_cooling_deviation_percent_tables, unique_rounded_smoothed_angle_deg, rounded_unique_field_max_values, temp_index, temp_labels{temp_index}, temp_values(temp_index), Normalize_to, Rxx3_all_zeros, excluded_fields, plan_measured_str);
+        end
+    end
+else
+    
+

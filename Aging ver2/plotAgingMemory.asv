@@ -1,0 +1,205 @@
+function plotAgingMemory(T_no, M_no, pauseRuns, color_scheme, fontsize, ...
+    linewidth, sample_name, Bohar_units, offsetMode, offsetPercent, ...
+    dip_window_K, colorRange)
+
+if nargin < 12 || isempty(colorRange)
+    colorRange = [0 1];   % default = full colormap
+end
+
+% plotAgingMemory — Draws M(T) and ΔM(T) for all runs
+% Paper-ready version with selected pause markers and clean x-axis ticks
+
+% ---------------- USER CONTROL ----------------
+SHOW_PAUSES_K = [10 14 18 22 26];   % pauses to mark in ΔM(T)
+% --------------------------------------------
+
+% --- base colormap ---
+cols_full = pickColors(numel(pauseRuns), color_scheme);
+
+% --- apply colormap range compression ---
+n = size(cols_full,1);
+i1 = max(1, round(colorRange(1) * n));
+i2 = min(n, round(colorRange(2) * n));
+idx = round(linspace(i1, i2, n));
+
+cols = cols_full(idx,:);
+
+lw_ref  = linewidth + 1.0;   % No-pause / reference
+lw_run  = linewidth + 0.2;   % Pause runs
+
+if Bohar_units
+    unitStr = '\mu_B / Co';
+else
+    unitStr = 'emu/g';
+end
+
+if nargin < 9 || isempty(offsetMode)
+    offsetMode = 'none';
+end
+if nargin < 10 || isempty(offsetPercent)
+    offsetPercent = 0;
+end
+if nargin < 11
+    dip_window_K = [];
+end
+
+%% ============================================================
+%% M(T)
+%% ============================================================
+figure('Color','w','Name',[sample_name ', Aging Memory, M(T)']); hold on;
+
+plot(T_no, M_no, '--', ...
+    'Color','k', ...
+    'LineWidth', lw_ref + 0.6, ...
+    'DisplayName','No pause');
+
+
+for i = 1:numel(pauseRuns)
+
+    T = pauseRuns(i).T;
+    M = pauseRuns(i).M;
+
+    plot(T, M, '-', ...
+        'Color', cols(i,:), ...
+        'LineWidth', lw_run, ...
+        'DisplayName', sprintf('%.0f K Pause', pauseRuns(i).waitK));
+
+    % pause marker (same logic as ΔM, but lighter)
+    if ismember(pauseRuns(i).waitK, SHOW_PAUSES_K)
+        xline(pauseRuns(i).waitK,'--', ...
+            'Color', cols(i,:), ...
+            'LineWidth', 1.8, ...
+            'HandleVisibility','off');
+    end
+end
+
+xlabel('Temperature (K)');
+ylabel(['M (' unitStr ')']);
+title([sample_name ', Aging Memory, M(T)'],'FontWeight','bold');
+
+xlim([0 45])
+xticks(0:5:45)
+
+legend('show','Location','bestoutside');
+grid on; box on;
+set(gca,'FontSize',fontsize);
+autoScaleYAxis(gca, 'M', unitStr);
+%% ============================================================
+%% ΔM(T)
+%% ============================================================
+
+% --- compute global amplitude (for offsets if needed)
+allAmp = [];
+for i = 1:numel(pauseRuns)
+    if isfield(pauseRuns(i),'DeltaM') && ~isempty(pauseRuns(i).DeltaM)
+        allAmp(end+1) = max(pauseRuns(i).DeltaM) - min(pauseRuns(i).DeltaM); %#ok<AGROW>
+    end
+end
+if isempty(allAmp)
+    warning('No ΔM data to plot.');
+    return;
+end
+globalAmp = max(allAmp);
+
+fprintf('\n[ΔM offset scaling] Global peak-to-peak = %.4g (%s)\n', ...
+    globalAmp, unitStr);
+
+figure('Color','w','Name',[sample_name ', Aging Memory, ΔM(T)']); hold on;
+
+for i = 1:numel(pauseRuns)
+
+    if ~isfield(pauseRuns(i),'T_common') || isempty(pauseRuns(i).T_common)
+        continue;
+    end
+
+    T = pauseRuns(i).T_common;
+
+    if isfield(pauseRuns(i),'DeltaM_aligned') && ~isempty(pauseRuns(i).DeltaM_aligned)
+        dM = pauseRuns(i).DeltaM_aligned;
+    else
+        dM = pauseRuns(i).DeltaM;
+    end
+
+    % --- optional offsets ---
+    switch lower(offsetMode)
+        case 'vertical'
+            dM = dM + (i-1)*(offsetPercent/100)*globalAmp;
+        case 'horizontal'
+            Tspan = max(T) - min(T);
+            T = T + (i-1)*(offsetPercent/100)*Tspan;
+    end
+
+    % main curve
+    plot(T, dM, '-', ...
+        'Color', cols(i,:), ...
+        'LineWidth', linewidth, ...
+        'DisplayName', sprintf('%.0f K Pause', pauseRuns(i).waitK));
+
+    % pause marker ONLY for selected pauses
+    if ismember(pauseRuns(i).waitK, SHOW_PAUSES_K)
+        xline(pauseRuns(i).waitK,'--', ...
+            'Color', cols(i,:), ...
+            'LineWidth', 2.0, ...
+            'HandleVisibility','off');
+    end
+end
+
+xlabel('Temperature (K)');
+ylabel(['\DeltaM (' unitStr ')']);
+title([sample_name ', Aging Memory, \DeltaM(T)'],'FontWeight','bold');
+
+xlim([0 45])
+xticks(0:5:45)
+
+legend('show','Location','bestoutside');
+grid on; box on;
+set(gca,'FontSize',fontsize);
+autoScaleYAxis(gca, '\DeltaM', unitStr);
+%% ============================================================
+%% Text summary
+%% ============================================================
+fprintf('\n=== Aging ΔM Summary (%s) ===\n', sample_name);
+fprintf('Pause[K]   ΔMatPause      ΔM_localMin\n');
+fprintf('-----------------------------------\n');
+for i = 1:numel(pauseRuns)
+    fprintf('%7.2f   %12.4g   %12.4g\n', ...
+        pauseRuns(i).waitK, ...
+        pauseRuns(i).DeltaM_atPause, ...
+        pauseRuns(i).DeltaM_localMin);
+end
+
+end
+
+%% ============================================================
+%% Color helper
+%% ============================================================
+function cols = pickColors(n, scheme)
+
+n = max(n,3);   % safety
+
+switch lower(scheme)
+
+    case 'parula'
+        cols = parula(n);
+
+    case 'jet'
+        cols = jet(n);
+
+    case 'lines'
+        cols = lines(n);
+
+    case 'thermal'
+        % cmocean thermal colormap
+        try
+            cols = cmocean('thermal', n);
+        catch
+            warning('cmocean not found. Falling back to parula.');
+            cols = parula(n);
+        end
+
+    otherwise
+        warning('Unknown color scheme "%s". Using parula.', scheme);
+        cols = parula(n);
+end
+end
+

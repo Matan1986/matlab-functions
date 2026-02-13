@@ -1,0 +1,86 @@
+function results = ACHC_runAuto(Angle, Cr, legendStrings, foldMode, manualFold)
+
+if nargin < 4 || isempty(foldMode),   foldMode   = 'manual'; end
+if nargin < 5 || isempty(manualFold), manualFold = 6;       end
+
+n = numel(Angle);
+
+% allocate
+results.fold     = nan(1,n);
+results.Q        = nan(1,n);
+results.A1       = nan(1,n);
+results.A2       = nan(1,n);
+results.hasSignal = false(1,n);
+
+fprintf('\n=== Folding analysis per dataset ===\n');
+
+for i = 1:n
+    % ---------------- data ----------------
+    theta = Angle{i}(:);
+    yraw  = Cr{i}(:);
+    label = legendStrings{i};
+
+    % sort angle (CRITICAL)
+    [theta, idx] = sort(theta);
+    y = detrend(yraw(idx));
+
+    % ---------------- fold ----------------
+    if strcmpi(foldMode,'manual')
+        fold = manualFold;
+    else
+        folds = 3:12;
+        [fold, ~] = detect_fold_by_folding(theta, y, folds);
+    end
+
+    % ---------------- folding quality ----------------
+    Q = folding_quality(theta, y, fold, 1);
+
+    % ---------------- folding ----------------
+    binDeg = 3; 
+    P = 360 / fold;
+    thetaFold = mod(theta, P);
+    [thetaBin, yFold] = fold_and_bin(thetaFold, y, binDeg);
+
+    % ---------------- Fourier content ----------------
+    % harmonic 1 and 2 only, robust
+    p = fit_folded(thetaBin, yFold, fold, 2);
+
+    A1 = hypot(p(2), p(3));
+    A2 = hypot(p(4), p(5));
+
+    % ---------------- signal decision ----------------
+    hasSignal = Q > 2;   % threshold: conservative & physical
+
+    % ---------------- store ----------------
+    results.fold(i)      = fold;
+    results.Q(i)         = Q;
+    results.A1(i)        = A1;
+    results.A2(i)        = A2;
+    results.hasSignal(i) = hasSignal;
+
+    % ---------------- print ----------------
+    fprintf('%s | fold=%d | Q=%.2f | A1=%.2g | A2=%.2g | signal=%d\n', ...
+        label, fold, Q, A1, A2, hasSignal);
+
+    % ---------------- plot (always, but honest) ----------------
+    figure('Name',label,'Color','w');
+
+    subplot(2,1,1)
+    plot(theta, y, '.-');
+    xlabel('Angle [deg]');
+    ylabel('C_r (detrended)');
+    title(sprintf('%s | raw', label));
+    grid on;
+
+    subplot(2,1,2)
+    plot(thetaBin, yFold, 'ko','MarkerFaceColor','k'); hold on;
+    th = linspace(0,P,400);
+    yFit = fourier_model(p, th*pi/180, fold, 2);
+    plot(th, yFit, 'r','LineWidth',1.5);
+
+    xlabel(sprintf('Angle mod %.1f°',P));
+    ylabel('C_r (folded)');
+    title(sprintf('fold=%d | Q=%.2f | signal=%d', fold, Q, hasSignal));
+    grid on;
+end
+end

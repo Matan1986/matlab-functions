@@ -1,0 +1,125 @@
+function plotFilteredCenteredData(figs, stored_data, sortedValues, colors, A, dep_type, ...
+    lineWidth, fontsize, activeChannels, tOffset)
+% plotFilteredCenteredData  (supports 1–4 channels)
+%
+% figs           : cell array of figure handles
+% stored_data    : N×5 cell => col 3 = centered data [t, ch1c, ch2c, ch3c, ch4c]
+% sortedValues   : dependence values (ORIGINAL ORDER!)
+% colors         : Nx3 colormap
+
+N     = size(stored_data,1);
+numCh = numel(activeChannels);
+
+% ---- conversion factor and xlabel text ----
+[convUnits, xlabelStr] = convertDepUnits(dep_type, A);
+
+% ---- legend containers ----
+legEntries = cell(N, numCh);
+
+% ---- channel indices ----
+chIndex = struct('ch1',2,'ch2',3,'ch3',4,'ch4',5);
+
+%% =================================================
+% 1) Plot centered traces (DO NOT TOUCH ORDER)
+% =================================================
+for i = 1:N
+    ctr = stored_data{i,3};      % [t, c1, c2, c3, c4]
+    t   = ctr(:,1) + tOffset(i);
+
+    for c = 1:numCh
+        fig = figs{c};
+        figure(fig); hold on;
+
+        y = ctr(:, chIndex.(activeChannels{c}));
+        plot(t, y, 'Color', colors(i,:), 'LineWidth', lineWidth);
+
+        xticks([]);
+        legEntries{i,c} = legendEntry(sortedValues, dep_type, i);
+    end
+end
+
+%% =======================
+% Set x-limits (time)
+% =======================
+tmin = 0;
+tmax = tOffset(end) + stored_data{end,3}(end,1);
+
+for c = 1:numCh
+    figure(figs{c});
+    xlim([tmin tmax]);
+end
+
+%% =================================================
+% 2) Colorbar (ABS dep, positive labels) — ALL FIGURES
+% =================================================
+special = {'Field cool','Configuration','Cooling rate','Pulse direction and order'};
+
+if ~ismember(dep_type, special)
+
+    if isnumeric(sortedValues)
+        absVals = abs(sortedValues(:)) * convUnits;
+        ticks   = sort(unique(absVals),'ascend');
+
+        switch lower(dep_type)
+            case {'temperature','temp','t'}
+                fmt = '%.1f';
+            case {'field'}
+                fmt = '%.1f';
+            case {'width'}
+                fmt = '%.2g';
+            case {'amplitude','amp'}
+                fmt = '%.1f';
+            otherwise
+                fmt = '%.2f';
+        end
+    end
+
+    for c = 1:numCh
+        figure(figs{c});
+        colormap(colors);
+
+        if isnumeric(sortedValues)
+            clim([min(ticks) max(ticks)]);
+            cb = colorbar('southoutside');
+            cb.Ticks = ticks;
+            cb.TickLabels = arrayfun(@(x) cleanZero(sprintf(fmt, x)), ...
+                ticks, 'UniformOutput', false);
+        else
+            cb = colorbar('southoutside');
+            cb.Ticks = 1:numel(sortedValues);
+            cb.TickLabels = sortedValues;
+        end
+
+        xlabel(cb, xlabelStr, ...
+    'Interpreter','latex', ...
+    'FontSize', fontsize);
+
+cb.TickLabelInterpreter = 'latex';
+cb.TickLength = 0;
+
+    end
+end
+
+%% =======================
+% 3) Legends
+% =======================
+for c = 1:numCh
+    figure(figs{c});
+    legend(legEntries(:,c), 'Location','best','Interpreter','tex');
+    legend off;
+end
+
+end   % ===== END MAIN FUNCTION =====
+
+
+% =================================================
+% Helper: clean minus-zero
+% =================================================
+function s = cleanZero(str)
+val = str2double(str);
+if abs(val) < 1e-12
+    s = regexprep(str, '^-0(\.0+)?$', '0');
+else
+    s = str;
+end
+end

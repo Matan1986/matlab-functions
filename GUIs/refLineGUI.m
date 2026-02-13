@@ -1,0 +1,163 @@
+function refLineGUI()
+% GUI for adding reference lines to EXISTING figures
+% Requires addRefLine.m
+
+    fig = figure('Name','Reference Line Tool', ...
+        'NumberTitle','off','MenuBar','none','ToolBar','none', ...
+        'Units','normalized','Position',[0.33 0.25 0.27 0.55], ...
+        'Color','w');
+
+    %% ------------ Axes selection ------------
+    uicontrol(fig,'Style','text','String','Target Axes:', ...
+        'Units','normalized','Position',[0.05 0.92 0.40 0.05], ...
+        'BackgroundColor','w','HorizontalAlignment','left');
+
+    axesList = findall(0,'type','axes');
+    if isempty(axesList)
+        axesNames = {'(No axes found)'};
+    else
+        axesNames = arrayfun(@(h) sprintf('Figure %d Axes', ancestor(h,'figure').Number), ...
+                             axesList, 'UniformOutput', false);
+    end
+
+    axesMenu = uicontrol(fig,'Style','popupmenu', ...
+        'String',axesNames, ...
+        'Units','normalized','Position',[0.50 0.92 0.45 0.06]);
+
+    %% ------------ Orientation ------------
+    uicontrol(fig,'Style','text','String','Orientation:', ...
+        'Units','normalized','Position',[0.05 0.84 0.40 0.05], ...
+        'BackgroundColor','w','HorizontalAlignment','left');
+
+    orientationMenu = uicontrol(fig,'Style','popupmenu', ...
+        'String',{'Vertical (x)','Horizontal (y)'}, ...
+        'Units','normalized','Position',[0.50 0.84 0.45 0.06], ...
+        'Callback',@updateLabelLocations);
+
+    %% Value
+    uicontrol(fig,'Style','text','String','Value (x or y):', ...
+        'Units','normalized','Position',[0.05 0.77 0.40 0.05], ...
+        'BackgroundColor','w','HorizontalAlignment','left');
+
+    valueBox = uicontrol(fig,'Style','edit','String','0', ...
+        'Units','normalized','Position',[0.50 0.77 0.45 0.06]);
+
+    %% Line style
+    uicontrol(fig,'Style','text','String','Line Style:', ...
+        'Units','normalized','Position',[0.05 0.70 0.40 0.05], ...
+        'BackgroundColor','w','HorizontalAlignment','left');
+
+    lineStyleMenu = uicontrol(fig,'Style','popupmenu', ...
+        'String',{'--','-','.:',':','-.'}, ...
+        'Units','normalized','Position',[0.50 0.70 0.45 0.06]);
+
+    %% Color
+    uicontrol(fig,'Style','text','String','Color [R G B]:', ...
+        'Units','normalized','Position',[0.05 0.63 0.40 0.05], ...
+        'BackgroundColor','w','HorizontalAlignment','left');
+
+    colorBox = uicontrol(fig,'Style','edit','String','[0 0 0]', ...
+        'Units','normalized','Position',[0.50 0.63 0.45 0.06]);
+
+    %% Width
+    uicontrol(fig,'Style','text','String','Line Width:', ...
+        'Units','normalized','Position',[0.05 0.56 0.40 0.05], ...
+        'BackgroundColor','w','HorizontalAlignment','left');
+
+    widthBox = uicontrol(fig,'Style','edit','String','1.5', ...
+        'Units','normalized','Position',[0.50 0.56 0.45 0.06]);
+
+    %% Label
+    uicontrol(fig,'Style','text','String','Label:', ...
+        'Units','normalized','Position',[0.05 0.49 0.40 0.05], ...
+        'BackgroundColor','w','HorizontalAlignment','left');
+
+    labelBox = uicontrol(fig,'Style','edit','String','', ...
+        'Units','normalized','Position',[0.50 0.49 0.45 0.06]);
+
+    %% Label location
+    uicontrol(fig,'Style','text','String','Label Location:', ...
+        'Units','normalized','Position',[0.05 0.42 0.40 0.05], ...
+        'BackgroundColor','w','HorizontalAlignment','left');
+
+    labelLocationMenu = uicontrol(fig,'Style','popupmenu', ...
+        'String',{'top','middle','bottom'}, ...   % default vertical
+        'Units','normalized','Position',[0.50 0.42 0.45 0.06]);
+
+    %% Offsets
+    uicontrol(fig,'Style','text','String','X Offset:', ...
+        'Units','normalized','Position',[0.05 0.35 0.40 0.05], ...
+        'BackgroundColor','w','HorizontalAlignment','left');
+
+    xOffsetBox = uicontrol(fig,'Style','edit','String','0', ...
+        'Units','normalized','Position',[0.50 0.35 0.45 0.06]);
+
+    uicontrol(fig,'Style','text','String','Y Offset:', ...
+        'Units','normalized','Position',[0.05 0.28 0.40 0.05], ...
+        'BackgroundColor','w','HorizontalAlignment','left');
+
+    yOffsetBox = uicontrol(fig,'Style','edit','String','0', ...
+        'Units','normalized','Position',[0.50 0.28 0.45 0.06]);
+
+    %% Add Line button
+    uicontrol(fig,'Style','pushbutton','String','Add Line', ...
+        'Units','normalized','Position',[0.20 0.10 0.60 0.10], ...
+        'FontSize',12,'FontWeight','bold', ...
+        'Callback',@addLineCallback);
+
+    %% --------- Callbacks -------------
+
+    function updateLabelLocations(~,~)
+        if get(orientationMenu,'Value') == 1
+            % Vertical line
+            set(labelLocationMenu,'String',{'top','middle','bottom'});
+        else
+            % Horizontal line
+            set(labelLocationMenu,'String',{'right','center','left'});
+        end
+    end
+
+    function addLineCallback(~,~)
+        try
+            %% Get axes
+            if isempty(axesList)
+                errordlg('No axes found in open figures.','Error');
+                return;
+            end
+            ax = axesList(get(axesMenu,'Value'));
+
+            %% Get orientation
+            if get(orientationMenu,'Value') == 1
+                orientation = 'x';
+            else
+                orientation = 'y';
+            end
+
+            %% Read parameters
+            val = str2double(get(valueBox,'String'));
+            styles = get(lineStyleMenu,'String');
+            style = styles{get(lineStyleMenu,'Value')};
+            color = eval(get(colorBox,'String'));
+            width = str2double(get(widthBox,'String'));
+            labelText = get(labelBox,'String');
+            locList = get(labelLocationMenu,'String');
+            loc = locList{get(labelLocationMenu,'Value')};
+            xoff = str2double(get(xOffsetBox,'String'));
+            yoff = str2double(get(yOffsetBox,'String'));
+
+            %% Add the line
+            addRefLine(orientation, val, ...
+                'Axes', ax, ...
+                'LineStyle', style, ...
+                'Color', color, ...
+                'LineWidth', width, ...
+                'Label', labelText, ...
+                'LabelLocation', loc, ...
+                'XOffset', xoff, ...
+                'YOffset', yoff);
+
+        catch ME
+            errordlg(ME.message, 'Error');
+        end
+    end
+end

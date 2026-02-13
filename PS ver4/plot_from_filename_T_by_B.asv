@@ -1,0 +1,183 @@
+function figs = plot_from_filename_T_by_B(fileDir, filename_dat, normalizeData, subtractMean, TEMP_TOL, FIELD_TOL)
+% plot_from_filename_T_by_B
+% Plot ONLY the temperature/field pairs listed in the filename.
+% No formatting, no saving, no side-effects.
+%
+% Required helpers present in your codebase:
+%   extract_base_max_angle, resolve_preset, select_preset,
+%   extract_current_I, extract_growth_FIB, getScalingFactor,
+%   read_data, build_channels
+%
+% Usage:
+%   figs = plot_from_filename_T_by_B(fileDir, filename_dat, true, true, 0.25, 0.15);
+
+if nargin < 5 || isempty(TEMP_TOL),  TEMP_TOL  = 0.25; end   % [K]
+if nargin < 6 || isempty(FIELD_TOL), FIELD_TOL = 0.15; end   % [T]
+if nargin < 3 || isempty(normalizeData), normalizeData = true; end
+if nargin < 4 || isempty(subtractMean),  subtractMean  = true; end
+
+% --- Parse temps/fields strictly from filename ---
+tokT = regexp(filename_dat,'temps_([0-9p_]+)K','tokens','once');
+tokB = regexp(filename_dat,'fields_([0-9p_]+)T','tokens','once');
+if isempty(tokT), error('Filename is missing "temps_*K".'); end
+if isempty(tokB), error('Filename is missing "fields_*T".'); end
+
+allTemps    = parse_number_list(tokT{1});
+fieldValues = parse_number_list(tokB{1});
+if isempty(allTemps) || isempty(fieldValues)
+    error('Parsed empty temperatures or fields from filename.');
+end
+
+% --- Minimal metadata & data load (no UI effects) ---
+[growth_num, FIB_num] = extract_growth_FIB(fileDir, filename_dat);
+I = extract_current_I(fileDir, filename_dat, NaN);
+Scaling_factor = getScalingFactor(growth_num, FIB_num);
+
+preset_name = resolve_preset(filename_dat, false, '');  % auto; no manual override
+[chMap, plotChannels, labels, Normalize_to] = select_preset(preset_name);
+
+fullpath = fullfile(fileDir, filename_dat + ".dat");
+[~, FieldT, TempK, AngleDeg, LI1_XV, ~, LI2_XV, ~, LI3_XV, ~, LI4_XV, ~] = read_data(fullpath); %#ok<ASGLU>
+LI_XV = {LI1_XV, LI2_XV, LI3_XV, LI4_XV};
+chans = build_channels(chMap, LI_XV, I, Scaling_factor);
+
+% --- Pick normalization channel (prefer "xx2") ---
+norm_chan = find(contains(string(struct2cell(labels)),"xx2",'IgnoreCase',true),1,'first');
+if isempty(norm_chan), norm_chan = 2; end
+norm_key   = sprintf('ch%d', norm_chan);
+norm_label = labels.(norm_key);
+
+% Helper for per-channel normalization index
+getNormIdx = @(k) ( ...
+    (isvector(Normalize_to) && numel(Normalize_to) >= k && ~isempty(Normalize_to(k))) * Normalize_to(k) + ...
+    ((~isvector(Normalize_to) || numel(Normalize_to) < k || isempty(Normalize_to(k))) * norm_chan) );
+
+% --- Plot (only requested pairs) ---
+cmap = parula(numel(fieldValues));
+figs = gobjects(0);
+for tVal = allTemps(:).'
+    for k = 1:4
+        keyk = sprintf('ch%d',k);
+        if ~isfield(plotChannels,keyk) || ~plotChannels.(keyk), continue; end
+
+        drew_any = false;
+        % Delay figure creation until we actually have something to draw:
+        f = [];
+
+        for iF = 1:numel(fieldValues)
+            B0 = fieldValues(iF);
+            idx = abs(TempK - tVal) <= TEMP_TOL & abs(FieldT - B0) <= FIELD_TOL;
+            if ~any(idx), continue; end
+
+            if ~drew_any
+                f = figure('Name', sprintf('Δ%s/%s at %.2f K', labels.(keyk), norm_label, tVal), ...
+                    'NumberTitle','off'); hold on; grid on;
+                % --- SAFE LaTeX labels (no warnings) ---
+                xlabel('Angle ($^\circ$)', 'Interpreter','latex');
+
+                % Build a LaTeX-safe y-label like: \Delta \rho_{\perp}/\rho_{\parallel}~(\%)
+                ylab = ['\Delta '         ...  % \Delta
+                    labels.(keyk)     ...  % e.g. \rho_{xx2}
+                    '/'               ...
+                    norm_label        ...  % e.g. \rho_{\parallel}
+                    '~(\%)'];              % escaped percent
+
+                ylabel(ylab, 'Interpreter','latex');
+
+                title(sprintf('%.2f K, %s', tVal, labels.(keyk)), 'Interpreter','latex');
+
+                % --- Sanitize labels for MATLAB LaTeX (no Unicode, no stray $) ---
+                key_raw  = labels.(keyk);
+                norm_raw = norm_label;
+
+                key_ltx  = latex_safe_label(key_raw);
+                norm_ltx = latex_safe_label(norm_raw);
+
+                % Angle label: DO NOT wrap the whole thing in $...$ (no "$Angle ...$")
+                xlabel('Angle ($^\circ$)', 'Interpreter','latex');
+
+                % Y label: e.g., "\Delta \rho_{xy1}/\rho_{xx2}~(\%)"
+                ylab = sprintf('\\Delta %s/%s~(\\%%)', key_ltx, norm_ltx);
+                ylabel(ylab, 'Interpreter','latex');
+
+                % Title: plain text is fine; if you want LaTeX, avoid Unicode too
+                title(sprintf('%.2f K, %s', tVal, key_ltx), 'Interpreter','latex');
+
+                % Legend: keep interpreter simple to avoid formatters touching math
+                % (Your DisplayName values are "3.00 T" etc., so 'none' is safest.)
+                lgd = legend('show','Location','best');
+                set(lgd,'Interpreter','none');
+
+
+
+            end
+
+            ang = AngleDeg(idx);
+            dat = chans.(keyk)(idx);
+
+            % Unique by angle (keep order)
+            [angU, ia] = unique(ang,'stable');
+            dat = dat(ia);
+
+            if subtractMean
+                dat = dat - mean(dat, 'omitnan');
+            end
+
+            knorm = sprintf('ch%d', getNormIdx(k));
+            denom = mean(chans.(knorm)(idx), 'omitnan');
+            if ~isfinite(denom) || abs(denom) < eps, denom = 1; end
+            if normalizeData
+                dat = (dat / denom) * 100;
+            end
+
+            plot(angU, dat, 'LineWidth', 2.0, 'Color', cmap(iF,:), ...
+                'DisplayName', sprintf('%.2f T', B0));
+            drew_any = true;
+        end
+
+        if drew_any
+            legend('show','Location','best');
+            figs(end+1) = f; %#ok<AGROW>
+        elseif ~isempty(f) && isvalid(f)
+            close(f);
+        end
+    end
+end
+
+end % function
+
+% ---- local helper ----
+function vals = parse_number_list(token_str)
+% Converts "4_12_20_28_36" or "3p5_7_11_14" to numeric vector.
+pieces = strsplit(token_str, '_');
+vals = str2double(strrep(pieces, 'p', '.'));
+vals = unique(vals(~isnan(vals)));
+end
+
+function s = latex_safe_label(s)
+% Convert common Unicode math to LaTeX-friendly ASCII.
+% Removes outer $...$ if present and escapes %.
+if isstring(s), s = char(s); end
+if ~ischar(s), s = char(string(s)); end
+
+% strip any surrounding $...$
+s = regexprep(s, '^\$(.*)\$$', '$1');
+
+% replace Unicode greek/ops with LaTeX
+s = strrep(s, 'Δ', '\Delta ');
+s = strrep(s, 'δ', '\delta ');
+s = strrep(s, 'ρ', '\rho ');
+s = strrep(s, '∥', '\parallel ');   % just in case
+s = strrep(s, '⊥', '\perp ');       % just in case
+
+% degree and percent (titles/labels only; legend left 'none')
+s = strrep(s, '°', '^\circ');       % use only inside math parts if needed
+s = strrep(s, '%', '\%');
+
+% collapse double spaces that may have been introduced
+s = regexprep(s, '\s{2,}', ' ');
+
+% ensure braces in subscripts are fine (leave as-is)
+% NO extra $ added here; caller sets Interpreter='latex'.
+end
+

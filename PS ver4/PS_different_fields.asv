@@ -1,0 +1,141 @@
+%% PS_dynamic_channels.m
+% Clear and setup
+close all; clearvars; clc;
+
+%% 1) User Parameters: folder, file name, channel labels, and normalization channel
+% fileDir       = 'L:\My Drive\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\MG119 FIB2 transport and out of plane to in plan rotator\Position scan at 4K with different fields 2T 5T 14T 3';
+% filename_dat  = 'MG_119_Outof_plan_rotator_CoxTaS2_Vxy1_Vxx2_Ixx_0p1mAmp_f_277p77Hz_PS_4K_diff_fields_2T_5T_14T.dat';
+fileDir       = "I:\My Drive\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3NbS2\MG 337 FIB 1 In plane rotator AMR and zfAMR\Position sweep AMR 2";
+filename_dat  = "MG_337_in_plan_rotator_CoxNbS2_Vxy1_Vxx2_Vxy3_Vxx4_Ixx_0p1mAmp_f_277p77Hz_PS_4K_diff_fields_1Tto13T_at_2T_steps";
+
+% Define the display names for each channel
+chan(1).label = 'R_{xy1}';   % CH1
+chan(2).label = 'R_{xx2}';   % CH2
+chan(3).label = 'R_{xy3}';   % CH3
+chan(4).label = 'R_{xx4}';   % CH4
+
+% Choose which channel to normalize to (1, 2 or 3)
+norm_chan       = 2;              % e.g. 2 ⇒ normalize by chan(2).label
+norm_label      = chan(norm_chan).label;
+
+%% 1a) Plot options
+formatFigures=true;
+fit=false;
+centerYAxis     = true;    % true ⇒ force symmetric y-limits around zero; false ⇒ leave auto limits
+subtractMean    = true;    % true ⇒ subtract mean(data) for each trace; false ⇒ do not subtract mean
+normalizeData   = true;    % true ⇒ normalize by reference mean and convert to %; false ⇒ plot in original units
+
+% 2) Load data
+filePath = fullfile(fileDir, filename_dat);
+
+% detect import options as before...
+opts = detectImportOptions(filePath, 'FileType','text');
+opts.Delimiter         = '\t';
+% add this line:
+opts.VariableNamingRule = 'preserve';
+
+% now read with your un-mangled names intact:
+T = readtable(filePath, opts);
+
+% Identify relevant columns
+vars     = T.Properties.VariableNames;
+fldCol   = vars{contains(lower(vars),'field')};
+angCol   = vars{contains(lower(vars),'angle')};
+sigCol   = vars(contains(vars,'LI1') | contains(vars,'LI2') | contains(vars,'LI3')|);
+
+FieldT   = T.(fldCol);
+AngleDeg = T.(angCol);
+for k = 1:3
+    chan(k).raw = T.( sigCol{k} );
+end
+
+%% 3) Physical scaling
+I      = 0.1e-3;  d = 1e-6;  l = 35e-6;  w = 20e-6;
+A      = w * d;
+scale  = A / l * 1e8;
+
+%% 4) Scale & filter each channel
+for k = 1:3
+    chan(k).ex = chan(k).raw ./ I * scale;
+    chan(k).ex = medfilt1(chan(k).ex, 50);
+end
+
+%% 5) Prepare figures (with dynamic denominator label)
+% field_values = [2,5,14];
+field_values = 1:2:13;
+numFields    = numel(field_values);
+cmap         = parula(numFields);
+field_str = strjoin(string(field_values), ',');
+for k = 1:3
+    fig(k) = figure('Name', sprintf('\\Delta%s/%s AMR at 4K, B=%sT', ...
+        chan(k).label, norm_label, field_str));
+    hold on;
+    xlabel('Angle [deg]','FontSize',14);
+    if normalizeData
+        ylabel(sprintf('\\Delta%s/%s %%', chan(k).label, norm_label),'FontSize',14);
+    else
+        % units in 10^-6 Ohm·cm
+        ylabel(sprintf('\\Delta%s [10^{-6} \\Omega\\cdotcm]', chan(k).label),'FontSize',14);
+    end
+    title(sprintf('\\Delta%s/%s AMR at 4K, B=%sT ', ...
+        chan(k).label, norm_label, field_str),'FontSize',14);
+    grid on;
+end
+
+%% 6) Plot each channel (optionally normalized) to chan(norm_chan)
+for idxF = 1:numFields
+    cf   = field_values(idxF);
+    color = cmap(idxF, :);
+
+    idx = abs(FieldT - cf) < 1e-3;
+    ang = AngleDeg(idx);
+    inc = [true; diff(ang)>0];
+    ang = ang(inc);
+
+    % compute the reference mean from the chosen channel
+    ref_mean = mean( chan(norm_chan).ex(idx) );
+
+    for k = 1:3
+        data = chan(k).ex(idx);
+        data = data(inc);
+        % subtract mean if requested
+        if subtractMean
+            num = data - mean(data);
+        else
+            num = data;
+        end
+        % apply normalization if requested
+        if normalizeData
+            delta = num / ref_mean * 100;
+        else
+            delta = num;
+        end
+
+        figure(fig(k));
+        plot(ang, delta, 'Color', color, 'DisplayName', sprintf('B=%dT', cf), ...
+            'LineWidth',1.8);
+        xticks(0:45:360);
+    end
+end
+
+%% 7) Finish legends (and optionally center y-axis)
+for k = 1:3
+    figure(fig(k));
+    if centerYAxis
+        % make y-limits symmetric around zero
+        yl = ylim;
+        yMax = max(abs(yl));
+        ylim([-yMax yMax]);
+    end
+    legend('Location','Best','FontSize',12);
+    hold off;
+end
+if(fit)
+
+ [T, coeffs, gofs] = fitSin2Folding(fileDir+"\Fitting",1,2, norm_chan,false,false);
+
+end
+% formatAllFigures(newPos, newFontSize, newLegendFS, lineWidth)
+if(formatFigures)
+    formatAllFigures([0.1, 0.1, 0.6, 0.4], 20, 20, 2.5);
+end

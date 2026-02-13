@@ -1,0 +1,37 @@
+function warming_tables = extract_warming_segments(segments_angle, rounded_smoothed_angle_deg, unique_rounded_smoothed_angle_deg, segments_increasing_temp, segments_field_max, rounded_unique_field_max_values, smoothed_field)
+    %% Extract Warming Segments
+    warming_tables = cell(length(rounded_unique_field_max_values), 1);
+
+    % Iterate over each field segment
+    for f = 1:length(rounded_unique_field_max_values)
+        field_value = rounded_unique_field_max_values(f);
+        field_segment = segments_field_max(f, :);
+
+        % Find the angle segments within the field segment
+        angle_segments_within_field = segments_angle(segments_angle(:, 1) >= field_segment(1) & segments_angle(:, 2) <= field_segment(2), :);
+        rounded_angles_within_field = rounded_smoothed_angle_deg(segments_angle(:, 1) >= field_segment(1) & segments_angle(:, 2) <= field_segment(2));
+
+        % Initialize the warming table for this field
+        warming_table = table();
+        warming_table.Angle = unique(rounded_angles_within_field);
+        warming_table.Indices = cell(size(warming_table.Angle));
+
+        % Iterate over each unique angle
+        for a = 1:length(warming_table.Angle)
+            angle_value = warming_table.Angle(a);
+            angle_segment_indices = angle_segments_within_field(rounded_angles_within_field == angle_value, :);
+
+            % Find the warming segments within the angle segments
+            warming_indices = [];
+            for seg = 1:size(angle_segment_indices, 1)
+                angle_segment = angle_segment_indices(seg, :);
+                temp_segment_indices = segments_increasing_temp(segments_increasing_temp(:, 1) >= angle_segment(1) & segments_increasing_temp(:, 2) <= angle_segment(2), :);
+                warming_indices = [warming_indices; temp_segment_indices];
+            end
+
+            warming_table.Indices{a} = warming_indices;
+        end
+
+        warming_tables{f} = warming_table;
+    end
+end

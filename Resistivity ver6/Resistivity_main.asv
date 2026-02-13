@@ -1,0 +1,263 @@
+% Resistivity_main.m
+% Transport (ρ/R) vs Temperature using TEX interpreter
+
+close_all_except_ui_figures; clc; clear;
+
+%% ===========================
+%  PATHS
+% ===========================
+baseFolder = 'C:\Users\matan\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Matlab functions';
+addpath(genpath(baseFolder));
+
+%% ===========================
+%  USER PARAMETERS
+% ===========================
+import_data   = true;
+dir       = "C:\Users\matan\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\MG119_FIB5_InplaneRotator_Switching\Cooling 1";
+filename_ending = "MG_119_in_plan_rotator_CoxTaS2_Vxy1_Vxx2_Vxx3_Ixx_0p01mAmp_f_277p77Hz_First_Cooling_0T";
+
+force_manual_preset = false;
+manual_preset_name  = '1xy_2xx_3xx';
+channel_sign_vec    = [1, 1, 1, 1];
+
+quantity_type       = 'resistivity';
+run_analysis        = true;
+analysis_channel_id = 'ch2';
+
+formatFigures = true;
+lineWidth = 2;
+fontSize  = 20;
+
+TH               = 50;
+TL               = 4;
+delta_T          = 0.1;
+smoothing_window = 30;
+edge_ignore_range= 2000;
+sgolay_order     = 7;
+sgolay_frame_len = 401;
+forced_log_fit   = false;
+twoTCs           = false;
+
+force_plane_str = "";
+
+% ==== NEW FLAG ====
+force_TC_by_growth = true;   % If true → TC is forced according to MG number
+
+%% ===========================
+%  FILTER CONTROL TOGGLES
+% ===========================
+Unfiltered       = true;
+ShowFilterDebug  = false;
+
+%% ===========================
+%  METADATA
+% ===========================
+preset_name = resolve_preset(filename_ending, force_manual_preset, manual_preset_name);
+
+[plan_measured, plan_measured_strings] = extract_plane_mode(dir, filename_ending, NaN);
+plan_measured_str = choose_plane(plan_measured_strings, plan_measured);
+if strlength(force_plane_str) > 0
+    plan_measured_str = string(force_plane_str);
+end
+
+I = extract_current_I(dir, filename_ending, NaN);
+[growth_num, FIB_num] = extract_growth_FIB(dir, filename_ending);
+Scaling_factor = getScalingFactor(growth_num, FIB_num);
+
+%% ==========================================================
+%  FORCE TC BY GROWTH NUMBER (FULL IMPLEMENTATION)
+% ==========================================================
+TC_used = NaN;
+
+if force_TC_by_growth
+    TC_map = containers.Map( ...
+        {'119','131'}, ...     % Growth numbers
+        [33.5, 27] ...         % TC values [K]
+        );
+
+    if ~isnan(growth_num)
+        key = string(growth_num);
+        if TC_map.isKey(key)
+            TC_used = TC_map(key);
+            fprintf('Forced TC = %.2f K based on growth MG %s\n', TC_used, key);
+        else
+            fprintf('No TC mapping exists for MG %s → TC_used = NaN\n', key);
+        end
+    else
+        fprintf('Growth number not detected → TC_used = NaN\n');
+    end
+end
+
+%% ===========================
+%  IMPORT RAW
+% ===========================
+filename = dir + "\" + filename_ending;
+
+if import_data
+    [Timems, FieldT, TemperatureK, Angledeg, ...
+        LI1_XV, ~, LI2_XV, ~, LI3_XV, ~, LI4_XV, ~] = read_data(filename);
+else
+    error('Set import_data=true or provide raw LI*_XV variables.');
+end
+
+%% ===========================
+% PRESET → SIGNS → BUILD → FILTER
+% ===========================
+LI_XV = {LI1_XV, LI2_XV, LI3_XV, LI4_XV};
+LI_XV = apply_channel_signs_by_preset(preset_name, channel_sign_vec, LI_XV);
+
+[chMap, plotChannels, labels, Normalize_to] = select_preset(preset_name);
+
+chans_all = build_channels(chMap, LI_XV, I, Scaling_factor);
+
+chans_all = filter_channels(chans_all, [], FieldT, TemperatureK);
+filtered_temp = chans_all.filtered_temp;
+
+%% ===========================
+% ENABLED CHANNELS
+% ===========================
+enabledKeys = {};
+fns = fieldnames(plotChannels);
+for k = 1:numel(fns)
+    val = plotChannels.(fns{k});
+    isEnabled = (islogical(val) && val) || (isnumeric(val) && any(val ~= 0));
+    if isEnabled
+        enabledKeys{end+1} = fns{k}; %#ok<SAGROW>
+    end
+end
+
+%% ===========================
+% LABELS
+% ===========================
+switch lower(quantity_type)
+    case 'resistivity'
+        unit_text      = ' (\mu\Omega\cdot cm)';  % parentheses, LaTeX-safe
+        default_lab    = 'ρ';
+        quantity_label = 'Resistivity';
+    case 'resistance'
+        unit_text      = ' (\Omega)';
+        default_lab    = 'R';
+        quantity_label = 'Resistance';
+    otherwise
+        error('Unknown quantity_type: %s', quantity_type);
+end
+
+makeFigName = @(ylab_raw) ...
+    (isnan(FIB_num)) * sprintf('%s, MG %d, %s, %s', ...
+    quantity_label, growth_num, plan_measured_str, ylab_raw) + ...
+    (~isnan(FIB_num)) * sprintf('%s, MG %d, FIB %d, %s, %s', ...
+    quantity_label, growth_num, FIB_num, plan_measured_str, ylab_raw);
+%% ===========================
+% PLOT EACH ENABLED CHANNEL
+% ===========================
+for ii = 1:numel(enabledKeys)
+    key = enabledKeys{ii};
+    y_raw = chans_all.(key);
+
+    if Unfiltered
+        y_f = y_raw;
+    else
+        y_f = clean_resistivity_curve_auto(filtered_temp, y_raw, ShowFilterDebug);
+    end
+
+    %% -------- META (RAW, no helpers) --------
+    ylab_raw = default_lab;
+    if isfield(labels, key)
+        ylab_raw = labels.(key);
+    end
+
+    if isnan(FIB_num)
+        figNameStr = sprintf('%s, MG %d, %s, %s', ...
+            quantity_label, growth_num, plan_measured_str, ylab_raw);
+    else
+        figNameStr = sprintf('%s, MG %d, FIB %d, %s, %s', ...
+            quantity_label, growth_num, FIB_num, plan_measured_str, ylab_raw);
+    end
+
+    %% -------- DISPLAY (cleaned) --------
+    ylab_disp = cleanChannelLabel(ylab_raw);
+    ylab_disp = regexprep(string(ylab_disp), '_$', '');
+    ylab_disp = char(ylab_disp);
+    ylab_disp = regexprep(ylab_disp, '^ρ', '\\rho');
+    ylab_full = ['$' ylab_disp '\,(\mu\Omega\cdot cm)$'];
+
+    %% -------- PLOT --------
+    fig = figure('Name', figNameStr);
+    ax  = axes('Parent',fig);
+    hold(ax,'on');
+
+    plot(ax, filtered_temp, y_f, '.-', 'LineWidth', lineWidth);
+
+    xlabel(ax,'Temperature\,(K)', ...
+        'FontSize',fontSize, ...
+        'Interpreter','latex');
+
+    ylabel(ax,ylab_full, ...
+        'FontSize',fontSize, ...
+        'Interpreter','latex');
+
+    % ---- Tick labels: LaTeX + larger ----
+    ax.TickLabelInterpreter = 'latex';
+    ax.FontSize = fontSize - 2;   % או +0 / +2 לפי הטעם שלך
+
+    grid(ax,'on');
+
+end
+
+
+%% ===========================
+% ANALYSIS ON SELECTED CHANNEL
+% ===========================
+if run_analysis && ismember(analysis_channel_id, enabledKeys)
+
+    y_raw = chans_all.(analysis_channel_id);
+
+    if Unfiltered
+        y_f = y_raw;
+    else
+        y_f = clean_resistivity_curve_auto(filtered_temp, y_raw, false);
+    end
+
+    [sm, fit_y, TC_idx, TC2_idx, rhoTH, maxidx, fit_T, p, RRR, drop, dropN, modelStr] = ...
+        Resistivity_analysis(filtered_temp, y_f, TH, TL, delta_T, ...
+        smoothing_window, edge_ignore_range, sgolay_order, sgolay_frame_len, ...
+        forced_log_fit, twoTCs);
+
+    % ===== OVERRIDE TC_idx IF FORCED BY MG =====
+    if force_TC_by_growth && ~isnan(TC_used)
+        [~, TC_idx] = min(abs(filtered_temp - TC_used));
+        fprintf('Using forced TC index instead of detected one.\n');
+    end
+
+    % NOTE: ylab_full + title_str were last set in loop.
+    % If analysis channel isn't last plotted channel, rebuild label for analysis channel:
+    key = analysis_channel_id;
+
+    ylab_raw = default_lab;
+    if isfield(labels, key)
+        ylab_raw = labels.(key);
+    end
+
+    figNameStr = makeFigName(ylab_raw);
+
+
+    Resistivity_plot_results( ...
+        filtered_temp, y_f, sm, fit_y, ...
+        TC_idx, NaN, maxidx, TH, TL, delta_T, rhoTH, ...
+        fit_T, p, RRR, drop, dropN, ylab_full, figNameStr, ...
+        false, filename, modelStr);
+
+    build_resistivity_analysis_table( ...
+        figNameStr, filtered_temp(TC_idx), RRR, drop, drop
+end
+end
+%{
+%% ===========================
+% FINAL FIGURE CLEANUP
+% ===========================
+if formatFigures
+    formatAllFigures('pos',[0.1,0.1,0.7,0.6],'showGrid',true,...
+        'callerName','resistivity_main',...
+        'showLegend',false,'clearTitles',false);
+end
+%}
