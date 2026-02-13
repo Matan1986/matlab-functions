@@ -101,8 +101,8 @@ btnAxApply.Layout.Row = 3; btnAxApply.Layout.Column = [1 4];
 pSmart = uipanel(gl,'Title','SMART Paper Layout');
 pSmart.Layout.Row = 4;
 
-gSmart = uigridlayout(pSmart,[3 4]);
-gSmart.RowHeight = {'fit','fit','fit'}; 
+gSmart = uigridlayout(pSmart,[4 4]);  % Changed from 3 to 4 rows
+gSmart.RowHeight = {'fit','fit','fit','fit'};  % Added one more 'fit'
 gSmart.ColumnWidth = {'fit','1x','fit','1x'};
 gSmart.Padding = [4 4 4 4];
 gSmart.RowSpacing = 4;
@@ -119,8 +119,14 @@ colMode = uidropdown(gSmart,'Items',{'Single column','Double column'},'Value','D
 lblAspect = uilabel(gSmart,'Text','Aspect ratio (H/W)'); lblAspect.Layout.Row = 2; lblAspect.Layout.Column = 3;
 hAspect = uieditfield(gSmart,'numeric','Value',panelAspect); hAspect.Layout.Row = 2; hAspect.Layout.Column = 4;
 
-% Row 3: apply button
+% Row 3: apply SMART button
 btnSmart = uibutton(gSmart,'Text','Apply SMART','ButtonPushedFcn',@applySmartLayout); btnSmart.Layout.Row = 3; btnSmart.Layout.Column = [1 4];
+
+% Row 4: combine figures button (LEGACY INTEGRATION)
+btnCombine = uibutton(gSmart,'Text','Combine open figures → PDF','ButtonPushedFcn',@combineFiguresGUI); 
+btnCombine.Layout.Row = 4; btnCombine.Layout.Column = [1 4];
+btnCombine.Tooltip = 'Combine open figures into multi-panel PDF layout';
+
 
 %% ================== APPEARANCE / COLORMAP CONTROL =================
 pApp = uipanel(gl,'Title','Appearance / Colormap Control');
@@ -398,6 +404,11 @@ btnAdvClose = uibutton(gAdvanced,'Text','Close','ButtonPushedFcn',@closeAndSave)
 btnAdvClose.Layout.Row = 1; btnAdvClose.Layout.Column = 6;
 btnRestoreDefaults = uibutton(gAdvanced,'Text','Restore Defaults','ButtonPushedFcn',@restoreUIdefaults);
 btnRestoreDefaults.Layout.Row = 2; btnRestoreDefaults.Layout.Column = [1 3];
+% LEGACY INTEGRATION: postFormatAllFigures wrapper button
+btnLegacyFormat = uibutton(gAdvanced,'Text','Legacy Format','ButtonPushedFcn',@applyLegacyFormatter);
+btnLegacyFormat.Layout.Row = 2; btnLegacyFormat.Layout.Column = [4 6];
+btnLegacyFormat.Tooltip = 'Apply postFormatAllFigures if available';
+
 
 % Standardize button appearance
 styleAllButtons();
@@ -421,8 +432,10 @@ loadPrefs();
     end
 
     function applyAxesSize(~,~)
-        for f = findRealFigs()
-            ax = findall(f{1},'Type','axes');
+        figs = findRealFigs();  % Get cell array of figures
+        for k = 1:numel(figs)
+            fig = figs{k};
+            ax = findall(fig,'Type','axes');
             for a = ax'
                 a.Units = 'normalized';
                 a.Position = [ ...
@@ -452,8 +465,10 @@ loadPrefs();
 
     function applyFontSize(~,~)
         fs = str2double(hFontSize.Value);
-        for f = findRealFigs()
-            set(findall(f{1},'Type','axes'),'FontSize',fs);
+        figs = findRealFigs();  % Get cell array of figures
+        for k = 1:numel(figs)
+            fig = figs{k};
+            set(findall(fig,'Type','axes'),'FontSize',fs);
         end
     end
 
@@ -807,8 +822,9 @@ loadPrefs();
         % ensure export-friendly font/interpreter settings match UI
         ensureExportFonts();
 
-        for f = findRealFigs()
-            fig0 = f{1};
+        figs = findRealFigs();  % Get cell array once
+        for k = 1:numel(figs)
+            fig0 = figs{k};  % Get each figure from cell array
             baseName = fig0.Name;
             if isempty(baseName), baseName = 'Figure'; end
             baseName = regexprep(baseName, '[\\/:*?"<>|]', '_');
@@ -913,6 +929,33 @@ loadPrefs();
                         if isprop(a.Title,'Interpreter'), a.Title.Interpreter = 'latex'; end
                         if isprop(a.Title,'FontName'), a.Title.FontName = 'latex'; end
                     end
+                    
+                    % LEGACY ENHANCEMENT: Colorbar coverage (if available)
+                    if isprop(a,'Colorbar')
+                        cb = a.Colorbar;
+                        if ~isempty(cb) && isvalid(cb)
+                            if isprop(cb,'FontSize'), cb.FontSize = fs; end
+                            if isprop(cb,'TickLabelInterpreter'), cb.TickLabelInterpreter = 'latex'; end
+                            if isprop(cb,'Label') && ~isempty(cb.Label)
+                                if isprop(cb.Label,'Interpreter'), cb.Label.Interpreter = 'latex'; end
+                                if isprop(cb.Label,'FontSize'), cb.Label.FontSize = fs; end
+                            end
+                        end
+                    end
+                catch
+                end
+            end
+            
+            % LEGACY ENHANCEMENT: Find colorbars as separate objects
+            cbars = findall(fig,'Type','colorbar');
+            for cb = cbars'
+                try
+                    if isprop(cb,'FontSize'), cb.FontSize = fs; end
+                    if isprop(cb,'TickLabelInterpreter'), cb.TickLabelInterpreter = 'latex'; end
+                    if isprop(cb,'Label') && ~isempty(cb.Label)
+                        if isprop(cb.Label,'Interpreter'), cb.Label.Interpreter = 'latex'; end
+                        if isprop(cb.Label,'FontSize'), cb.Label.FontSize = fs; end
+                    end
                 catch
                 end
             end
@@ -928,13 +971,53 @@ loadPrefs();
                 catch
                 end
             end
+            
+            % LEGACY ENHANCEMENT: Annotation and textbox coverage
+            annots = findall(fig,'Type','annotation');
+            for ann = annots'
+                try
+                    if isprop(ann,'FontSize'), ann.FontSize = fs; end
+                    if isprop(ann,'Interpreter'), ann.Interpreter = 'latex'; end
+                catch
+                end
+            end
+            
+            % LEGACY ENHANCEMENT: Textbox coverage
+            textboxes = findall(fig,'Type','textbox');
+            for tb = textboxes'
+                try
+                    if isprop(tb,'FontSize'), tb.FontSize = fs; end
+                    if isprop(tb,'Interpreter'), tb.Interpreter = 'latex'; end
+                    if isprop(tb,'String') && ~isempty(tb.String)
+                        tb.String = sanitizeLatexString(tb.String);
+                    end
+                catch
+                end
+            end
+            
+            % LEGACY ENHANCEMENT: Text objects coverage
+            texts = findall(fig,'Type','text');
+            for txt = texts'
+                try
+                    if isprop(txt,'Interpreter'), txt.Interpreter = 'latex'; end
+                    if isprop(txt,'String') && ~isempty(txt.String)
+                        txt.String = sanitizeLatexString(txt.String);
+                    end
+                catch
+                end
+            end
+            
+            % Apply bracket cleanup for consistency
+            fixAxisLabelsBrackets(fig);
+            fixLegendBrackets(fig);
         end
     end
 
 
     function setFigureBackgroundWhite(~,~)
-        for f = findRealFigs()
-            f{1}.Color = 'white';
+        figs = findRealFigs();  % Get cell array
+        for k = 1:numel(figs)
+            figs{k}.Color = 'white';
         end
     end
 
@@ -969,10 +1052,111 @@ loadPrefs();
     end
 
     function formatAllForPaper(~,~)
+        % FORMATALLFORPAPER - Apply publication formatting to all figures
+        % Includes bracket cleanup from legacy GUI
         figs = findRealFigs();
         for k = 1:numel(figs)
             fig = figs{k};
             formatForPaper(fig);
+            % Apply bracket cleanup (legacy integration)
+            fixAxisLabelsBrackets(fig);
+            fixLegendBrackets(fig);
+        end
+    end
+    
+    function applyLegacyFormatter(~,~)
+        % APPLYLEGACYFORMATTER - Legacy safe wrapper for postFormatAllFigures
+        % Guards with exist() check and avoids GUI window interference
+        if ~exist('postFormatAllFigures','file')
+            errordlg(['Function postFormatAllFigures not found. ' ...
+                'Please ensure General ver2/appearanceControl/CommonFormatting is on the path.'], ...
+                'Missing Function');
+            return;
+        end
+        
+        try
+            % Get target figures (respects applyCurrentOnly flag)
+            figs = findRealFigs();
+            if isempty(figs)
+                warning('applyLegacyFormatter:NoFigures','No target figures found.');
+                return;
+            end
+            
+            % Apply postFormatAllFigures to each figure
+            % Use current figure size, Arial font, size 12, skip GUI name, white background
+            for k = 1:numel(figs)
+                fig = figs{k};
+                oldCF = get(0,'CurrentFigure');
+                set(0,'CurrentFigure',fig);
+                
+                sz = fig.Position(3:4);  % Keep current size
+                postFormatAllFigures(sz,'Arial',12,"FinalFigureFormatterUI",'white',true);
+                
+                set(0,'CurrentFigure',oldCF);
+            end
+            
+            fprintf('✔ Legacy formatter applied to %d figure(s)\n', numel(figs));
+        catch ME
+            errordlg(sprintf('Error applying legacy formatter: %s', ME.message), ...
+                'Legacy Format Error');
+        end
+    end
+    
+    function formatForPaper(fig)
+        % FORMATFORPAPER - Apply formatting to single figure
+        % Ported from legacy FinalFigureFormatterGUI
+        if nargin<1
+            fig = gcf;
+        end
+        
+        tickFont   = 16;
+        labelFont  = 20;
+        legendFont = 18;
+        lineWidth  = 2.5;
+        
+        ax = findall(fig,'Type','axes');
+        for a = ax'
+            try
+                a.FontSize  = tickFont;
+                a.LineWidth = 0.6;
+                a.TickDir   = 'out';
+                a.Box       = 'on';
+                a.Layer     = 'top';
+                
+                if ~isempty(a.XLabel.String)
+                    a.XLabel.FontSize = labelFont;
+                end
+                if ~isempty(a.YLabel.String)
+                    a.YLabel.FontSize = labelFont;
+                end
+                if ~isempty(a.Title.String)
+                    a.Title.FontSize = labelFont;
+                end
+                
+                L = findall(a,'Type','Line');
+                set(L,'LineWidth',lineWidth);
+            catch
+                % Skip on error
+            end
+        end
+        
+        lg = findall(fig,'Type','legend');
+        for L = lg'
+            try
+                L.FontSize = legendFont;
+                L.Color    = 'none';
+                L.Box      = 'off';
+            catch
+            end
+        end
+        
+        tx = findall(fig,'Type','text');
+        for t = tx'
+            try
+                if isempty(t.String), continue; end
+                t.FontSize = labelFont;
+            catch
+            end
         end
     end
 
@@ -1372,25 +1556,26 @@ loadPrefs();
     end
 
     function figs = findRealFigs()
-        % FINDREALFIGS - Return array of valid user data figures
+        % FINDREALFIGS - Return CELL ARRAY of valid user data figures
         % Filters out UI windows using safe string comparison
+        % ALWAYS returns a cell array for consistent iteration
         if applyCurrentOnly
             if isempty(lastRealFigure)
-                figs = [];
+                figs = {};
                 return;
             end
             if ~isvalid(lastRealFigure)
                 lastRealFigure = [];  % Clean up deleted handle
-                figs = [];
+                figs = {};
                 return;
             end
-            figs = lastRealFigure;
+            figs = {lastRealFigure};  % Wrap in cell for consistent return type
             return;
         end
         
         % Find all figures and filter out UI windows
         allFigs = findall(0,'Type','figure');
-        figs = [];
+        figs = {};  % Initialize as cell array
         
         for f = allFigs'
             if ~isvalid(f), continue; end
@@ -1413,7 +1598,7 @@ loadPrefs();
             end
             
             if ~isSkipped
-                figs = [figs; f];
+                figs{end+1} = f;  % Add to cell array
             end
         end
     end
@@ -2165,6 +2350,107 @@ loadPrefs();
                 C = interp1([0 0.5 1],[0 0 0; 1 1 1; 1 1 0], linspace(0,1,n));
             otherwise
                 error('Unknown custom colormap name: %s', name);
+        end
+    end
+
+    %% ========================================================
+    % LEGACY BRACKET/LABEL CLEANUP FUNCTIONS
+    % Ported from FinalFigureFormatterGUI.m for compatibility
+    %% ========================================================
+    
+    function fixAxisLabelsBrackets(fig)
+        % FIXAXISLABELSBRACKETS - Convert [unit] to (unit) in axis labels
+        % Standardizes unit notation in X/Y/Z labels and titles
+        ax = findall(fig,'Type','axes');
+        for a = ax'
+            try
+                hX = get(a,'XLabel');
+                hY = get(a,'YLabel');
+                hZ = get(a,'ZLabel');
+                hT = get(a,'Title');
+                
+                set(hX,'String', convertBracketsToParens(get(hX,'String')));
+                set(hY,'String', convertBracketsToParens(get(hY,'String')));
+                set(hZ,'String', convertBracketsToParens(get(hZ,'String')));
+                set(hT,'String', convertBracketsToParens(get(hT,'String')));
+            catch
+                % Skip on error (MATLAB version compatibility)
+            end
+        end
+    end
+    
+    function out = convertBracketsToParens(in)
+        % CONVERTBRACKETSTOPARENS - Generic regex-based bracket to paren converter
+        % Converts [text] format to (text) format for cleaner labels
+        if isstring(in)
+            in = cellstr(in);
+        end
+        if ischar(in)
+            out = regexprep(in,'\[(.*?)\]','($1)');
+        elseif iscellstr(in)
+            out = in;
+            for k = 1:numel(out)
+                out{k} = regexprep(out{k},'\[(.*?)\]','($1)');
+            end
+        else
+            out = in;
+        end
+    end
+    
+    function fixLegendBrackets(fig)
+        % FIXLEGENDBRACKETS - Remove brackets from legend entries
+        % Cleans up legend text by removing [ and ] characters
+        lg = findall(fig,'Type','legend');
+        for L = lg'
+            try
+                str = L.String;
+                if isstring(str)
+                    str = cellstr(str);
+                end
+                if ischar(str)
+                    s = str;
+                    s = strrep(s,'[',' ');
+                    s = strrep(s,']',' ');
+                    s = regexprep(s,'\s+',' ');
+                    s = strtrim(s);
+                    L.String = s;
+                elseif iscellstr(str)
+                    for k = 1:numel(str)
+                        s = str{k};
+                        s = strrep(s,'[',' ');
+                        s = strrep(s,']',' ');
+                        s = regexprep(s,'\s+',' ');
+                        str{k} = strtrim(s);
+                    end
+                    L.String = str;
+                end
+            catch
+                % Skip on error (MATLAB version compatibility)
+            end
+        end
+    end
+    
+    %% ========================================================
+    % COMBINE FIGURES GUI CALLBACK
+    % Integrates with combineOpenFiguresToPanels utility
+    %% ========================================================
+    
+    function combineFiguresGUI(~,~)
+        % COMBINEFIGURESGUI - Combine open figures into panel PDF
+        % Calls external combineOpenFiguresToPanels function if available
+        if ~exist('combineOpenFiguresToPanels','file')
+            errordlg(['Function combineOpenFiguresToPanels not found. ' ...
+                'Please ensure General ver2/appearanceControl is on the path.'], ...
+                'Missing Function');
+            return;
+        end
+        
+        try
+            % Call the external utility to create panel figure
+            combineOpenFiguresToPanels();
+        catch ME
+            errordlg(sprintf('Error combining figures: %s', ME.message), ...
+                'Combine Figures Error');
         end
     end
 
