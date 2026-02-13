@@ -1090,7 +1090,7 @@ loadPrefs();
                 set(0,'CurrentFigure',fig);
                 
                 sz = fig.Position(3:4);  % Keep current size
-                postFormatAllFigures(sz,'Arial',12,"FinalFigureFormatterUI",'white',true);
+                postFormatAllFigures(sz,'Arial',12,'FinalFigureFormatterUI','white',true);
                 
                 set(0,'CurrentFigure',oldCF);
             end
