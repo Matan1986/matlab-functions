@@ -31,3 +31,18 @@ run(fullfile('Relaxation ver3','main_relexation.m'))
 - `Resistivity MagLab ver1/ACHC_RH_main.m` and `AC HC MagLab ver8/ACHC_main.m` — MagLab pipelines.
 
 For personal notes, conventions, and routine workflow, see `DOCUMENTATION.md`.
+
+## Testing
+
+A minimal smoke test suite is available in `tests/` to verify all main entry scripts are structurally valid.
+
+```matlab
+% Run all smoke tests
+tests/run_all_smoke_tests
+
+% Or run individual tests
+addpath('tests')
+test_smoke_PS
+```
+
+See `tests/README.md` for details. These tests verify file existence and basic syntax, but do not require data files or execute full workflows.
