@@ -1,0 +1,20 @@
+﻿[INFO] ScientificColourMaps8: Not found (optional)
+[CONFIG] Total colormaps available: 81
+Validating style consistency...
+ SMART: nx=3 | Panel = 2.33 x 1.87 inch
+
+[PHASE 2.1 VALIDATION] FAILED
+ -  | Line width change not applied
+      passed: 0
+    failures: {' | Line width change not applied'}
+
+matlab : {Phase21ValidationFailed
+At line:1 char:92
++ ... t -Force }; matlab -batch "cd('GUIs'); results = phase21_validation() ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ({Phase21ValidationFailed:String) 
+    [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+} 
+ERROR: MATLAB error Exit Status: 0x00000001
