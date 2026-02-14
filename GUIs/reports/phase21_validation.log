@@ -1,0 +1,9 @@
+[INFO] ScientificColourMaps8: Not found (optional)
+[CONFIG] Total colormaps available: 81
+Validating style consistency...
+✔ SMART: nx=3 | Panel = 2.33 x 1.87 inch
+
+[PHASE 2.1 VALIDATION] FAILED
+ -  | Line width change not applied
+{Phase21ValidationFailed
+} 

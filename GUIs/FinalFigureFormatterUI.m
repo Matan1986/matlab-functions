@@ -8,9 +8,11 @@ panelAspect     = 0.75;
 % preference group for storing UI state between runs
 prefGroup = 'FinalFigureFormatterUI_Prefs';
 
-skipList = ["CtrlGUI","Final Figure Formatter","FigureTools","refLineGUI"];
+skipList = ["CtrlGUI","Final Figure Formatter","FigureTools","refLineGUI","All Available Colormaps"];
 lastRealFigure = [];
 applyCurrentOnly = false;
+currentFigureListener = [];
+layoutPresetPath = '';
 
 %% ================== MAIN WINDOW =================
 fig = uifigure( ...
@@ -25,14 +27,14 @@ gl.RowHeight   = {'fit','fit','fit','fit','fit','fit','fit','1x'};
 gl.Padding     = [8 8 8 8];
 gl.RowSpacing  = 6;
 
-addlistener(0,'CurrentFigure','PostSet',@trackLastFigure);
+currentFigureListener = addlistener(0,'CurrentFigure','PostSet',@trackLastFigure);
 
 %% ================== SAVE & EXPORT (compact) =================
 pSave = uipanel(gl,'Title','Save & Export');
 pSave.Layout.Row = 1;
 
-gSave = uigridlayout(pSave,[3 3]);
-gSave.RowHeight = {'fit','fit','fit'};
+gSave = uigridlayout(pSave,[4 3]);
+gSave.RowHeight = {'fit','fit','fit','fit','fit'};
 gSave.ColumnWidth = {'1x',150,150};
 gSave.Padding = [4 4 4 4];
 gSave.RowSpacing = 4;
@@ -61,6 +63,20 @@ hOverwrite = uicheckbox(gSave,'Text','Overwrite existing files'); hOverwrite.Lay
 % set callback after creation to avoid undefined-variable closure issues
 hUseSubfolder.ValueChangedFcn = @setSubfolderEnable;
 
+% PDF export mode
+lblPdfMode = uilabel(gSave,'Text','PDF mode:','FontWeight','bold','HorizontalAlignment','right');
+lblPdfMode.Layout.Row = 4; lblPdfMode.Layout.Column = 1;
+hPdfMode = uidropdown(gSave, ...
+    'Items', {'Vector (Recommended)','WYSIWYG (Match FIG)'}, ...
+    'Value', 'Vector (Recommended)');
+hPdfMode.Layout.Row = 4; hPdfMode.Layout.Column = [2 3];
+
+% One-click preset workflow
+lblPreset = uilabel(gSave,'Text','Preset:','FontWeight','bold','HorizontalAlignment','right');
+lblPreset.Layout.Row = 5; lblPreset.Layout.Column = 1;
+btnLoadLayoutPreset = uibutton(gSave,'Text','Load Preset...','ButtonPushedFcn',@loadLayoutPreset);
+btnLoadLayoutPreset.Layout.Row = 5; btnLoadLayoutPreset.Layout.Column = [2 3];
+
 %% ================== FIGURE SIZE =================
 pFig = uipanel(gl,'Title','Figure Size (pixels)');
 pFig.Layout.Row = 2;
@@ -80,7 +96,7 @@ btnFigApply = uibutton(gFig,'Text','Apply Figure Size','ButtonPushedFcn',@applyF
 btnFigApply.Layout.Row = [1 2]; btnFigApply.Layout.Column = 3;
 
 %% ================== AXES SIZE =================
-pAx = uipanel(gl,'Title','Axes Size (normalized)');
+pAx = uipanel(gl,'Title','Axes Geometry (Advanced)');
 pAx.Layout.Row = 3;
 
 gAx = uigridlayout(pAx,[3 4]);
@@ -98,11 +114,11 @@ btnAxApply = uibutton(gAx,'Text','Apply Axes','ButtonPushedFcn',@applyAxesSize);
 btnAxApply.Layout.Row = 3; btnAxApply.Layout.Column = [1 4];
 
 %% ================== SMART PAPER LAYOUT =================
-pSmart = uipanel(gl,'Title','SMART Paper Layout');
+pSmart = uipanel(gl,'Title','SMART Layout (Primary)');
 pSmart.Layout.Row = 4;
 
-gSmart = uigridlayout(pSmart,[3 4]);
-gSmart.RowHeight = {'fit','fit','fit'}; 
+gSmart = uigridlayout(pSmart,[4 4]);
+gSmart.RowHeight = {'fit','fit','fit','fit'}; 
 gSmart.ColumnWidth = {'fit','1x','fit','1x'};
 gSmart.Padding = [4 4 4 4];
 gSmart.RowSpacing = 4;
@@ -119,8 +135,13 @@ colMode = uidropdown(gSmart,'Items',{'Single column','Double column'},'Value','D
 lblAspect = uilabel(gSmart,'Text','Aspect ratio (H/W)'); lblAspect.Layout.Row = 2; lblAspect.Layout.Column = 3;
 hAspect = uieditfield(gSmart,'numeric','Value',panelAspect); hAspect.Layout.Row = 2; hAspect.Layout.Column = 4;
 
-% Row 3: apply button
-btnSmart = uibutton(gSmart,'Text','Apply SMART','ButtonPushedFcn',@applySmartLayout); btnSmart.Layout.Row = 3; btnSmart.Layout.Column = [1 4];
+% Row 3: style mode
+lblStyleMode = uilabel(gSmart,'Text','Style mode'); lblStyleMode.Layout.Row = 3; lblStyleMode.Layout.Column = 1;
+hStyleMode = uidropdown(gSmart,'Items',{'PRL','Nature','Compact','Presentation'},'Value','PRL');
+hStyleMode.Layout.Row = 3; hStyleMode.Layout.Column = 2;
+
+% Row 4: apply button
+btnSmart = uibutton(gSmart,'Text','Apply SMART','ButtonPushedFcn',@applySmartLayout); btnSmart.Layout.Row = 4; btnSmart.Layout.Column = [1 4];
 
 %% ================== APPEARANCE / COLORMAP CONTROL =================
 pApp = uipanel(gl,'Title','Appearance / Colormap Control');
@@ -141,8 +162,10 @@ builtinMaps = { 'parula','jet','cool','spring','summer','autumn','winter','coppe
 testMaps = {'magma', 'inferno', 'plasma', 'cividis'};
 for t = 1:numel(testMaps)
     try
-        feval(testMaps{t}, 2);  % Quick test
-        builtinMaps{end+1} = testMaps{t};
+        testMapData = feval(testMaps{t}, 2);  % Quick test with output to avoid side effects
+        if isnumeric(testMapData) && ismatrix(testMapData) && size(testMapData,2) == 3
+            builtinMaps{end+1} = testMaps{t};
+        end
     catch
         % Colormap not available in this MATLAB version
     end
@@ -156,7 +179,10 @@ cmoMaps = { 'cmocean(''thermal'')','cmocean(''haline'')','cmocean(''solar'')','c
 
 % Test if cmocean is available
 try
-    cmocean('thermal');  % Test call
+    cmoTest = cmocean('thermal');  % Test with output to avoid gca/figure side effects
+    if ~isnumeric(cmoTest) || size(cmoTest,2) ~= 3
+        cmoMaps = {};
+    end
 catch
     % cmocean not available - clear the list
     cmoMaps = {};
@@ -336,6 +362,9 @@ hChkReverseLegend.Value = false;
 hChkReverseOrder = uicheckbox(gApp,'Text','Reverse Plot','FontSize',9);
 hChkReverseOrder.Layout.Row = 5; hChkReverseOrder.Layout.Column = [4 5];
 hChkReverseOrder.Value = false;
+hChkNoMapChange = uicheckbox(gApp,'Text','No map change','FontSize',9);
+hChkNoMapChange.Layout.Row = 5; hChkNoMapChange.Layout.Column = 6;
+hChkNoMapChange.Value = false;
 
 % Row 6: Apply button + Show All Colormaps button
 btnAppearance = uibutton(gApp,'Text','Apply Appearance','ButtonPushedFcn',@applyAppearanceSettings);
@@ -347,8 +376,8 @@ btnShowAllMaps.Layout.Row = 6; btnShowAllMaps.Layout.Column = [5 6];
 pTypo = uipanel(gl,'Title','Typography');
 pTypo.Layout.Row = 6;
 
-gTypo = uigridlayout(pTypo,[2 8]);
-gTypo.RowHeight = {'fit','fit'};
+gTypo = uigridlayout(pTypo,[3 8]);
+gTypo.RowHeight = {'fit','fit','fit'};
 gTypo.ColumnWidth = {'fit','1x','fit','fit','fit','fit','fit','fit'};
 gTypo.Padding = [4 4 4 4];
 gTypo.RowSpacing = 4;
@@ -366,15 +395,19 @@ hLegendFontSize.Layout.Row = 1; hLegendFontSize.Layout.Column = [5 6];
 btnApplyLegend = uibutton(gTypo,'Text','Apply','ButtonPushedFcn',@applyLegendFontSize);
 btnApplyLegend.Layout.Row = 1; btnApplyLegend.Layout.Column = 7;
 
-% Row 2: Legend position buttons (compact)
-posGrid = uigridlayout(gTypo,[1 6]); posGrid.Layout.Row = 2; posGrid.Layout.Column = [1 8];
-posGrid.ColumnWidth = {'1x','1x','1x','1x','1x','1x'}; posGrid.Padding = [2 2 2 2];
+% Row 2: Alignment buttons
+posGrid = uigridlayout(gTypo,[1 4]); posGrid.Layout.Row = 2; posGrid.Layout.Column = [1 8];
+posGrid.ColumnWidth = {'1x','1x','1x','1x'}; posGrid.Padding = [2 2 2 2];
 uibutton(posGrid,'Text','↗','ButtonPushedFcn',@(~,~) moveLegend('northeast'));
 uibutton(posGrid,'Text','↖','ButtonPushedFcn',@(~,~) moveLegend('northwest'));
 uibutton(posGrid,'Text','↙','ButtonPushedFcn',@(~,~) moveLegend('southwest'));
 uibutton(posGrid,'Text','↘','ButtonPushedFcn',@(~,~) moveLegend('southeast'));
-uibutton(posGrid,'Text','Best','ButtonPushedFcn',@(~,~) moveLegend('best'));
-uibutton(posGrid,'Text','Out','ButtonPushedFcn',@(~,~) moveLegend('northeastoutside'));
+
+% Row 3: Best/Out buttons
+posGrid2 = uigridlayout(gTypo,[1 2]); posGrid2.Layout.Row = 3; posGrid2.Layout.Column = [1 8];
+posGrid2.ColumnWidth = {'1x','1x'}; posGrid2.Padding = [2 2 2 2];
+uibutton(posGrid2,'Text','Best','ButtonPushedFcn',@(~,~) moveLegend('best'));
+uibutton(posGrid2,'Text','Out','ButtonPushedFcn',@(~,~) moveLegend('northeastoutside'));
 
 % ================== ADVANCED / UTILITIES (collapsible) =================
 % advanced panel (visible)
@@ -421,67 +454,36 @@ loadPrefs();
     end
 
     function applyAxesSize(~,~)
-        for f = findRealFigs()
-            ax = findall(f{1},'Type','axes');
-            for a = ax'
-                a.Units = 'normalized';
-                a.Position = [ ...
-                    hLeftMargin.Value, ...
-                    1-hAxHeight.Value-hTopMargin.Value, ...
-                    hAxWidth.Value, ...
-                    hAxHeight.Value];
-            end
-        end
+        figs = findRealFigs();
+        if isempty(figs), return; end
+        style = buildStyleFromCurrentUI();
+        style.applyPreviewResize = false;
+        applyStyleToFigures(figs, style);
     end
 
     function applyFigureSize(~,~)
-        w = hFigWidth.Value;
-        h = hFigHeight.Value;
         figs = findRealFigs();
-        for k = 1:numel(figs)
-            f0 = figs{k};
-            try
-                % Position is [left bottom width height] in pixels for figures
-                pos = f0.Position;
-                pos(3:4) = [w h];
-                f0.Position = pos;
-            catch
-            end
-        end
+        if isempty(figs), return; end
+        style = buildStyleFromCurrentUI();
+        style.applyPreviewResize = true;
+        style.previewScale = 1.0;
+        applyStyleToFigures(figs, style);
     end
 
     function applyFontSize(~,~)
-        fs = str2double(hFontSize.Value);
-        for f = findRealFigs()
-            set(findall(f{1},'Type','axes'),'FontSize',fs);
-        end
+        figs = findRealFigs();
+        if isempty(figs), return; end
+        style = buildStyleFromCurrentUI();
+        style.applyPreviewResize = false;
+        applyStyleToFigures(figs, style);
     end
 
     function applyLegendFontSize(~,~)
-        fs = str2double(hLegendFontSize.Value);
         figs = findRealFigs();
-        if isempty(figs)
-            warning('applyLegendFontSize:NoFigures','No target figures found.');
-            return;
-        end
-        for k = 1:numel(figs)
-            fig = figs{k};
-            lg = findall(fig,'Type','legend');
-            for L = lg'
-                L.FontSize    = fs;
-                if isprop(L,'FontName'), L.FontName = 'latex'; end
-                if isprop(L,'Interpreter'), L.Interpreter = 'latex'; end
-                if isprop(L,'ItemTokenSize'), L.ItemTokenSize = [10 8]; end
-                % sanitize legend strings
-                if iscell(L.String)
-                    for j = 1:numel(L.String)
-                        L.String{j} = sanitizeLatexString(L.String{j});
-                    end
-                elseif ischar(L.String) || isstring(L.String)
-                    L.String = sanitizeLatexString(L.String);
-                end
-            end
-        end
+        if isempty(figs), return; end
+        style = buildStyleFromCurrentUI();
+        style.applyPreviewResize = false;
+        applyStyleToFigures(figs, style);
     end
 
     function applySmartLayout(~,~)
@@ -516,47 +518,17 @@ loadPrefs();
         end
         panelHeight = panelWidth * ratio;
 
-        % get style from panel size
-        style = getStyleFromPanelSize(panelWidth, panelHeight);
-
-        % derive physical axes size (in inches) and compute fonts/markers/lines
-        axPhysicalW = panelWidth * style.axWidth;   % inches
-        axPhysicalH = panelHeight * style.axHeight; % inches
-
-        % use a single scale factor from axes physical size (height is primary)
-        scl = max(0.5, axPhysicalH); % avoid zero
-
-        % fonts: continuous mapping tuned for printed figures
-        tickFont   = max(6, min(22, round(6 + scl * 3.0)));
-        labelFont  = max(8, round(tickFont + 2));
-        titleFont  = max(9, round(tickFont + 3));
-        legendFont = max(6, round(labelFont - 1));
-        annFont    = max(8, round(tickFont + 1));
-
-        % line and marker sizing (in points for markers, linewidth in points)
-        lineWidth  = max(0.5, min(3.0, 0.6 * scl));
-        markerSize = max(4, min(24, round(6 + scl * 6)));
-        itemTokenW = max(8, round(markerSize * 1.2));
-        itemTokenH = max(6, round(markerSize * 1.0));
-
-        % store derived style
-        style.tickFont   = tickFont;
-        style.labelFont  = labelFont;
-        style.titleFont  = titleFont;
-        style.legendFont = legendFont;
-        style.annFont    = annFont;
-        style.lineWidth  = lineWidth;
-        style.markerSize = markerSize;
-        style.itemTokenSize = [itemTokenW itemTokenH];
+        style = SmartFigureEngine.computeSmartStyle(panelWidth, panelHeight, nx, ny, hStyleMode.Value);
+        style.applyPreviewResize = true;
+        style.previewScale = 3.0;
+        style.dpi = 96;
 
         % update UI controls with computed values
         hTopMargin.Value  = style.topMargin;
         hLeftMargin.Value = style.leftMargin;
 
-        % screen preview DPI
-        DPI = 96;
-        hFigWidth.Value  = round(panelWidth * DPI);
-        hFigHeight.Value = round(panelHeight * DPI);
+        hFigWidth.Value  = round(panelWidth * style.dpi);
+        hFigHeight.Value = round(panelHeight * style.dpi);
 
         hAxWidth.Value  = style.axWidth;
         hAxHeight.Value = style.axHeight;
@@ -567,41 +539,39 @@ loadPrefs();
         setPopupValueByString(hFontSize,       num2str(style.tickFont));
         setPopupValueByString(hLegendFontSize, num2str(style.legendFont));
 
-        % apply to MATLAB figures
-        previewScale = 3.0;
-        for k = 1:numel(figs)
-            fig0 = figs{k};
-
-            % set physical paper size for export
-            try
-                fig0.Units = 'inches';
-                fig0.PaperUnits = 'inches';
-                fig0.PaperSize = [panelWidth panelHeight];
-                fig0.PaperPosition = [0 0 panelWidth panelHeight];
-                fig0.PaperPositionMode = 'manual';
-            catch
-            end
-
-            % set screen preview size
-            try
-                fig0.Units = 'pixels';
-                fig0.Position(3) = panelWidth * DPI * previewScale;
-                fig0.Position(4) = panelHeight * DPI * previewScale;
-            catch
-            end
-
-            % apply axes geometry
-            if isMultiPanelFigure(fig0)
-                applyAxesSizeMulti(fig0, style.axWidth, style.axHeight, style.topMargin, style.leftMargin);
-            else
-                applyAxesSizeSingle(fig0, style.axWidth, style.axHeight, style.topMargin, style.leftMargin);
-            end
-
-            % apply fonts, line widths, marker sizes and legend sizing
-            applyFontSystem(fig0, style);
-        end
+        applyStyleToFigures(figs, style);
 
         fprintf('✔ SMART: nx=%d | Panel = %.2f x %.2f inch\n', nx, panelWidth, panelHeight);
+    end
+
+    function style = buildStyleFromCurrentUI()
+        panelWidth = max(1.0, hFigWidth.Value/96);
+        panelHeight = max(1.0, hFigHeight.Value/96);
+        nx = max(1, round(hPanelsX.Value));
+        ny = max(1, round(hPanelsY.Value));
+        style = SmartFigureEngine.computeSmartStyle(panelWidth, panelHeight, nx, ny, hStyleMode.Value);
+
+        style.axWidth = hAxWidth.Value;
+        style.axHeight = hAxHeight.Value;
+        style.topMargin = hTopMargin.Value;
+        style.leftMargin = hLeftMargin.Value;
+
+        fs = str2double(hFontSize.Value);
+        lfs = str2double(hLegendFontSize.Value);
+        style = SmartFigureEngine.applyUiOverrides(style, fs, lfs);
+        style.applyPreviewResize = false;
+    end
+
+    function applyStyleToFigures(figs, style)
+        figs = figs(:);
+        for k = 1:numel(figs)
+            fig0 = figs(k);
+            try
+                SmartFigureEngine.applyFullSmart(fig0, style);
+            catch ME
+                warning('Smart apply failed on figure %d: %s', k, ME.message);
+            end
+        end
     end
 
     function switchTarget(useOpen)
@@ -617,62 +587,33 @@ loadPrefs();
     end
 
     function applyAppearanceSettings(~,~)
-        % Extract values from UI controls
-        maps = hPopupMap.Items;
         mapName = hPopupMap.Value;
-        
-        noColormapChange = strcmp(mapName,'(no change)');
-        
         spreadMode = hPopupSpread.Value;
-        
-        % Target: open figures or folder
         useFolder = logical(hRadioFolder.Value);
-        
-        % Fit color
-        fitColor_str = hPopupFitColor.Value;
-        if strcmp(fitColor_str,'(no change)')
-            fitColor = '';
-        else
-            fitColor = fitColor_str;
-        end
-        
-        % Data lines
-        dw = str2double(hEditDataLW.Value);
-        if isnan(dw) || dw <= 0, dw = []; end
-        
-        dataStyle = hPopupDataStyle.Value;
-        if strcmp(dataStyle,'(no change)'), dataStyle = ''; end
-        
-        % Marker size
-        ms = str2double(hEditMarkerSize.Value);
-        if isnan(ms) || ms <= 0, ms = []; end
-        
-        % Fit lines
-        fw = str2double(hEditFitLW.Value);
-        if isnan(fw) || fw <= 0, fw = []; end
-        
-        fitStyle = hPopupFitStyle.Value;
-        if strcmp(fitStyle,'(no change)'), fitStyle = ''; end
-        
-        % Legend/plot order flags (now actual checkboxes with .Value)
-        reverseLegend = logical(hChkReverseLegend.Value);
-        reverseOrder = logical(hChkReverseOrder.Value);
-        
-        try
-            if ~useFolder
-                % Apply to currently open figures
-                applyColormapToFigures(mapName, [], spreadMode, ...
-                    fitColor, dw, dataStyle, fw, fitStyle, reverseOrder, reverseLegend, noColormapChange, ms);
-            else
-                % Apply to .fig files in the selected folder
-                folderName = strtrim(hEditFolder.Value);
-                if isempty(folderName) || ~isfolder(folderName)
-                    errordlg('Invalid folder path','Appearance Error');
-                    return;
-                end
-                applyColormapToFigures(mapName, folderName, spreadMode, ...
-                    fitColor, dw, dataStyle, fw, fitStyle, reverseOrder, reverseLegend, noColormapChange, ms);
+        folderName = strtrim(hEditFolder.Value);
+        targetFigs = [];
+
+        if useFolder
+            if isempty(folderName) || ~isfolder(folderName)
+                errordlg('Invalid folder path','Appearance Error');
+                return;
             end
+        else
+            if applyCurrentOnly && ~isempty(lastRealFigure) && isvalid(lastRealFigure)
+                targetFigs = lastRealFigure;
+            else
+                targetFigs = findRealFigs();
+            end
+        end
+
+        try
+            appearanceStyle = SmartFigureEngine.buildAppearanceStyleFromUI( ...
+                mapName, spreadMode, useFolder, folderName, ...
+                hPopupFitColor.Value, hEditDataLW.Value, hPopupDataStyle.Value, ...
+                hEditMarkerSize.Value, hEditFitLW.Value, hPopupFitStyle.Value, ...
+                logical(hChkReverseOrder.Value), logical(hChkReverseLegend.Value), ...
+                logical(hChkNoMapChange.Value), targetFigs, scm8Maps);
+            SmartFigureEngine.applyAppearanceToTargets(appearanceStyle);
             fprintf('✔ Appearance settings applied.\n');
         catch ME
             errordlg(ME.message,'Appearance Error');
@@ -689,9 +630,11 @@ loadPrefs();
         if ~isempty(existingPreview)
             for k = existingPreview'
                 try
-                    close(k);
-                catch
-                    % Silent failure if close fails
+                    if isvalid(k)
+                        delete(k);
+                    end
+                catch ME
+                    fprintf('[INFO] Preview cleanup skipped: %s\n', ME.message);
                 end
             end
         end
@@ -708,6 +651,10 @@ loadPrefs();
         
         nMaps = numel(mapNames);
         fprintf('[PREVIEW] Opening colormap preview for %d maps\n', nMaps);
+        if nMaps < 1
+            fprintf('[PREVIEW] No colormaps available to preview.\n');
+            return;
+        end
         
         % Calculate tile dimensions for optimal layout
         % Aim for narrow strips stacked vertically
@@ -716,9 +663,8 @@ loadPrefs();
         
         % Create new figure with tiledlayout
         % CRITICAL: Hide figure during construction to prevent blank canvas flashing
-        fig = figure('Name','All Available Colormaps','NumberTitle','off',...
-            'Position',[100 100 1400 min(max(25*nRows, 600), 1200)],...
-            'Visible','off');  % Hide until fully populated
+        fig = figure('Name','All Available Colormaps','Visible','off','NumberTitle','off',...
+            'Position',[100 100 1400 min(max(25*nRows, 600), 1200)]);  % Hide until fully populated
         
         % CRITICAL: Pass figure handle explicitly to tiledlayout to prevent
         % tiledlayout() from creating a separate blank figure when main UI is uifigure
@@ -732,7 +678,7 @@ loadPrefs();
             
             try
                 % Get colormap with error handling
-                cmap = getColormapToUse(mapName);
+                cmap = SmartFigureEngine.getColormapForPreview(mapName, scm8Maps);
                 if isempty(cmap)
                     failedMaps{end+1} = mapName;
                     continue;
@@ -763,7 +709,9 @@ loadPrefs();
                 
             catch ME
                 % Log failed colormap
-                failedMaps{end+1} = [mapName ' (error: ' ME.message(1:30) ')'];
+                msg = ME.message;
+                msg = msg(1:min(30, numel(msg)));
+                failedMaps{end+1} = [mapName ' (error: ' msg ')'];
                 fprintf('[WARNING] Colormap %s failed: %s\n', mapName, ME.message);
             end
         end
@@ -783,7 +731,9 @@ loadPrefs();
         end
         
         % Make figure visible now that content is fully loaded
-        fig.Visible = 'on';
+        if isvalid(fig)
+            fig.Visible = 'on';
+        end
     end
 
     function saveDo(mode)
@@ -804,11 +754,23 @@ loadPrefs();
             saveFolder = baseFolder;
         end
 
-        % ensure export-friendly font/interpreter settings match UI
-        ensureExportFonts();
+        figsToSave = findRealFigs();
+        figsToSave = figsToSave(:);
+        if isempty(figsToSave)
+            warning('FinalFigureFormatterUI:NoFiguresToSave','No valid target figures found for export.');
+            return;
+        end
 
-        for f = findRealFigs()
-            fig0 = f{1};
+        % WYSIWYG rule: export must be passive (no export-time reformat/reflow)
+
+        pdfMode = getPdfExportMode();
+
+        for k = 1:numel(figsToSave)
+            fig0 = figsToSave(k);
+            if ~isvalid(fig0) || ~isscalar(fig0) || ~isgraphics(fig0,'figure')
+                warning('FinalFigureFormatterUI:InvalidFigureHandle','Skipping invalid figure target at index %d.', k);
+                continue;
+            end
             baseName = fig0.Name;
             if isempty(baseName), baseName = 'Figure'; end
             baseName = regexprep(baseName, '[\\/:*?"<>|]', '_');
@@ -852,18 +814,32 @@ loadPrefs();
 
                 case 'pdf'
                     outPath = ensureFreeFilename([outBase '.pdf'], overwrite);
-                    % try exportgraphics first, then fall back to saveas/print
-                    try
-                        exportgraphics(fig0, outPath, 'ContentType','vector');
-                    catch
+                    pdfSaved = false;
+                    if strcmp(pdfMode,'wysiwyg')
                         try
-                            saveas(fig0, outPath);
-                        catch
-                            try
-                                print(fig0, '-dpdf', outPath);
-                            catch ME
-                                warning('Failed to save PDF (%s): %s', outPath, ME.message);
-                            end
+                            exportgraphics(fig0, outPath, 'ContentType','image', 'Resolution', 600, 'BackgroundColor', 'current');
+                            pdfSaved = true;
+                        catch ME
+                            warning('FinalFigureFormatterUI:PdfExportFailed', ...
+                                'Failed to save PDF with passive exportgraphics (%s): %s', outPath, ME.message);
+                        end
+                    else
+                        try
+                            exportgraphics(fig0, outPath, 'ContentType','vector', 'BackgroundColor', 'current');
+                            pdfSaved = true;
+                        catch ME
+                            warning('FinalFigureFormatterUI:PdfExportFailed', ...
+                                'Failed to save PDF with passive exportgraphics (%s): %s', outPath, ME.message);
+                        end
+                    end
+
+                    if pdfSaved
+                        try
+                            jsonPath = [erase(outPath, '.pdf') '_layout.json'];
+                            saveLayoutMetadataJson(jsonPath, fig0, mode, pdfMode);
+                        catch ME
+                            warning('FinalFigureFormatterUI:LayoutMetadataSaveFailed', ...
+                                'Failed to save layout metadata JSON (%s): %s', jsonPath, ME.message);
                         end
                     end
 
@@ -875,94 +851,373 @@ loadPrefs();
           savePrefs();
     end
 
-    function ensureExportFonts()
-        % Apply font settings and LaTeX interpreters before exporting
-        fs = str2double(hFontSize.Value);
-        lfs = str2double(hLegendFontSize.Value);
-        figs = findRealFigs();
-        for k = 1:numel(figs)
-            fig = figs{k};
-            % set renderer for vector export
-            try, fig.Renderer = 'painters'; catch, end
+    function prepareFigureForWysiwygExport(fig)
+        %#ok<INUSD>
+        % Passive export policy: do not mutate figure properties at save time.
+    end
 
-            ax = findall(fig,'Type','axes');
-            for a = ax'
-                try
-                    if isprop(a,'FontUnits'), a.FontUnits = 'points'; end
-                    a.FontSize = fs;
-                    if isprop(a,'TickLabelInterpreter'), a.TickLabelInterpreter = 'latex'; end
-                    % X/Y labels and title
-                    if ~isempty(a.XLabel.String)
-                        a.XLabel.String = sanitizeLatexString(a.XLabel.String);
-                        if isprop(a.XLabel,'FontUnits'), a.XLabel.FontUnits = 'points'; end
-                        a.XLabel.FontSize = fs;
-                        if isprop(a.XLabel,'Interpreter'), a.XLabel.Interpreter = 'latex'; end
-                        if isprop(a.XLabel,'FontName'), a.XLabel.FontName = 'latex'; end
-                    end
-                    if ~isempty(a.YLabel.String)
-                        a.YLabel.String = sanitizeLatexString(a.YLabel.String);
-                        if isprop(a.YLabel,'FontUnits'), a.YLabel.FontUnits = 'points'; end
-                        a.YLabel.FontSize = fs;
-                        if isprop(a.YLabel,'Interpreter'), a.YLabel.Interpreter = 'latex'; end
-                        if isprop(a.YLabel,'FontName'), a.YLabel.FontName = 'latex'; end
-                    end
-                    if ~isempty(a.Title.String)
-                        a.Title.String = sanitizeLatexString(a.Title.String);
-                        if isprop(a.Title,'FontUnits'), a.Title.FontUnits = 'points'; end
-                        a.Title.FontSize = fs;
-                        if isprop(a.Title,'Interpreter'), a.Title.Interpreter = 'latex'; end
-                        if isprop(a.Title,'FontName'), a.Title.FontName = 'latex'; end
-                    end
-                catch
-                end
+    function prepareFigureForVectorExport(fig)
+        %#ok<INUSD>
+        % Passive export policy: do not mutate figure properties at save time.
+    end
+
+    function mode = getPdfExportMode()
+        mode = 'vector';
+        try
+            if strcmpi(hPdfMode.Value, 'WYSIWYG (Match FIG)')
+                mode = 'wysiwyg';
             end
+        catch
+        end
+    end
 
-            lg = findall(fig,'Type','legend');
-            for L = lg'
-                try
-                    if isprop(L,'FontUnits'), L.FontUnits = 'points'; end
-                    L.FontSize = lfs;
-                    if isprop(L,'Interpreter'), L.Interpreter = 'latex'; end
-                    if isprop(L,'FontName'), L.FontName = 'latex'; end
-                    if isprop(L,'ItemTokenSize'), L.ItemTokenSize = [10 8]; end
-                catch
+    function saveLayoutMetadataJson(jsonPath, figHandle, exportMode, pdfMode)
+        meta = buildLayoutMetadata(figHandle, exportMode, pdfMode);
+        meta = normalizeForJson(meta);
+        try
+            raw = jsonencode(meta, 'PrettyPrint', true);
+        catch
+            raw = jsonencode(meta);
+        end
+
+        fid = fopen(jsonPath, 'w');
+        if fid < 0
+            error('Could not open metadata file for writing: %s', jsonPath);
+        end
+        c = onCleanup(@() fclose(fid)); %#ok<NASGU>
+        fwrite(fid, raw, 'char');
+    end
+
+    function meta = buildLayoutMetadata(figHandle, exportMode, pdfMode)
+        styleNow = buildStyleFromCurrentUI();
+        defaults = SmartFigureEngine.computeSmartStyle( ...
+            max(1.0, hFigWidth.Value/96), max(1.0, hFigHeight.Value/96), ...
+            max(1, round(hPanelsX.Value)), max(1, round(hPanelsY.Value)), hStyleMode.Value);
+
+        figInfo = struct('name','','number',NaN,'position',[]);
+        try
+            figInfo.name = string(figHandle.Name);
+            figInfo.number = double(figHandle.Number);
+            figInfo.position = double(figHandle.Position);
+        catch
+        end
+
+        meta = struct();
+        meta.schemaVersion = 'layout-metadata-v1';
+        meta.savedAt = string(datetime('now','TimeZone','local','Format','yyyy-MM-dd''T''HH:mm:ss.SSSZZZZZ'));
+        meta.generator = 'FinalFigureFormatterUI';
+        meta.export = struct('mode', string(exportMode), 'pdfMode', string(pdfMode));
+        meta.figure = figInfo;
+        meta.uiKnown = collectKnownUiState();
+        meta.uiControls = captureUiControlsRaw();
+        meta.engineStyle = styleNow;
+        meta.engineDefaults = defaults;
+    end
+
+    function state = collectKnownUiState()
+        state = struct();
+        state.path = string(hPathBox.Value);
+        state.useSubfolder = logical(hUseSubfolder.Value);
+        state.subfolderName = string(hSubfolderName.Value);
+        state.overwrite = logical(hOverwrite.Value);
+        state.pdfMode = string(hPdfMode.Value);
+        state.layoutPresetPath = string(layoutPresetPath);
+
+        state.figWidth = double(hFigWidth.Value);
+        state.figHeight = double(hFigHeight.Value);
+        state.axWidth = double(hAxWidth.Value);
+        state.axHeight = double(hAxHeight.Value);
+        state.topMargin = double(hTopMargin.Value);
+        state.leftMargin = double(hLeftMargin.Value);
+
+        state.panelsX = double(hPanelsX.Value);
+        state.panelsY = double(hPanelsY.Value);
+        state.columnMode = string(colMode.Value);
+        state.styleMode = string(hStyleMode.Value);
+        state.aspect = double(hAspect.Value);
+
+        state.fontSize = string(hFontSize.Value);
+        state.legendFontSize = string(hLegendFontSize.Value);
+        state.applyCurrentOnly = logical(applyCurrentOnly);
+
+        state.appearanceMapName = string(hPopupMap.Value);
+        state.appearanceSpreadMode = string(hPopupSpread.Value);
+        state.appearanceUseFolder = logical(hRadioFolder.Value);
+        state.appearanceFolderPath = string(hEditFolder.Value);
+        state.appearanceFitColor = string(hPopupFitColor.Value);
+        state.appearanceDataLineWidth = string(hEditDataLW.Value);
+        state.appearanceDataLineStyle = string(hPopupDataStyle.Value);
+        state.appearanceMarkerSize = string(hEditMarkerSize.Value);
+        state.appearanceFitLineWidth = string(hEditFitLW.Value);
+        state.appearanceFitLineStyle = string(hPopupFitStyle.Value);
+        state.appearanceReverseLegend = logical(hChkReverseLegend.Value);
+        state.appearanceReverseOrder = logical(hChkReverseOrder.Value);
+        state.appearanceNoMapChange = logical(hChkNoMapChange.Value);
+    end
+
+    function controlsRaw = captureUiControlsRaw()
+        controlsRaw = struct('type',{},'tag',{},'label',{},'value',{},'items',{},'enabled',{});
+        all = findall(fig);
+        idx = 0;
+        for i = 1:numel(all)
+            h = all(i);
+            try
+                if ~isprop(h,'Value')
+                    continue;
                 end
+                idx = idx + 1;
+                controlsRaw(idx).type = string(class(h));
+                if isprop(h,'Tag'), controlsRaw(idx).tag = string(h.Tag); else, controlsRaw(idx).tag = ""; end
+                if isprop(h,'Text'), controlsRaw(idx).label = string(h.Text); else, controlsRaw(idx).label = ""; end
+                controlsRaw(idx).value = normalizeForJson(h.Value);
+                if isprop(h,'Items')
+                    controlsRaw(idx).items = normalizeForJson(h.Items);
+                else
+                    controlsRaw(idx).items = [];
+                end
+                if isprop(h,'Enable')
+                    controlsRaw(idx).enabled = string(h.Enable);
+                else
+                    controlsRaw(idx).enabled = "";
+                end
+            catch
+                idx = idx - 1;
             end
         end
+    end
+
+    function out = normalizeForJson(in)
+        if isstruct(in)
+            out = struct();
+            f = fieldnames(in);
+            for ii = 1:numel(f)
+                key = f{ii};
+                out.(key) = normalizeForJson(in.(key));
+            end
+            return;
+        end
+        if iscell(in)
+            out = cell(size(in));
+            for ii = 1:numel(in)
+                out{ii} = normalizeForJson(in{ii});
+            end
+            return;
+        end
+        if isstring(in)
+            out = cellstr(in);
+            return;
+        end
+        if ischar(in) || isnumeric(in) || islogical(in)
+            out = in;
+            return;
+        end
+        try
+            out = char(string(in));
+        catch
+            out = [];
+        end
+    end
+
+    function prepareFiguresForExportThroughEngine(figs)
+        %#ok<INUSD>
+        % Passive export policy: export does not re-apply SMART formatting.
     end
 
 
     function setFigureBackgroundWhite(~,~)
         for f = findRealFigs()
-            f{1}.Color = 'white';
+            f.Color = 'white';
+        end
+    end
+
+    function loadLayoutPreset(~,~)
+        startPath = hPathBox.Value;
+        try
+            if ~isempty(layoutPresetPath) && isfile(layoutPresetPath)
+                startPath = fileparts(layoutPresetPath);
+            end
+        catch
+        end
+
+        [f,p] = uigetfile({'*.json;*.mat','Layout Metadata Files (*.json,*.mat)'}, ...
+            'Load Layout Preset / Metadata', startPath);
+        if isequal(f,0), return; end
+        presetPath = fullfile(p,f);
+        layoutPresetPath = presetPath;
+
+        try
+            [~,~,ext] = fileparts(presetPath);
+            switch lower(ext)
+                case '.json'
+                    raw = fileread(presetPath);
+                    meta = jsondecode(raw);
+                case '.mat'
+                    s = load(presetPath);
+                    if isfield(s,'meta')
+                        meta = s.meta;
+                    else
+                        fn = fieldnames(s);
+                        meta = s.(fn{1});
+                    end
+                otherwise
+                    error('Unsupported preset extension: %s', ext);
+            end
+
+            if isfield(meta,'uiKnown')
+                applyKnownUiState(meta.uiKnown);
+            else
+                applyKnownUiState(meta);
+            end
+
+            savePrefs();
+
+            try
+                applySmartLayout([],[]);
+            catch
+                try
+                    style = buildStyleFromCurrentUI();
+                    applyStyleToFigures(findRealFigs(), style);
+                catch
+                end
+            end
+        catch ME
+            errordlg(sprintf('Failed to load layout preset:\n%s', ME.message), 'Layout Preset Error');
+        end
+    end
+
+    function applyKnownUiState(s)
+        if isempty(s) || ~isstruct(s), return; end
+
+        setFieldText(hPathBox, s, 'path');
+        setFieldLogical(hUseSubfolder, s, 'useSubfolder');
+        setFieldText(hSubfolderName, s, 'subfolderName');
+        setFieldLogical(hOverwrite, s, 'overwrite');
+        setFieldDropdown(hPdfMode, s, 'pdfMode');
+        if isfield(s,'layoutPresetPath')
+            try, layoutPresetPath = char(string(s.layoutPresetPath)); catch, end
+        end
+
+        setFieldNumeric(hFigWidth, s, 'figWidth');
+        setFieldNumeric(hFigHeight, s, 'figHeight');
+        setFieldNumeric(hAxWidth, s, 'axWidth');
+        setFieldNumeric(hAxHeight, s, 'axHeight');
+        setFieldNumeric(hTopMargin, s, 'topMargin');
+        setFieldNumeric(hLeftMargin, s, 'leftMargin');
+
+        setFieldNumeric(hPanelsX, s, 'panelsX');
+        setFieldNumeric(hPanelsY, s, 'panelsY');
+        setFieldDropdown(colMode, s, 'columnMode');
+        setFieldDropdown(hStyleMode, s, 'styleMode');
+        setFieldNumeric(hAspect, s, 'aspect');
+
+        setFieldDropdownOrText(hFontSize, s, 'fontSize');
+        setFieldDropdownOrText(hLegendFontSize, s, 'legendFontSize');
+
+        if isfield(s,'applyCurrentOnly')
+            applyCurrentOnly = logical(s.applyCurrentOnly);
+            if exist('chkCurrent','var') && isvalid(chkCurrent)
+                chkCurrent.Value = applyCurrentOnly;
+            end
+        end
+
+        setFieldDropdown(hPopupMap, s, 'appearanceMapName');
+        setFieldDropdown(hPopupSpread, s, 'appearanceSpreadMode');
+        if isfield(s,'appearanceUseFolder')
+            useFolder = logical(s.appearanceUseFolder);
+            hRadioFolder.Value = useFolder;
+            hRadioOpen.Value = ~useFolder;
+            hEditFolder.Enable = iif(useFolder, 'on', 'off');
+        end
+        setFieldText(hEditFolder, s, 'appearanceFolderPath');
+        setFieldDropdown(hPopupFitColor, s, 'appearanceFitColor');
+        setFieldDropdownOrText(hEditDataLW, s, 'appearanceDataLineWidth');
+        setFieldDropdown(hPopupDataStyle, s, 'appearanceDataLineStyle');
+        setFieldDropdownOrText(hEditMarkerSize, s, 'appearanceMarkerSize');
+        setFieldDropdownOrText(hEditFitLW, s, 'appearanceFitLineWidth');
+        setFieldDropdown(hPopupFitStyle, s, 'appearanceFitLineStyle');
+        setFieldLogical(hChkReverseLegend, s, 'appearanceReverseLegend');
+        setFieldLogical(hChkReverseOrder, s, 'appearanceReverseOrder');
+        setFieldLogical(hChkNoMapChange, s, 'appearanceNoMapChange');
+
+        setSubfolderEnable(hUseSubfolder, []);
+    end
+
+    function setFieldText(ctrl, s, key)
+        if ~isfield(s,key), return; end
+        try
+            if isvalid(ctrl)
+                ctrl.Value = char(string(s.(key)));
+            end
+        catch
+        end
+    end
+
+    function setFieldNumeric(ctrl, s, key)
+        if ~isfield(s,key), return; end
+        try
+            v = double(s.(key));
+            if isfinite(v) && isvalid(ctrl)
+                ctrl.Value = v;
+            end
+        catch
+        end
+    end
+
+    function setFieldLogical(ctrl, s, key)
+        if ~isfield(s,key), return; end
+        try
+            if isvalid(ctrl)
+                ctrl.Value = logical(s.(key));
+            end
+        catch
+        end
+    end
+
+    function setFieldDropdown(ctrl, s, key)
+        if ~isfield(s,key), return; end
+        try
+            v = char(string(s.(key)));
+            if isvalid(ctrl) && any(strcmp(ctrl.Items, v))
+                ctrl.Value = v;
+            end
+        catch
+        end
+    end
+
+    function setFieldDropdownOrText(ctrl, s, key)
+        if ~isfield(s,key), return; end
+        try
+            v = char(string(s.(key)));
+            if isprop(ctrl,'Items')
+                if any(strcmp(ctrl.Items, v))
+                    ctrl.Value = v;
+                else
+                    ctrl.Value = v;
+                end
+            else
+                ctrl.Value = v;
+            end
+        catch
         end
     end
 
     function moveLegend(loc)
         figs = findRealFigs();
         for k = 1:numel(figs)
-            fig = figs{k};
-            lg = findall(fig,'Type','legend');
-            if ~isempty(lg)
-                set(lg,'Location',loc,'Box','off','Color','none');
-            end
+            SmartFigureEngine.setLegendLocation(figs(k), loc);
         end
     end
 
     function resetAll(~,~)
         figs = findRealFigs();
+        style = SmartFigureEngine.computeSmartStyle(3.5, 2.6, 1, 1, hStyleMode.Value);
+        style.applyPreviewResize = false;
         for k = 1:numel(figs)
-            fig = figs{k};
+            fig = figs(k);
             try
                 fig.Color = [0.94 0.94 0.94];
                 fig.Position(3:4) = [560 420];
-                ax = findall(fig,'Type','axes');
-                for a = ax'
-                    a.FontName = 'Helvetica';
-                    a.FontSize = 11;
-                    a.LineWidth = 0.5;
-                    a.Box = 'on';
-                end
+                SmartFigureEngine.applyFullSmart(fig, style);
             catch
             end
         end
@@ -971,8 +1226,8 @@ loadPrefs();
     function formatAllForPaper(~,~)
         figs = findRealFigs();
         for k = 1:numel(figs)
-            fig = figs{k};
-            formatForPaper(fig);
+            fig = figs(k);
+            SmartFigureEngine.formatForPaper(fig, hStyleMode.Value);
         end
     end
 
@@ -1052,9 +1307,12 @@ loadPrefs();
             setpref(prefGroup,'PanelsX',double(hPanelsX.Value));
             setpref(prefGroup,'PanelsY',double(hPanelsY.Value));
             setpref(prefGroup,'ColMode',colMode.Value);
+            setpref(prefGroup,'StyleMode',hStyleMode.Value);
             setpref(prefGroup,'Aspect',double(hAspect.Value));
             setpref(prefGroup,'FontSize',hFontSize.Value);
             setpref(prefGroup,'LegendFontSize',hLegendFontSize.Value);
+            setpref(prefGroup,'PdfMode',hPdfMode.Value);
+            setpref(prefGroup,'LayoutPresetPath',layoutPresetPath);
             setpref(prefGroup,'ApplyCurrentOnly',logical(applyCurrentOnly));
             % Appearance preferences
             setpref(prefGroup,'AppearanceMapName',hPopupMap.Value);
@@ -1067,23 +1325,28 @@ loadPrefs();
             setpref(prefGroup,'AppearanceMarkerSize',hEditMarkerSize.Value);
             setpref(prefGroup,'AppearanceFitLineWidth',hEditFitLW.Value);
             setpref(prefGroup,'AppearanceFitLineStyle',hPopupFitStyle.Value);
+            setpref(prefGroup,'AppearanceReverseLegend',logical(hChkReverseLegend.Value));
+            setpref(prefGroup,'AppearanceReverseOrder',logical(hChkReverseOrder.Value));
+            setpref(prefGroup,'AppearanceNoMapChange',logical(hChkNoMapChange.Value));
         catch
         end
     end
 
     function loadPrefs()
-        % LOADPREFS - Safely load preferences with type validation
-        % Defaults to UI initial values if preferences missing or malformed
+        % LOADPREFS - Load preferences with per-key isolation
+        % Each preference is guarded so one corrupt key does not block others
+        failedPrefKeys = {};
+
         try
-            % Path preference
             if ispref(prefGroup,'LastPath')
                 p = getpref(prefGroup,'LastPath');
-                if ischar(p) || isstring(p)
-                    hPathBox.Value = char(p);
-                end
+                if ischar(p) || isstring(p), hPathBox.Value = char(p); end
             end
-            
-            % Subfolder preferences
+        catch ME
+            failedPrefKeys{end+1} = sprintf('LastPath (%s)', ME.message);
+        end
+
+        try
             if ispref(prefGroup,'UseSubfolder')
                 useSub = getpref(prefGroup,'UseSubfolder');
                 if islogical(useSub) || isnumeric(useSub)
@@ -1091,113 +1354,185 @@ loadPrefs();
                     hSubfolderName.Enable = iif(hUseSubfolder.Value, 'on', 'off');
                 end
             end
+        catch ME
+            failedPrefKeys{end+1} = sprintf('UseSubfolder (%s)', ME.message);
+        end
+
+        try
             if ispref(prefGroup,'SubfolderName')
                 sf = getpref(prefGroup,'SubfolderName');
-                if ischar(sf) || isstring(sf)
-                    hSubfolderName.Value = char(sf);
-                end
+                if ischar(sf) || isstring(sf), hSubfolderName.Value = char(sf); end
             end
-            
-            % Save options
+        catch ME
+            failedPrefKeys{end+1} = sprintf('SubfolderName (%s)', ME.message);
+        end
+
+        try
             if ispref(prefGroup,'Overwrite')
                 ov = getpref(prefGroup,'Overwrite');
-                if islogical(ov) || isnumeric(ov)
-                    hOverwrite.Value = logical(ov(1));
-                end
+                if islogical(ov) || isnumeric(ov), hOverwrite.Value = logical(ov(1)); end
             end
-            
-            % Figure size preferences
+        catch ME
+            failedPrefKeys{end+1} = sprintf('Overwrite (%s)', ME.message);
+        end
+
+        try
             if ispref(prefGroup,'FigWidth')
                 fw = getpref(prefGroup,'FigWidth');
-                if isnumeric(fw) && fw > 0
-                    hFigWidth.Value = fw(1);
-                end
+                if isnumeric(fw) && fw > 0, hFigWidth.Value = fw(1); end
             end
+        catch ME
+            failedPrefKeys{end+1} = sprintf('FigWidth (%s)', ME.message);
+        end
+
+        try
             if ispref(prefGroup,'FigHeight')
                 fh = getpref(prefGroup,'FigHeight');
-                if isnumeric(fh) && fh > 0
-                    hFigHeight.Value = fh(1);
-                end
+                if isnumeric(fh) && fh > 0, hFigHeight.Value = fh(1); end
             end
-            
-            % Axes size preferences
+        catch ME
+            failedPrefKeys{end+1} = sprintf('FigHeight (%s)', ME.message);
+        end
+
+        try
             if ispref(prefGroup,'AxWidth')
                 aw = getpref(prefGroup,'AxWidth');
-                if isnumeric(aw) && aw >=0 && aw <= 1
-                    hAxWidth.Value = aw(1);
-                end
+                if isnumeric(aw) && aw >=0 && aw <= 1, hAxWidth.Value = aw(1); end
             end
+        catch ME
+            failedPrefKeys{end+1} = sprintf('AxWidth (%s)', ME.message);
+        end
+
+        try
             if ispref(prefGroup,'AxHeight')
                 ah = getpref(prefGroup,'AxHeight');
-                if isnumeric(ah) && ah >= 0 && ah <= 1
-                    hAxHeight.Value = ah(1);
-                end
+                if isnumeric(ah) && ah >= 0 && ah <= 1, hAxHeight.Value = ah(1); end
             end
-            
-            % Margin preferences
+        catch ME
+            failedPrefKeys{end+1} = sprintf('AxHeight (%s)', ME.message);
+        end
+
+        try
             if ispref(prefGroup,'TopMargin')
                 tm = getpref(prefGroup,'TopMargin');
-                if isnumeric(tm) && tm >= 0 && tm <= 1
-                    hTopMargin.Value = tm(1);
-                end
+                if isnumeric(tm) && tm >= 0 && tm <= 1, hTopMargin.Value = tm(1); end
             end
+        catch ME
+            failedPrefKeys{end+1} = sprintf('TopMargin (%s)', ME.message);
+        end
+
+        try
             if ispref(prefGroup,'LeftMargin')
                 lm = getpref(prefGroup,'LeftMargin');
-                if isnumeric(lm) && lm >= 0 && lm <= 1
-                    hLeftMargin.Value = lm(1);
-                end
+                if isnumeric(lm) && lm >= 0 && lm <= 1, hLeftMargin.Value = lm(1); end
             end
-            
-            % Panel preferences
+        catch ME
+            failedPrefKeys{end+1} = sprintf('LeftMargin (%s)', ME.message);
+        end
+
+        try
             if ispref(prefGroup,'PanelsX')
                 px = getpref(prefGroup,'PanelsX');
-                if isnumeric(px) && px > 0
-                    hPanelsX.Value = px(1);
-                end
+                if isnumeric(px) && px > 0, hPanelsX.Value = px(1); end
             end
+        catch ME
+            failedPrefKeys{end+1} = sprintf('PanelsX (%s)', ME.message);
+        end
+
+        try
             if ispref(prefGroup,'PanelsY')
                 py = getpref(prefGroup,'PanelsY');
-                if isnumeric(py) && py > 0
-                    hPanelsY.Value = py(1);
-                end
+                if isnumeric(py) && py > 0, hPanelsY.Value = py(1); end
             end
-            
-            % Layout preferences
+        catch ME
+            failedPrefKeys{end+1} = sprintf('PanelsY (%s)', ME.message);
+        end
+
+        try
             if ispref(prefGroup,'ColMode')
                 cm = getpref(prefGroup,'ColMode');
                 if ischar(cm) || isstring(cm)
                     cm = char(cm);
-                    if any(strcmp(colMode.Items, cm))
-                        colMode.Value = cm;
-                    end
+                    if any(strcmp(colMode.Items, cm)), colMode.Value = cm; end
                 end
             end
+        catch ME
+            failedPrefKeys{end+1} = sprintf('ColMode (%s)', ME.message);
+        end
+
+        try
+            if ispref(prefGroup,'StyleMode')
+                smd = getpref(prefGroup,'StyleMode');
+                if ischar(smd) || isstring(smd)
+                    smd = char(smd);
+                    if any(strcmp(hStyleMode.Items, smd)), hStyleMode.Value = smd; end
+                end
+            end
+        catch ME
+            failedPrefKeys{end+1} = sprintf('StyleMode (%s)', ME.message);
+        end
+
+        try
             if ispref(prefGroup,'Aspect')
                 asp = getpref(prefGroup,'Aspect');
-                if isnumeric(asp) && asp > 0
-                    hAspect.Value = asp(1);
-                end
+                if isnumeric(asp) && asp > 0, hAspect.Value = asp(1); end
             end
-            
-            % Typography preferences
+        catch ME
+            failedPrefKeys{end+1} = sprintf('Aspect (%s)', ME.message);
+        end
+
+        try
             if ispref(prefGroup,'FontSize')
                 fs = getpref(prefGroup,'FontSize');
                 if isnumeric(fs) && fs > 0
                     hFontSize.Value = num2str(fs(1));
                 elseif ischar(fs) || isstring(fs)
-                    hFontSize.Value = char(fs);
+                    fs = char(fs);
+                    if any(strcmp(hFontSize.Items, fs)), hFontSize.Value = fs; end
                 end
             end
+        catch ME
+            failedPrefKeys{end+1} = sprintf('FontSize (%s)', ME.message);
+        end
+
+        try
             if ispref(prefGroup,'LegendFontSize')
                 lfs = getpref(prefGroup,'LegendFontSize');
                 if isnumeric(lfs) && lfs > 0
                     hLegendFontSize.Value = num2str(lfs(1));
                 elseif ischar(lfs) || isstring(lfs)
-                    hLegendFontSize.Value = char(lfs);
+                    lfs = char(lfs);
+                    if any(strcmp(hLegendFontSize.Items, lfs)), hLegendFontSize.Value = lfs; end
                 end
             end
-            
-            % Current-only preference
+        catch ME
+            failedPrefKeys{end+1} = sprintf('LegendFontSize (%s)', ME.message);
+        end
+
+        try
+            if ispref(prefGroup,'PdfMode')
+                pm = getpref(prefGroup,'PdfMode');
+                if ischar(pm) || isstring(pm)
+                    pm = char(pm);
+                    if any(strcmp(hPdfMode.Items, pm)), hPdfMode.Value = pm; end
+                end
+            end
+        catch ME
+            failedPrefKeys{end+1} = sprintf('PdfMode (%s)', ME.message);
+        end
+
+        try
+            if ispref(prefGroup,'LayoutPresetPath')
+                lpp = getpref(prefGroup,'LayoutPresetPath');
+                if ischar(lpp) || isstring(lpp)
+                    layoutPresetPath = char(lpp);
+                end
+            end
+        catch ME
+            failedPrefKeys{end+1} = sprintf('LayoutPresetPath (%s)', ME.message);
+        end
+
+        try
             if ispref(prefGroup,'ApplyCurrentOnly')
                 aco = getpref(prefGroup,'ApplyCurrentOnly');
                 if islogical(aco) || isnumeric(aco)
@@ -1205,26 +1540,35 @@ loadPrefs();
                     chkCurrent.Value = applyCurrentOnly;
                 end
             end
-            
-            % Appearance preferences
+        catch ME
+            failedPrefKeys{end+1} = sprintf('ApplyCurrentOnly (%s)', ME.message);
+        end
+
+        try
             if ispref(prefGroup,'AppearanceMapName')
                 mn = getpref(prefGroup,'AppearanceMapName');
                 if ischar(mn) || isstring(mn)
                     mn = char(mn);
-                    if any(strcmp(mapList, mn))
-                        hPopupMap.Value = mn;
-                    end
+                    if any(strcmp(mapList, mn)), hPopupMap.Value = mn; end
                 end
             end
+        catch ME
+            failedPrefKeys{end+1} = sprintf('AppearanceMapName (%s)', ME.message);
+        end
+
+        try
             if ispref(prefGroup,'AppearanceSpreadMode')
                 sm = getpref(prefGroup,'AppearanceSpreadMode');
                 if ischar(sm) || isstring(sm)
                     sm = char(sm);
-                    if any(strcmp(hPopupSpread.Items, sm))
-                        hPopupSpread.Value = sm;
-                    end
+                    if any(strcmp(hPopupSpread.Items, sm)), hPopupSpread.Value = sm; end
                 end
             end
+        catch ME
+            failedPrefKeys{end+1} = sprintf('AppearanceSpreadMode (%s)', ME.message);
+        end
+
+        try
             if ispref(prefGroup,'AppearanceUseFolder')
                 auf = getpref(prefGroup,'AppearanceUseFolder');
                 if islogical(auf) || isnumeric(auf)
@@ -1234,21 +1578,32 @@ loadPrefs();
                     hEditFolder.Enable = iif(auf, 'on', 'off');
                 end
             end
+        catch ME
+            failedPrefKeys{end+1} = sprintf('AppearanceUseFolder (%s)', ME.message);
+        end
+
+        try
             if ispref(prefGroup,'AppearanceFolderPath')
                 fp = getpref(prefGroup,'AppearanceFolderPath');
-                if ischar(fp) || isstring(fp)
-                    hEditFolder.Value = char(fp);
-                end
+                if ischar(fp) || isstring(fp), hEditFolder.Value = char(fp); end
             end
+        catch ME
+            failedPrefKeys{end+1} = sprintf('AppearanceFolderPath (%s)', ME.message);
+        end
+
+        try
             if ispref(prefGroup,'AppearanceFitColor')
                 fc = getpref(prefGroup,'AppearanceFitColor');
                 if ischar(fc) || isstring(fc)
                     fc = char(fc);
-                    if any(strcmp(hPopupFitColor.Items, fc))
-                        hPopupFitColor.Value = fc;
-                    end
+                    if any(strcmp(hPopupFitColor.Items, fc)), hPopupFitColor.Value = fc; end
                 end
             end
+        catch ME
+            failedPrefKeys{end+1} = sprintf('AppearanceFitColor (%s)', ME.message);
+        end
+
+        try
             if ispref(prefGroup,'AppearanceDataLineWidth')
                 dlw = getpref(prefGroup,'AppearanceDataLineWidth');
                 if isnumeric(dlw)
@@ -1257,15 +1612,23 @@ loadPrefs();
                     hEditDataLW.Value = char(dlw);
                 end
             end
+        catch ME
+            failedPrefKeys{end+1} = sprintf('AppearanceDataLineWidth (%s)', ME.message);
+        end
+
+        try
             if ispref(prefGroup,'AppearanceDataLineStyle')
                 dls = getpref(prefGroup,'AppearanceDataLineStyle');
                 if ischar(dls) || isstring(dls)
                     dls = char(dls);
-                    if any(strcmp(hPopupDataStyle.Items, dls))
-                        hPopupDataStyle.Value = dls;
-                    end
+                    if any(strcmp(hPopupDataStyle.Items, dls)), hPopupDataStyle.Value = dls; end
                 end
             end
+        catch ME
+            failedPrefKeys{end+1} = sprintf('AppearanceDataLineStyle (%s)', ME.message);
+        end
+
+        try
             if ispref(prefGroup,'AppearanceMarkerSize')
                 ms = getpref(prefGroup,'AppearanceMarkerSize');
                 if isnumeric(ms)
@@ -1274,6 +1637,11 @@ loadPrefs();
                     hEditMarkerSize.Value = char(ms);
                 end
             end
+        catch ME
+            failedPrefKeys{end+1} = sprintf('AppearanceMarkerSize (%s)', ME.message);
+        end
+
+        try
             if ispref(prefGroup,'AppearanceFitLineWidth')
                 flw = getpref(prefGroup,'AppearanceFitLineWidth');
                 if isnumeric(flw)
@@ -1282,18 +1650,52 @@ loadPrefs();
                     hEditFitLW.Value = char(flw);
                 end
             end
+        catch ME
+            failedPrefKeys{end+1} = sprintf('AppearanceFitLineWidth (%s)', ME.message);
+        end
+
+        try
             if ispref(prefGroup,'AppearanceFitLineStyle')
                 fls = getpref(prefGroup,'AppearanceFitLineStyle');
                 if ischar(fls) || isstring(fls)
                     fls = char(fls);
-                    if any(strcmp(hPopupFitStyle.Items, fls))
-                        hPopupFitStyle.Value = fls;
-                    end
+                    if any(strcmp(hPopupFitStyle.Items, fls)), hPopupFitStyle.Value = fls; end
                 end
             end
         catch ME
-            % Silent failure - just use defaults
-            warning('Some preferences could not be loaded: %s', ME.message);
+            failedPrefKeys{end+1} = sprintf('AppearanceFitLineStyle (%s)', ME.message);
+        end
+
+        try
+            if ispref(prefGroup,'AppearanceReverseLegend')
+                arl = getpref(prefGroup,'AppearanceReverseLegend');
+                if islogical(arl) || isnumeric(arl), hChkReverseLegend.Value = logical(arl(1)); end
+            end
+        catch ME
+            failedPrefKeys{end+1} = sprintf('AppearanceReverseLegend (%s)', ME.message);
+        end
+
+        try
+            if ispref(prefGroup,'AppearanceReverseOrder')
+                aro = getpref(prefGroup,'AppearanceReverseOrder');
+                if islogical(aro) || isnumeric(aro), hChkReverseOrder.Value = logical(aro(1)); end
+            end
+        catch ME
+            failedPrefKeys{end+1} = sprintf('AppearanceReverseOrder (%s)', ME.message);
+        end
+
+        try
+            if ispref(prefGroup,'AppearanceNoMapChange')
+                anm = getpref(prefGroup,'AppearanceNoMapChange');
+                if islogical(anm) || isnumeric(anm), hChkNoMapChange.Value = logical(anm(1)); end
+            end
+        catch ME
+            failedPrefKeys{end+1} = sprintf('AppearanceNoMapChange (%s)', ME.message);
+        end
+
+        if ~isempty(failedPrefKeys)
+            prefSummary = strjoin(unique(failedPrefKeys), ', ');
+            fprintf('[INFO] Preferences skipped (%d): %s\n', numel(failedPrefKeys), prefSummary);
         end
     end
     
@@ -1321,8 +1723,10 @@ loadPrefs();
         hTopMargin.Value = 0.06; hLeftMargin.Value = 0.08;
         hPanelsX.Value = 2; hPanelsY.Value = 2;
         colMode.Value = 'Double column';
+        hStyleMode.Value = 'PRL';
         hAspect.Value = panelAspect;
         hFontSize.Value = '12'; hLegendFontSize.Value = '12';
+        hPdfMode.Value = 'Vector (Recommended)';
         applyCurrentOnly = false; chkCurrent.Value = false;
         % reset Appearance controls
         hPopupMap.Value = mapList{1};
@@ -1331,6 +1735,7 @@ loadPrefs();
         hPopupFitColor.Value = '(no change)';
         hEditDataLW.Value = ''; hPopupDataStyle.Value = '(no change)';
         hEditMarkerSize.Value = ''; hEditFitLW.Value = ''; hPopupFitStyle.Value = '(no change)';
+        hChkReverseLegend.Value = false; hChkReverseOrder.Value = false; hChkNoMapChange.Value = false;
         % persist cleared state
         savePrefs();
     end
@@ -1339,9 +1744,19 @@ loadPrefs();
         % save current UI state, then close
         try
             savePrefs();
-        catch
+        catch ME
+            fprintf('[INFO] savePrefs on close skipped: %s\n', ME.message);
         end
-        delete(fig);
+        try
+            if ~isempty(currentFigureListener) && isvalid(currentFigureListener)
+                delete(currentFigureListener);
+            end
+        catch ME
+            fprintf('[INFO] Listener cleanup skipped: %s\n', ME.message);
+        end
+        if isvalid(fig)
+            delete(fig);
+        end
     end
 
     % advanced toggle removed; advanced panel is always visible
@@ -1413,7 +1828,10 @@ loadPrefs();
             end
             
             if ~isSkipped
-                figs = [figs; f];
+                hasAxes = ~isempty(findall(f,'Type','axes'));
+                if hasAxes
+                    figs = [figs; f];
+                end
             end
         end
     end
@@ -1442,183 +1860,6 @@ loadPrefs();
         end
     end
 
-    function applyAxesSizeSingle(fig, w, h, topMargin, leftMargin)
-        ax = findall(fig,'Type','axes');
-        ax = ax(~strcmp(get(ax,'Tag'),'legend'));
-        bottom = 1 - h - topMargin;
-        if bottom < 0, bottom = 0; end
-        for a = ax'
-            a.Units = 'normalized';
-            a.Position = [leftMargin, bottom, w, h];
-        end
-    end
-
-    function applyAxesSizeMulti(fig, w, h, topMargin, leftMargin)
-        ax = findall(fig,'Type','axes');
-        ax = ax(~strcmp(get(ax,'Tag'),'legend'));
-        % exclude colorbars
-        ax = ax(~arrayfun(@isColorbarAxes, ax));
-        if isempty(ax), return; end
-        pos = vertcat(ax.Position);
-        left0   = min(pos(:,1));
-        bottom0 = min(pos(:,2));
-        right0  = max(pos(:,1) + pos(:,3));
-        top0    = max(pos(:,2) + pos(:,4));
-        width0  = right0 - left0;
-        height0 = top0   - bottom0;
-        newLeft   = leftMargin;
-        newTop    = 1 - topMargin;
-        newWidth  = min(w, 1 - newLeft - 0.02);
-        newHeight = min(h, newTop - 0.02);
-        scaleX = newWidth  / width0;
-        scaleY = newHeight / height0;
-        for a = ax'
-            p = a.Position;
-            p(1) = newLeft + (p(1) - left0) * scaleX;
-            p(2) = newTop  - (top0 - p(2) - p(4)) * scaleY - p(4)*scaleY;
-            p(3) = p(3) * scaleX;
-            p(4) = p(4) * scaleY;
-            a.Units = 'normalized';
-            a.Position = p;
-        end
-    end
-
-    function applyFontSystem(fig, style)
-        % AXES
-        ax = findall(fig,'Type','axes');
-        for a = ax'
-            a.FontSize = style.tickFont;
-            try
-                if isprop(a,'TickLabelInterpreter'), a.TickLabelInterpreter = 'latex'; end
-            catch
-            end
-            % labels and title: sanitize and set latex interpreter/font
-            try
-                if ~isempty(a.XLabel.String)
-                    a.XLabel.String = sanitizeLatexString(a.XLabel.String);
-                    a.XLabel.FontSize = style.labelFont;
-                    if isprop(a.XLabel,'Interpreter'), a.XLabel.Interpreter = 'latex'; end
-                    if isprop(a.XLabel,'FontName'), a.XLabel.FontName = 'latex'; end
-                end
-                if ~isempty(a.YLabel.String)
-                    a.YLabel.String = sanitizeLatexString(a.YLabel.String);
-                    a.YLabel.FontSize = style.labelFont;
-                    if isprop(a.YLabel,'Interpreter'), a.YLabel.Interpreter = 'latex'; end
-                    if isprop(a.YLabel,'FontName'), a.YLabel.FontName = 'latex'; end
-                end
-                if ~isempty(a.Title.String)
-                    a.Title.String = sanitizeLatexString(a.Title.String);
-                    a.Title.FontSize = style.titleFont;
-                    if isprop(a.Title,'Interpreter'), a.Title.Interpreter = 'latex'; end
-                    if isprop(a.Title,'FontName'), a.Title.FontName = 'latex'; end
-                end
-            catch
-            end
-        end
-        % LEGENDS
-        lg = findall(fig,'Type','legend');
-        for L = lg'
-            try
-                if isprop(L,'FontUnits'), L.FontUnits = 'points'; end
-                L.FontSize = style.legendFont;
-                if isprop(L,'FontName'), L.FontName = 'latex'; end
-                if isprop(L,'Interpreter'), L.Interpreter = 'latex'; end
-                if isprop(L,'ItemTokenSize') && isfield(style,'itemTokenSize')
-                    L.ItemTokenSize = style.itemTokenSize;
-                end
-                % sanitize legend strings
-                if iscell(L.String)
-                    for j = 1:numel(L.String)
-                        L.String{j} = sanitizeLatexString(L.String{j});
-                    end
-                elseif ischar(L.String) || isstring(L.String)
-                    L.String = sanitizeLatexString(L.String);
-                end
-            catch
-            end
-        end
-        % TEXT
-        tx = findall(fig,'Type','text');
-        for t = tx'
-            try
-                t.FontSize = style.annFont;
-                if isprop(t,'Interpreter'), t.Interpreter = 'latex'; end
-                t.String = sanitizeLatexString(t.String);
-            catch
-            end
-        end
-        % TEXTBOX
-        ann = findall(fig,'Type','textboxshape');
-        for a = ann'
-            try
-                a.FontSize = style.annFont;
-                if isprop(a,'Interpreter'), a.Interpreter = 'latex'; end
-                a.String = sanitizeLatexString(a.String);
-            catch
-            end
-        end
-        % COLORBARS
-        cb = findall(fig,'Type','colorbar');
-        for c = cb'
-            c.FontSize = style.tickFont;
-            if ~isempty(c.Label.String)
-                c.Label.String = sanitizeLatexString(c.Label.String);
-                c.Label.FontSize = style.labelFont;
-                if isprop(c.Label,'Interpreter'), c.Label.Interpreter = 'latex'; end
-                if isprop(c.Label,'FontName'), c.Label.FontName = 'latex'; end
-            end
-        end
-        % --- apply line widths and marker sizes to plotted objects ---
-        try
-            if isfield(style,'lineWidth') || isfield(style,'markerSize')
-                % lines
-                ln = findall(fig,'Type','line');
-                for L = ln'
-                    try
-                        if isfield(style,'lineWidth') && isprop(L,'LineWidth'), L.LineWidth = style.lineWidth; end
-                        if isfield(style,'markerSize') && isprop(L,'MarkerSize'), L.MarkerSize = style.markerSize; end
-                    catch
-                    end
-                end
-                % scatter objects
-                sc = findall(fig,'Type','scatter');
-                for S = sc'
-                    try, if isprop(S,'SizeData'), S.SizeData = style.markerSize^2; end; catch, end
-                end
-                % errorbar objects
-                eb = findall(fig,'Type','errorbar');
-                for E = eb'
-                    try
-                        if isprop(E,'LineWidth'), E.LineWidth = style.lineWidth; end
-                        if isprop(E,'MarkerSize'), E.MarkerSize = style.markerSize; end
-                    catch
-                    end
-                end
-                % patches and other drawable objects
-                pch = findall(fig,'Type','patch');
-                for P = pch'
-                    try, if isprop(P,'LineWidth'), P.LineWidth = style.lineWidth; end; catch, end
-                end
-            end
-        catch
-        end
-    end
-
-    function style = getStyleFromPanelSize(panelW, ~)
-        % defaults (fallback)
-        style.tickFont   = 9; style.labelFont  = 11; style.titleFont  = 11;
-        style.legendFont = 8; style.annFont    = 10;
-        style.axWidth    = 0.76; style.axHeight   = 0.72;
-        style.topMargin  = 0.08; style.leftMargin = 0.12;
-        if abs(panelW - 2.33) < 0.1
-            style.axWidth    = 0.76; style.axHeight   = 0.72;
-            style.topMargin  = 0.08; style.leftMargin = 0.12;
-        elseif abs(panelW - 3.5) < 0.2
-            style.axWidth    = 0.80; style.axHeight   = 0.75;
-            style.topMargin  = 0.06; style.leftMargin = 0.10;
-        end
-    end
-
     function setPopupValueByString(hPopup, targetStr)
         try
             opts = hPopup.Items;
@@ -1629,7 +1870,9 @@ loadPrefs();
     end
 
     function out = sanitizeLatexString(in)
-        % ported from legacy GUI: escape underscores, wrap math when needed
+        % Normalize labels for robust publication typography.
+        % Fixes split-letter labels, normalizes common scientific notation,
+        % and keeps latex usage consistent.
         if iscell(in)
             out = cell(size(in));
             for k = 1:numel(in)
@@ -1638,534 +1881,159 @@ loadPrefs();
             return;
         end
         if isstring(in), in = char(in); end
+        if ~ischar(in)
+            out = in;
+            return;
+        end
+
+        in = collapseSpacedLabel(in);
+        in = strrep(in, char(916), '\\Delta'); % Δ
+        in = strrep(in, char(181), '\\mu');    % µ
+
         in = strtrim(in);
         if isempty(in), out = in; return; end
-        if isWrappedInMath(in), out = in; return; end
-        in = strrep(in,'[',''); in = strrep(in,']','');
-        in = strrep(in,'_','\\_');
-        if contains(in,{'_','^','\','{'})
+        if isWrappedInMath(in)
+            out = repairWrappedMathString(in);
+            return;
+        end
+
+        in = regexprep(in, '^\s*Temperature\s*\(\s*K\s*\)\s*$', 'Temperature (K)', 'ignorecase');
+        in = regexprep(in, '10\s*\^\s*\(?\s*([-+]?\d+)\s*\)?', '10^{$1}');
+        in = regexprep(in, '([A-Za-z])\s*\^\s*\(?\s*([-+]?\d+)\s*\)?', '$1^{$2}');
+        if ~isempty(regexpi(in,'M\s*/\s*H\s*\(.*emu.*g\^\{-?1\}.*Oe\^\{-?1\}.*\)','once'))
+            in = 'M/H\,(10^{-5}\,\\mathrm{emu}\,\\mathrm{g}^{-1}\,\\mathrm{Oe}^{-1})';
+        end
+        in = regexprep(in,'\s+',' ');
+        in = normalizeMathCore(in);
+
+        in = strrep(in,'[','');
+        in = strrep(in,']','');
+        in = escapePlainUnderscores(in);
+
+        if contains(in,{'_','^','\','{','Delta','\mu'})
             out = ['$' in '$'];
         else
             out = in;
         end
     end
 
-    %% ===== APPEARANCE / COLORMAP HELPER FUNCTIONS =====
-    
-    function applyColormapToFigures(mapName, folder, spreadMode, ...
-        fitColor, dataWidth, dataStyle, fitWidth, fitStyle, ...
-        reverseOrder, reverseLegend, noMapChange, markerSize)
-        
-        % APPLYCOLORMAPTOFIGURES - Apply colormap and styling to figures
-        % Respects applyCurrentOnly flag
-        
-        if nargin < 2 || isempty(folder), folder = []; end
-        if nargin < 3 || isempty(spreadMode), spreadMode = 'medium'; end
-        if nargin < 4, fitColor = ''; end
-        if nargin < 5, dataWidth = []; end
-        if nargin < 6, dataStyle = ''; end
-        if nargin < 7, fitWidth = []; end
-        if nargin < 8, fitStyle = ''; end
-        if nargin < 9, reverseOrder = 0; end
-        if nargin < 10, reverseLegend = 0; end
-        if nargin < 11, noMapChange = 0; end
-        if nargin < 12, markerSize = []; end
-        
-        % Generate colormap
-        if noMapChange
-            cmapFull = [];  % signal: don't change colormap
-        else
-            cmapFull = getColormapToUse(mapName);
-        end
-        
-        % Apply to figures (respecting applyCurrentOnly)
-        if isempty(folder)
-            if applyCurrentOnly && ~isempty(lastRealFigure)
-                figList = lastRealFigure;
-            else
-                figList = findRealFigs();
-                if iscell(figList), figList = [figList{:}]; else, figList = figList(:); end
-            end
-            
-            for fig = figList'
-                applyToSingleFigure(fig, cmapFull, spreadMode, ...
-                    fitColor, dataWidth, dataStyle, fitWidth, fitStyle, ...
-                    reverseOrder, reverseLegend, markerSize);
-            end
-        else
-            % Apply to .fig files in folder
-            files = dir(fullfile(folder,'*.fig'));
-            for k = 1:numel(files)
-                f = openfig(fullfile(folder,files(k).name),'invisible');
-                applyToSingleFigure(f, cmapFull, spreadMode, ...
-                    fitColor, dataWidth, dataStyle, fitWidth, fitStyle, ...
-                    reverseOrder, reverseLegend, markerSize);
-                savefig(f, fullfile(folder,files(k).name));
-                close(f);
-            end
-        end
-    end
-    
-    function applyToSingleFigure(fig, cmapFull, spreadMode, ...
-        fitColor, dataWidth, dataStyle, fitWidth, fitStyle, ...
-        reverseOrder, reverseLegend, markerSize)
-        
-        if nargin < 5, dataWidth = []; end
-        if nargin < 6, dataStyle = ''; end
-        if nargin < 7, fitWidth = []; end
-        if nargin < 8, fitStyle = ''; end
-        if nargin < 9, reverseOrder = 0; end
-        if nargin < 10, reverseLegend = 0; end
-        if nargin < 11, markerSize = []; end
-        
-        axList = findall(fig,'Type','axes');
-        fitRGB = name2rgb(fitColor);
-        
-        %% 1) COLORING + COLORMAP
-        if ~isempty(cmapFull)
-            M = size(cmapFull,1);
-        end
-        
-        for ax = axList'
-            % ----- colormap -----
-            if ~isempty(cmapFull)
-                idx = getSliceIndices(M, spreadMode);
-                cmapSlice = cmapFull(idx,:);
-                colormap(ax, cmapSlice);
-            end
-            
-            % ----- lines -----
-            allLines = findall(ax,'Type','line');
-            if isempty(allLines), continue; end
-            
-            names = get(allLines,'DisplayName');
-            if ischar(names), names = {names}; end
-            
-            isData = ~cellfun(@isempty,names);
-            dataLines = allLines(isData);
-            fitLines = allLines(~isData);
-            
-            % DATA lines
-            if ~isempty(cmapFull) && ~isempty(dataLines)
-                nC = size(cmapSlice,1);
-                idx = round(linspace(1,nC,numel(dataLines)));
-                for k = 1:numel(dataLines)
-                    if ~isempty(markerSize), dataLines(k).MarkerSize = markerSize; end
-                    dataLines(k).Color = cmapSlice(idx(k),:);
-                    if ~isempty(dataWidth), dataLines(k).LineWidth = dataWidth; end
-                    if ~isempty(dataStyle), dataLines(k).LineStyle = dataStyle; end
-                end
-            else
-                % change width/style only
-                for k = 1:numel(dataLines)
-                    if ~isempty(dataWidth), dataLines(k).LineWidth = dataWidth; end
-                    if ~isempty(dataStyle), dataLines(k).LineStyle = dataStyle; end
-                end
-            end
-            
-            % FIT lines
-            for k = 1:numel(fitLines)
-                if ~isempty(markerSize), fitLines(k).MarkerSize = markerSize; end
-                if ~isempty(fitColor)
-                    fitLines(k).Color = fitRGB;
-                end
-                if ~isempty(fitWidth), fitLines(k).LineWidth = fitWidth; end
-                if ~isempty(fitStyle), fitLines(k).LineStyle = fitStyle; end
-            end
-            
-            % COLORBARS
-            cbList = findall(fig,'Type','colorbar','Axes',ax);
-            for cb = cbList'
-                if ~isempty(cmapFull)
-                    colormap(cb, flipud(cmapSlice));
-                end
-                set(cb,'Direction','normal');
-            end
-        end
-        
-        %% 2) Reverse PLOT order
-        if reverseOrder
-            for ax = axList'
-                ch = ax.Children;
-                isLine = strcmp(get(ch,'Type'),'line');
-                lineChildren = ch(isLine);
-                otherChildren = ch(~isLine);
-                if numel(lineChildren) > 1
-                    lineChildren = flipud(lineChildren);
-                end
-                ax.Children = [lineChildren; otherChildren];
-            end
-        end
-        
-        %% 3) Reverse LEGEND order
-        if reverseLegend
-            for ax = axList'
-                hLeg = findobj(ax.Parent,'Type','legend','-and','Parent',ax.Parent);
-                if isempty(hLeg), continue; end
-                
-                % Store all legend properties before deletion
-                oldPos = hLeg.Position;
-                oldFontSize = hLeg.FontSize;
-                oldFontWeight = hLeg.FontWeight;
-                oldFontName = hLeg.FontName;
-                oldInterpreter = hLeg.Interpreter;
-                oldLocation = hLeg.Location;
-                oldOrientation = hLeg.Orientation;
-                oldBox = hLeg.Box;
-                oldEdgeColor = hLeg.EdgeColor;
-                oldFaceColor = hLeg.FaceColor;
-                oldFaceAlpha = hLeg.FaceAlpha;
-                
-                allLines = findall(ax,'Type','line');
-                if isempty(allLines), continue; end
-                names = get(allLines,'DisplayName');
-                if ischar(names), names = {names}; end
-                
-                isData = ~cellfun(@isempty,names);
-                dataLines = allLines(isData);
-                dataNames = names(isData);
-                
-                dataLines = flipud(dataLines);
-                dataNames = flipud(dataNames);
-                
-                delete(hLeg);
-                
-                % Create new legend with reversed data
-                newLeg = legend(ax, dataLines, dataNames);
-                newLeg.AutoUpdate = 'off';
-                
-                % Restore all preserved properties
-                try
-                    newLeg.Position = oldPos;
-                    newLeg.FontSize = oldFontSize;
-                    newLeg.FontWeight = oldFontWeight;
-                    newLeg.FontName = oldFontName;
-                    newLeg.Interpreter = oldInterpreter;
-                    newLeg.Location = oldLocation;
-                    newLeg.Orientation = oldOrientation;
-                    newLeg.Box = oldBox;
-                    newLeg.EdgeColor = oldEdgeColor;
-                    newLeg.FaceColor = oldFaceColor;
-                    newLeg.FaceAlpha = oldFaceAlpha;
-                catch ME
-                    % Legacy figure - some properties may not be available
-                    warning('Could not restore all legend properties: %s', ME.message);
-                end
-            end
-        end
-    end
-    
-    function cmap = getColormapToUse(mapName)
-        % GETCOLORMAPTOUSE - Safely retrieve colormap by name
-        % NO eval() - uses safe dispatch only
-        % Validates all outputs for correctness
-        
-        custom = {
-            'softyellow', 'softgreen', 'softred', 'softblue', 'softpurple', ...
-            'softorange', 'softcyan', 'softgray', 'softbrown', 'softteal', ...
-            'softolive', 'softgold', 'softpink', 'softaqua', 'softsand', 'softsky', ...
-            'bluebright', 'redbright', 'greenbright', 'purplebright', 'orangebright', ...
-            'cyanbright', 'yellowbright', 'magnetabright', 'limebright', 'tealbright', ...
-            'ultrabrightblue', 'ultrabrightred', ...
-            'bluewhitered', 'redwhiteblue', 'purplewhitegreen', 'brownwhiteblue', ...
-            'greenwhitepurple', 'bluewhiteorange', 'blackwhiteyellow', ...
-            'fire', 'ice', 'ocean', 'topo', 'terrain', 'magma', 'inferno', ...
-            'plasma', 'cividis'
-        };
-        
-        cmap = [];
-        
-        try
-            % Check custom colormaps first
-            if any(strcmpi(mapName, custom))
-                cmap = makeCustomColormap(mapName);
-            % Check cmocean specially (SAFE DISPATCH - no eval)
-            elseif contains(lower(mapName),'cmocean')
-                cmap = getCmoceanColormap(mapName);
-            % Check ScientificColourMaps8
-            elseif ~isempty(scm8Maps) && any(strcmp(mapName, scm8Maps))
-                cmap = feval(mapName, 256);
-            % Check built-in MATLAB colormaps
-            elseif exist(mapName,'builtin')
-                cmap = feval(mapName, 256);
-            % Check if function exists in path
-            elseif exist(mapName,'file')
-                cmap = feval(mapName, 256);
-            else
-                error('Unknown colormap name "%s".', mapName);
-            end
-        catch ME
-            error('Invalid colormap: %s', ME.message);
-        end
-        
-        % VALIDATE OUTPUT FORMAT
-        if isempty(cmap)
-            error('Colormap %s returned empty result', mapName);
-        end
-        if ~ismatrix(cmap) || size(cmap,2) ~= 3
-            error('Colormap %s has invalid dimensions (expected Nx3)', mapName);
-        end
-        if any(isnan(cmap(:))) || any(isinf(cmap(:)))
-            error('Colormap %s contains NaN or Inf', mapName);
-        end
-        if any(cmap(:) < 0) || any(cmap(:) > 1)
-            error('Colormap %s has values outside [0,1]', mapName);
-        end
-    end
-    
-    function cmap = getCmoceanColormap(mapName)
-        % GETCMOCEANCOLORMAP - Safe dispatch for cmocean colormaps
-        % Avoids eval() - validates input format first
-        
-        % Extract colormap name from string like "cmocean('thermal')"
-        match = regexp(mapName, "cmocean\('([^']*)'\)", 'tokens');
-        if isempty(match)
-            error('Invalid cmocean format: %s', mapName);
-        end
-        
-        cmName = match{1}{1};
-        
-        % Whitelist of known cmocean maps
-        validMaps = {'thermal','haline','solar','matter','turbid','speed',...
-            'amp','deep','dense','algae','balance','curl','delta','oxy',...
-            'phase','rain','ice','gray'};
-        
-        if ~any(strcmp(cmName, validMaps))
-            error('Unknown cmocean colormap: %s', cmName);
-        end
-        
-        % Safe dispatch using feval
-        try
-            cmap = cmocean(cmName);
-        catch ME
-            error('cmocean function failed: %s', ME.message);
-        end
-    end
-    
-    function idx = getSliceIndices(M, mode)
-        % GETSLICEINDICES - Flexible colormap slicing with spread modes
-        % BOUNDS-SAFE: All returned indices guaranteed in [1, M]
-        
-        if M < 2, M = 2; end  % Minimum viable colormap size
-        
-        SPAN_ULTRA_NARROW = ceil(0.20 * M);
-        SPAN_NARROW = ceil(0.30 * M);
-        SPAN_MEDIUM = ceil(0.35 * M);
-        SPAN_WIDE = ceil(0.40 * M);
-        SPAN_ULTRA = ceil(0.45 * M);
-        
-        mode = lower(mode);
-        mid = round(M/2);
-        
-        switch mode
-            case 'full'
-                idx = 1:M;
-            case 'full-rev'
-                idx = M:-1:1;
-            case 'ultra-narrow'
-                lo = max(1, mid - round(SPAN_ULTRA_NARROW/2));
-                hi = min(M, lo + SPAN_ULTRA_NARROW - 1);
-                lo = min(lo, hi);  % Ensure lo <= hi
-                idx = lo:hi;
-            case 'ultra-narrow-rev'
-                lo = max(1, mid - round(SPAN_ULTRA_NARROW/2));
-                hi = min(M, lo + SPAN_ULTRA_NARROW - 1);
-                lo = min(lo, hi);
-                idx = hi:-1:lo;
-            case 'narrow'
-                lo = max(1, mid - round(SPAN_NARROW/2));
-                hi = min(M, lo + SPAN_NARROW - 1);
-                lo = min(lo, hi);
-                idx = lo:hi;
-            case 'narrow-rev'
-                lo = max(1, mid - round(SPAN_NARROW/2));
-                hi = min(M, lo + SPAN_NARROW - 1);
-                lo = min(lo, hi);
-                idx = hi:-1:lo;
-            case 'medium'
-                lo = max(1, mid - round(SPAN_MEDIUM/2));
-                hi = min(M, lo + SPAN_MEDIUM - 1);
-                lo = min(lo, hi);
-                idx = lo:hi;
-            case 'medium-rev'
-                lo = max(1, mid - round(SPAN_MEDIUM/2));
-                hi = min(M, lo + SPAN_MEDIUM - 1);
-                lo = min(lo, hi);
-                idx = hi:-1:lo;
-            case 'wide'
-                lo = max(1, mid - round(SPAN_WIDE/2));
-                hi = min(M, lo + SPAN_WIDE - 1);
-                lo = min(lo, hi);
-                idx = lo:hi;
-            case 'wide-rev'
-                lo = max(1, mid - round(SPAN_WIDE/2));
-                hi = min(M, lo + SPAN_WIDE - 1);
-                lo = min(lo, hi);
-                idx = hi:-1:lo;
-            case 'ultra'
-                lo = max(1, mid - round(SPAN_ULTRA/2));
-                hi = min(M, lo + SPAN_ULTRA - 1);
-                lo = min(lo, hi);
-                idx = lo:hi;
-            case 'ultra-rev'
-                lo = max(1, mid - round(SPAN_ULTRA/2));
-                hi = min(M, lo + SPAN_ULTRA - 1);
-                lo = min(lo, hi);
-                idx = hi:-1:lo;
-            otherwise
-                error('Unknown spreadMode "%s".', mode);
-        end
-        
-        % FINAL SAFETY CHECK: Verify all indices are within bounds
-        idx = idx(idx >= 1 & idx <= M);
-        if isempty(idx)
-            idx = round(M/2);  % Fallback to middle
-        end
-    end
-    
-    function rgb = name2rgb(c)
-        % NAME2RGB - Convert color name to RGB vector
-        
-        if isnumeric(c) && numel(c) == 3
-            rgb = c(:)';
+    function out = repairWrappedMathString(in)
+        out = in;
+        if ~ischar(out) || numel(out) < 2, return; end
+        if ~(out(1) == '$' && out(end) == '$'), return; end
+
+        core = strtrim(out(2:end-1));
+        if isempty(core)
+            out = in;
             return;
         end
-        
-        if isempty(c), rgb = []; return; end
-        
-        c = lower(strtrim(string(c)));
-        
-        switch c
-            case {'k','black'}
-                rgb = [0 0 0];
-            case {'r','red'}
-                rgb = [1 0 0];
-            case {'g','green'}
-                rgb = [0 0.5 0];
-            case {'b','blue'}
-                rgb = [0 0 1];
-            case {'c','cyan'}
-                rgb = [0 1 1];
-            case {'m','magenta'}
-                rgb = [1 0 1];
-            case {'y','yellow'}
-                rgb = [1 1 0];
-            case {'w','white'}
-                rgb = [1 1 1];
-            otherwise
-                try
-                    v = str2num(c); %#ok<ST2NM>
-                    if isnumeric(v) && numel(v) == 3
-                        rgb = v(:)';
-                    else
-                        rgb = [0 0 0];
-                    end
-                catch
-                    rgb = [0 0 0];
+
+        % Normalize accidental doubled slashes from repeated sanitization
+        core = strrep(core, '\\\\', '\\');
+
+        % If expression is fully wrapped by \mathrm{...}, strip it.
+        % MATLAB's LaTeX subset often rejects mixed command content there.
+        stripped = stripOuterMathMacro(core, '\\mathrm');
+        if ~strcmp(stripped, core)
+            core = stripped;
+        end
+
+        core = normalizeMathCore(core);
+        core = escapePlainUnderscores(core);
+
+        % Final cleanup of common spacing artifacts
+        core = regexprep(core,'\s+',' ');
+        out = ['$' core '$'];
+    end
+
+    function out = stripOuterMathMacro(in, macro)
+        out = in;
+        s = strtrim(in);
+        prefix = [macro '{'];
+        nPrefix = numel(prefix);
+        if numel(s) < nPrefix + 1 || ~strncmp(s, prefix, nPrefix)
+            return;
+        end
+
+        depth = 0;
+        closeIdx = -1;
+        for i = (nPrefix+1):numel(s)
+            ch = s(i);
+            if ch == '{'
+                depth = depth + 1;
+            elseif ch == '}'
+                if depth == 0
+                    closeIdx = i;
+                    break;
+                else
+                    depth = depth - 1;
                 end
+            end
+        end
+
+        if closeIdx == numel(s)
+            out = s((nPrefix+1):(end-1));
         end
     end
-    
-    function C = makeCustomColormap(name)
-        % MAKECUSTOMCOLORMAP - Generate custom color maps
-        
-        n = 256;
-        
-        switch lower(name)
-            case 'softyellow'
-                C = [linspace(0.4,0.9,n)', linspace(0.4,0.9,n)', linspace(0.1,0.2,n)'];
-            case 'softgreen'
-                C = [linspace(0.1,0.4,n)', linspace(0.3,0.7,n)', linspace(0.1,0.3,n)'];
-            case 'softred'
-                C = [linspace(0.4,0.9,n)', linspace(0.1,0.3,n)', linspace(0.1,0.3,n)'];
-            case 'softblue'
-                C = [linspace(0.1,0.3,n)', linspace(0.1,0.3,n)', linspace(0.4,0.9,n)'];
-            case 'softpurple'
-                C = [linspace(0.4,0.7,n)', linspace(0.2,0.3,n)', linspace(0.5,0.8,n)'];
-            case 'softorange'
-                C = [linspace(0.7,0.95,n)', linspace(0.4,0.6,n)', linspace(0.1,0.2,n)'];
-            case 'softcyan'
-                C = [linspace(0.1,0.2,n)', linspace(0.5,0.9,n)', linspace(0.8,0.95,n)'];
-            case 'softgray'
-                C = repmat(linspace(0.3,0.9,n)',1,3);
-            case 'softbrown'
-                C = [linspace(0.3,0.6,n)', linspace(0.2,0.3,n)', linspace(0.1,0.1,n)'];
-            case 'softteal'
-                C = [linspace(0.1,0.2,n)', linspace(0.6,0.8,n)', linspace(0.7,0.9,n)'];
-            case 'softolive'
-                C = [linspace(0.3,0.5,n)', linspace(0.4,0.5,n)', linspace(0.1,0.2,n)'];
-            case 'softgold'
-                C = [linspace(0.8,1,n)', linspace(0.7,0.9,n)', linspace(0.2,0.3,n)'];
-            case 'softpink'
-                C = [linspace(0.9,1,n)', linspace(0.7,0.8,n)', linspace(0.7,0.9,n)'];
-            case 'softaqua'
-                C = [linspace(0.3,0.5,n)', linspace(0.8,1,n)', linspace(0.9,1,n)'];
-            case 'softsand'
-                C = [linspace(0.7,0.9,n)', linspace(0.6,0.7,n)', linspace(0.4,0.5,n)'];
-            case 'softsky'
-                C = [linspace(0.4,0.6,n)', linspace(0.6,0.8,n)', linspace(0.9,1,n)'];
-            case 'bluebright'
-                C = [zeros(n,1), zeros(n,1), linspace(0.2,1,n)'];
-            case 'redbright'
-                C = [linspace(0.2,1,n)', zeros(n,1), zeros(n,1)];
-            case 'greenbright'
-                C = [zeros(n,1), linspace(0.2,1,n)', zeros(n,1)];
-            case 'purplebright'
-                C = [linspace(0.3,1,n)', linspace(0,0.3,n)', linspace(0.3,1,n)'];
-            case 'orangebright'
-                C = [ones(n,1), linspace(0.5,0.1,n)', zeros(n,1)];
-            case 'cyanbright'
-                C = [zeros(n,1), linspace(0.5,1,n)', ones(n,1)];
-            case 'yellowbright'
-                C = [ones(n,1), ones(n,1), linspace(0.2,0,n)'];
-            case 'magnetabright'
-                C = [ones(n,1), linspace(0,0.2,n)', ones(n,1)];
-            case 'limebright'
-                C = [linspace(0.6,1,n)', ones(n,1), linspace(0.2,0.3,n)'];
-            case 'tealbright'
-                C = [zeros(n,1), linspace(0.7,1,n)', linspace(0.7,1,n)'];
-            case 'ultrabrightblue'
-                C = [zeros(n,1), zeros(n,1), linspace(0.5,1,n)'];
-            case 'ultrabrightred'
-                C = [linspace(0.5,1,n)', zeros(n,1), zeros(n,1)];
-            case 'fire'
-                C = [linspace(0,1,n)', linspace(0,0.8,n)', zeros(n,1)];
-            case 'ice'
-                C = [linspace(0.8,0,n)', linspace(1,0.4,n)', ones(n,1)];
-            case 'ocean'
-                C = [zeros(n,1), linspace(0.2,0.7,n)', linspace(0.5,1,n)'];
-            case 'topo'
-                C = [linspace(0.1,0.8,n)', linspace(0.4,0.8,n)', linspace(0.2,0.4,n)'];
-            case 'terrain'
-                C = [linspace(0.2,0.6,n)', linspace(0.4,1,n)', ones(n,1)*0.2];
-            case 'magma'
-                C = magma(n);
-            case 'inferno'
-                C = inferno(n);
-            case 'plasma'
-                C = plasma(n);
-            case 'cividis'
-                C = cividis(n);
-            case 'bluewhitered'
-                C1 = [0 0 1];
-                C2 = [1 1 1];
-                C3 = [1 0 0];
-                C = interp1([0 0.5 1],[C1;C2;C3],linspace(0,1,n));
-            case 'redwhiteblue'
-                C = flipud(makeCustomColormap('bluewhitered'));
-            case 'purplewhitegreen'
-                C = interp1([0 0.5 1],[0.6 0 0.6; 1 1 1; 0 0.6 0], linspace(0,1,n));
-            case 'brownwhiteblue'
-                C = interp1([0 0.5 1],[0.5 0.2 0; 1 1 1; 0 0.4 1], linspace(0,1,n));
-            case 'greenwhitepurple'
-                C = interp1([0 0.5 1],[0 1 0; 1 1 1; 0.5 0 0.5], linspace(0,1,n));
-            case 'bluewhiteorange'
-                C = interp1([0 0.5 1],[0 0 1; 1 1 1; 1 0.5 0], linspace(0,1,n));
-            case 'blackwhiteyellow'
-                C = interp1([0 0.5 1],[0 0 0; 1 1 1; 1 1 0], linspace(0,1,n));
-            otherwise
-                error('Unknown custom colormap name: %s', name);
+
+    function out = normalizeMathCore(in)
+        out = in;
+        if ~ischar(out), return; end
+
+        out = regexprep(out,'\\Delta(?=[A-Za-z])','\\Delta ');
+        out = regexprep(out,'\\rho(?=[A-Za-z])','\\rho ');
+        out = regexprep(out,'\\mu(?=[A-Za-z])','\\mu ');
+        out = regexprep(out,'\\Omega(?=[A-Za-z])','\\Omega ');
+    end
+
+    function out = escapePlainUnderscores(in)
+        out = in;
+        if ~ischar(out) || isempty(out), return; end
+
+        chars = out;
+        k = 1;
+        while k <= numel(chars)
+            if chars(k) ~= '_'
+                k = k + 1;
+                continue;
+            end
+
+            prefix = chars(1:max(1,k-1));
+            if ~isempty(regexp(prefix,'\\[A-Za-z]+$','once'))
+                k = k + 1;
+                continue;
+            end
+            if k > 1 && chars(k-1) == '\\'
+                k = k + 1;
+                continue;
+            end
+
+            chars = [chars(1:k-1) '\\' chars(k:end)]; %#ok<AGROW>
+            k = k + 2;
         end
+        out = chars;
+    end
+
+    function out = collapseSpacedLabel(in)
+        out = in;
+        if ~ischar(out), return; end
+        s = strtrim(out);
+        if numel(s) < 3, out = s; return; end
+
+        % Collapse only true split-letter patterns while preserving normal
+        % spaces in legend entries and axis titles.
+        tokenPattern = '^\s*(?:[A-Za-z]\s+){5,}[A-Za-z](?:\s*[\(\[].*[\)\]])?\s*$';
+        if ~isempty(regexp(s, tokenPattern, 'once'))
+            out = regexprep(s,'([A-Za-z])\s+(?=[A-Za-z])','$1');
+            return;
+        end
+        out = s;
+    end
+
+    function tf = isWrappedInMath(str)
+        if isstring(str), str = char(str); end
+        if ~ischar(str), tf = false; return; end
+        tf = numel(str) >= 2 && str(1) == '$' && str(end) == '$';
     end
 
 end

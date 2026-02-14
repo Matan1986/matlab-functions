@@ -1,0 +1,99 @@
+FIG Quality Diagnostic Report
+Generated: 13-Feb-2026 12:45:36
+
+============================================================
+File: Aging memory summary.fig
+Path: C:\Users\matan\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Graphs for papers\Switching paper\Graphs for paper ver3\Fig2\Spin glass\Aging (out of plane) ver11\Aging memory summary.fig
+Figure.Name: Aging memory summary
+Figure.Position(px): [840.0 301.0 672.0 537.6]
+Counts: axes=2, legends=0, colorbars=0, lines=16, texts=10
+Axes.FontSize: min=10.000, med=10.000, max=10.000
+Axes.LineWidth: min=0.500, med=0.500, max=0.500
+Legend.FontSize: [none]
+Line.LineWidth: min=0.806, med=0.806, max=0.806
+Line.MarkerSize: min=14.000, med=14.000, max=14.000
+Interpreter issues (axes ticklabel not latex): 0
+Potential underscore/latex label issues: 0
+Axes with possible clipping risk: 0
+Smoke export: PDF=OK; FIG=OK
+
+============================================================
+File: Aging_memory_summary.fig
+Path: C:\Users\matan\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Graphs for papers\Switching paper\Graphs for paper ver3\Fig2\Spin glass\Aging (out of plane) ver11\Aging_memory_summary.fig
+Figure.Name: Aging memory summary
+Figure.Position(px): [840.0 301.0 672.0 571.2]
+Counts: axes=2, legends=0, colorbars=0, lines=16, texts=10
+Axes.FontSize: min=9.000, med=9.000, max=9.000
+Axes.LineWidth: min=0.500, med=0.500, max=0.500
+Legend.FontSize: [none]
+Line.LineWidth: min=0.500, med=0.500, max=0.500
+Line.MarkerSize: min=2.000, med=6.000, max=6.000
+Interpreter issues (axes ticklabel not latex): 0
+Potential underscore/latex label issues: 0
+Axes with possible clipping risk: 0
+Smoke export: PDF=OK; FIG=OK
+
+============================================================
+File: MG 119, Aging Memory, ΔM(T).fig
+Path: C:\Users\matan\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Graphs for papers\Switching paper\Graphs for paper ver3\Fig2\Spin glass\Aging (out of plane) ver11\MG 119, Aging Memory, ΔM(T).fig
+Figure.Name: MG 119, Aging Memory, ΔM(T)
+Figure.Position(px): [147.0 244.0 672.0 537.6]
+Counts: axes=1, legends=1, colorbars=0, lines=12, texts=5
+Axes.FontSize: min=10.000, med=10.000, max=10.000
+Axes.LineWidth: min=0.500, med=0.500, max=0.500
+Legend.FontSize: min=12.000, med=12.000, max=12.000
+Line.LineWidth: min=0.806, med=0.806, max=0.806
+Line.MarkerSize: min=14.000, med=14.000, max=14.000
+Interpreter issues (axes ticklabel not latex): 0
+Potential underscore/latex label issues: 0
+Axes with possible clipping risk: 0
+Smoke export: PDF=OK; FIG=OK
+
+============================================================
+File: MG119 - Combined M_H(T).fig
+Path: C:\Users\matan\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Graphs for papers\Switching paper\Graphs for paper ver3\Fig2\Spin glass\Aging (out of plane) ver11\MG119 - Combined M_H(T).fig
+Figure.Name: MG119 — Combined M/H(T)
+Figure.Position(px): [144.0 289.0 672.0 537.6]
+Counts: axes=6, legends=0, colorbars=0, lines=17, texts=32
+Axes.FontSize: min=10.000, med=10.000, max=10.000
+Axes.LineWidth: min=0.500, med=0.500, max=0.500
+Legend.FontSize: [none]
+Line.LineWidth: min=0.806, med=0.806, max=0.806
+Line.MarkerSize: min=14.000, med=14.000, max=14.000
+Interpreter issues (axes ticklabel not latex): 0
+Potential underscore/latex label issues: 0
+Axes with possible clipping risk: 0
+Smoke export: PDF=OK; FIG=OK
+
+============================================================
+File: MG119__Combined_MHT.fig
+Path: C:\Users\matan\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Graphs for papers\Switching paper\Graphs for paper ver3\Fig2\Spin glass\Aging (out of plane) ver11\MG119__Combined_MHT.fig
+Figure.Name: MG119 — Combined M/H(T)
+Figure.Position(px): [144.0 289.0 672.0 571.0]
+Counts: axes=6, legends=0, colorbars=0, lines=17, texts=32
+Axes.FontSize: min=9.000, med=9.000, max=9.000
+Axes.LineWidth: min=0.500, med=0.500, max=0.500
+Legend.FontSize: [none]
+Line.LineWidth: min=0.500, med=0.700, max=0.700
+Line.MarkerSize: min=6.000, med=6.000, max=6.000
+Interpreter issues (axes ticklabel not latex): 0
+Potential underscore/latex label issues: 0
+Axes with possible clipping risk: 0
+Smoke export: PDF=OK; FIG=OK
+
+============================================================
+File: MG_119_Aging_Memory_MT.fig
+Path: C:\Users\matan\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Graphs for papers\Switching paper\Graphs for paper ver3\Fig2\Spin glass\Aging (out of plane) ver11\MG_119_Aging_Memory_MT.fig
+Figure.Name: MG 119, Aging Memory, ΔM(T)
+Figure.Position(px): [147.0 244.0 672.0 571.0]
+Counts: axes=1, legends=1, colorbars=0, lines=12, texts=5
+Axes.FontSize: min=9.000, med=9.000, max=9.000
+Axes.LineWidth: min=0.500, med=0.500, max=0.500
+Legend.FontSize: min=6.000, med=6.000, max=6.000
+Line.LineWidth: min=0.500, med=0.800, max=0.800
+Line.MarkerSize: min=6.000, med=6.000, max=6.000
+Interpreter issues (axes ticklabel not latex): 0
+Potential underscore/latex label issues: 0
+Axes with possible clipping risk: 0
+Smoke export: PDF=OK; FIG=OK
+

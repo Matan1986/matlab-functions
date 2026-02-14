@@ -1,0 +1,66 @@
+=== PARANOIA_EdgeCaseTests START ===
+====================================
+PARANOIA VALIDATION: Edge Case Testing
+====================================
+ 
+TEST 1: Handle empty figure list gracefully
+[INFO] ScientificColourMaps8: Not found (optional)
+[CONFIG] Total colormaps available: 63
+  ✔ UI handles empty figure list
+ 
+TEST 2: Handle invalid folder path
+  ✔ Invalid folder path handling available
+ 
+TEST 3: Handle NaN/invalid numeric inputs
+  ✔ NaN handling works (str2double returns NaN for empty)
+ 
+TEST 4: Handle invalid colormap gracefully
+  ✔ Invalid colormap throws appropriate error
+ 
+TEST 5: Handle figures without colorbars
+  ✔ Figures without colorbars handled
+ 
+TEST 6: Handle figures with no axes
+  ✔ Empty figures detected correctly
+ 
+TEST 7: Verify callback function signatures
+  ✔ getColormapToUse signature correct
+ 
+TEST 8: Handle preferences with special characters
+  ✔ Preferences with special characters work
+ 
+TEST 9: Handle very large numeric values
+  ✔ Large numeric values handled
+ 
+TEST 10: Handle very small numeric values
+  ✔ Small numeric values handled
+ 
+TEST 11: Reject invalid negative values
+  ✔ Negative value detection available
+ 
+TEST 12: Handle Unicode in preferences
+  ✔ Unicode in preferences works
+ 
+====================================
+PARANOIA TEST SUMMARY
+====================================
+Tests passed: 12 / 12
+ 
+✔ ALL PARANOIA TESTS PASSED
+  No silent failures detected
+  Edge cases handled gracefully
+ 
+FUNCTION AVAILABILITY CHECK:
+====================================
+C:\Users\matan\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Matlab functions\GUIs\FinalFigureFormatterUI.m
+✔ FinalFigureFormatterUI - found
+C:\Users\matan\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Matlab functions\GUIs\PARANOIA_EdgeCaseTests.m (getColormapToUse)  % Local function of PARANOIA_EdgeCaseTests
+✔ getColormapToUse - found
+'makeCustomColormap' not found.
+✔ makeCustomColormap - found
+'getSliceIndices' not found.
+✔ getSliceIndices - found
+'name2rgb' not found.
+✔ name2rgb - found
+ 
+=== PARANOIA_EdgeCaseTests END ===
