@@ -479,77 +479,203 @@ loadPrefs();
         figs = findRealFigs();
         if isempty(figs), return; end
         style = buildStyleFromCurrentUI();
-        style.applyPreviewResize = false;
-        applyStyleToFigures(figs, style);
-    end
-
-    function applyLegendFontSize(~,~)
-        figs = findRealFigs();
-        if isempty(figs), return; end
-        legendFs = str2double(hLegendFontSize.Value);
-        if ~isfinite(legendFs) || legendFs <= 0
-            errordlg('Legend font size must be a positive number','Legend Font Size');
+        if isstruct(snapshot)
+            itemList = num2cell(snapshot(:));
+        elseif iscell(snapshot)
+            itemList = snapshot(:);
+        else
             return;
         end
-        for k = 1:numel(figs)
+
+        if isempty(itemList)
+            return;
+        end
+
+        tagMap = buildUiControlTagMap();
+        for i = 1:numel(itemList)
             try
-                SmartFigureEngine.applyLegendAnnotationFontOnly(figs(k), legendFs);
+                it = itemList{i};
+            catch
+                continue;
+            end
+            if ~isstruct(it) || ~isscalar(it)
+                continue;
+            end
+
+            try
+                if ~isfield(it,'tag') || isempty(it.tag)
+                    continue;
+                end
+                tag = char(string(it.tag));
+                if isempty(tag)
+                    continue;
+                end
+                if ~isKey(tagMap, tag)
+                    warning('FinalFigureFormatterUI:UnmatchedControlTag', ...
+                        'Saved UI control tag not found in current UI: %s', tag);
+                    continue;
+                end
+                h = tagMap(tag);
+                if isempty(h) || ~isvalid(h) || ~isprop(h,'Value')
+                    continue;
+                end
+
+                restoredByIndex = false;
+                if isfield(it,'selectedIndex') && ~isempty(it.selectedIndex)
+                    restoredByIndex = applyBySelectedIndex(h, it.selectedIndex);
+                end
+                if restoredByIndex
+                    continue;
+                end
+
+                if isfield(it,'checked') && ~isempty(it.checked)
+                    applyControlValue(h, it.checked);
+                elseif isfield(it,'value')
+                    applyControlValue(h, it.value);
+                end
             catch ME
-                warning('Legend/annotation font apply failed on figure %d: %s', k, ME.message);
+                warning('FinalFigureFormatterUI:ReplayControlFailed', ...
+                    'Failed to replay control at index %d: %s', i, ME.message);
             end
         end
     end
 
-    function applySmartLayout(~,~)
-        figs = findRealFigs();
-        if isempty(figs)
-            errordlg('No data figures found','SMART Layout');
-            return;
+    function tf = applyBySelectedIndex(h, rawIndex)
+        tf = false;
+        try
+            if isempty(h) || ~isvalid(h) || ~isprop(h,'Items')
+                return;
+            end
+            itemsNow = h.Items;
+            maxN = numel(itemsNow);
+            idxSel = parseValidIndex(rawIndex, maxN);
+            if isempty(idxSel)
+                return;
+            end
+
+            if iscell(itemsNow)
+                if idxSel <= numel(itemsNow)
+                    h.Value = itemsNow{idxSel};
+                    tf = true;
+                end
+            elseif isstring(itemsNow)
+                if idxSel <= numel(itemsNow)
+                    h.Value = itemsNow(idxSel);
+                    tf = true;
+                end
+            elseif isnumeric(itemsNow) || islogical(itemsNow)
+                if idxSel <= numel(itemsNow)
+                    h.Value = itemsNow(idxSel);
+                    tf = true;
+                end
+            end
+        catch
+            tf = false;
         end
+    end
 
-        nx = hPanelsX.Value;
-        ny = hPanelsY.Value;
-
-        if any([nx ny] < 1)
-            errordlg('Panels must be positive integers','SMART Layout');
-            return;
+    function idx = parseValidIndex(rawIndex, maxN)
+        idx = [];
+        try
+            if isempty(rawIndex) || ~isnumeric(maxN) || isempty(maxN) || ~isfinite(maxN) || maxN < 1
+                return;
+            end
+            candidate = [];
+            if isnumeric(rawIndex) || islogical(rawIndex)
+                if ~isempty(rawIndex)
+                    candidate = double(rawIndex(1));
+                end
+            elseif ischar(rawIndex) || isstring(rawIndex)
+                candidate = str2double(char(string(rawIndex)));
+            end
+            if isempty(candidate) || ~isfinite(candidate)
+                return;
+            end
+            candidate = floor(candidate);
+            if candidate >= 1 && candidate <= maxN
+                idx = candidate;
+            end
+        catch
+            idx = [];
         end
+    end
 
-        isDouble = strcmp(colMode.Value,'Double column');
-
-        % article width depending on column mode
-        if isDouble
-            articleWidth = doubleColWidth;
-        else
-            articleWidth = singleColWidth;
+    function scalarNum = parseNumericScalar(rawValue)
+        scalarNum = [];
+        try
+            if isnumeric(rawValue) || islogical(rawValue)
+                if ~isempty(rawValue)
+                    scalarNum = double(rawValue(1));
+                end
+                return;
+            end
+            if ischar(rawValue) || isstring(rawValue)
+                scalarNum = str2double(char(string(rawValue)));
+                if ~isfinite(scalarNum)
+                    scalarNum = [];
+                end
+            end
+        catch
+            scalarNum = [];
         end
+    end
 
-        panelWidth = articleWidth / nx;
-        ratio = hAspect.Value;
-        if isnan(ratio) || ratio <= 0 || ratio > 2
-            errordlg('Aspect ratio must be positive and reasonable (e.g. 0.6)','SMART Layout');
-            return;
+    function scalarLog = parseLogicalScalar(rawValue)
+        scalarLog = [];
+        try
+            if islogical(rawValue)
+                if ~isempty(rawValue)
+                    scalarLog = logical(rawValue(1));
+                end
+                return;
+            end
+            if isnumeric(rawValue)
+                if ~isempty(rawValue)
+                    scalarLog = logical(rawValue(1));
+                end
+                return;
+            end
+            if ischar(rawValue) || isstring(rawValue)
+                txt = lower(strtrim(char(string(rawValue))));
+                if any(strcmp(txt, {'1','true','on','yes'}))
+                    scalarLog = true;
+                elseif any(strcmp(txt, {'0','false','off','no'}))
+                    scalarLog = false;
+                else
+                    scalarLog = [];
+                end
+            end
+        catch
+            scalarLog = [];
         end
-        panelHeight = panelWidth * ratio;
+    end
 
-        style = SmartFigureEngine.computeSmartStyle(panelWidth, panelHeight, nx, ny, hStyleMode.Value);
-        style.applyPreviewResize = true;
-        style.previewScale = 3.0;
-        style.dpi = 96;
-
-        % update UI controls with computed values
-        hTopMargin.Value  = style.topMargin;
-        hLeftMargin.Value = style.leftMargin;
-
-        hFigWidth.Value  = round(panelWidth * style.dpi);
-        hFigHeight.Value = round(panelHeight * style.dpi);
-
-        hAxWidth.Value  = style.axWidth;
-        hAxHeight.Value = style.axHeight;
-        hTopMargin.Value = style.topMargin;
-        hLeftMargin.Value = style.leftMargin;
-
-        % reflect computed font sizes in the UI dropdowns
+    function scalarTxt = parseTextScalar(rawValue)
+        scalarTxt = [];
+        try
+            if ischar(rawValue)
+                scalarTxt = rawValue;
+                return;
+            end
+            if isstring(rawValue)
+                if isempty(rawValue)
+                    scalarTxt = '';
+                else
+                    scalarTxt = char(rawValue(1));
+                end
+                return;
+            end
+            if isnumeric(rawValue) || islogical(rawValue)
+                if isempty(rawValue)
+                    scalarTxt = '';
+                else
+                    scalarTxt = char(string(rawValue(1)));
+                end
+            end
+        catch
+            scalarTxt = [];
+        end
+    end
         setPopupValueByString(hFontSize,       num2str(style.tickFont));
         setPopupValueByString(hLegendFontSize, num2str(style.legendFont));
 
@@ -1635,16 +1761,6 @@ loadPrefs();
             applyLayoutMetadataStruct(meta);
 
             savePrefs();
-
-            try
-                applySmartLayout([],[]);
-            catch
-                try
-                    style = buildStyleFromCurrentUI();
-                    applyStyleToFigures(findRealFigs(), style);
-                catch
-                end
-            end
         catch ME
             errordlg(sprintf('Failed to load layout preset:\n%s', ME.message), 'Layout Preset Error');
         end
@@ -1750,50 +1866,53 @@ loadPrefs();
         end
 
         try
+            currVal = h.Value;
+        catch
+            return;
+        end
+
+        try
             % Dropdowns: ensure value is among Items when possible
             if isprop(h,'Items')
-                items = h.Items;
-                candidate = char(string(rawValue));
-                if iscell(items)
-                    idx = find(strcmp(items, candidate), 1);
+                itemsNow = h.Items;
+                candidate = parseTextScalar(rawValue);
+                if ~isempty(candidate) && iscell(itemsNow)
+                    idx = find(strcmp(itemsNow, candidate), 1);
                     if ~isempty(idx)
-                        h.Value = items{idx};
+                        h.Value = itemsNow{idx};
                         return;
                     end
-                elseif isstring(items)
-                    idx = find(strcmp(cellstr(items), candidate), 1);
+                elseif ~isempty(candidate) && isstring(itemsNow)
+                    idx = find(strcmp(cellstr(itemsNow), candidate), 1);
                     if ~isempty(idx)
-                        h.Value = items(idx);
+                        h.Value = itemsNow(idx);
                         return;
                     end
                 end
             end
 
             % Numeric fields / checkboxes / generic value controls
-            if isnumeric(h.Value)
-                if isnumeric(rawValue)
-                    h.Value = rawValue(1);
-                else
-                    numVal = str2double(char(string(rawValue)));
-                    if isfinite(numVal)
-                        h.Value = numVal;
-                    end
+            if isnumeric(currVal)
+                numVal = parseNumericScalar(rawValue);
+                if ~isempty(numVal)
+                    h.Value = numVal;
                 end
                 return;
             end
 
-            if islogical(h.Value)
-                if islogical(rawValue) || isnumeric(rawValue)
-                    h.Value = logical(rawValue(1));
-                else
-                    txt = lower(char(string(rawValue)));
-                    h.Value = any(strcmp(txt, {'1','true','on','yes'}));
+            if islogical(currVal)
+                logVal = parseLogicalScalar(rawValue);
+                if ~isempty(logVal)
+                    h.Value = logVal;
                 end
                 return;
             end
 
             % Textual controls
-            h.Value = char(string(rawValue));
+            txtVal = parseTextScalar(rawValue);
+            if ~isempty(txtVal)
+                h.Value = txtVal;
+            end
         catch
             % Last resort: try direct assignment
             try
