@@ -431,6 +431,11 @@ btnAdvClose = uibutton(gAdvanced,'Text','Close','ButtonPushedFcn',@closeAndSave)
 btnAdvClose.Layout.Row = 1; btnAdvClose.Layout.Column = 6;
 btnRestoreDefaults = uibutton(gAdvanced,'Text','Restore Defaults','ButtonPushedFcn',@restoreUIdefaults);
 btnRestoreDefaults.Layout.Row = 2; btnRestoreDefaults.Layout.Column = [1 3];
+btnRoundTripTest = uibutton(gAdvanced,'Text','Test Round-Trip','ButtonPushedFcn',@testUiRoundTrip);
+btnRoundTripTest.Layout.Row = 2; btnRoundTripTest.Layout.Column = [4 6];
+
+% Assign deterministic tags to value-bearing controls for JSON round-trip restore
+assignControlTags();
 
 % Standardize button appearance
 styleAllButtons();
@@ -481,9 +486,18 @@ loadPrefs();
     function applyLegendFontSize(~,~)
         figs = findRealFigs();
         if isempty(figs), return; end
-        style = buildStyleFromCurrentUI();
-        style.applyPreviewResize = false;
-        applyStyleToFigures(figs, style);
+        legendFs = str2double(hLegendFontSize.Value);
+        if ~isfinite(legendFs) || legendFs <= 0
+            errordlg('Legend font size must be a positive number','Legend Font Size');
+            return;
+        end
+        for k = 1:numel(figs)
+            try
+                SmartFigureEngine.applyLegendAnnotationFontOnly(figs(k), legendFs);
+            catch ME
+                warning('Legend/annotation font apply failed on figure %d: %s', k, ME.message);
+            end
+        end
     end
 
     function applySmartLayout(~,~)
@@ -563,6 +577,9 @@ loadPrefs();
     end
 
     function applyStyleToFigures(figs, style)
+        if applyCurrentOnly
+            figs = findRealFigs();
+        end
         figs = figs(:);
         for k = 1:numel(figs)
             fig0 = figs(k);
@@ -764,6 +781,8 @@ loadPrefs();
         % WYSIWYG rule: export must be passive (no export-time reformat/reflow)
 
         pdfMode = getPdfExportMode();
+        validFigsForMetadata = gobjects(0);
+        anyPdfSaved = false;
 
         for k = 1:numel(figsToSave)
             fig0 = figsToSave(k);
@@ -771,6 +790,7 @@ loadPrefs();
                 warning('FinalFigureFormatterUI:InvalidFigureHandle','Skipping invalid figure target at index %d.', k);
                 continue;
             end
+            validFigsForMetadata(end+1,1) = fig0; %#ok<AGROW>
             baseName = fig0.Name;
             if isempty(baseName), baseName = 'Figure'; end
             baseName = regexprep(baseName, '[\\/:*?"<>|]', '_');
@@ -832,21 +852,22 @@ loadPrefs();
                                 'Failed to save PDF with passive exportgraphics (%s): %s', outPath, ME.message);
                         end
                     end
-
-                    if pdfSaved
-                        try
-                            jsonPath = [erase(outPath, '.pdf') '_layout.json'];
-                            saveLayoutMetadataJson(jsonPath, fig0, mode, pdfMode);
-                        catch ME
-                            warning('FinalFigureFormatterUI:LayoutMetadataSaveFailed', ...
-                                'Failed to save layout metadata JSON (%s): %s', jsonPath, ME.message);
-                        end
-                    end
+                    anyPdfSaved = anyPdfSaved || pdfSaved;
 
                 otherwise
                     error('Unknown save mode: %s',mode);
             end
         end
+
+        if strcmpi(mode,'pdf') && anyPdfSaved
+            jsonName = ['save_layout_' char(datetime('now','Format','yyyyMMdd_HHmmss')) '.json'];
+            jsonPath = ensureFreeFilename(fullfile(saveFolder, jsonName), overwrite);
+            [metaOk, metaMsg] = saveLayoutMetadataJson(jsonPath, validFigsForMetadata, mode, pdfMode);
+            if ~metaOk
+                fprintf('[INFO] Layout metadata save note (%s): %s\n', jsonPath, metaMsg);
+            end
+        end
+
           % persist UI state after a save operation
           savePrefs();
     end
@@ -871,47 +892,493 @@ loadPrefs();
         end
     end
 
-    function saveLayoutMetadataJson(jsonPath, figHandle, exportMode, pdfMode)
-        meta = buildLayoutMetadata(figHandle, exportMode, pdfMode);
-        meta = normalizeForJson(meta);
+    function [ok, msg] = saveLayoutMetadataJson(jsonPath, figHandles, exportMode, pdfMode)
+        ok = true;
+        msg = '';
+        buildError = "";
+        try
+            meta = buildLayoutMetadata(figHandles, exportMode, pdfMode);
+        catch ME
+            meta = struct();
+            meta.schemaVersion = 'ui-snapshot-v1';
+            meta.savedAt = string(datetime('now','TimeZone','local','Format','yyyy-MM-dd''T''HH:mm:ss.SSSZZZZZ'));
+            meta.generator = 'FinalFigureFormatterUI';
+            meta.export = struct('mode', string(exportMode), 'pdfMode', string(pdfMode));
+            meta.uiState = struct();
+            buildError = string(ME.message);
+            ok = false;
+            msg = char(buildError);
+        end
+
+        if strlength(buildError) > 0
+            meta.error = buildError;
+            meta.errorStage = 'buildLayoutMetadata';
+        end
+
         try
             raw = jsonencode(meta, 'PrettyPrint', true);
-        catch
-            raw = jsonencode(meta);
+        catch MEpp
+            try
+                raw = jsonencode(meta);
+            catch MEraw
+                raw = jsonencode(struct( ...
+                    'schemaVersion','ui-snapshot-v1', ...
+                    'savedAt',string(datetime('now','TimeZone','local','Format','yyyy-MM-dd''T''HH:mm:ss.SSSZZZZZ')), ...
+                    'generator','FinalFigureFormatterUI', ...
+                    'export',struct('mode', string(exportMode), 'pdfMode', string(pdfMode)), ...
+                    'uiState',struct(), ...
+                    'error',string(MEraw.message), ...
+                    'errorStage','jsonencode', ...
+                    'jsonencodePrettyError',string(MEpp.message)));
+                ok = false;
+                if isempty(msg), msg = MEraw.message; end
+            end
         end
 
         fid = fopen(jsonPath, 'w');
         if fid < 0
-            error('Could not open metadata file for writing: %s', jsonPath);
+            ok = false;
+            msg = sprintf('Could not open metadata file for writing: %s', jsonPath);
+            return;
         end
         c = onCleanup(@() fclose(fid)); %#ok<NASGU>
-        fwrite(fid, raw, 'char');
+        try
+            fwrite(fid, raw, 'char');
+        catch ME
+            ok = false;
+            if isempty(msg), msg = ME.message; end
+        end
     end
 
-    function meta = buildLayoutMetadata(figHandle, exportMode, pdfMode)
-        styleNow = buildStyleFromCurrentUI();
-        defaults = SmartFigureEngine.computeSmartStyle( ...
-            max(1.0, hFigWidth.Value/96), max(1.0, hFigHeight.Value/96), ...
-            max(1, round(hPanelsX.Value)), max(1, round(hPanelsY.Value)), hStyleMode.Value);
-
-        figInfo = struct('name','','number',NaN,'position',[]);
+    function meta = buildLayoutMetadata(figHandles, exportMode, pdfMode)
+        %#ok<INUSD>
         try
-            figInfo.name = string(figHandle.Name);
-            figInfo.number = double(figHandle.Number);
-            figInfo.position = double(figHandle.Position);
+            styleNow = buildStyleFromCurrentUI();
         catch
+            styleNow = struct();
+        end
+        try
+            defaults = SmartFigureEngine.computeSmartStyle( ...
+                max(1.0, hFigWidth.Value/96), max(1.0, hFigHeight.Value/96), ...
+                max(1, round(hPanelsX.Value)), max(1, round(hPanelsY.Value)), hStyleMode.Value);
+        catch
+            defaults = struct();
         end
 
         meta = struct();
-        meta.schemaVersion = 'layout-metadata-v1';
+        meta.schemaVersion = 'ui-snapshot-v1';
         meta.savedAt = string(datetime('now','TimeZone','local','Format','yyyy-MM-dd''T''HH:mm:ss.SSSZZZZZ'));
         meta.generator = 'FinalFigureFormatterUI';
         meta.export = struct('mode', string(exportMode), 'pdfMode', string(pdfMode));
-        meta.figure = figInfo;
-        meta.uiKnown = collectKnownUiState();
-        meta.uiControls = captureUiControlsRaw();
-        meta.engineStyle = styleNow;
-        meta.engineDefaults = defaults;
+
+        try
+            meta.uiKnown = collectKnownUiState();
+        catch
+            meta.uiKnown = struct();
+        end
+        try
+            meta.uiControls = captureUiControlsRaw();
+        catch
+            meta.uiControls = struct('type',{},'tag',{},'label',{},'value',{},'items',{},'enabled',{});
+        end
+        meta.uiState = meta.uiKnown;
+        meta.uiControlsSnapshot = meta.uiControls;
+
+        % Keep only UI snapshot fields required for reproducibility
+        try, meta.uiState.nx = double(hPanelsX.Value); catch, meta.uiState.nx = NaN; end
+        try, meta.uiState.ny = double(hPanelsY.Value); catch, meta.uiState.ny = NaN; end
+        try, meta.uiState.styleMode = string(hStyleMode.Value); catch, end
+        try, meta.uiState.fontSize = string(hFontSize.Value); catch, end
+        try, meta.uiState.legendFontSize = string(hLegendFontSize.Value); catch, end
+        try, meta.uiState.applyCurrentOnly = logical(applyCurrentOnly); catch, end
+        try, meta.uiState.exportMode = string(exportMode); catch, end
+        try, meta.uiState.pdfMode = string(pdfMode); catch, end
+        try, meta.uiState.SAFE_MODE = logical(getNumericField(styleNow, 'safeMode', getNumericField(defaults, 'safeMode', 1)) ~= 0); catch, end
+
+        % Intentionally UI-snapshot only: no figure/axes/legend/object serialization
+    end
+
+    function [layoutBlock, typographyBlock, optionsBlock] = buildLayoutRecipeBlocks(figInfoList, styleNow, defaults)
+        axesPerFigure = zeros(1, numel(figInfoList));
+        totalAxes = 0;
+        for i = 1:numel(figInfoList)
+            try
+                axesPerFigure(i) = numel(figInfoList(i).axes);
+            catch
+                axesPerFigure(i) = 0;
+            end
+            totalAxes = totalAxes + axesPerFigure(i);
+        end
+
+        nx = getNumericField(styleNow, 'nx', getNumericField(defaults, 'nx', 1));
+        ny = getNumericField(styleNow, 'ny', getNumericField(defaults, 'ny', 1));
+
+        margins = struct( ...
+            'left', getNumericField(styleNow, 'leftMargin', getNumericField(defaults, 'leftMargin', NaN)), ...
+            'right', getNumericField(styleNow, 'rightMargin', getNumericField(defaults, 'rightMargin', NaN)), ...
+            'top', getNumericField(styleNow, 'topMargin', getNumericField(defaults, 'topMargin', NaN)), ...
+            'bottom', getNumericField(styleNow, 'bottomMargin', getNumericField(defaults, 'bottomMargin', NaN)));
+
+        panelSizes = struct( ...
+            'panelWidth', getNumericField(styleNow, 'panelWidth', getNumericField(defaults, 'panelWidth', NaN)), ...
+            'panelHeight', getNumericField(styleNow, 'panelHeight', getNumericField(defaults, 'panelHeight', NaN)), ...
+            'axWidth', getNumericField(styleNow, 'axWidth', getNumericField(defaults, 'axWidth', NaN)), ...
+            'axHeight', getNumericField(styleNow, 'axHeight', getNumericField(defaults, 'axHeight', NaN)));
+
+        layoutBlock = struct();
+        layoutBlock.figureCount = numel(figInfoList);
+        layoutBlock.axesPerFigure = axesPerFigure;
+        layoutBlock.totalAxesCount = totalAxes;
+        layoutBlock.margins = margins;
+        layoutBlock.panelSizes = panelSizes;
+        layoutBlock.nx = nx;
+        layoutBlock.ny = ny;
+
+        typographyBlock = struct();
+        typographyBlock.baseFont = getNumericField(styleNow, 'tickFont', getNumericField(defaults, 'tickFont', NaN));
+        typographyBlock.legendFontSize = getNumericField(styleNow, 'legendFont', getNumericField(defaults, 'legendFont', NaN));
+        typographyBlock.labelFontSize = getNumericField(styleNow, 'labelFont', getNumericField(defaults, 'labelFont', NaN));
+        typographyBlock.titleFontSize = getNumericField(styleNow, 'titleFont', getNumericField(defaults, 'titleFont', NaN));
+        typographyBlock.annotationFontSize = getNumericField(styleNow, 'annotationFont', getNumericField(defaults, 'annotationFont', NaN));
+
+        optionsBlock = struct();
+        optionsBlock.smartCentering = logical(getNumericField(styleNow, 'safeMode', getNumericField(defaults, 'safeMode', 1)) ~= 0);
+        optionsBlock.SAFE_MODE = logical(getNumericField(styleNow, 'safeMode', getNumericField(defaults, 'safeMode', 1)) ~= 0);
+        optionsBlock.applyCurrentOnly = logical(applyCurrentOnly);
+        optionsBlock.mode = string(getStringField(styleNow, 'mode', getStringField(defaults, 'mode', char(hStyleMode.Value))));
+        optionsBlock.geometryMode = string(getStringField(styleNow, 'geometryMode', getStringField(defaults, 'geometryMode', 'deterministic-grid')));
+    end
+
+    function legendState = collectLegendStateAllFigures(figHandles, styleNow)
+        legendState = struct('figureLegendState',{},'builtInLegendCount',{},'manualLegendCount',{},'legendFont',{});
+        totalBuiltIn = 0;
+        totalManual = 0;
+
+        if isempty(figHandles)
+            legendState = struct('figureLegendState',struct([]), ...
+                'builtInLegendCount',0,'manualLegendCount',0, ...
+                'legendFont',getNumericField(styleNow,'legendFont',NaN));
+            return;
+        end
+
+        oneTemplate = getFigureLegendStateTemplate();
+        perFig = repmat(oneTemplate, 0, 1);
+        idx = 0;
+        for i = 1:numel(figHandles)
+            f = figHandles(i);
+            try
+                if isempty(f) || ~isvalid(f) || ~isgraphics(f,'figure')
+                    continue;
+                end
+            catch
+                continue;
+            end
+
+            idx = idx + 1;
+            one = collectLegendStateForFigure(f);
+            perFig(idx) = one;
+            totalBuiltIn = totalBuiltIn + one.builtInLegendCount;
+            totalManual = totalManual + one.manualLegendCount;
+        end
+
+        legendState = struct();
+        legendState.figureLegendState = perFig;
+        legendState.builtInLegendCount = totalBuiltIn;
+        legendState.manualLegendCount = totalManual;
+        legendState.legendFont = getNumericField(styleNow,'legendFont',NaN);
+    end
+
+    function one = collectLegendStateForFigure(f)
+        one = getFigureLegendStateTemplate();
+
+        try, one.figureName = string(f.Name); catch, end
+        try, one.figureNumber = double(f.Number); catch, end
+
+        builtInItemTemplate = getBuiltInLegendTemplate();
+        builtIn = repmat(builtInItemTemplate, 0, 1);
+        try
+            lg = findall(f,'Type','legend');
+        catch
+            lg = gobjects(0);
+        end
+        for i = 1:numel(lg)
+            L = lg(i);
+            item = builtInItemTemplate;
+            item.exists = true;
+            try, item.location = string(L.Location); catch, end
+            try, if isprop(L,'Position'), item.position = double(L.Position); end, catch, end
+            try, if isprop(L,'FontSize'), item.fontSize = double(L.FontSize); end, catch, end
+            try, if isprop(L,'NumColumns'), item.numColumns = double(L.NumColumns); end, catch, end
+            builtIn(end+1) = item; %#ok<AGROW>
+        end
+
+        manualItemTemplate = getManualLegendEntryTemplate();
+        manual = repmat(manualItemTemplate, 0, 1);
+
+        try
+            txb = findall(f,'Type','textboxshape');
+        catch
+            txb = gobjects(0);
+        end
+        for i = 1:numel(txb)
+            t = txb(i);
+            m = manualItemTemplate;
+            m.type = "textboxshape";
+            try, if isprop(t,'Tag'), m.tag = string(t.Tag); end, catch, end
+            try, if isprop(t,'Position'), m.position = double(t.Position); end, catch, end
+            try, if isprop(t,'FontSize'), m.fontSize = double(t.FontSize); end, catch, end
+            manual(end+1) = m; %#ok<AGROW>
+        end
+
+        try
+            tx = findall(f,'Type','text');
+        catch
+            tx = gobjects(0);
+        end
+        for i = 1:numel(tx)
+            t = tx(i);
+            include = false;
+            tagVal = "";
+            parentIsAxes = false;
+            try, tagVal = lower(string(t.Tag)); catch, end
+            try, parentIsAxes = isa(t.Parent, 'matlab.graphics.axis.Axes'); catch, end
+            if contains(tagVal,'legend') || ~parentIsAxes
+                include = true;
+            end
+            if ~include
+                continue;
+            end
+
+            m = manualItemTemplate;
+            m.type = "text";
+            try, if isprop(t,'Tag'), m.tag = string(t.Tag); end, catch, end
+            try, if isprop(t,'Position'), m.position = double(t.Position); end, catch, end
+            try, if isprop(t,'FontSize'), m.fontSize = double(t.FontSize); end, catch, end
+            manual(end+1) = m; %#ok<AGROW>
+        end
+
+        one.builtInLegends = builtIn;
+        one.manualLegends = manual;
+        one.manualLegendAxes = collectManualLegendAxesForFigure(f);
+        one.builtInLegendCount = numel(builtIn);
+        one.manualLegendCount = numel(manual) + numel(one.manualLegendAxes);
+    end
+
+    function manualAxes = collectManualLegendAxesForFigure(f)
+        manualAxesTemplate = getManualLegendAxesTemplate();
+        manualAxes = repmat(manualAxesTemplate, 0, 1);
+        try
+            allAxes = findall(f,'Type','axes');
+        catch
+            allAxes = gobjects(0);
+        end
+        idx = 0;
+        for i = 1:numel(allAxes)
+            a = allAxes(i);
+            try
+                if ~isManualLegendAxes(a)
+                    continue;
+                end
+            catch
+                continue;
+            end
+            idx = idx + 1;
+            manualAxes(idx) = manualAxesTemplate;
+            try, if isprop(a,'Tag'), manualAxes(idx).tag = string(a.Tag); end, catch, end
+            try, if isprop(a,'Position'), manualAxes(idx).position = double(a.Position); end, catch, end
+            try, if isprop(a,'OuterPosition'), manualAxes(idx).outerPosition = double(a.OuterPosition); end, catch, end
+            try, if isprop(a,'Visible'), manualAxes(idx).visible = string(a.Visible); end, catch, end
+        end
+    end
+
+    function val = getNumericField(s, fieldName, defaultVal)
+        val = defaultVal;
+        try
+            if isstruct(s) && isfield(s,fieldName)
+                candidate = s.(fieldName);
+                if isnumeric(candidate) || islogical(candidate)
+                    if ~isempty(candidate)
+                        val = double(candidate(1));
+                    end
+                end
+            end
+        catch
+        end
+    end
+
+    function val = getStringField(s, fieldName, defaultVal)
+        val = defaultVal;
+        try
+            if isstruct(s) && isfield(s,fieldName)
+                candidate = s.(fieldName);
+                val = char(string(candidate));
+            end
+        catch
+        end
+    end
+
+    function figInfoList = collectFigureAxesMetadata(figHandles)
+        figTemplate = getFigureMetadataTemplate();
+        figInfoList = repmat(figTemplate, 0, 1);
+        if isempty(figHandles)
+            return;
+        end
+
+        idx = 0;
+        for i = 1:numel(figHandles)
+            f = figHandles(i);
+            try
+                if isempty(f) || ~isvalid(f) || ~isgraphics(f,'figure')
+                    continue;
+                end
+            catch
+                continue;
+            end
+
+            idx = idx + 1;
+            figInfoList(idx) = figTemplate;
+
+            try, figInfoList(idx).name = string(f.Name); catch, end
+            try, figInfoList(idx).number = double(f.Number); catch, end
+            try, figInfoList(idx).position = double(f.Position); catch, end
+
+            try
+                ax = SmartFigureEngine.getDataAxes(f);
+            catch
+                ax = gobjects(0);
+            end
+
+            axIdx = 0;
+            for j = 1:numel(ax)
+                a = ax(j);
+                try
+                    if isempty(a) || ~isvalid(a)
+                        continue;
+                    end
+                    if ~(isgraphics(a,'axes') || isgraphics(a,'uiaxes'))
+                        continue;
+                    end
+                    if isManualLegendAxes(a)
+                        continue;
+                    end
+                catch
+                    continue;
+                end
+
+                axIdx = axIdx + 1;
+                axInfo = getAxisMetadataTemplate();
+
+                try, if isprop(a,'Tag'), axInfo.tag = string(a.Tag); end, catch, end
+                try, if isprop(a,'Position'), axInfo.position = double(a.Position); end, catch, end
+                try, if isprop(a,'OuterPosition'), axInfo.outerPosition = double(a.OuterPosition); end, catch, end
+
+                try
+                    if isprop(a,'XLim')
+                        xlimNow = double(a.XLim);
+                        if isnumeric(xlimNow) && numel(xlimNow) >= 2
+                            axInfo.xlim = xlimNow(1:2);
+                        end
+                    end
+                catch
+                end
+                try
+                    if isprop(a,'YLim')
+                        ylimNow = double(a.YLim);
+                        if isnumeric(ylimNow) && numel(ylimNow) >= 2
+                            axInfo.ylim = ylimNow(1:2);
+                        end
+                    end
+                catch
+                end
+
+                try, if isprop(a,'XScale'), axInfo.xscale = string(a.XScale); end, catch, end
+                try, if isprop(a,'YScale'), axInfo.yscale = string(a.YScale); end, catch, end
+
+                try, if isprop(a,'Title') && isprop(a.Title,'String'), axInfo.title = string(a.Title.String); end, catch, end
+                try, if isprop(a,'XLabel') && isprop(a.XLabel,'String'), axInfo.xlabel = string(a.XLabel.String); end, catch, end
+                try, if isprop(a,'YLabel') && isprop(a.YLabel,'String'), axInfo.ylabel = string(a.YLabel.String); end, catch, end
+                try, if isprop(a,'FontSize'), axInfo.tickFontSize = double(a.FontSize); end, catch, end
+                try, if isprop(a,'Title') && isprop(a.Title,'FontSize'), axInfo.titleFontSize = double(a.Title.FontSize); end, catch, end
+                try, if isprop(a,'XLabel') && isprop(a.XLabel,'FontSize'), axInfo.xlabelFontSize = double(a.XLabel.FontSize); end, catch, end
+                try, if isprop(a,'YLabel') && isprop(a.YLabel,'FontSize'), axInfo.ylabelFontSize = double(a.YLabel.FontSize); end, catch, end
+
+                figInfoList(idx).axes(axIdx) = axInfo;
+            end
+        end
+    end
+
+    function out = getFigureMetadataTemplate()
+        out = struct('name',"",'number',NaN,'position',[],'axes',repmat(getAxisMetadataTemplate(),0,1));
+    end
+
+    function out = getAxisMetadataTemplate()
+        out = struct('tag',"",'position',[],'outerPosition',[],'xlim',[],'ylim',[], ...
+            'xscale',"",'yscale',"",'title',"",'xlabel',"",'ylabel',"", ...
+            'tickFontSize',NaN,'titleFontSize',NaN,'xlabelFontSize',NaN,'ylabelFontSize',NaN);
+    end
+
+    function out = getFigureLegendStateTemplate()
+        out = struct('figureName',"",'figureNumber',NaN, ...
+            'builtInLegends',repmat(getBuiltInLegendTemplate(),0,1), ...
+            'manualLegends',repmat(getManualLegendEntryTemplate(),0,1), ...
+            'manualLegendAxes',repmat(getManualLegendAxesTemplate(),0,1), ...
+            'builtInLegendCount',0,'manualLegendCount',0);
+    end
+
+    function out = getBuiltInLegendTemplate()
+        out = struct('exists',false,'location',"",'position',[],'fontSize',NaN,'numColumns',NaN);
+    end
+
+    function out = getManualLegendEntryTemplate()
+        out = struct('type',"",'tag',"",'position',[],'fontSize',NaN);
+    end
+
+    function out = getManualLegendAxesTemplate()
+        out = struct('tag',"",'position',[],'outerPosition',[],'visible',"");
+    end
+
+    function tf = isManualLegendAxes(a)
+        tf = false;
+        try
+            if isempty(a) || ~isvalid(a)
+                return;
+            end
+            tagVal = "";
+            try, if isprop(a,'Tag'), tagVal = string(a.Tag); end, catch, end
+            if strlength(tagVal) > 0
+                if strcmpi(tagVal, "MT_Legend_Axes")
+                    tf = true;
+                    return;
+                end
+                if any(contains(tagVal, ["legend_axes","legend axis","legend"], 'IgnoreCase', true))
+                    tf = true;
+                    return;
+                end
+            end
+            if isprop(a,'UserData')
+                try
+                    ud = a.UserData;
+                    if ischar(ud) || isstring(ud)
+                        if contains(string(ud), "legend", 'IgnoreCase', true)
+                            tf = true;
+                            return;
+                        end
+                    elseif isstruct(ud)
+                        fn = fieldnames(ud);
+                        for ii = 1:numel(fn)
+                            v = ud.(fn{ii});
+                            if (ischar(v) || isstring(v)) && contains(string(v), "legend", 'IgnoreCase', true)
+                                tf = true;
+                                return;
+                            end
+                        end
+                    end
+                catch
+                end
+            end
+        catch
+            tf = false;
+        end
     end
 
     function state = collectKnownUiState()
@@ -956,7 +1423,7 @@ loadPrefs();
     end
 
     function controlsRaw = captureUiControlsRaw()
-        controlsRaw = struct('type',{},'tag',{},'label',{},'value',{},'items',{},'enabled',{});
+        controlsRaw = struct('type',{},'tag',{},'label',{},'value',{},'items',{},'enabled',{},'checked',{},'selectedIndex',{});
         all = findall(fig);
         idx = 0;
         for i = 1:numel(all)
@@ -969,9 +1436,9 @@ loadPrefs();
                 controlsRaw(idx).type = string(class(h));
                 if isprop(h,'Tag'), controlsRaw(idx).tag = string(h.Tag); else, controlsRaw(idx).tag = ""; end
                 if isprop(h,'Text'), controlsRaw(idx).label = string(h.Text); else, controlsRaw(idx).label = ""; end
-                controlsRaw(idx).value = normalizeForJson(h.Value);
+                controlsRaw(idx).value = toJsonSafeValue(h.Value);
                 if isprop(h,'Items')
-                    controlsRaw(idx).items = normalizeForJson(h.Items);
+                    controlsRaw(idx).items = toJsonSafeValue(h.Items);
                 else
                     controlsRaw(idx).items = [];
                 end
@@ -980,41 +1447,143 @@ loadPrefs();
                 else
                     controlsRaw(idx).enabled = "";
                 end
+                if islogical(h.Value) || isnumeric(h.Value)
+                    try
+                        controlsRaw(idx).checked = logical(h.Value(1));
+                    catch
+                        controlsRaw(idx).checked = [];
+                    end
+                else
+                    controlsRaw(idx).checked = [];
+                end
+                if isprop(h,'Items')
+                    try
+                        itemsNow = h.Items;
+                        valNow = h.Value;
+                        selIdx = [];
+                        if iscell(itemsNow)
+                            selIdx = find(strcmp(itemsNow, char(string(valNow))), 1);
+                        elseif isstring(itemsNow)
+                            selIdx = find(strcmp(cellstr(itemsNow), char(string(valNow))), 1);
+                        end
+                        controlsRaw(idx).selectedIndex = selIdx;
+                    catch
+                        controlsRaw(idx).selectedIndex = [];
+                    end
+                else
+                    controlsRaw(idx).selectedIndex = [];
+                end
             catch
                 idx = idx - 1;
             end
         end
     end
 
-    function out = normalizeForJson(in)
-        if isstruct(in)
-            out = struct();
-            f = fieldnames(in);
-            for ii = 1:numel(f)
-                key = f{ii};
-                out.(key) = normalizeForJson(in.(key));
-            end
-            return;
-        end
-        if iscell(in)
-            out = cell(size(in));
-            for ii = 1:numel(in)
-                out{ii} = normalizeForJson(in{ii});
-            end
-            return;
-        end
-        if isstring(in)
-            out = cellstr(in);
-            return;
-        end
-        if ischar(in) || isnumeric(in) || islogical(in)
-            out = in;
-            return;
-        end
+    function out = toJsonSafeValue(in)
         try
+            if ischar(in) || isnumeric(in) || islogical(in) || isempty(in) || iscell(in) || isstruct(in)
+                out = in;
+                return;
+            end
+            if isstring(in)
+                out = cellstr(in);
+                return;
+            end
+            if isdatetime(in)
+                out = char(string(in));
+                return;
+            end
             out = char(string(in));
         catch
             out = [];
+        end
+    end
+
+    function out = normalizeForJson(in)
+        [out, ~] = normalizeForJsonWithErrors(in, 'root');
+    end
+
+    function [out, errors] = normalizeForJsonWithErrors(in, path)
+        errors = struct('path',{},'message',{});
+
+        if isstruct(in)
+            if isempty(in)
+                out = struct();
+                return;
+            end
+
+            if isscalar(in)
+                out = struct();
+                f = fieldnames(in);
+                for ii = 1:numel(f)
+                    key = f{ii};
+                    childPath = sprintf('%s.%s', path, key);
+                    try
+                        [val, childErr] = normalizeForJsonWithErrors(in.(key), childPath);
+                        out.(key) = val;
+                        errors = [errors, childErr]; %#ok<AGROW>
+                    catch ME
+                        out.(key) = [];
+                        errors(end+1) = struct('path', string(childPath), 'message', string(ME.message)); %#ok<AGROW>
+                    end
+                end
+                return;
+            end
+
+            out = cell(1,numel(in));
+            for ii = 1:numel(in)
+                childPath = sprintf('%s(%d)', path, ii);
+                try
+                    [out{ii}, childErr] = normalizeForJsonWithErrors(in(ii), childPath);
+                    errors = [errors, childErr]; %#ok<AGROW>
+                catch ME
+                    out{ii} = struct();
+                    errors(end+1) = struct('path', string(childPath), 'message', string(ME.message)); %#ok<AGROW>
+                end
+            end
+            return;
+        end
+
+        if iscell(in)
+            out = cell(size(in));
+            for ii = 1:numel(in)
+                childPath = sprintf('%s{%d}', path, ii);
+                try
+                    [out{ii}, childErr] = normalizeForJsonWithErrors(in{ii}, childPath);
+                    errors = [errors, childErr]; %#ok<AGROW>
+                catch ME
+                    out{ii} = [];
+                    errors(end+1) = struct('path', string(childPath), 'message', string(ME.message)); %#ok<AGROW>
+                end
+            end
+            return;
+        end
+
+        if isstring(in)
+            try
+                out = cellstr(in);
+            catch ME
+                out = cellstr(string(in));
+                errors(end+1) = struct('path', string(path), 'message', string(ME.message)); %#ok<AGROW>
+            end
+            return;
+        end
+
+        if isdatetime(in)
+            out = char(string(in));
+            return;
+        end
+
+        if ischar(in) || isnumeric(in) || islogical(in) || isempty(in)
+            out = in;
+            return;
+        end
+
+        try
+            out = char(string(in));
+        catch ME
+            out = [];
+            errors(end+1) = struct('path', string(path), 'message', string(ME.message)); %#ok<AGROW>
         end
     end
 
@@ -1063,11 +1632,7 @@ loadPrefs();
                     error('Unsupported preset extension: %s', ext);
             end
 
-            if isfield(meta,'uiKnown')
-                applyKnownUiState(meta.uiKnown);
-            else
-                applyKnownUiState(meta);
-            end
+            applyLayoutMetadataStruct(meta);
 
             savePrefs();
 
@@ -1082,6 +1647,286 @@ loadPrefs();
             end
         catch ME
             errordlg(sprintf('Failed to load layout preset:\n%s', ME.message), 'Layout Preset Error');
+        end
+    end
+
+    function applyLayoutMetadataStruct(meta)
+        if isempty(meta) || ~isstruct(meta)
+            return;
+        end
+
+        % Primary source: uiState (new schema)
+        if isfield(meta,'uiState') && isstruct(meta.uiState)
+            applyKnownUiState(meta.uiState);
+        % Legacy fallback
+        elseif isfield(meta,'uiKnown') && isstruct(meta.uiKnown)
+            applyKnownUiState(meta.uiKnown);
+        else
+            applyKnownUiState(meta);
+        end
+
+        % Generic replay by Tag (primary for full round-trip)
+        if isfield(meta,'uiControlsSnapshot')
+            replayUiControlsSnapshot(meta.uiControlsSnapshot);
+        elseif isfield(meta,'uiControls')
+            replayUiControlsSnapshot(meta.uiControls);
+        end
+    end
+
+    function replayUiControlsSnapshot(snapshot)
+        if isempty(snapshot)
+            return;
+        end
+        if isstruct(snapshot)
+            items = snapshot;
+        elseif iscell(snapshot)
+            try
+                items = [snapshot{:}];
+            catch
+                return;
+            end
+        else
+            return;
+        end
+        if isempty(items)
+            return;
+        end
+
+        tagMap = buildUiControlTagMap();
+        for i = 1:numel(items)
+            it = items(i);
+            try
+                if ~isfield(it,'tag') || isempty(it.tag)
+                    continue;
+                end
+                tag = char(string(it.tag));
+                if isempty(tag)
+                    continue;
+                end
+                if ~isKey(tagMap, tag)
+                    warning('FinalFigureFormatterUI:UnmatchedControlTag', ...
+                        'Saved UI control tag not found in current UI: %s', tag);
+                    continue;
+                end
+                h = tagMap(tag);
+                if ~isvalid(h)
+                    continue;
+                end
+
+                if isfield(it,'selectedIndex') && ~isempty(it.selectedIndex) && isprop(h,'Items')
+                    try
+                        idxSel = double(it.selectedIndex);
+                        items = h.Items;
+                        if isfinite(idxSel) && idxSel >= 1 && idxSel <= numel(items)
+                            if iscell(items)
+                                h.Value = items{idxSel};
+                            else
+                                h.Value = items(idxSel);
+                            end
+                            continue;
+                        end
+                    catch
+                    end
+                end
+
+                if isfield(it,'checked') && ~isempty(it.checked)
+                    applyControlValue(h, it.checked);
+                elseif isfield(it,'value')
+                    applyControlValue(h, it.value);
+                end
+            catch ME
+                warning('FinalFigureFormatterUI:ReplayControlFailed', ...
+                    'Failed to replay control at index %d: %s', i, ME.message);
+            end
+        end
+    end
+
+    function applyControlValue(h, rawValue)
+        if isempty(h) || ~isvalid(h)
+            return;
+        end
+        if ~isprop(h,'Value')
+            return;
+        end
+
+        try
+            % Dropdowns: ensure value is among Items when possible
+            if isprop(h,'Items')
+                items = h.Items;
+                candidate = char(string(rawValue));
+                if iscell(items)
+                    idx = find(strcmp(items, candidate), 1);
+                    if ~isempty(idx)
+                        h.Value = items{idx};
+                        return;
+                    end
+                elseif isstring(items)
+                    idx = find(strcmp(cellstr(items), candidate), 1);
+                    if ~isempty(idx)
+                        h.Value = items(idx);
+                        return;
+                    end
+                end
+            end
+
+            % Numeric fields / checkboxes / generic value controls
+            if isnumeric(h.Value)
+                if isnumeric(rawValue)
+                    h.Value = rawValue(1);
+                else
+                    numVal = str2double(char(string(rawValue)));
+                    if isfinite(numVal)
+                        h.Value = numVal;
+                    end
+                end
+                return;
+            end
+
+            if islogical(h.Value)
+                if islogical(rawValue) || isnumeric(rawValue)
+                    h.Value = logical(rawValue(1));
+                else
+                    txt = lower(char(string(rawValue)));
+                    h.Value = any(strcmp(txt, {'1','true','on','yes'}));
+                end
+                return;
+            end
+
+            % Textual controls
+            h.Value = char(string(rawValue));
+        catch
+            % Last resort: try direct assignment
+            try
+                h.Value = rawValue;
+            catch
+            end
+        end
+    end
+
+    function map = buildUiControlTagMap()
+        map = containers.Map('KeyType','char','ValueType','any');
+        allControls = findall(fig);
+        for ii = 1:numel(allControls)
+            h = allControls(ii);
+            try
+                if ~isprop(h,'Value') || ~isprop(h,'Tag')
+                    continue;
+                end
+                tag = char(string(h.Tag));
+                if isempty(tag)
+                    continue;
+                end
+                map(tag) = h;
+            catch
+            end
+        end
+    end
+
+    function assignControlTags()
+        % Save / export
+        try, hPathBox.Tag = 'pathBox'; catch, end
+        try, hUseSubfolder.Tag = 'useSubfolder'; catch, end
+        try, hSubfolderName.Tag = 'subfolderName'; catch, end
+        try, hOverwrite.Tag = 'overwrite'; catch, end
+        try, hPdfMode.Tag = 'pdfMode'; catch, end
+
+        % Figure / axes geometry
+        try, hFigWidth.Tag = 'figWidth'; catch, end
+        try, hFigHeight.Tag = 'figHeight'; catch, end
+        try, hAxWidth.Tag = 'axWidth'; catch, end
+        try, hAxHeight.Tag = 'axHeight'; catch, end
+        try, hTopMargin.Tag = 'topMargin'; catch, end
+        try, hLeftMargin.Tag = 'leftMargin'; catch, end
+
+        % Smart layout
+        try, hPanelsX.Tag = 'panelsX'; catch, end
+        try, hPanelsY.Tag = 'panelsY'; catch, end
+        try, colMode.Tag = 'columnMode'; catch, end
+        try, hAspect.Tag = 'aspect'; catch, end
+        try, hStyleMode.Tag = 'styleMode'; catch, end
+
+        % Appearance
+        try, hPopupMap.Tag = 'appearanceMapName'; catch, end
+        try, hPopupSpread.Tag = 'appearanceSpreadMode'; catch, end
+        try, hRadioOpen.Tag = 'appearanceOpenFigs'; catch, end
+        try, hRadioFolder.Tag = 'appearanceUseFolder'; catch, end
+        try, hEditFolder.Tag = 'appearanceFolderPath'; catch, end
+        try, hEditDataLW.Tag = 'appearanceDataLineWidth'; catch, end
+        try, hPopupDataStyle.Tag = 'appearanceDataLineStyle'; catch, end
+        try, hEditMarkerSize.Tag = 'appearanceMarkerSize'; catch, end
+        try, hEditFitLW.Tag = 'appearanceFitLineWidth'; catch, end
+        try, hPopupFitStyle.Tag = 'appearanceFitLineStyle'; catch, end
+        try, hPopupFitColor.Tag = 'appearanceFitColor'; catch, end
+        try, hChkReverseLegend.Tag = 'appearanceReverseLegend'; catch, end
+        try, hChkReverseOrder.Tag = 'appearanceReverseOrder'; catch, end
+        try, hChkNoMapChange.Tag = 'appearanceNoMapChange'; catch, end
+
+        % Typography / advanced
+        try, hFontSize.Tag = 'fontSize'; catch, end
+        try, hLegendFontSize.Tag = 'legendFontSize'; catch, end
+        try, chkCurrent.Tag = 'applyCurrentOnly'; catch, end
+    end
+
+    function testUiRoundTrip(~,~)
+        try
+            before = captureUiControlsRaw();
+            tmpPath = fullfile(tempdir, ['ffui_roundtrip_' char(datetime('now','Format','yyyyMMdd_HHmmss')) '.json']);
+            [okSave, msgSave] = saveLayoutMetadataJson(tmpPath, gobjects(0), 'pdf', getPdfExportMode());
+            if ~okSave
+                fprintf('[INFO] Round-trip test: save metadata degraded: %s\n', msgSave);
+            end
+
+            restoreUIdefaults([],[]);
+
+            raw = fileread(tmpPath);
+            meta = jsondecode(raw);
+            applyLayoutMetadataStruct(meta);
+
+            after = captureUiControlsRaw();
+            mismatch = compareControlSnapshots(before, after);
+            assert(isempty(mismatch), 'Round-trip mismatch in %d control(s): %s', numel(mismatch), strjoin(mismatch, ', '));
+            msgbox('Round-trip test passed: UI state restored successfully.','Round-Trip Test');
+        catch ME
+            errordlg(sprintf('Round-trip test failed:\n%s', ME.message), 'Round-Trip Test');
+        end
+    end
+
+    function mismatch = compareControlSnapshots(a, b)
+        mismatch = {};
+        mapA = snapshotToMap(a);
+        mapB = snapshotToMap(b);
+        keysA = mapA.keys;
+        for i = 1:numel(keysA)
+            tag = keysA{i};
+            if ~isKey(mapB, tag)
+                mismatch{end+1} = tag; %#ok<AGROW>
+                continue;
+            end
+            va = mapA(tag);
+            vb = mapB(tag);
+            if ~isequaln(string(va), string(vb))
+                mismatch{end+1} = tag; %#ok<AGROW>
+            end
+        end
+    end
+
+    function map = snapshotToMap(snap)
+        map = containers.Map('KeyType','char','ValueType','any');
+        if isempty(snap)
+            return;
+        end
+        for i = 1:numel(snap)
+            try
+                if ~isfield(snap(i),'tag') || ~isfield(snap(i),'value')
+                    continue;
+                end
+                tag = char(string(snap(i).tag));
+                if isempty(tag)
+                    continue;
+                end
+                map(tag) = snap(i).value;
+            catch
+            end
         end
     end
 
@@ -1768,19 +2613,8 @@ loadPrefs();
         if isempty(fig0), return; end
         if ~isvalid(fig0), return; end
         
-        % Safely check if figure name is in skip list
-        fname = '';
-        try
-            fname = char(fig0.Name);  % Convert to char to support both string and char
-        catch
-            fname = '';
-        end
-        
-        % Safe string matching
-        for i = 1:numel(skipList)
-            if strcmp(fname, skipList{i})
-                return;  % Skip UI windows
-            end
+        if ~isRealDataFigure(fig0)
+            return;
         end
         
         lastRealFigure = fig0;
@@ -1790,16 +2624,25 @@ loadPrefs();
         % FINDREALFIGS - Return array of valid user data figures
         % Filters out UI windows using safe string comparison
         if applyCurrentOnly
-            if isempty(lastRealFigure)
-                figs = [];
+            if ~isempty(lastRealFigure) && isvalid(lastRealFigure) && isRealDataFigure(lastRealFigure)
+                figs = lastRealFigure;
                 return;
             end
-            if ~isvalid(lastRealFigure)
-                lastRealFigure = [];  % Clean up deleted handle
-                figs = [];
+
+            figCurrent = [];
+            try
+                figCurrent = get(0,'CurrentFigure');
+            catch
+                figCurrent = [];
+            end
+            if ~isempty(figCurrent) && isvalid(figCurrent) && isRealDataFigure(figCurrent)
+                lastRealFigure = figCurrent;
+                figs = figCurrent;
                 return;
             end
-            figs = lastRealFigure;
+
+            lastRealFigure = [];
+            figs = [];
             return;
         end
         
@@ -1810,29 +2653,36 @@ loadPrefs();
         for f = allFigs'
             if ~isvalid(f), continue; end
             
-            % Get figure name safely
+            if isRealDataFigure(f)
+                figs = [figs; f];
+            end
+        end
+    end
+
+    function tf = isRealDataFigure(f)
+        tf = false;
+        try
+            if isempty(f) || ~isvalid(f) || ~isgraphics(f,'figure')
+                return;
+            end
+
             fname = '';
             try
                 fname = char(f.Name);
             catch
                 fname = '';
             end
-            
-            % Check if figure should be skipped
-            isSkipped = false;
+
             for i = 1:numel(skipList)
                 if strcmp(fname, skipList{i})
-                    isSkipped = true;
-                    break;
+                    return;
                 end
             end
-            
-            if ~isSkipped
-                hasAxes = ~isempty(findall(f,'Type','axes'));
-                if hasAxes
-                    figs = [figs; f];
-                end
-            end
+
+            hasAxes = ~isempty(findall(f,'Type','axes'));
+            tf = hasAxes;
+        catch
+            tf = false;
         end
     end
 

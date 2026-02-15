@@ -108,7 +108,7 @@ classdef SmartFigureEngine
                 return;
             end
             setappdata(fig,'SmartFigureEngine_IsApplying',true);
-            c = onCleanup(@() setappdata(fig,'SmartFigureEngine_IsApplying',false)); %#ok<NASGU>
+            c = onCleanup(@() SmartFigureEngine.clearApplyingFlag(fig)); %#ok<NASGU>
 
             if ~isfield(style,'lockSmartStyle'), style.lockSmartStyle = false; end
             if isappdata(fig,'SmartFigureEngine_StyleLock')
@@ -132,12 +132,15 @@ classdef SmartFigureEngine
 
             SmartFigureEngine.applyFigureGeometry(fig, style);
             SmartFigureEngine.applyAxesGeometry(fig, style);
+            SmartFigureEngine.recenterYLabelsForFigure(fig);
             style = SmartFigureEngine.syncSafeModeMarginsFromAxes(fig, style);
             setappdata(fig,'SmartFigureEngine_LastStyle',style);
             SmartFigureEngine.applyTypography(fig, style);
             SmartFigureEngine.applyLineSystem(fig, style);
             SmartFigureEngine.applyLegendSystem(fig, style);
             SmartFigureEngine.finalize(fig, style);
+            SmartFigureEngine.enforceReferenceLinesBehindData(fig);
+            SmartFigureEngine.recenterYLabelsForFigure(fig);
 
             try
                 report = SmartFigureEngine.validateFigureConsistency(fig);
@@ -151,6 +154,7 @@ classdef SmartFigureEngine
             end
 
             axNow = SmartFigureEngine.getDataAxes(fig);
+            SmartFigureEngine.attachYLimRecenteringListeners(axNow);
             geomMode = SmartFigureEngine.getGeometryMode(style);
             isDeterministicMode = strcmpi(geomMode,'deterministic-grid');
             if ~isDeterministicMode && (~isfield(style,'enableAutoReflow') || style.enableAutoReflow)
@@ -216,7 +220,9 @@ classdef SmartFigureEngine
                 bottom = max(0.01, min(1-height-0.01, 1 - height - style.topMargin));
                 ax(1).Units = 'normalized';
                 ax(1).Position = [left, bottom, width, height];
+                SmartFigureEngine.applyGlobalLeftShift(ax(1), style);
                 SmartFigureEngine.placeAxisLabels(ax(1), style, false);
+                SmartFigureEngine.enforceReferenceLinesBehindData(fig);
                 return;
             end
 
@@ -226,6 +232,8 @@ classdef SmartFigureEngine
                 else
                     SmartFigureEngine.applyMultiPanelGeometry(fig, ax, style);
                 end
+                SmartFigureEngine.applyGlobalLeftShift(ax, style);
+                SmartFigureEngine.enforceReferenceLinesBehindData(fig);
                 return;
             end
 
@@ -234,7 +242,9 @@ classdef SmartFigureEngine
                 left = max(0.01, min(1-style.axWidth-0.01, style.leftMargin));
                 ax(1).Units = 'normalized';
                 ax(1).Position = [left, bottom, style.axWidth, style.axHeight];
+                SmartFigureEngine.applyGlobalLeftShift(ax(1), style);
                 SmartFigureEngine.placeAxisLabels(ax(1), style, false);
+                SmartFigureEngine.enforceReferenceLinesBehindData(fig);
                 return;
             end
         end
@@ -256,7 +266,7 @@ classdef SmartFigureEngine
                 end
             catch
             end
-            legendFs = SmartFigureEngine.getLegendTargetFont(style);
+            legendFs = SmartFigureEngine.getSharedLegendTextFont(style);
             isMultiPanel = numel(ax) > 1;
             for a = ax(:)'
                 try
@@ -314,14 +324,10 @@ classdef SmartFigureEngine
 
             tx = findall(fig,'Type','text');
             for t = tx(:)'
-                textFs = max(style.annotationFont, round(style.tickFont));
+                textFs = legendFs;
                 try
                     if ~isempty(excludedText) && any(t == excludedText)
                         continue;
-                    end
-                    pAx = ancestor(t,'axes');
-                    if ~isempty(pAx) && any(pAx == ax)
-                        textFs = legendFs;
                     end
                 catch
                 end
@@ -334,7 +340,7 @@ classdef SmartFigureEngine
 
             ann = findall(fig,'Type','textboxshape');
             for t = ann(:)'
-                SmartFigureEngine.applyTextObj(t, max(legendFs, round(style.tickFont)));
+                SmartFigureEngine.applyTextObj(t, legendFs);
                 try
                     if isprop(t,'Interpreter'), t.Interpreter = 'latex'; end
                     if isprop(t,'LineWidth'), t.LineWidth = max(0.5, style.lineWidth*0.5); end
@@ -343,7 +349,7 @@ classdef SmartFigureEngine
                 end
             end
 
-            SmartFigureEngine.normalizeInAxesTextboxes(fig, ax, max(legendFs, round(style.tickFont)));
+            SmartFigureEngine.normalizeInAxesTextboxes(fig, ax, legendFs);
 
             SmartFigureEngine.enforceSubplotLabelPlacement(ax, style);
         end
@@ -383,8 +389,7 @@ classdef SmartFigureEngine
 
         function applyLegendSystem(fig, style)
             lg = findall(fig,'Type','legend');
-            legendFs = SmartFigureEngine.getLegendTargetFont(style);
-            tickFloor = max(1, round(style.tickFont));
+            legendFs = SmartFigureEngine.getSharedLegendTextFont(style);
             for L = lg(:)'
                 try
                     if isprop(L,'AutoUpdate'), L.AutoUpdate = 'off'; end
@@ -399,7 +404,7 @@ classdef SmartFigureEngine
                     catch
                     end
 
-                    L.FontSize = max(legendFs, tickFloor);
+                    L.FontSize = legendFs;
                     if isprop(L,'Interpreter'), L.Interpreter = 'latex'; end
                     if isprop(L,'Location')
                         if ~isManualLegend
@@ -419,107 +424,108 @@ classdef SmartFigureEngine
                     end
                 catch
                 end
+            end
+        end
 
-                    function positionManualLegendNearTopRight(L, style)
-                        try
-                            if isempty(L) || ~isgraphics(L,'legend') || ~isprop(L,'Position')
-                                return;
-                            end
+        function positionManualLegendNearTopRight(L, style)
+            try
+                if isempty(L) || ~isgraphics(L,'legend') || ~isprop(L,'Position')
+                    return;
+                end
 
-                            parentAx = [];
-                            try
-                                if isprop(L,'Parent') && ~isempty(L.Parent) && isgraphics(L.Parent,'axes')
-                                    parentAx = L.Parent;
-                                end
-                            catch
-                            end
-                            if isempty(parentAx)
-                                try
-                                    parentAx = ancestor(L,'axes');
-                                catch
-                                    parentAx = [];
-                                end
-                            end
-                            if isempty(parentAx) || ~isgraphics(parentAx,'axes')
-                                return;
-                            end
-
-                            oldAxUnits = '';
-                            try
-                                if isprop(parentAx,'Units')
-                                    oldAxUnits = parentAx.Units;
-                                    parentAx.Units = 'normalized';
-                                end
-                            catch
-                            end
-
-                            axPos = [];
-                            try
-                                axPos = parentAx.Position;
-                            catch
-                            end
-
-                            try
-                                if ~isempty(oldAxUnits) && isprop(parentAx,'Units')
-                                    parentAx.Units = oldAxUnits;
-                                end
-                            catch
-                            end
-
-                            if isempty(axPos) || numel(axPos) < 4
-                                return;
-                            end
-
-                            p = L.Position;
-                            if numel(p) < 4 || p(3) <= 0 || p(4) <= 0
-                                return;
-                            end
-
-                            colGap = 0.05;
-                            rowGap = 0.05;
-                            try
-                                if isfield(style,'colGap') && isnumeric(style.colGap) && isfinite(style.colGap)
-                                    colGap = max(0, style.colGap);
-                                end
-                            catch
-                            end
-                            try
-                                if isfield(style,'rowGap') && isnumeric(style.rowGap) && isfinite(style.rowGap)
-                                    rowGap = max(0, style.rowGap);
-                                end
-                            catch
-                            end
-
-                            insetX = max(0.008, min(0.028, 0.18*colGap + 0.02));
-                            insetY = max(0.008, min(0.028, 0.18*rowGap + 0.02));
-
-                            targetX = axPos(1) + axPos(3) - p(3) - insetX;
-                            targetY = axPos(2) + axPos(4) - p(4) - insetY;
-
-                            xMin = axPos(1) + 0.001;
-                            xMax = axPos(1) + axPos(3) - p(3) - 0.001;
-                            yMin = axPos(2) + 0.001;
-                            yMax = axPos(2) + axPos(4) - p(4) - 0.001;
-
-                            if xMax < xMin || yMax < yMin
-                                return;
-                            end
-
-                            p(1) = min(max(targetX, xMin), xMax);
-                            p(2) = min(max(targetY, yMin), yMax);
-                            L.Position = p;
-                        catch
-                        end
+                parentAx = [];
+                try
+                    if isprop(L,'Parent') && ~isempty(L.Parent) && isgraphics(L.Parent,'axes')
+                        parentAx = L.Parent;
                     end
+                catch
+                end
+                if isempty(parentAx)
+                    try
+                        parentAx = ancestor(L,'axes');
+                    catch
+                        parentAx = [];
+                    end
+                end
+                if isempty(parentAx) || ~isgraphics(parentAx,'axes')
+                    return;
+                end
+
+                oldAxUnits = '';
+                try
+                    if isprop(parentAx,'Units')
+                        oldAxUnits = parentAx.Units;
+                        parentAx.Units = 'normalized';
+                    end
+                catch
+                end
+
+                axPos = [];
+                try
+                    axPos = parentAx.Position;
+                catch
+                end
+
+                try
+                    if ~isempty(oldAxUnits) && isprop(parentAx,'Units')
+                        parentAx.Units = oldAxUnits;
+                    end
+                catch
+                end
+
+                if isempty(axPos) || numel(axPos) < 4
+                    return;
+                end
+
+                p = L.Position;
+                if numel(p) < 4 || p(3) <= 0 || p(4) <= 0
+                    return;
+                end
+
+                colGap = 0.05;
+                rowGap = 0.05;
+                try
+                    if isfield(style,'colGap') && isnumeric(style.colGap) && isfinite(style.colGap)
+                        colGap = max(0, style.colGap);
+                    end
+                catch
+                end
+                try
+                    if isfield(style,'rowGap') && isnumeric(style.rowGap) && isfinite(style.rowGap)
+                        rowGap = max(0, style.rowGap);
+                    end
+                catch
+                end
+
+                insetX = max(0.008, min(0.028, 0.18*colGap + 0.02));
+                insetY = max(0.008, min(0.028, 0.18*rowGap + 0.02));
+
+                targetX = axPos(1) + axPos(3) - p(3) - insetX;
+                targetY = axPos(2) + axPos(4) - p(4) - insetY;
+
+                xMin = axPos(1) + 0.001;
+                xMax = axPos(1) + axPos(3) - p(3) - 0.001;
+                yMin = axPos(2) + 0.001;
+                yMax = axPos(2) + axPos(4) - p(4) - 0.001;
+
+                if xMax < xMin || yMax < yMin
+                    return;
+                end
+
+                p(1) = min(max(targetX, xMin), xMax);
+                p(2) = min(max(targetY, yMin), yMax);
+                L.Position = p;
+            catch
             end
         end
 
         function finalize(fig, style)
             SmartFigureEngine.bringMarkersToFront(fig);
-            SmartFigureEngine.enforceAnnotationHierarchy(fig, style.annotationFont);
+            SmartFigureEngine.enforceAnnotationHierarchy(fig, SmartFigureEngine.getSharedLegendTextFont(style));
             if ~isfield(style,'detectTextOverlaps') || style.detectTextOverlaps
                 SmartFigureEngine.resolveTextOverlaps(fig, style);
             end
+            SmartFigureEngine.solveLabelOverflow(fig, style);
             SmartFigureEngine.warnLabelOverflow(fig);
             drawnow limitrate;
         end
@@ -564,6 +570,9 @@ classdef SmartFigureEngine
                     else
                         SmartFigureEngine.applyMultiPanelGeometry(fig, ax, style);
                     end
+                    SmartFigureEngine.recenterYLabelsForAxes(ax);
+                    SmartFigureEngine.enforceReferenceLinesBehindData(fig);
+                    SmartFigureEngine.attachYLimRecenteringListeners(ax);
                     return;
                 end
             end
@@ -600,6 +609,112 @@ classdef SmartFigureEngine
                 try
                     if isprop(L,'Location'), L.Location = loc; end
                 catch
+                end
+            end
+        end
+
+        function applyLegendAnnotationFontOnly(fig, fontSize)
+            if isempty(fig) || ~isvalid(fig) || ~isgraphics(fig,'figure')
+                return;
+            end
+            if nargin < 2 || ~isnumeric(fontSize) || ~isfinite(fontSize) || fontSize <= 0
+                return;
+            end
+
+            fs = max(1, round(fontSize));
+            try
+                setappdata(0,'SmartFigureEngine_GlobalLegendFont',fs);
+            catch
+            end
+
+            lg = findall(fig,'Type','legend');
+            for L = lg(:)'
+                try
+                    if isprop(L,'FontUnits'), L.FontUnits = 'points'; end
+                    L.FontSize = fs;
+                    if isprop(L,'Interpreter'), L.Interpreter = 'latex'; end
+                catch
+                end
+            end
+
+            ax = SmartFigureEngine.getDataAxes(fig);
+            excludedText = gobjects(0);
+            for a = ax(:)'
+                try, excludedText(end+1,1) = a.XLabel; catch, end %#ok<AGROW>
+                try, excludedText(end+1,1) = a.YLabel; catch, end %#ok<AGROW>
+                try, excludedText(end+1,1) = a.Title;  catch, end %#ok<AGROW>
+            end
+
+            tx = findall(fig,'Type','text');
+            for t = tx(:)'
+                try
+                    if ~isempty(excludedText) && any(t == excludedText)
+                        continue;
+                    end
+
+                    includeManualLegendText = false;
+
+                    % Figure-level text (not inside axes) is treated as manual legend/annotation text
+                    pAx = [];
+                    try, pAx = ancestor(t,'axes'); catch, end
+                    if isempty(pAx)
+                        includeManualLegendText = true;
+                    end
+
+                    % Explicit legend-like tagging on text or parent/group
+                    if ~includeManualLegendText
+                        tagVal = "";
+                        nameVal = "";
+                        pTag = "";
+                        gpTag = "";
+                        try, if isprop(t,'Tag'), tagVal = lower(string(t.Tag)); end, catch, end
+                        try, if isprop(t,'DisplayName'), nameVal = lower(string(t.DisplayName)); end, catch, end
+                        try
+                            p = t.Parent;
+                            if ~isempty(p) && isgraphics(p) && isprop(p,'Tag')
+                                pTag = lower(string(p.Tag));
+                            end
+                        catch
+                        end
+                        try
+                            gp = ancestor(t,'hggroup');
+                            if ~isempty(gp) && isprop(gp,'Tag')
+                                gpTag = lower(string(gp.Tag));
+                            end
+                        catch
+                        end
+
+                        if contains(tagVal,'legend') || contains(nameVal,'legend') || contains(pTag,'legend') || contains(gpTag,'legend')
+                            includeManualLegendText = true;
+                        end
+                    end
+
+                    if includeManualLegendText
+                        SmartFigureEngine.applyTextObj(t, fs);
+                    end
+                catch
+                end
+            end
+
+            txb = findall(fig,'Type','textboxshape');
+            for t = txb(:)'
+                try
+                    SmartFigureEngine.applyTextObj(t, fs);
+                    if isprop(t,'Interpreter'), t.Interpreter = 'latex'; end
+                catch
+                end
+            end
+
+            annTypes = {'textarrowshape','arrowshape','doubleendarrowshape'};
+            for i = 1:numel(annTypes)
+                a = findall(fig,'Type',annTypes{i});
+                for h = a(:)'
+                    try
+                        if isprop(h,'FontUnits'), h.FontUnits = 'points'; end
+                        if isprop(h,'FontSize'), h.FontSize = fs; end
+                        if isprop(h,'Interpreter'), h.Interpreter = 'latex'; end
+                    catch
+                    end
                 end
             end
         end
@@ -680,6 +795,20 @@ classdef SmartFigureEngine
                     end
                     if numel(ax) > 1 && (p(1) < 0.005 || p(2) < 0.005)
                         addIssue('MarginCorrectness', a, 'Position', mat2str(p,4), 'Increase left/top propagation for multi-panel layout');
+                    end
+                catch
+                end
+
+                try
+                    ov = SmartFigureEngine.getAxisLabelOverflow(a);
+                    if ov.xOverflow > 0
+                        addIssue('XLabelClipping', a.XLabel, 'Overflow', ov.xOverflow, 'Increase bottomMargin using extent delta');
+                    end
+                    if ov.yOverflow > 0
+                        addIssue('YLabelClipping', a.YLabel, 'Overflow', ov.yOverflow, 'Increase leftMargin using extent delta');
+                    end
+                    if ov.titleOverflow > 0
+                        addIssue('TitleClipping', a.Title, 'Overflow', ov.titleOverflow, 'Increase topMargin using extent delta');
                     end
                 catch
                 end
@@ -1102,6 +1231,98 @@ classdef SmartFigureEngine
                 a.YLabel.VerticalAlignment = 'bottom';
             catch
             end
+
+            SmartFigureEngine.recenterYLabelOnAxes(a);
+        end
+
+        function recenterYLabelsForFigure(fig)
+            ax = SmartFigureEngine.getDataAxes(fig);
+            SmartFigureEngine.recenterYLabelsForAxes(ax);
+        end
+
+        function recenterYLabelsForAxes(ax)
+            if isempty(ax)
+                return;
+            end
+            for a = ax(:)'
+                SmartFigureEngine.recenterYLabelOnAxes(a);
+            end
+        end
+
+        function recenterYLabelOnAxes(ax)
+            try
+                if isempty(ax) || ~(isgraphics(ax,'axes') || isgraphics(ax,'uiaxes'))
+                    return;
+                end
+                yl = [];
+                try
+                    yl = ax.YLabel;
+                catch
+                end
+                if isempty(yl) || ~isgraphics(yl)
+                    return;
+                end
+
+                yLimits = ax.YLim;
+                if isempty(yLimits) || numel(yLimits) < 2 || any(~isfinite(yLimits))
+                    return;
+                end
+                yCenter = mean(yLimits);
+
+                yl.Units = 'data';
+                pos = yl.Position;
+                if numel(pos) < 2
+                    return;
+                end
+                pos(2) = yCenter;
+                yl.Position = pos;
+            catch
+            end
+        end
+
+        function attachYLimRecenteringListeners(ax)
+            if isempty(ax)
+                return;
+            end
+
+            for a = ax(:)'
+                try
+                    if isempty(a) || ~(isgraphics(a,'axes') || isgraphics(a,'uiaxes'))
+                        continue;
+                    end
+
+                    if isappdata(a,'SmartFigureEngine_YLimListener')
+                        l = getappdata(a,'SmartFigureEngine_YLimListener');
+                        try
+                            if isvalid(l)
+                                continue;
+                            end
+                        catch
+                        end
+                    end
+
+                    l = addlistener(a, 'YLim', 'PostSet', @(~,evt) SmartFigureEngine.onAxisYLimChanged(evt));
+                    setappdata(a,'SmartFigureEngine_YLimListener',l);
+                catch
+                end
+            end
+        end
+
+        function onAxisYLimChanged(evt)
+            try
+                ax = [];
+                try
+                    if isprop(evt,'AffectedObject')
+                        ax = evt.AffectedObject;
+                    end
+                catch
+                end
+                if isempty(ax)
+                    return;
+                end
+                SmartFigureEngine.recenterYLabelOnAxes(ax);
+            catch
+            end
         end
 
         function style = syncSafeModeMarginsFromAxes(fig, style)
@@ -1170,6 +1391,10 @@ classdef SmartFigureEngine
                 catch
                 end
                 if strlength(tagVal) > 0
+                    if strcmpi(tagVal, "MT_Legend_Axes")
+                        keep(k) = false;
+                        continue;
+                    end
                     if contains(tagVal, ["legend","colorbar","helper","temp"], 'IgnoreCase', true)
                         keep(k) = false;
                         continue;
@@ -1643,6 +1868,39 @@ classdef SmartFigureEngine
             end
         end
 
+        function epsX = getGlobalLeftShift(style)
+            epsX = 0.008;
+            try
+                if isfield(style,'panelWidth') && isnumeric(style.panelWidth) && isfinite(style.panelWidth)
+                    if style.panelWidth <= 3.0
+                        epsX = 0.010;
+                    elseif style.panelWidth >= 6.0
+                        epsX = 0.006;
+                    else
+                        t = (style.panelWidth - 3.0) / 3.0;
+                        epsX = 0.010 - 0.004 * max(0, min(1, t));
+                    end
+                end
+            catch
+            end
+            epsX = max(0.005, min(0.015, epsX));
+        end
+
+        function applyGlobalLeftShift(ax, style)
+            if isempty(ax), return; end
+            epsX = SmartFigureEngine.getGlobalLeftShift(style);
+            for k = 1:numel(ax)
+                try
+                    p = ax(k).Position;
+                    if numel(p) >= 4
+                        p(1) = p(1) - epsX;
+                        ax(k).Position = p;
+                    end
+                catch
+                end
+            end
+        end
+
         function enforceSymmetricXTicks(ax)
             try
                 xl = get(ax,'XLim');
@@ -1799,6 +2057,71 @@ classdef SmartFigureEngine
             end
         end
 
+        function enforceReferenceLinesBehindData(fig)
+            if isempty(fig) || ~isvalid(fig) || ~isgraphics(fig,'figure')
+                return;
+            end
+
+            % Global pass: try to push every reference-like object to bottom
+            try
+                allObj = findall(fig);
+            catch
+                allObj = gobjects(0);
+            end
+            for h = allObj(:)'
+                try
+                    if SmartFigureEngine.isReferenceGraphic(h)
+                        try, uistack(h,'bottom'); catch, end
+                    end
+                catch
+                end
+            end
+
+            ax = SmartFigureEngine.getDataAxes(fig);
+            for a = ax(:)'
+                try
+                    try
+                        if isprop(a,'SortMethod')
+                            a.SortMethod = 'childorder';
+                        end
+                    catch
+                    end
+
+                    ch = a.Children;
+                    isRef = false(size(ch));
+                    for k = 1:numel(ch)
+                        try
+                            isRef(k) = SmartFigureEngine.isReferenceGraphic(ch(k));
+                        catch
+                        end
+                    end
+
+                    if any(isRef)
+                        dataChildren = ch(~isRef);
+                        refChildren = ch(isRef);
+
+                        % Primary ordering pass
+                        a.Children = [dataChildren; refChildren];
+
+                        % Fallback stacking pass (robust against child order ambiguities)
+                        for k = 1:numel(refChildren)
+                            try
+                                uistack(refChildren(k),'bottom');
+                            catch
+                            end
+                        end
+                        for k = 1:numel(dataChildren)
+                            try
+                                uistack(dataChildren(k),'top');
+                            catch
+                            end
+                        end
+                    end
+                catch
+                end
+            end
+        end
+
         function tf = isReferenceGraphic(h)
             tf = false;
             try
@@ -1861,11 +2184,22 @@ classdef SmartFigureEngine
                     end
                     s = lower(char(string(t.String)));
                     if contains(s,{'pause','zfc','fc'})
-                        t.FontSize = max(7, annFont-1);
+                        t.FontSize = annFont;
                     end
                 catch
                 end
             end
+        end
+
+        function fs = getSharedLegendTextFont(style)
+            fs = SmartFigureEngine.getLegendTargetFont(style);
+            try
+                if isfield(style,'legendFont') && isnumeric(style.legendFont) && isfinite(style.legendFont) && style.legendFont > 0
+                    fs = round(style.legendFont);
+                end
+            catch
+            end
+            fs = max(1, fs);
         end
 
         function enforceBottomOnlyXTickLabels(ax)
@@ -1945,14 +2279,7 @@ classdef SmartFigureEngine
                 end
             catch
             end
-            fs = max(14, min(18, fs));
-
-            try
-                if isfield(style,'tickFont') && isnumeric(style.tickFont) && isfinite(style.tickFont) && style.tickFont > 0
-                    fs = max(fs, round(style.tickFont));
-                end
-            catch
-            end
+            fs = max(1, fs);
 
             try
                 key = 'SmartFigureEngine_GlobalLegendFont';
@@ -1969,12 +2296,7 @@ classdef SmartFigureEngine
             catch
             end
 
-            try
-                if isfield(style,'tickFont') && isnumeric(style.tickFont) && isfinite(style.tickFont) && style.tickFont > 0
-                    fs = max(fs, round(style.tickFont));
-                end
-            catch
-            end
+            fs = max(1, fs);
         end
 
         function styleOut = rebuildLockedStyle(styleIn)
@@ -2362,25 +2684,134 @@ classdef SmartFigureEngine
             for k = 1:numel(ax)
                 a = ax(k);
                 try
-                    ex = get(a.XLabel, 'Extent');
-                    if numel(ex) >= 2 && ex(2) < -0.02
+                    ov = SmartFigureEngine.getAxisLabelOverflow(a);
+                    if ov.xOverflow > 0
                         warning('SmartFigureEngine:XLabelClipping', ...
-                            'XLabel clipped on axis %d (Extent Y = %.3f). Consider increasing bottomMargin.', k, ex(2));
+                            'XLabel clipped on axis %d (overflow = %.4f).', k, ov.xOverflow);
                     end
-
-                    ey = get(a.YLabel, 'Extent');
-                    if numel(ey) >= 1 && ey(1) < -0.02
+                    if ov.yOverflow > 0
                         warning('SmartFigureEngine:YLabelClipping', ...
-                            'YLabel clipped on axis %d (Extent X = %.3f). Consider increasing leftMargin or reducing YLabel font.', k, ey(1));
+                            'YLabel clipped on axis %d (overflow = %.4f).', k, ov.yOverflow);
                     end
-
-                    et = get(a.Title, 'Extent');
-                    if numel(et) >= 4 && (et(2) + et(4)) > 1.02
+                    if ov.titleOverflow > 0
                         warning('SmartFigureEngine:TitleClipping', ...
-                            'Title clipped on axis %d (Extent top = %.3f). Consider increasing topMargin or reducing title font.', k, et(2) + et(4));
+                            'Title clipped on axis %d (overflow = %.4f).', k, ov.titleOverflow);
                     end
                 catch
                 end
+            end
+        end
+
+        function solveLabelOverflow(fig, style)
+            if nargin < 2 || isempty(style) || ~isstruct(style)
+                style = SmartFigureEngine.computeSmartStyle(3.5, 2.6, 1, 1, 'PRL');
+            end
+            if isempty(fig) || ~isvalid(fig) || ~isgraphics(fig,'figure')
+                return;
+            end
+
+            if ~isfield(style,'rightMargin') || ~isnumeric(style.rightMargin) || ~isfinite(style.rightMargin)
+                style.rightMargin = max(0.01, 1 - style.leftMargin - style.axWidth);
+            end
+            if ~isfield(style,'bottomMargin') || ~isnumeric(style.bottomMargin) || ~isfinite(style.bottomMargin)
+                style.bottomMargin = max(0.01, 1 - style.topMargin - style.axHeight);
+            end
+
+            maxIter = 5;
+            pad = 0.012;
+            for iter = 1:maxIter
+                ax = SmartFigureEngine.getDataAxes(fig);
+                if isempty(ax)
+                    break;
+                end
+
+                deltaBottom = 0;
+                deltaLeft = 0;
+                deltaTop = 0;
+
+                for k = 1:numel(ax)
+                    try
+                        ov = SmartFigureEngine.getAxisLabelOverflow(ax(k));
+                        deltaBottom = max(deltaBottom, ov.xOverflow + pad);
+                        deltaLeft = max(deltaLeft, ov.yOverflow + pad);
+                        deltaTop = max(deltaTop, ov.titleOverflow + pad);
+                    catch
+                    end
+                end
+
+                if deltaBottom <= pad && deltaLeft <= pad && deltaTop <= pad
+                    break;
+                end
+
+                style.bottomMargin = min(0.92, max(0.01, style.bottomMargin + deltaBottom));
+                style.leftMargin = min(0.92, max(0.01, style.leftMargin + deltaLeft));
+                style.topMargin = min(0.92, max(0.01, style.topMargin + deltaTop));
+
+                maxAxesSpan = 0.95;
+                totalX = style.leftMargin + style.rightMargin;
+                if totalX > maxAxesSpan
+                    overflowX = totalX - maxAxesSpan;
+                    style.leftMargin = max(0.01, style.leftMargin - overflowX);
+                end
+
+                style.axWidth = max(0.05, 1 - style.leftMargin - style.rightMargin);
+                style.axHeight = max(0.05, 1 - style.topMargin - style.bottomMargin);
+
+                SmartFigureEngine.applyAxesGeometry(fig, style);
+                SmartFigureEngine.recenterYLabelsForFigure(fig);
+                drawnow limitrate;
+            end
+
+            maxResidual = 0;
+            try
+                ax = SmartFigureEngine.getDataAxes(fig);
+                for k = 1:numel(ax)
+                    ov = SmartFigureEngine.getAxisLabelOverflow(ax(k));
+                    maxResidual = max([maxResidual, ov.xOverflow, ov.yOverflow, ov.titleOverflow]);
+                end
+            catch
+            end
+            if maxResidual > 0.01
+                warning('SmartFigureEngine:OverflowSolverNotConverged', ...
+                    'Label overflow solver did not converge after %d iterations (max residual %.4f).', maxIter, maxResidual);
+            end
+
+            if isgraphics(fig,'figure')
+                setappdata(fig,'SmartFigureEngine_LastStyle',style);
+            end
+        end
+
+        function ov = getAxisLabelOverflow(a)
+            ov = struct('xOverflow',0,'yOverflow',0,'titleOverflow',0);
+            try
+                ex = get(a.XLabel, 'Extent');
+                if isnumeric(ex) && numel(ex) >= 2
+                    ov.xOverflow = max(0, -double(ex(2)) - 0.002);
+                end
+            catch
+            end
+            try
+                ey = get(a.YLabel, 'Extent');
+                if isnumeric(ey) && numel(ey) >= 1
+                    ov.yOverflow = max(0, -double(ey(1)) - 0.002);
+                end
+            catch
+            end
+            try
+                et = get(a.Title, 'Extent');
+                if isnumeric(et) && numel(et) >= 4
+                    ov.titleOverflow = max(0, double(et(2) + et(4) - 1.0) + 0.002);
+                end
+            catch
+            end
+        end
+
+        function clearApplyingFlag(fig)
+            try
+                if ~isempty(fig) && isvalid(fig) && isgraphics(fig,'figure')
+                    setappdata(fig,'SmartFigureEngine_IsApplying',false);
+                end
+            catch
             end
         end
 
