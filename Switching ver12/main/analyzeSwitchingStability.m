@@ -561,7 +561,7 @@ xPulse = pulse_times(:);
 if any(panels=="trace")
     nexttile;
     plot(t, y, '-'); hold on; grid on;
-    ylabel('R');
+    ylabel(physLabel('symbol','R'));
     title(sprintf('sv=%.6g | ch=%d', sv, ch));
     for j = 1:numel(xPulse)
         xline(xPulse(j),'--');

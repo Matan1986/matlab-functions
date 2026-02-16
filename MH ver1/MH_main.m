@@ -22,10 +22,10 @@ filterParams.maxInterpLength = 15;
 % ==========================
 % Paths
 % ==========================
-baseFolder = 'C:\Users\User\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Matlab functions';
+baseFolder = 'C:\Users\matan\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Matlab functions';
 addpath(genpath(baseFolder));
 
-dir = "C:\Users\User\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\MG119 VSM PPMS\MH different temperatures";
+dir = "C:\Users\matan\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\MG119 VSM PPMS\MH different temperatures";
 
 % ==========================
 % Load file list (AUTO detect mode)
@@ -112,7 +112,7 @@ Plots_MH(Temp_table, MagneticField_table, VSM_table, ...
 % ==========================
 % Format figures
 % ==========================
-if formatFigures
+if false
     formatAllFigures('pos',[0.1,0.1,0.7,0.6], ...
                      'clearTitles', false, ...
                      'showLegend', true, ...

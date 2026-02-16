@@ -500,7 +500,7 @@ loadPrefs();
         end
     end
 
-    function applySmartLayout(~,~)
+    function applySmartLayout(~,~)  
         figs = findRealFigs();
         if isempty(figs)
             errordlg('No data figures found','SMART Layout');

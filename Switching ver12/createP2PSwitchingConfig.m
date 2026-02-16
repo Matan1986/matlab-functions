@@ -51,7 +51,7 @@ function createP2PSwitchingConfig(tableData, sortedValues, A, pulse_current_str,
         end
 
         xlabel('Configuration', 'FontSize',16);
-        ylabel('\DeltaR / R [%]', 'FontSize',16);
+        ylabel(physLabel('symbol','R','delta',true,'ratioTo','R','units','\%'), 'FontSize',16);
         title(sprintf('%s   (%s)', labels.(ch), pulse_current_str), 'FontSize',18);
     end
 end

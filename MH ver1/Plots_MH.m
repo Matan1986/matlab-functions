@@ -44,11 +44,11 @@ if ~all_same_fig
              'LineWidth', linewidth, ...
              'DisplayName', sprintf('%g K', sortedTemps(i)));
 
-        xlabel('Field (T)', 'FontSize', fontsize);
-        ylabel('M_z (\mu_B / Co^{2+})', 'FontSize', fontsize);
-        title(sprintf('%s, %g K', titleStr, sortedTemps(i)), 'FontSize', fontsize);
+        applyXLabel('Field (T)');
+        applyYLabel('$M_z$ ($\mu_B / \mathrm{Co}^{2+}$)');
+        applyTitle(sprintf('%s, %g K', titleStr, sortedTemps(i)));
         grid on; set(gca,'FontSize',fontsize);
-        legend('show','FontSize',fontsize,'Location','northeast');
+        applyLegend('show','Location','northeast');
 
         hold off;
     end
@@ -72,11 +72,11 @@ else
              'DisplayName', sprintf('%g K', sortedTemps(i)));
     end
 
-    xlabel('Field (T)', 'FontSize', fontsize);
-    ylabel('M_z (\mu_B / Co^{2+})', 'FontSize', fontsize);
-    title(titleStr, 'FontSize', fontsize);
+    applyXLabel('Field (T)');
+    applyYLabel('$M_z$ ($\mu_B / \mathrm{Co}^{2+}$)');
+    applyTitle(titleStr);
     grid on; set(gca,'FontSize',fontsize);
-    legend('show','FontSize',fontsize,'Location','eastoutside');
+    applyLegend('show','Location','eastoutside');
 
     hold off;
 end

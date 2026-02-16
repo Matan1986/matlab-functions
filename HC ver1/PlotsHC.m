@@ -23,11 +23,11 @@ function PlotsHC(Temp_table, HC_table, sortedFields, colors, ...
     end
 
     % X label: upright text in latex, ticks in tex
-    xlabel(ax,'Temperature (K)','Interpreter','latex','FontSize',Fontsize);
+    applyXLabel(ax,'Temperature (K)');
 
     % Y label: math mode but FULL \mathrm{}
     ylab_full = '$\mathrm{C_{p}\ (J\ K^{-1}\ mol^{-1})}$';
-    ylabel(ax, ylab_full, 'Interpreter','latex','FontSize',Fontsize);
+    applyYLabel(ax, ylab_full);
 
     ax.TickLabelInterpreter = 'tex';
     ax.FontSize = Fontsize - 2;
@@ -61,10 +61,10 @@ function PlotsHC(Temp_table, HC_table, sortedFields, colors, ...
             'DisplayName',[num2str(sortedFields(i)) ' T']);
     end
 
-    xlabel(ax,'Temperature (K)','Interpreter','latex','FontSize',Fontsize);
+    applyXLabel(ax,'Temperature (K)');
 
     ylab_full = '$\mathrm{C_{p}/T\ (J\ K^{-2}\ mol^{-1})}$';
-    ylabel(ax, ylab_full, 'Interpreter','latex','FontSize',Fontsize);
+    applyYLabel(ax, ylab_full);
 
     ax.TickLabelInterpreter = 'tex';
     ax.FontSize = Fontsize - 2;

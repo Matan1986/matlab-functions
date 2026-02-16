@@ -16,11 +16,11 @@ LineWidth               = 2;
 figureMode = 'paper';   % 'normal' | 'paper'
 
 %% PATHS
-baseFolder = 'C:\Users\User\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Matlab functions';
+baseFolder = 'C:\Users\matan\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Matlab functions';
 addpath(genpath(baseFolder));
 
 %% DATA dir
-dir = 'C:\Users\User\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\MG 119 Heat Capacity out of plane\Field Scan 0T 8T';
+dir = 'C:\Users\matan\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\MG 119 Heat Capacity out of plane\Field Scan 0T 8T';
 % dir = 'I:\My Drive\...\Field scans data';
 % dir = 'I:\My Drive\...\Field Scan 0T 8T';
 

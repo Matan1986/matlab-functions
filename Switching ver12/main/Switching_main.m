@@ -5,7 +5,7 @@ format shortEng;
 %% dir & file list
 baseFolder = 'C:\Users\matan\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Matlab functions';
 addpath(genpath(baseFolder));
-dir = "C:\Users\User\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\FIB5_Switching_old_PPMS\Config3 23\Amp Temp Dep partial ver2";
+dir = "C:\Users\matan\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\FIB5_Switching_old_PPMS\Config3 23\Amp Temp Dep partial ver2";
 % -------------------------------------------------
 % Amp–Temp Switching Map
 % plotAmpTempSwitchingMap_switchCh(parentDir, metricType, channelMode)
