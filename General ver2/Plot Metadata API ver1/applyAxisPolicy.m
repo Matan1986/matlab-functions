@@ -39,7 +39,15 @@ if isfield(style, 'gridPolicy')
             grid(ax, 'on');
         case 'off'
             grid(ax, 'off');
-            grid(ax, 'minoroff');
+            if isprop(ax, 'XMinorGrid')
+                ax.XMinorGrid = 'off';
+            end
+            if isprop(ax, 'YMinorGrid')
+                ax.YMinorGrid = 'off';
+            end
+            if isprop(ax, 'ZMinorGrid')
+                ax.ZMinorGrid = 'off';
+            end
         case 'minor'
             grid(ax, 'on');
             grid(ax, 'minor');
