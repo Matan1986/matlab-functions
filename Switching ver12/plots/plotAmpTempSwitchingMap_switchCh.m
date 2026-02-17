@@ -255,9 +255,9 @@ for ch = channelsPlotted
     cb = colorbar(ax);
     switch metricType
         case "P2P_percent"
-            xlabel(cb,'$\mathrm{\Delta R/R\ (\%)}$','Interpreter','latex');
+            xlabel(cb, physLabel('symbol','R','delta',true,'ratioTo','R','units','\%'),'Interpreter','latex');
         otherwise
-            xlabel(cb,'$\mathrm{\Delta R/R}$','Interpreter','latex');
+            xlabel(cb, physLabel('symbol','R','delta',true,'ratioTo','R'),'Interpreter','latex');
     end
     cb.TickLabelInterpreter = 'tex';
 

@@ -7,7 +7,7 @@ function [figure_ch1_filtered_offset, figure_ch2_filtered_offset] = createFilter
     hold on;
     title(sprintf('Amplitude Dependence for %s (Filtered with Offset)', ch1_label), 'FontSize', 14);
     xlabel('Time [sec]', 'FontSize', 14);
-    ylabel('\rho [10^{-6} \Omega \cdot cm]', 'FontSize', 14);
+    ylabel(physLabel('symbol','\rho','units','10^{-6}\Omega \cdot cm'), 'FontSize', 14);
     set(gca, 'FontSize', 10);
     grid on;
 
@@ -16,7 +16,7 @@ function [figure_ch1_filtered_offset, figure_ch2_filtered_offset] = createFilter
     hold on;
     title(sprintf('Amplitude Dependence for %s (Filtered with Offset)', ch2_label), 'FontSize', 14);
     xlabel('Time [sec]', 'FontSize', 14);
-    ylabel('\rho [10^{-6} \Omega \cdot cm]', 'FontSize', 14);
+    ylabel(physLabel('symbol','\rho','units','10^{-6}\Omega \cdot cm'), 'FontSize', 14);
     set(gca, 'FontSize', 10);
     grid on;
 end

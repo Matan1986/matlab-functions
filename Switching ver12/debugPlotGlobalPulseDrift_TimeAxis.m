@@ -85,7 +85,7 @@ for ch = channelsToUse
     end
 
     xlabel('Time (ms)');
-    ylabel('\DeltaR');
+    ylabel(physLabel('symbol','R','delta',true));
     grid on;
 
     hA = plot(NaN,NaN,'.-','Color',blueMap(1,:), ...

@@ -1,0 +1,9 @@
+
+=== FigureControlStudio Persistence Audit ===
+FAIL | 1) gridRows/gridCols persist | Compose numeric controls not found.
+FAIL | 2) widthPreset/customWidth persist | Compose numeric controls not found.
+FAIL | 3) scopeMode persist/no override | Compose numeric controls not found.
+FAIL | 4) reset defaults behavior | Compose numeric controls not found.
+FAIL | 5) corrupted/partial file fallback | Compose numeric controls not found.
+FAIL | 6) no handle persistence + compose unaffected | Compose numeric controls not found.
+Overall: false

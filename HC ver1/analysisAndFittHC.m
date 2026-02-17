@@ -59,11 +59,11 @@ end
 plot(temp_zero_field, feval(fit_result, temp_zero_field), 'r--', 'LineWidth', 1.5, 'DisplayName', 'Fitted curve');
 
 % Add labels, legend, and grid
-xlabel('Temperature [K]', 'Interpreter', 'latex');
-ylabel('$C_p \, [J \, K^{-1} \, mol^{-1}]$', 'Interpreter', 'latex');
+applyXLabel('Temperature [K]');
+applyYLabel('$C_p \, [J \, K^{-1} \, mol^{-1}]$');
 legend('show', 'Location', 'southeast');
 grid on;
-title('Cp vs T with Double Smoothing and Custom Fit', 'Interpreter', 'latex');
+applyTitle('Cp vs T with Double Smoothing and Custom Fit');
 
 % Display the symbolic equation with gamma and beta
 equation_str = '$C_p = \beta T^3 + \gamma T$';
