@@ -204,10 +204,12 @@ ddScope = uidropdown(tgtGrid, ...
 
     % ---------------- Tab 3: Appearance ----------------
     tAppearance = uitab(tabs, 'Title', 'Appearance');
-    tabRootAppearance = uigridlayout(tAppearance, [6 1]);
-    tabRootAppearance.RowHeight = {'fit', 'fit', 'fit', 'fit', '1x', 'fit'};
+    tabRootAppearance = uigridlayout(tAppearance, [5 1]);
+    tabRootAppearance.RowHeight = {'fit', 'fit', 'fit', '1x', 'fit'};
     tabRootAppearance.ColumnWidth = {'1x'};
     tabRootAppearance.Padding = [12 12 12 12];
+    tabRootAppearance.RowSpacing = 12;
+    tabRootAppearance.Scrollable = 'on';
 
     cmapItems = i_getAvailableColormapNames();
     if isempty(cmapItems)
@@ -217,8 +219,30 @@ ddScope = uidropdown(tgtGrid, ...
     if ~any(strcmp(cmapItems, cmapDefault))
         cmapDefault = cmapItems{1};
     end
+    cmapItems = [{'keep'}, cmapItems];
 
-    secAppA = uigridlayout(tabRootAppearance, [3 2]);
+    secColors = uigridlayout(tabRootAppearance, [2 1]);
+    secColors.Layout.Row = 1;
+    secColors.Layout.Column = 1;
+    secColors.ColumnWidth = {'1x'};
+    secColors.RowHeight = {'fit', 'fit'};
+    secColors.Padding = [0 0 0 0];
+    secColors.RowSpacing = 6;
+
+    lblSecColors = uilabel(secColors, 'Text', 'Colors', 'HorizontalAlignment', 'left');
+    lblSecColors.FontWeight = 'bold';
+    lblSecColors.Layout.Row = 1;
+    lblSecColors.Layout.Column = 1;
+
+    secColorsBody = uigridlayout(secColors, [1 1]);
+    secColorsBody.Layout.Row = 2;
+    secColorsBody.Layout.Column = 1;
+    secColorsBody.ColumnWidth = {'1x'};
+    secColorsBody.RowHeight = {'fit'};
+    secColorsBody.Padding = [0 0 0 0];
+    secColorsBody.RowSpacing = 0;
+
+    secAppA = uigridlayout(secColorsBody, [3 2]);
     secAppA.Layout.Row = 1;
     secAppA.Layout.Column = 1;
     secAppA.ColumnWidth = {170, '1x'};
@@ -237,7 +261,8 @@ ddScope = uidropdown(tgtGrid, ...
     lblAppSpread.Layout.Row = 2;
     lblAppSpread.Layout.Column = 1;
     ddSpreadMode = uidropdown(secAppA, ...
-        'Items', {'ultra-narrow','narrow','medium','wide','ultra','full'}, ...
+        'Items', {'keep','ultra-narrow','ultra-narrow-rev','narrow','narrow-rev','medium','medium-rev', ...
+                  'wide','wide-rev','ultra','ultra-rev','full','full-rev'}, ...
         'Value', 'medium', ...
         'ValueChangedFcn', @onPersistedControlChanged);
     ddSpreadMode.Layout.Row = 2;
@@ -248,151 +273,188 @@ ddScope = uidropdown(tgtGrid, ...
     cbSpreadReverse.Layout.Row = 3;
     cbSpreadReverse.Layout.Column = [1 2];
 
-    secAppB = uigridlayout(tabRootAppearance, [9 2]);
-    secAppB.Layout.Row = 2;
-    secAppB.Layout.Column = 1;
-    secAppB.ColumnWidth = {170, '1x'};
-    secAppB.RowHeight = {'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit'};
-    secAppB.Padding = [0 0 0 0];
+    secLinesAxes = uigridlayout(tabRootAppearance, [12 2]);
+    secLinesAxes.Layout.Row = 2;
+    secLinesAxes.Layout.Column = 1;
+    secLinesAxes.ColumnWidth = {'1x','1x'};
+    secLinesAxes.RowHeight = {'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 40};
+    secLinesAxes.Padding = [12 12 12 12];
+    secLinesAxes.RowSpacing = 6;
 
-    cbBgWhiteFigure = uicheckbox(secAppB, 'Text', 'Background white (figure)', 'Value', false, ...
+    lblSecLinesAxes = uilabel(secLinesAxes, 'Text', 'Lines & Axes', 'HorizontalAlignment', 'left');
+    lblSecLinesAxes.FontWeight = 'bold';
+    lblSecLinesAxes.Layout.Row = 1;
+    lblSecLinesAxes.Layout.Column = [1 2];
+
+    cbBgWhiteFigure = uicheckbox(secLinesAxes, 'Text', 'Background white (figure)', 'Value', false, ...
         'ValueChangedFcn', @onBackgroundToggleChanged);
-    cbBgWhiteFigure.Layout.Row = 1;
+    cbBgWhiteFigure.Layout.Row = 2;
     cbBgWhiteFigure.Layout.Column = [1 2];
 
-    cbBgTransparentAxes = uicheckbox(secAppB, 'Text', 'Transparent axes background', 'Value', false, ...
+    cbBgTransparentAxes = uicheckbox(secLinesAxes, 'Text', 'Transparent axes background', 'Value', false, ...
         'ValueChangedFcn', @onBackgroundToggleChanged);
-    cbBgTransparentAxes.Layout.Row = 2;
+    cbBgTransparentAxes.Layout.Row = 3;
     cbBgTransparentAxes.Layout.Column = [1 2];
 
-    lblDataLineStyle = uilabel(secAppB, 'Text', 'Data line style', 'HorizontalAlignment', 'left');
-    lblDataLineStyle.Layout.Row = 3;
+    lblDataLineStyle = uilabel(secLinesAxes, 'Text', 'Data line style', 'HorizontalAlignment', 'left');
+    lblDataLineStyle.Layout.Row = 4;
     lblDataLineStyle.Layout.Column = 1;
-    ddDataLineStyle = uidropdown(secAppB, 'Items', {'(keep)','-','--',':','-.'}, 'Value', '(keep)', ...
+    ddDataLineStyle = uidropdown(secLinesAxes, 'Items', {'(keep)','-','--',':','-.'}, 'Value', '(keep)', ...
         'ValueChangedFcn', @onPersistedControlChanged);
-    ddDataLineStyle.Layout.Row = 3;
+    ddDataLineStyle.Layout.Row = 4;
     ddDataLineStyle.Layout.Column = 2;
 
-    lblDataLineWidth = uilabel(secAppB, 'Text', 'Data line width', 'HorizontalAlignment', 'left');
-    lblDataLineWidth.Layout.Row = 4;
+    lblDataLineWidth = uilabel(secLinesAxes, 'Text', 'Data line width', 'HorizontalAlignment', 'left');
+    lblDataLineWidth.Layout.Row = 5;
     lblDataLineWidth.Layout.Column = 1;
-    nfDataLineWidth = uieditfield(secAppB, 'numeric', 'Value', 1.5, 'Limits', [0 Inf], ...
+    nfDataLineWidth = uieditfield(secLinesAxes, 'numeric', 'Value', 1.5, 'Limits', [0 Inf], ...
         'ValueChangedFcn', @onPersistedControlChanged);
-    nfDataLineWidth.Layout.Row = 4;
+    nfDataLineWidth.Layout.Row = 5;
     nfDataLineWidth.Layout.Column = 2;
 
-    lblDataMarkerSize = uilabel(secAppB, 'Text', 'Data marker size', 'HorizontalAlignment', 'left');
-    lblDataMarkerSize.Layout.Row = 5;
+    lblDataMarkerSize = uilabel(secLinesAxes, 'Text', 'Data marker size', 'HorizontalAlignment', 'left');
+    lblDataMarkerSize.Layout.Row = 6;
     lblDataMarkerSize.Layout.Column = 1;
-    nfDataMarkerSize = uieditfield(secAppB, 'numeric', 'Value', 6, 'Limits', [0 Inf], ...
+    nfDataMarkerSize = uieditfield(secLinesAxes, 'numeric', 'Value', 6, 'Limits', [0 Inf], ...
         'ValueChangedFcn', @onPersistedControlChanged);
-    nfDataMarkerSize.Layout.Row = 5;
+    nfDataMarkerSize.Layout.Row = 6;
     nfDataMarkerSize.Layout.Column = 2;
 
-    lblFitLineStyle = uilabel(secAppB, 'Text', 'Fit line style', 'HorizontalAlignment', 'left');
-    lblFitLineStyle.Layout.Row = 6;
+    lblFitLineStyle = uilabel(secLinesAxes, 'Text', 'Fit line style', 'HorizontalAlignment', 'left');
+    lblFitLineStyle.Layout.Row = 7;
     lblFitLineStyle.Layout.Column = 1;
-    ddFitLineStyle = uidropdown(secAppB, 'Items', {'(keep)','-','--',':','-.'}, 'Value', '(keep)', ...
+    ddFitLineStyle = uidropdown(secLinesAxes, 'Items', {'(keep)','-','--',':','-.'}, 'Value', '(keep)', ...
         'ValueChangedFcn', @onPersistedControlChanged);
-    ddFitLineStyle.Layout.Row = 6;
+    ddFitLineStyle.Layout.Row = 7;
     ddFitLineStyle.Layout.Column = 2;
 
-    lblFitLineWidth = uilabel(secAppB, 'Text', 'Fit line width', 'HorizontalAlignment', 'left');
-    lblFitLineWidth.Layout.Row = 7;
+    lblFitLineWidth = uilabel(secLinesAxes, 'Text', 'Fit line width', 'HorizontalAlignment', 'left');
+    lblFitLineWidth.Layout.Row = 8;
     lblFitLineWidth.Layout.Column = 1;
-    nfFitLineWidth = uieditfield(secAppB, 'numeric', 'Value', 1.5, 'Limits', [0 Inf], ...
+    nfFitLineWidth = uieditfield(secLinesAxes, 'numeric', 'Value', 1.5, 'Limits', [0 Inf], ...
         'ValueChangedFcn', @onPersistedControlChanged);
-    nfFitLineWidth.Layout.Row = 7;
+    nfFitLineWidth.Layout.Row = 8;
     nfFitLineWidth.Layout.Column = 2;
 
-    lblFitMarkerSize = uilabel(secAppB, 'Text', 'Fit marker size', 'HorizontalAlignment', 'left');
-    lblFitMarkerSize.Layout.Row = 8;
+    lblFitMarkerSize = uilabel(secLinesAxes, 'Text', 'Fit marker size', 'HorizontalAlignment', 'left');
+    lblFitMarkerSize.Layout.Row = 9;
     lblFitMarkerSize.Layout.Column = 1;
-    nfFitMarkerSize = uieditfield(secAppB, 'numeric', 'Value', 6, 'Limits', [0 Inf], ...
+    nfFitMarkerSize = uieditfield(secLinesAxes, 'numeric', 'Value', 6, 'Limits', [0 Inf], ...
         'ValueChangedFcn', @onPersistedControlChanged);
-    nfFitMarkerSize.Layout.Row = 8;
+    nfFitMarkerSize.Layout.Row = 9;
     nfFitMarkerSize.Layout.Column = 2;
 
-    lblPanelsPerRow = uilabel(secAppB, 'Text', 'Panels per row:', 'HorizontalAlignment', 'left');
-    lblPanelsPerRow.Layout.Row = 9;
+    lblPanelsPerRow = uilabel(secLinesAxes, 'Text', 'Panels per row:', 'HorizontalAlignment', 'left');
+    lblPanelsPerRow.Layout.Row = 10;
     lblPanelsPerRow.Layout.Column = 1;
-    ddPanelsPerRow = uidropdown(secAppB, 'Items', {'1','2','3'}, 'Value', '2', ...
+    ddPanelsPerRow = uidropdown(secLinesAxes, 'Items', {'1','2','3'}, 'Value', '2', ...
         'ValueChangedFcn', @onPersistedControlChanged);
-    ddPanelsPerRow.Layout.Row = 9;
+    ddPanelsPerRow.Layout.Row = 10;
     ddPanelsPerRow.Layout.Column = 2;
 
-    secAppC = uigridlayout(tabRootAppearance, [2 1]);
-    secAppC.Layout.Row = 3;
+    cbReversePlotOrder = uicheckbox(secLinesAxes, 'Text', 'Reverse plot order', 'Value', false, ...
+        'ValueChangedFcn', @onPersistedControlChanged);
+    cbReversePlotOrder.Layout.Row = 11;
+    cbReversePlotOrder.Layout.Column = [1 2];
+
+    btnApplyAppearance = uibutton(secLinesAxes, 'Text', 'Apply Appearance', 'ButtonPushedFcn', @onApplyAppearance);
+    btnApplyAppearance.Layout.Row = 12;
+    btnApplyAppearance.Layout.Column = [1 2];
+
+    secQuickPresets = uigridlayout(tabRootAppearance, [2 1]);
+    secQuickPresets.Layout.Row = 3;
+    secQuickPresets.Layout.Column = 1;
+    secQuickPresets.ColumnWidth = {'1x', '1x'};
+    secQuickPresets.RowHeight = {'fit', 'fit'};
+    secQuickPresets.Padding = [0 0 0 0];
+    secQuickPresets.RowSpacing = 6;
+
+    lblSecQuickPresets = uilabel(secQuickPresets, 'Text', 'Quick Presets', 'HorizontalAlignment', 'left');
+    lblSecQuickPresets.FontWeight = 'bold';
+    lblSecQuickPresets.Layout.Row = 1;
+    lblSecQuickPresets.Layout.Column = 1;
+
+    secAppC = uigridlayout(secQuickPresets, [3 1]);
+    secAppC.Layout.Row = 2;
     secAppC.Layout.Column = 1;
     secAppC.ColumnWidth = {'1x'};
-    secAppC.RowHeight = {'fit', 'fit'};
+    secAppC.RowHeight = {'fit', 'fit', 'fit'};
     secAppC.Padding = [0 0 0 0];
 
+    lblQuickPresetInfo = uilabel(secAppC, 'Text', 'Applies using current settings.', 'HorizontalAlignment', 'left');
+    lblQuickPresetInfo.Layout.Row = 1;
+    lblQuickPresetInfo.Layout.Column = [1 2];
+
     btnApplyPublicationStyle = uibutton(secAppC, 'Text', 'Apply Publication Style', 'ButtonPushedFcn', @onApplyPublicationStyle);
-    btnApplyPublicationStyle.Layout.Row = 1;
-    btnApplyPublicationStyle.Layout.Column = 1;
+    btnApplyPublicationStyle.Layout.Row = 2;
+    btnApplyPublicationStyle.Layout.Column = [1 2];
 
     btnApplySmartPack = uibutton(secAppC, 'Text', 'Apply Smart Colormap Pack', 'ButtonPushedFcn', @onApplySmartPack);
-    btnApplySmartPack.Layout.Row = 2;
-    btnApplySmartPack.Layout.Column = 1;
+    btnApplySmartPack.Layout.Row = 3;
+    btnApplySmartPack.Layout.Column = [1 2];
 
-    secAppD = uigridlayout(tabRootAppearance, [6 2]);
-    secAppD.Layout.Row = 4;
+    secSpacerAppearance = uigridlayout(tabRootAppearance, [1 1]);
+    secSpacerAppearance.Layout.Row = 4;
+    secSpacerAppearance.Layout.Column = 1;
+    secSpacerAppearance.ColumnWidth = {'1x'};
+    secSpacerAppearance.RowHeight = {22};
+    secSpacerAppearance.Padding = [0 0 0 0];
+
+    secFigureSize = uigridlayout(tabRootAppearance, [2 1]);
+    secFigureSize.Layout.Row = 5;
+    secFigureSize.Layout.Column = 1;
+    secFigureSize.ColumnWidth = {'1x'};
+    secFigureSize.RowHeight = {'fit', 'fit'};
+    secFigureSize.Padding = [0 0 0 0];
+    secFigureSize.RowSpacing = 6;
+
+    lblSecFigureSize = uilabel(secFigureSize, 'Text', 'Figure Size', 'HorizontalAlignment', 'left');
+    lblSecFigureSize.FontWeight = 'bold';
+    lblSecFigureSize.Layout.Row = 1;
+    lblSecFigureSize.Layout.Column = 1;
+
+    secAppD = uigridlayout(secFigureSize, [5 2]);
+    secAppD.Layout.Row = 2;
     secAppD.Layout.Column = 1;
     secAppD.ColumnWidth = {170, '1x'};
-    secAppD.RowHeight = {'fit', 'fit', 'fit', 'fit', 'fit', 'fit'};
+    secAppD.RowHeight = {'fit', 'fit', 'fit', 'fit', 'fit'};
     secAppD.Padding = [0 0 0 0];
 
-    lblWorkspaceSize = uilabel(secAppD, 'Text', 'Workspace Size', 'HorizontalAlignment', 'left');
-    lblWorkspaceSize.Layout.Row = 1;
-    lblWorkspaceSize.Layout.Column = [1 2];
-
     lblWsWidth = uilabel(secAppD, 'Text', 'Target Width (cm)', 'HorizontalAlignment', 'left');
-    lblWsWidth.Layout.Row = 2;
+    lblWsWidth.Layout.Row = 1;
     lblWsWidth.Layout.Column = 1;
     nfWsWidth = uieditfield(secAppD, 'numeric', 'Value', 12, 'Limits', [5 40], ...
         'ValueChangedFcn', @onPersistedControlChanged);
-    nfWsWidth.Layout.Row = 2;
+    nfWsWidth.Layout.Row = 1;
     nfWsWidth.Layout.Column = 2;
 
     lblWsHeightMode = uilabel(secAppD, 'Text', 'Height Mode', 'HorizontalAlignment', 'left');
-    lblWsHeightMode.Layout.Row = 3;
+    lblWsHeightMode.Layout.Row = 2;
     lblWsHeightMode.Layout.Column = 1;
     ddWsHeightMode = uidropdown(secAppD, 'Items', {'Auto (ratio)','Auto (grid × ratio)','Custom'}, 'Value', 'Auto (ratio)', ...
         'ValueChangedFcn', @onWorkspaceHeightModeChanged);
-    ddWsHeightMode.Layout.Row = 3;
+    ddWsHeightMode.Layout.Row = 2;
     ddWsHeightMode.Layout.Column = 2;
 
     lblWsHeight = uilabel(secAppD, 'Text', 'Height (cm)', 'HorizontalAlignment', 'left');
-    lblWsHeight.Layout.Row = 4;
+    lblWsHeight.Layout.Row = 3;
     lblWsHeight.Layout.Column = 1;
     nfWsHeight = uieditfield(secAppD, 'numeric', 'Value', 9, 'Limits', [5 40], ...
         'ValueChangedFcn', @onPersistedControlChanged);
-    nfWsHeight.Layout.Row = 4;
+    nfWsHeight.Layout.Row = 3;
     nfWsHeight.Layout.Column = 2;
 
     lblWsBaseRatio = uilabel(secAppD, 'Text', 'Base ratio (H/W)', 'HorizontalAlignment', 'left');
-    lblWsBaseRatio.Layout.Row = 5;
+    lblWsBaseRatio.Layout.Row = 4;
     lblWsBaseRatio.Layout.Column = 1;
     nfWsBaseRatio = uieditfield(secAppD, 'numeric', 'Value', 0.75, 'Limits', [0.3 2], ...
         'ValueChangedFcn', @onPersistedControlChanged);
-    nfWsBaseRatio.Layout.Row = 5;
+    nfWsBaseRatio.Layout.Row = 4;
     nfWsBaseRatio.Layout.Column = 2;
 
-    btnApplyWorkspaceSize = uibutton(secAppD, 'Text', 'Apply Workspace Size', 'ButtonPushedFcn', @onApplyWorkspaceSize);
-    btnApplyWorkspaceSize.Layout.Row = 6;
+    btnApplyWorkspaceSize = uibutton(secAppD, 'Text', 'Apply Size', 'ButtonPushedFcn', @onApplyWorkspaceSize);
+    btnApplyWorkspaceSize.Layout.Row = 5;
     btnApplyWorkspaceSize.Layout.Column = [1 2];
-
-    appearanceActionBar = uigridlayout(tabRootAppearance, [1 1]);
-    appearanceActionBar.Layout.Row = 6;
-    appearanceActionBar.Layout.Column = 1;
-    appearanceActionBar.ColumnWidth = {'1x'};
-    appearanceActionBar.RowHeight = {'fit'};
-    appearanceActionBar.Padding = [0 0 0 0];
-
-    btnApplyAppearance = uibutton(appearanceActionBar, 'Text', 'Apply', 'ButtonPushedFcn', @onApplyAppearance);
-    btnApplyAppearance.Layout.Row = 1;
-    btnApplyAppearance.Layout.Column = 1;
 
     % ---------------- Tab 4: Export ----------------
     tExport = uitab(tabs, 'Title', 'Export');
@@ -641,6 +703,7 @@ ddScope = uidropdown(tgtGrid, ...
         'fitLineStyle', "(keep)", ...
         'fitLineWidth', 1.5, ...
         'fitMarkerSize', 6, ...
+        'reversePlotOrder', false, ...
         'panelsPerRow', "2", ...
         'exportCompose', false);
     suppressUIStateSave = false;
@@ -832,16 +895,10 @@ ddScope = uidropdown(tgtGrid, ...
     end
 
     function onBackgroundToggleChanged(~, ~)
+        % Deferred execution model:
+        % Background toggles only update stored state.
+        % Actual application occurs when user clicks the main Apply button.
         i_saveUIState();
-        figs = resolveExplicitListTargetsOrAlert("Background");
-        if isempty(figs)
-            return;
-        end
-
-        opts = struct();
-        opts.bgWhiteFigure = logical(cbBgWhiteFigure.Value);
-        opts.bgTransparentAxes = logical(cbBgTransparentAxes.Value);
-        i_applyBackgroundAppearance(figs, opts);
     end
 
     function onResetDefaults(~, ~)
@@ -870,6 +927,7 @@ ddScope = uidropdown(tgtGrid, ...
         ddFitLineStyle.Value = char(defaultUIState.fitLineStyle);
         nfFitLineWidth.Value = double(defaultUIState.fitLineWidth);
         nfFitMarkerSize.Value = double(defaultUIState.fitMarkerSize);
+        cbReversePlotOrder.Value = logical(defaultUIState.reversePlotOrder);
         ddPanelsPerRow.Value = char(defaultUIState.panelsPerRow);
         cbExportCompose.Value = logical(defaultUIState.exportCompose);
 
@@ -1323,10 +1381,30 @@ ddScope = uidropdown(tgtGrid, ...
     function stats = i_applyAppearanceSettings(figs, opts)
         stats = struct('figuresTouched', 0, 'axesTouched', 0, 'linesTouched', 0, 'colorbarsTouched', 0);
 
-        cmapFull = i_getColormapByName(opts.mapName);
-        M = size(cmapFull, 1);
-        idx = i_getSliceIndices(M, opts.spreadMode);
-        cmapSlice = cmapFull(idx, :);
+        mapNameKey = lower(strtrim(char(string(opts.mapName))));
+        spreadModeKey = lower(strtrim(char(string(opts.spreadMode))));
+        applyColormap = ~strcmp(mapNameKey, 'keep');
+        reverseSpread = endsWith(spreadModeKey, '-rev');
+        spreadModeBase = spreadModeKey;
+        if reverseSpread
+            spreadModeBase = extractBefore(string(spreadModeKey), strlength(string(spreadModeKey)) - 3);
+            spreadModeBase = lower(strtrim(char(spreadModeBase)));
+        end
+
+        cmapSlice = [];
+        if applyColormap
+            cmapFull = i_getColormapByName(opts.mapName);
+            if strcmp(spreadModeBase, 'keep')
+                cmapSlice = cmapFull;
+            else
+                M = size(cmapFull, 1);
+                idx = i_getSliceIndices(M, spreadModeBase);
+                cmapSlice = cmapFull(idx, :);
+            end
+            if reverseSpread
+                cmapSlice = flipud(cmapSlice);
+            end
+        end
 
         for k = 1:numel(figs)
             fig = figs(k);
@@ -1345,19 +1423,120 @@ ddScope = uidropdown(tgtGrid, ...
                 end
 
                 stats.axesTouched = stats.axesTouched + 1;
-                colormap(ax, cmapSlice);
+                
+                % Publication style settings (optional):
+                % When invoked from onApplyPublicationStyle, opts contains
+                % additional fields for font sizes and axis appearance.
+                if isfield(opts, 'axesFont') && isfinite(opts.axesFont) && opts.axesFont > 0
+                    if isprop(ax, 'FontSize')
+                        ax.FontSize = opts.axesFont;
+                    end
+                end
+                
+                if isfield(opts, 'tickDir') && ~isempty(opts.tickDir)
+                    if isprop(ax, 'TickDir')
+                        ax.TickDir = char(opts.tickDir);
+                    end
+                end
+                
+                if isfield(opts, 'box') && ~isempty(opts.box)
+                    if isprop(ax, 'Box')
+                        ax.Box = char(opts.box);
+                    end
+                end
+                
+                if isfield(opts, 'axesLineWidth') && isfinite(opts.axesLineWidth) && opts.axesLineWidth > 0
+                    if isprop(ax, 'LineWidth')
+                        ax.LineWidth = opts.axesLineWidth;
+                    end
+                end
+                
+                if isfield(opts, 'labelFont') && isfinite(opts.labelFont) && opts.labelFont > 0
+                    if isprop(ax, 'XLabel')
+                        xl = ax.XLabel;
+                        if ~isempty(xl) && isgraphics(xl) && isprop(xl, 'FontSize')
+                            xl.FontSize = opts.labelFont;
+                        end
+                    end
+                    if isprop(ax, 'YLabel')
+                        yl = ax.YLabel;
+                        if ~isempty(yl) && isgraphics(yl) && isprop(yl, 'FontSize')
+                            yl.FontSize = opts.labelFont;
+                        end
+                    end
+                    if isprop(ax, 'Title')
+                        ttl = ax.Title;
+                        if ~isempty(ttl) && isgraphics(ttl) && isprop(ttl, 'FontSize')
+                            ttl.FontSize = opts.labelFont;
+                        end
+                    end
+                end
+                
+                if applyColormap
+                    colormap(ax, cmapSlice);
 
-                cbList = i_getColorbarsForAxes(fig, ax);
-                for c = 1:numel(cbList)
-                    cb = cbList(c);
-                    if isgraphics(cb, 'colorbar')
-                        colormap(cb, flipud(cmapSlice));
-                        stats.colorbarsTouched = stats.colorbarsTouched + 1;
+                    cbList = i_getColorbarsForAxes(fig, ax);
+                    for c = 1:numel(cbList)
+                        cb = cbList(c);
+                        if isgraphics(cb, 'colorbar')
+                            colormap(cb, flipud(cmapSlice));
+                            stats.colorbarsTouched = stats.colorbarsTouched + 1;
+                        end
                     end
                 end
 
                 [dataLines, fitLines] = i_getDataAndFitLines(ax);
                 stats.linesTouched = stats.linesTouched + numel(dataLines) + numel(fitLines);
+
+                if isfield(opts, 'reversePlotOrder') && logical(opts.reversePlotOrder) && ~isempty(dataLines)
+                    i_reverseDataLinesZOrder(ax, dataLines);
+                end
+
+                % Legacy reverse-spread behavior when keeping existing colormap:
+                % reverse current data-line colors in deterministic dataLines order.
+                if ~applyColormap && reverseSpread && ~isempty(dataLines)
+                    validIdx = false(numel(dataLines), 1);
+                    colors = cell(numel(dataLines), 1);
+                    for iLine = 1:numel(dataLines)
+                        ln = dataLines(iLine);
+                        if isgraphics(ln, 'line') && isprop(ln, 'Color')
+                            try
+                                colors{iLine} = ln.Color;
+                                validIdx(iLine) = true;
+                            catch
+                                validIdx(iLine) = false;
+                            end
+                        end
+                    end
+
+                    idxValid = find(validIdx);
+                    if numel(idxValid) > 1
+                        reversedColors = flipud(colors(idxValid));
+                        for iLine = 1:numel(idxValid)
+                            ln = dataLines(idxValid(iLine));
+                            if isgraphics(ln, 'line') && isprop(ln, 'Color')
+                                try
+                                    ln.Color = reversedColors{iLine};
+                                catch
+                                end
+                            end
+                        end
+                    end
+                end
+
+                % CtrlGUI-compatible colormap-to-data-lines behavior:
+                % Recolor only data lines (non-empty DisplayName) from the
+                % currently applied colormap slice using evenly spaced samples.
+                if ~isempty(cmapSlice) && ~isempty(dataLines)
+                    nC = size(cmapSlice, 1);
+                    idxData = round(linspace(1, nC, numel(dataLines)));
+                    for iLine = 1:numel(dataLines)
+                        ln = dataLines(iLine);
+                        if isgraphics(ln, 'line') && isprop(ln, 'Color')
+                            ln.Color = cmapSlice(idxData(iLine), :);
+                        end
+                    end
+                end
 
                 i_applyLineStyleBundle(dataLines, opts.dataLineStyle, opts.dataLineWidth, opts.dataMarkerSize);
                 i_applyLineStyleBundle(fitLines, opts.fitLineStyle, opts.fitLineWidth, opts.fitMarkerSize);
@@ -1403,7 +1582,8 @@ ddScope = uidropdown(tgtGrid, ...
         dataLines = gobjects(0,1);
         fitLines = gobjects(0,1);
 
-        allLines = findall(ax, 'Type', 'line');
+        % Use findobj ordering consistently for deterministic line traversal.
+        allLines = findobj(ax, 'Type', 'line');
         keep = false(numel(allLines), 1);
         for i = 1:numel(allLines)
             ln = allLines(i);
@@ -1477,6 +1657,47 @@ ddScope = uidropdown(tgtGrid, ...
             if applyMarker && isprop(ln, 'MarkerSize')
                 ln.MarkerSize = markerSize;
             end
+        end
+    end
+
+    function i_reverseDataLinesZOrder(ax, dataLines)
+        if isempty(ax) || ~isgraphics(ax, 'axes') || isempty(dataLines)
+            return;
+        end
+
+        dataLines = dataLines(isgraphics(dataLines, 'line'));
+        if isempty(dataLines)
+            return;
+        end
+
+        try
+            ch = ax.Children;
+        catch
+            return;
+        end
+
+        if isempty(ch)
+            return;
+        end
+
+        isDataChild = false(numel(ch), 1);
+        for i = 1:numel(ch)
+            h = ch(i);
+            if isgraphics(h, 'line') && any(h == dataLines)
+                isDataChild(i) = true;
+            end
+        end
+
+        if nnz(isDataChild) < 2
+            return;
+        end
+
+        dataChildren = ch(isDataChild);
+        ch(isDataChild) = flipud(dataChildren);
+
+        try
+            ax.Children = ch;
+        catch
         end
     end
 
@@ -1897,7 +2118,11 @@ ddScope = uidropdown(tgtGrid, ...
         end
     end
 
-    function onApplyAppearance(~, ~)
+    function onApplyAppearance(~, ~, overrides)
+        if nargin < 3 || ~isstruct(overrides)
+            overrides = struct();
+        end
+
         figs = resolveExplicitListTargetsOrAlert("Appearance");
         if isempty(figs), return; end
 
@@ -1917,6 +2142,14 @@ ddScope = uidropdown(tgtGrid, ...
         opts.fitLineStyle = string(ddFitLineStyle.Value);
         opts.fitLineWidth = double(nfFitLineWidth.Value);
         opts.fitMarkerSize = double(nfFitMarkerSize.Value);
+        opts.reversePlotOrder = logical(cbReversePlotOrder.Value);
+
+        if ~isempty(fieldnames(overrides))
+            fnames = sort(fieldnames(overrides));
+            for i = 1:numel(fnames)
+                opts.(fnames{i}) = overrides.(fnames{i});
+            end
+        end
 
         try
             stats = i_applyAppearanceSettings(figs, opts);
@@ -1928,82 +2161,25 @@ ddScope = uidropdown(tgtGrid, ...
     end
 
     function onApplyPublicationStyle(~, ~)
-        selected = lbFigures.Value;
-        if isempty(selected)
-            uialert(ui, 'Select at least one figure from the explicit list.', 'Publication Style');
-            return;
-        end
-
-        selected = double(selected(:));
-        selected = selected(selected >= 1 & selected <= numel(explicitHandleCache));
-        selected = unique(selected, 'stable');
-        figs = explicitHandleCache(selected);
-        figs = figs(isgraphics(figs, 'figure'));
-        if isempty(figs)
-            uialert(ui, 'Selected explicit-list figures are not valid.', 'Publication Style');
-            return;
-        end
-
         mode = str2double(string(ddPanelsPerRow.Value));
         if ~isfinite(mode) || ~any(mode == [1 2 3])
             mode = 2;
         end
         preset = i_getPublicationStylePreset(mode);
 
-        for k = 1:numel(figs)
-            fig = figs(k);
-            try
-                axList = findall(fig, 'Type', 'axes');
-                for a = 1:numel(axList)
-                    ax = axList(a);
+        nfDataLineWidth.Value = preset.lineWidth;
+        nfDataMarkerSize.Value = preset.markerSize;
+        nfFitLineWidth.Value = preset.lineWidth;
+        nfFitMarkerSize.Value = preset.markerSize;
 
-                    if isprop(ax, 'FontSize')
-                        ax.FontSize = preset.axesFont;
-                    end
-                    if isprop(ax, 'LineWidth')
-                        ax.LineWidth = preset.lineWidth;
-                    end
-                    if isprop(ax, 'TickDir')
-                        ax.TickDir = 'out';
-                    end
-                    if isprop(ax, 'Box')
-                        ax.Box = 'off';
-                    end
+        overrides = struct();
+        overrides.axesFont = preset.axesFont;
+        overrides.labelFont = preset.labelFont;
+        overrides.axesLineWidth = preset.lineWidth;
+        overrides.tickDir = 'out';
+        overrides.box = 'off';
 
-                    if isprop(ax, 'XLabel')
-                        xl = ax.XLabel;
-                        if ~isempty(xl) && isgraphics(xl) && isprop(xl, 'FontSize')
-                            xl.FontSize = preset.labelFont;
-                        end
-                    end
-                    if isprop(ax, 'YLabel')
-                        yl = ax.YLabel;
-                        if ~isempty(yl) && isgraphics(yl) && isprop(yl, 'FontSize')
-                            yl.FontSize = preset.labelFont;
-                        end
-                    end
-                    if isprop(ax, 'Title')
-                        ttl = ax.Title;
-                        if ~isempty(ttl) && isgraphics(ttl) && isprop(ttl, 'FontSize')
-                            ttl.FontSize = preset.labelFont;
-                        end
-                    end
-
-                    lineObjs = findall(ax, 'Type', 'line');
-                    for m = 1:numel(lineObjs)
-                        ln = lineObjs(m);
-                        if isprop(ln, 'LineWidth')
-                            ln.LineWidth = preset.lineWidth;
-                        end
-                        if isprop(ln, 'MarkerSize')
-                            ln.MarkerSize = preset.markerSize;
-                        end
-                    end
-                end
-            catch
-                continue;
-            end
-        end
+        onApplyAppearance([], [], overrides);
     end
 
     function onApplySmartPack(~, ~)
@@ -3223,6 +3399,9 @@ ddScope = uidropdown(tgtGrid, ...
             if isfield(uiState, 'fitMarkerSize') && isnumeric(uiState.fitMarkerSize) && isfinite(uiState.fitMarkerSize)
                 nfFitMarkerSize.Value = max(0, double(uiState.fitMarkerSize));
             end
+            if isfield(uiState, 'reversePlotOrder') && ~isempty(uiState.reversePlotOrder)
+                cbReversePlotOrder.Value = logical(uiState.reversePlotOrder);
+            end
             if isfield(uiState, 'panelsPerRow') && ~isempty(uiState.panelsPerRow)
                 cand = string(uiState.panelsPerRow);
                 if any(string(ddPanelsPerRow.Items) == cand)
@@ -3267,6 +3446,7 @@ ddScope = uidropdown(tgtGrid, ...
         uiState.fitLineStyle = string(ddFitLineStyle.Value);
         uiState.fitLineWidth = double(nfFitLineWidth.Value);
         uiState.fitMarkerSize = double(nfFitMarkerSize.Value);
+        uiState.reversePlotOrder = logical(cbReversePlotOrder.Value);
         uiState.panelsPerRow = string(ddPanelsPerRow.Value);
         uiState.exportCompose = logical(cbExportCompose.Value);
 
