@@ -3221,13 +3221,6 @@ ddScope = uidropdown(tgtGrid, ...
             return;
         end
 
-        kTypographic = 1.2;
-        debugAlignOneFigure = true;
-        debugFig = [];
-        if debugAlignOneFigure && ~isempty(figs)
-            debugFig = figs(1);
-        end
-
         try
             for k = 1:numel(figs)
                 fig = figs(k);
@@ -3244,15 +3237,8 @@ ddScope = uidropdown(tgtGrid, ...
 
                     isPrimaryAxes = i_isPrimaryPlotAxes(ax);
                     isManualLegendAxes = i_isManualLegendAxes(ax);
-                    axTag = "";
                     axHandleVisibility = "";
                     axVisible = "";
-                    axPos = [NaN NaN NaN NaN];
-                    axUnitsNow = "";
-                    try
-                        axTag = string(ax.Tag);
-                    catch
-                    end
                     try
                         axHandleVisibility = string(ax.HandleVisibility);
                     catch
@@ -3261,112 +3247,23 @@ ddScope = uidropdown(tgtGrid, ...
                         axVisible = string(ax.Visible);
                     catch
                     end
-                    try
-                        axPos = double(ax.Position);
-                    catch
-                    end
-                    try
-                        axUnitsNow = string(ax.Units);
-                    catch
-                    end
-
-                    if debugAlignOneFigure && ~isempty(debugFig) && isequal(fig, debugFig)
-                        fprintf('[AlignLabels][Axis] idx=%d tag="%s" handleVis=%s visible=%s units=%s pos=[%.6f %.6f %.6f %.6f] isPrimary=%d isManualLegend=%d\n', ...
-                            a, char(axTag), char(axHandleVisibility), char(axVisible), char(axUnitsNow), ...
-                            axPos(1), axPos(2), axPos(3), axPos(4), isPrimaryAxes, isManualLegendAxes);
-                    end
 
                     isAlignEligible = isPrimaryAxes && ~isManualLegendAxes && strcmpi(char(axVisible), 'on') && ~strcmpi(char(axHandleVisibility), 'off');
                     if ~isAlignEligible
                         continue;
                     end
 
-                    tiBlock1Before = [NaN NaN NaN NaN];
-                    tiBlock1After = [NaN NaN NaN NaN];
-                    try
-                        tiBlock1Before = double(ax.TightInset);
-                    catch
-                    end
-
                     try
                         xl = ax.XLabel;
                         if ~isempty(xl) && isgraphics(xl)
-                            origAxUnits = ax.Units;
-                            origXLabelUnits = xl.Units;
-                            origXLabelPos = xl.Position;
-
-                            ax.Units = 'pixels';
-                            axPosPx = double(ax.Position);
-                            tiBefore = double(ax.TightInset);
-
-                            if ~isnumeric(axPosPx) || numel(axPosPx) < 4 || ~isfinite(axPosPx(3)) || axPosPx(3) <= 0
-                                ax.Units = origAxUnits;
-                                continue;
+                            if isprop(xl, 'HorizontalAlignment')
+                                xl.HorizontalAlignment = 'center';
                             end
-
-                            baseFontSize = ax.FontSize;
-                            if ~isfinite(baseFontSize) || baseFontSize <= 0
-                                baseFontSize = 11;
-                            end
-                            offsetYPx = 1.7 * baseFontSize;
-
-                            xl.Units = 'pixels';
-                            xl.Position = [axPosPx(3)/2, -offsetYPx, 0];
-                            xl.HorizontalAlignment = 'center';
-                            xl.Units = origXLabelUnits;
-
-                            drawnow limitrate;
-                            tiAfter = double(ax.TightInset);
-
-                            if numel(tiBefore) >= 4 && numel(tiAfter) >= 4
-                                if any(abs(double(tiAfter(1:4)) - double(tiBefore(1:4))) > 1e-9)
-                                    xl.Units = origXLabelUnits;
-                                    xl.Position = origXLabelPos;
-                                    drawnow limitrate;
-                                end
-                            end
-
-                            if k == 1 && a == 1
-                                fprintf('[AlignLabels] TightInset before=[%.6f %.6f %.6f %.6f], after=[%.6f %.6f %.6f %.6f]\n', ...
-                                    tiBefore(1), tiBefore(2), tiBefore(3), tiBefore(4), ...
-                                    tiAfter(1), tiAfter(2), tiAfter(3), tiAfter(4));
-                            end
-
-                            ax.Units = origAxUnits;
                         end
                     catch
                     end
 
-                    try
-                        tiBlock1After = double(ax.TightInset);
-                    catch
-                    end
-
-                    if debugAlignOneFigure && ~isempty(debugFig) && isequal(fig, debugFig)
-                        fprintf('[AlignLabels][Block1] axis=%d tiBefore=[%.6f %.6f %.6f %.6f] tiAfter=[%.6f %.6f %.6f %.6f]\n', ...
-                            a, tiBlock1Before(1), tiBlock1Before(2), tiBlock1Before(3), tiBlock1Before(4), ...
-                            tiBlock1After(1), tiBlock1After(2), tiBlock1After(3), tiBlock1After(4));
-                    end
-
-                    tiBlock2Before = [NaN NaN NaN NaN];
-                    tiBlock2After = [NaN NaN NaN NaN];
-                    try
-                        tiBlock2Before = double(ax.TightInset);
-                    catch
-                    end
-
                     alignAxisLabelsPublication(ax);
-
-                    try
-                        tiBlock2After = double(ax.TightInset);
-                    catch
-                    end
-
-                    if debugAlignOneFigure && ~isempty(debugFig) && isequal(fig, debugFig)
-                        fprintf('[AlignLabels][Block2] axis=%d tiBefore=[%.6f %.6f %.6f %.6f] tiAfter=[%.6f %.6f %.6f %.6f]\n', ...
-                            a, tiBlock2Before(1), tiBlock2Before(2), tiBlock2Before(3), tiBlock2Before(4), ...
-                            tiBlock2After(1), tiBlock2After(2), tiBlock2After(3), tiBlock2After(4));
-                    end
                 end
             end
         catch ME

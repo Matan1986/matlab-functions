@@ -1,4 +1,4 @@
-function normalizeAxesMarginsUnified(figHandles, options)
+function report = normalizeAxesMarginsUnified(figHandles, options)
 % NORMALIZEAXESMARGINSUNIFIED  Unified publication margin normalization.
 %
 % Normalizes a list of figures together so all figures receive the same
@@ -32,9 +32,17 @@ function normalizeAxesMarginsUnified(figHandles, options)
     if ~isfield(options, 'Verbose') || isempty(options.Verbose)
         options.Verbose = false;
     end
+    if ~isfield(options, 'debugGeometry') || isempty(options.debugGeometry)
+        options.debugGeometry = false;
+    end
 
     skipUIAxes = logical(options.SkipUIAxes);
     verbose = logical(options.Verbose);
+    debugGeometry = logical(options.debugGeometry);
+
+    report = struct();
+    report.enabled = debugGeometry;
+    report.figures = struct('figureHandle', {}, 'figureNumber', {}, 'figureName', {}, 'figureSizePx', {}, 'axes', {});
 
     figList = i_normalizeFigureInput(figHandles);
     if isempty(figList)
@@ -246,8 +254,179 @@ function normalizeAxesMarginsUnified(figHandles, options)
         i_applyUnifiedBBox(contexts, bboxNew2);
     end
 
+    if debugGeometry
+        drawnow;
+        report = i_collectDebugGeometryReport(contexts, report);
+        i_printDebugGeometryReport(report);
+    end
+
     if verbose
         fprintf('Unified normalization for %d figures (%d axes).\n', totalFiguresNormalized, totalAxesNormalized);
+    end
+end
+
+function report = i_collectDebugGeometryReport(contexts, report)
+    figRows = repmat(struct('figureHandle', gobjects(0,1), 'figureNumber', NaN, 'figureName', "", 'figureSizePx', [NaN NaN], 'axes', struct('axisHandle', gobjects(0,1), 'axisId', NaN, 'positionNorm', [NaN NaN NaN NaN], 'positionPx', [NaN NaN NaN NaN], 'tightInsetNorm', [NaN NaN NaN NaN], 'tightInsetPx', [NaN NaN NaN NaN], 'looseInsetNorm', [NaN NaN NaN NaN], 'looseInsetPx', [NaN NaN NaN NaN], 'xLabelPositionPx', [NaN NaN NaN], 'xLabelExtentPx', [NaN NaN NaN NaN], 'requiredBottomPxFromExtent', NaN, 'xLabelBottomFigPx', NaN, 'overflowPx', NaN)), 0, 1);
+
+    for iFig = 1:numel(contexts)
+        c = contexts(iFig);
+        fig = c.fig;
+        if isempty(fig) || ~isgraphics(fig, 'figure')
+            continue;
+        end
+
+        figSizePx = i_getFigureSizePx(fig);
+        figW = figSizePx(1);
+        figH = figSizePx(2);
+
+        axRows = repmat(struct('axisHandle', gobjects(0,1), 'axisId', NaN, 'positionNorm', [NaN NaN NaN NaN], 'positionPx', [NaN NaN NaN NaN], 'tightInsetNorm', [NaN NaN NaN NaN], 'tightInsetPx', [NaN NaN NaN NaN], 'looseInsetNorm', [NaN NaN NaN NaN], 'looseInsetPx', [NaN NaN NaN NaN], 'xLabelPositionPx', [NaN NaN NaN], 'xLabelExtentPx', [NaN NaN NaN NaN], 'requiredBottomPxFromExtent', NaN, 'xLabelBottomFigPx', NaN, 'overflowPx', NaN), 0, 1);
+
+        for iAx = 1:numel(c.axes)
+            ax = c.axes(iAx);
+            if isempty(ax) || ~isgraphics(ax, 'axes')
+                continue;
+            end
+
+            posNorm = [NaN NaN NaN NaN];
+            tightNorm = [NaN NaN NaN NaN];
+            looseNorm = [NaN NaN NaN NaN];
+            posPx = [NaN NaN NaN NaN];
+            tightPx = [NaN NaN NaN NaN];
+            loosePx = [NaN NaN NaN NaN];
+            xLabelPosPx = [NaN NaN NaN];
+            xLabelExtentPx = [NaN NaN NaN NaN];
+            requiredBottomPx = NaN;
+            xLabelBottomFigPx = NaN;
+            overflowPx = NaN;
+
+            try
+                oldAxUnits = ax.Units;
+            catch
+                oldAxUnits = 'normalized';
+            end
+
+            try
+                ax.Units = 'normalized';
+                posNorm = double(ax.Position);
+                tightNorm = double(ax.TightInset);
+                if isprop(ax, 'LooseInset')
+                    looseNorm = double(ax.LooseInset);
+                end
+            catch
+            end
+
+            try
+                ax.Units = oldAxUnits;
+            catch
+            end
+
+            if numel(posNorm) >= 4 && isfinite(figW) && isfinite(figH) && figW > 0 && figH > 0
+                posPx = [posNorm(1) * figW, posNorm(2) * figH, posNorm(3) * figW, posNorm(4) * figH];
+            end
+            if numel(tightNorm) >= 4 && isfinite(figW) && isfinite(figH) && figW > 0 && figH > 0
+                tightPx = [tightNorm(1) * figW, tightNorm(2) * figH, tightNorm(3) * figW, tightNorm(4) * figH];
+            end
+            if numel(looseNorm) >= 4 && isfinite(figW) && isfinite(figH) && figW > 0 && figH > 0
+                loosePx = [looseNorm(1) * figW, looseNorm(2) * figH, looseNorm(3) * figW, looseNorm(4) * figH];
+            end
+
+            try
+                xl = ax.XLabel;
+            catch
+                xl = [];
+            end
+
+            if ~isempty(xl) && isgraphics(xl)
+                xlUnitsOld = "";
+                hasUnits = false;
+                try
+                    if isprop(xl, 'Units')
+                        xlUnitsOld = string(xl.Units);
+                        hasUnits = true;
+                    end
+                catch
+                end
+
+                try
+                    if hasUnits
+                        xl.Units = 'pixels';
+                    end
+                    if isprop(xl, 'Position')
+                        xLabelPosPx = double(xl.Position);
+                    end
+                    if isprop(xl, 'Extent')
+                        xLabelExtentPx = double(xl.Extent);
+                    end
+                catch
+                end
+
+                try
+                    if hasUnits && strlength(xlUnitsOld) > 0
+                        xl.Units = char(xlUnitsOld);
+                    end
+                catch
+                end
+            end
+
+            if numel(xLabelExtentPx) >= 2 && isfinite(xLabelExtentPx(2))
+                requiredBottomPx = max(0, -xLabelExtentPx(2));
+            end
+
+            if numel(posPx) >= 2 && numel(xLabelExtentPx) >= 2 && isfinite(posPx(2)) && isfinite(xLabelExtentPx(2))
+                xLabelBottomFigPx = posPx(2) + xLabelExtentPx(2);
+                overflowPx = max(0, -xLabelBottomFigPx);
+            end
+
+            axRow = struct();
+            axRow.axisHandle = ax;
+            axRow.axisId = i_handleId(ax);
+            axRow.positionNorm = i_vec4(posNorm);
+            axRow.positionPx = i_vec4(posPx);
+            axRow.tightInsetNorm = i_vec4(tightNorm);
+            axRow.tightInsetPx = i_vec4(tightPx);
+            axRow.looseInsetNorm = i_vec4(looseNorm);
+            axRow.looseInsetPx = i_vec4(loosePx);
+            axRow.xLabelPositionPx = i_vec3(xLabelPosPx);
+            axRow.xLabelExtentPx = i_vec4(xLabelExtentPx);
+            axRow.requiredBottomPxFromExtent = requiredBottomPx;
+            axRow.xLabelBottomFigPx = xLabelBottomFigPx;
+            axRow.overflowPx = overflowPx;
+
+            axRows(end+1,1) = axRow; %#ok<AGROW>
+        end
+
+        figRow = struct();
+        figRow.figureHandle = fig;
+        figRow.figureNumber = i_figureNumber(fig);
+        figRow.figureName = i_figureName(fig);
+        figRow.figureSizePx = figSizePx;
+        figRow.axes = axRows;
+
+        figRows(end+1,1) = figRow; %#ok<AGROW>
+    end
+
+    report.figures = figRows;
+end
+
+function i_printDebugGeometryReport(report)
+    if ~isstruct(report) || ~isfield(report, 'figures') || isempty(report.figures)
+        fprintf('[normalizeAxesMarginsUnified][debugGeometry] No eligible axes report rows.\n');
+        return;
+    end
+
+    for i = 1:numel(report.figures)
+        figRow = report.figures(i);
+        sz = i_vec2(figRow.figureSizePx);
+        fprintf('[normalizeAxesMarginsUnified][debugGeometry] figure=%s sizePx=[%.1f %.1f] axes=%d\n', ...
+            char(i_figureLabel(figRow.figureNumber, figRow.figureName)), sz(1), sz(2), numel(figRow.axes));
+        fprintf('  %-18s %-16s %-16s %-24s %-12s\n', 'AxisId', 'TightInsetPxB', 'LooseInsetPxB', 'requiredBottomPxFromExtent', 'overflowPx');
+        for j = 1:numel(figRow.axes)
+            r = figRow.axes(j);
+            ti = i_vec4(r.tightInsetPx);
+            li = i_vec4(r.looseInsetPx);
+            fprintf('  %-18.17g %-16.3f %-16.3f %-24.3f %-12.3f\n', ...
+                r.axisId, ti(2), li(2), r.requiredBottomPxFromExtent, r.overflowPx);
+        end
     end
 end
 
@@ -262,8 +441,11 @@ function i_applyUnifiedBBox(contexts, bbox)
             ax = c.axes(1);
             if isgraphics(ax, 'axes')
                 try
+                    % Clamp normalized bbox to [0,1] frame before write.
+                    bboxClamped = i_clampNormalizedRect(bbox);
                     ax.Units = 'normalized';
-                    ax.Position = bbox;
+                    ax.Position = bboxClamped;
+                    i_correctBottomOuterOverflow(ax);
                 catch
                 end
             end
@@ -287,13 +469,69 @@ function i_applyUnifiedBBox(contexts, bbox)
                     rh * bbox(4)];
 
                 try
+                    % Clamp normalized bbox to [0,1] frame before write.
+                    pNewClamped = i_clampNormalizedRect(pNew);
                     ax.Units = 'normalized';
-                    ax.Position = pNew;
+                    ax.Position = pNewClamped;
+                    i_correctBottomOuterOverflow(ax);
                 catch
                 end
             end
         end
     end
+end
+
+function i_correctBottomOuterOverflow(ax)
+    if isempty(ax) || ~isgraphics(ax, 'axes')
+        return;
+    end
+
+    try
+        outerPos = double(ax.OuterPosition);
+    catch
+        return;
+    end
+
+    if numel(outerPos) < 2 || ~isfinite(outerPos(2)) || outerPos(2) >= 0
+        return;
+    end
+
+    delta = -outerPos(2);
+
+    try
+        posNow = double(ax.Position);
+        if numel(posNow) < 4 || any(~isfinite(posNow(1:4)))
+            return;
+        end
+        posAdjusted = posNow;
+        posAdjusted(2) = posAdjusted(2) + delta;
+        posAdjusted = i_clampNormalizedRect(posAdjusted);
+        ax.Position = posAdjusted;
+    catch
+    end
+end
+
+function out = i_clampNormalizedRect(inRect)
+    out = [0 0 0 0];
+    if ~isnumeric(inRect) || numel(inRect) < 4
+        return;
+    end
+
+    left = double(inRect(1));
+    bottom = double(inRect(2));
+    width = double(inRect(3));
+    height = double(inRect(4));
+
+    left = max(0, left);
+    bottom = max(0, bottom);
+
+    width = max(0, width);
+    height = max(0, height);
+
+    width = min(width, 1 - left);
+    height = min(height, 1 - bottom);
+
+    out = [left, bottom, width, height];
 end
 
 function figList = i_normalizeFigureInput(figHandles)
@@ -470,4 +708,85 @@ function key = i_handleKey(h)
         key = "";
     end
     key = char(key);
+end
+
+function id = i_handleId(h)
+    id = NaN;
+    try
+        id = double(h);
+    catch
+    end
+end
+
+function out = i_figureNumber(fig)
+    out = NaN;
+    try
+        out = double(fig.Number);
+    catch
+    end
+end
+
+function out = i_figureName(fig)
+    out = "";
+    try
+        out = string(fig.Name);
+    catch
+    end
+end
+
+function out = i_figureLabel(figNumber, figName)
+    out = "#?";
+    if isfinite(figNumber)
+        out = "#" + string(figNumber);
+    end
+    if strlength(strtrim(figName)) > 0
+        out = out + " " + figName;
+    end
+end
+
+function sz = i_getFigureSizePx(fig)
+    sz = [NaN NaN];
+    if isempty(fig) || ~isgraphics(fig, 'figure')
+        return;
+    end
+    oldUnits = "";
+    try
+        oldUnits = string(fig.Units);
+    catch
+    end
+    try
+        fig.Units = 'pixels';
+        pos = double(fig.Position);
+        if isnumeric(pos) && numel(pos) >= 4 && isfinite(pos(3)) && isfinite(pos(4))
+            sz = [pos(3) pos(4)];
+        end
+    catch
+    end
+    try
+        if strlength(oldUnits) > 0
+            fig.Units = char(oldUnits);
+        end
+    catch
+    end
+end
+
+function v = i_vec2(x)
+    v = [NaN NaN];
+    if isnumeric(x) && numel(x) >= 2
+        v = double(x(1:2));
+    end
+end
+
+function v = i_vec3(x)
+    v = [NaN NaN NaN];
+    if isnumeric(x) && numel(x) >= 3
+        v = double(x(1:3));
+    end
+end
+
+function v = i_vec4(x)
+    v = [NaN NaN NaN NaN];
+    if isnumeric(x) && numel(x) >= 4
+        v = double(x(1:4));
+    end
 end
