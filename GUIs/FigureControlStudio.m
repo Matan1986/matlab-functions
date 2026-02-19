@@ -118,11 +118,11 @@ ddScope = uidropdown(tgtGrid, ...
     textAxisRoot.Padding = [10 10 10 10];
     textAxisRoot.RowSpacing = 10;
 
-    secTypoMain = uigridlayout(textAxisRoot, [2 2]);
+    secTypoMain = uigridlayout(textAxisRoot, [3 2]);
     secTypoMain.Layout.Row = 1;
     secTypoMain.Layout.Column = 1;
     secTypoMain.ColumnWidth = {170, '1x'};
-    secTypoMain.RowHeight = {'fit', 'fit'};
+    secTypoMain.RowHeight = {'fit', 'fit', 'fit'};
     secTypoMain.Padding = [0 0 0 0];
 
     lblTypoFontSize = uilabel(secTypoMain, 'Text', 'Font Size', 'HorizontalAlignment', 'left');
@@ -138,6 +138,13 @@ ddScope = uidropdown(tgtGrid, ...
     ddAxisPreset = uidropdown(secTypoMain, 'Items', {'paper'}, 'Value', 'paper');
     ddAxisPreset.Layout.Row = 2;
     ddAxisPreset.Layout.Column = 2;
+
+    lblTypoProfile = uilabel(secTypoMain, 'Text', 'Typography profile', 'HorizontalAlignment', 'left');
+    lblTypoProfile.Layout.Row = 3;
+    lblTypoProfile.Layout.Column = 1;
+    ddTypoProfile = uidropdown(secTypoMain, 'Items', cellstr(FCS_listTypographyProfiles()), 'Value', 'Default');
+    ddTypoProfile.Layout.Row = 3;
+    ddTypoProfile.Layout.Column = 2;
 
     secAnnotationText = uigridlayout(textAxisRoot, [2 1]);
     secAnnotationText.Layout.Row = 2;
@@ -3143,7 +3150,7 @@ ddScope = uidropdown(tgtGrid, ...
     end
 
     function onApplyTypography(~, ~)
-        figs = resolveExplicitListTargetsOrAlert("Typography");
+        figs = resolveTargetsOrAlert();
         if isempty(figs), return; end
 
         fs = double(nfFontSize.Value);
@@ -3159,6 +3166,13 @@ ddScope = uidropdown(tgtGrid, ...
             return;
         end
 
+        annOpts = struct();
+        annOpts.annFontName = string(efAnnFontName.Value);
+        annOpts.annFontSize = double(nfAnnFontSize.Value);
+        annOpts.annFontWeight = string(ddAnnFontWeight.Value);
+        annOpts.annInterpreter = string(ddAnnInterpreter.Value);
+        annOpts.annColor = string(efAnnColor.Value);
+
         try
             if hasOverride
                 FCS_applyFontSize(figs, fs, 'AffectLegend', false);
@@ -3166,8 +3180,35 @@ ddScope = uidropdown(tgtGrid, ...
                 FCS_applyFontSize(figs, fs);
             end
             FCS_applyAxisPolicy(figs, preset);
+
+            profileName = string(ddTypoProfile.Value);
+
+            for k = 1:numel(figs)
+                fig = figs(k);
+                if ~isgraphics(fig, 'figure')
+                    continue;
+                end
+
+                axList = findall(fig, 'Type', 'axes');
+                for a = 1:numel(axList)
+                    ax = axList(a);
+                    if ~isgraphics(ax, 'axes')
+                        continue;
+                    end
+                    annTextObjs = i_getAnnotationTextObjects(ax);
+                    i_applyAnnotationTextStyle(annTextObjs, annOpts);
+                end
+            end
+
             if hasOverride
                 i_applyLegendFontSize(figs, overrideFontSize);
+            end
+
+            report = FCS_applyTypography(figs, profileName);
+            fprintf('[FCS Typography] profile=%s resolved=%s figures=%d changed=%d skipped=%d errors=%d\n', ...
+                report.profileName, report.resolvedFontName, report.figuresProcessed, report.objectsChanged, report.objectsSkipped, report.objectsErrored);
+            if report.objectsErrored > 0
+                uialert(ui, sprintf('Typography applied with %d object-level errors. See Command Window for summary.', report.objectsErrored), 'Typography Apply Warning');
             end
         catch ME
             uialert(ui, ME.message, 'Typography Apply Failed');
