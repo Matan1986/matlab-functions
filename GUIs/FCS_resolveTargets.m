@@ -182,6 +182,20 @@ end
 function tf = i_isKnownGUIFigure(fig, knownNames, knownTags, excludeAutoGUI)
     tf = false;
 
+    % Prefer deterministic markers over fragile Name-based detection.
+    % Some older or externally-created instances may not have AppData,
+    % so Tag-based fallback ensures deterministic detection.
+    if isappdata(fig, 'FCS_Root')
+        tf = true;
+        return;
+    end
+    try
+        if strcmpi(string(fig.Tag), "FCS_ROOT")
+            tf = true;
+            return;
+        end
+    catch
+    end
     figName = "";
     figTag = "";
     try, figName = string(fig.Name); catch, end

@@ -1,4 +1,12 @@
 function outFig = combineOpenFiguresToPanels(nx, ny, journalMode, outPdfPath)
+% ========================================================================
+% DEPRECATION NOTICE (LEGACY GEOMETRY ENGINE)
+% This file is deprecated for new development.
+% It remains for backward compatibility only.
+% Do not extend or reuse this file for new layout logic.
+% New layout logic must use explicit target lists and stateless margin
+% normalization.
+% ========================================================================
 % Combines open MATLAB figures into ARTICLE-style multi-panel figure.
 % Robust: does NOT copy axes directly (avoids TightInset/Position bugs).
 

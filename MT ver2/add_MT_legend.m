@@ -32,6 +32,12 @@ end
 %% --- Remove existing legends ---
 delete(findobj(figHandle,'Type','legend'));
 
+%% --- Remove existing manual legend axes (enforce single MT_Legend_Axes) ---
+oldAx = findall(figHandle, 'Type', 'axes', 'Tag', 'MT_Legend_Axes');
+if ~isempty(oldAx)
+    delete(oldAx);
+end
+
 %% --- Legend axes ---
 axLeg = axes('Parent',figHandle, 'Position',[0.68 0.29 0.15 0.60]);
 set(axLeg,'Visible','off','XLim',[0 1],'YLim',[0 nU+2],'YDir','reverse');

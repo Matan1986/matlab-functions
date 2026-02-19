@@ -50,11 +50,821 @@ function FCS_export(figHandles, exportOpts)
                     exportgraphics(fig, outFile, 'Resolution', 300);
 
                 case "fig"
-                    savefig(fig, outFile);
+                    if iscell(fig)
+                        error('FCS_export:InvalidFigureHandleType', 'savefig input fig must not be a cell array.');
+                    end
+                    if isstruct(fig)
+                        error('FCS_export:InvalidFigureHandleType', 'savefig input fig must not be a struct.');
+                    end
+
+                    figList = fig;
+                    for kFig = 1:numel(figList)
+                        figOne = figList(kFig);
+                        if ~isgraphics(figOne, 'figure')
+                            error('FCS_export:InvalidFigureHandle', 'savefig input must be a valid figure handle.');
+                        end
+
+                        outFileK = outFile;
+                        if numel(figList) > 1
+                            [pK, nK, eK] = fileparts(outFile);
+                            outFileK = fullfile(pK, sprintf('%s_%d%s', nK, kFig, eK));
+                        end
+
+                        fprintf('\n=== FCS FIG EXPORT DIAGNOSTIC ===\n');
+                        fprintf('class(figOne): %s\n', class(figOne));
+                        sFig = size(figOne);
+                        fprintf('size(figOne): [%s]\n', sprintf('%d ', sFig));
+                        fprintf('numel(figOne): %d\n', numel(figOne));
+                        for iFig = 1:numel(figOne)
+                            hFig = figOne(iFig);
+                            fprintf('  element %d handle: %s\n', iFig, num2str(double(hFig)));
+                            if isprop(hFig, 'Name')
+                                try
+                                    fprintf('    Name: %s\n', char(string(hFig.Name)));
+                                catch
+                                    fprintf('    Name: <unprintable>\n');
+                                end
+                            else
+                                fprintf('    Name: <no property>\n');
+                            end
+                            if isprop(hFig, 'Tag')
+                                try
+                                    fprintf('    Tag: %s\n', char(string(hFig.Tag)));
+                                catch
+                                    fprintf('    Tag: <unprintable>\n');
+                                end
+                            else
+                                fprintf('    Tag: <no property>\n');
+                            end
+                        end
+                        fprintf('root figure count: %d\n', numel(findall(0, 'Type', 'figure')));
+
+                        savefig(figOne, outFileK);
+                    end
 
                 otherwise
                     error('FCS_export:UnsupportedFormat', 'Unsupported format: %s', fmt);
             end
+        end
+    end
+end
+
+function exportModel = discoverScene(figOne, exportOpts)
+    exportModel = struct();
+    exportModel.figure = struct();
+    exportModel.layout = discoverTiledLayout(figOne);
+    exportModel.axes = struct('key', {}, 'srcHandle', {}, 'tag', {}, 'className', {}, 'isPrimary', {}, ...
+        'isManualLegend', {}, 'isAuxiliary', {}, 'classificationReason', {}, 'positionNorm', {}, 'tileIndex', {}, ...
+        'tileSpan', {}, 'axisProps', {}, 'children', {}, 'sortHandleId', {});
+    exportModel.colorbars = struct('srcId', {}, 'hostAxesKey', {}, 'props', {});
+    exportModel.legends = struct('srcId', {}, 'hostAxesKey', {}, 'entrySrcIds', {}, 'labels', {}, 'props', {});
+    exportModel.annotations = struct('className', {}, 'props', {});
+    exportModel.manualLegend = struct('axesKey', {}, 'positionNorm', {});
+    exportModel.warnings = strings(0,1);
+
+    exportModel.figure.sourceClass = string(class(figOne));
+    exportModel.figure.name = i_figureNameSafe(figOne);
+    exportModel.figure.color = i_getPropSafe(figOne, 'Color', [1 1 1]);
+    exportModel.figure.renderer = i_getPropSafe(figOne, 'Renderer', 'painters');
+    exportModel.figure.positionPixels = i_getFigurePositionPixels(figOne);
+    exportModel.figure.colormap = i_getColormapSafe(figOne, []);
+
+    axList = findall(figOne, 'Type', 'axes');
+    for iAx = 1:numel(axList)
+        ax = axList(iAx);
+        if ~isgraphics(ax)
+            continue;
+        end
+
+        [category, reason] = classifyAxes(ax, exportModel.layout);
+
+        axModel = struct();
+        axModel.key = i_handleKey(ax);
+        axModel.srcHandle = ax;
+        axModel.tag = string(i_getPropSafe(ax, 'Tag', ''));
+        axModel.className = string(class(ax));
+        axModel.isPrimary = strcmp(category, 'primary');
+        axModel.isManualLegend = strcmp(category, 'manualLegend');
+        axModel.isAuxiliary = strcmp(category, 'auxiliary');
+        axModel.classificationReason = string(reason);
+        axModel.positionNorm = i_getAxesPositionNorm(ax);
+        [axModel.tileIndex, axModel.tileSpan] = i_getAxesTileInfo(ax);
+        axModel.axisProps = i_captureAxesProps(ax);
+        axModel.children = i_discoverAxesChildren(ax);
+        axModel.sortHandleId = i_handleIdNumeric(ax);
+
+        exportModel.axes(end+1,1) = axModel; %#ok<AGROW>
+
+        if axModel.isManualLegend
+            exportModel.manualLegend(end+1,1) = struct('axesKey', axModel.key, 'positionNorm', axModel.positionNorm); %#ok<AGROW>
+        end
+    end
+
+    exportModel.axes = i_sortAxesModelsDeterministic(exportModel.axes, exportModel.layout);
+
+    cbList = findall(figOne, 'Type', 'ColorBar');
+    if isempty(cbList)
+        cbList = findall(figOne, 'Type', 'colorbar');
+    end
+    for iCb = 1:numel(cbList)
+        cb = cbList(iCb);
+        hostAx = i_getPropSafe(cb, 'Axes', []);
+        if isempty(hostAx) || ~isgraphics(hostAx, 'axes')
+            continue;
+        end
+        hostKey = i_handleKey(hostAx);
+        if ~i_axesKeyIsPrimary(exportModel.axes, hostKey)
+            continue;
+        end
+
+        cbModel = struct();
+        cbModel.srcId = i_handleKey(cb);
+        cbModel.hostAxesKey = hostKey;
+        cbModel.props = i_captureColorbarProps(cb);
+        exportModel.colorbars(end+1,1) = cbModel; %#ok<AGROW>
+    end
+
+    lgList = findall(figOne, 'Type', 'Legend');
+    if isempty(lgList)
+        lgList = findall(figOne, 'Type', 'legend');
+    end
+    for iLg = 1:numel(lgList)
+        lg = lgList(iLg);
+        hostAx = i_getPropSafe(lg, 'Axes', []);
+        if isempty(hostAx) || ~isgraphics(hostAx, 'axes')
+            continue;
+        end
+        hostKey = i_handleKey(hostAx);
+        if ~i_axesKeyIsPrimary(exportModel.axes, hostKey)
+            continue;
+        end
+
+        entrySrcIds = strings(0,1);
+        pc = i_getPropSafe(lg, 'PlotChildren', gobjects(0,1));
+        for p = 1:numel(pc)
+            if isgraphics(pc(p))
+                entrySrcIds(end+1,1) = string(i_handleKey(pc(p))); %#ok<AGROW>
+            end
+        end
+
+        labels = i_getLegendLabelsSafe(lg);
+        lgModel = struct();
+        lgModel.srcId = i_handleKey(lg);
+        lgModel.hostAxesKey = hostKey;
+        lgModel.entrySrcIds = entrySrcIds;
+        lgModel.labels = labels;
+        lgModel.props = i_captureLegendProps(lg);
+        exportModel.legends(end+1,1) = lgModel; %#ok<AGROW>
+    end
+
+    shapeObjs = findall(figOne, '-regexp', 'Type', 'textboxshape|line|arrow|doubleendarrow|textarrow');
+    if ~isempty(shapeObjs)
+        exportModel.warnings(end+1,1) = "Figure annotations found; Stage-1 exporter currently skips annotation reconstruction.";
+    end
+
+    if nargin >= 2 && isstruct(exportOpts) && isfield(exportOpts, 'exportVerbose') && ~logical(exportOpts.exportVerbose)
+        % Warnings are still recorded; emission is controlled elsewhere.
+    end
+end
+
+function layoutModel = discoverTiledLayout(figOne)
+    layoutModel = struct('mode', 'free', 'gridSize', [1 1], 'tileSpacing', 'none', 'padding', 'none');
+
+    axList = findall(figOne, 'Type', 'axes');
+    tileHit = false;
+    for iAx = 1:numel(axList)
+        ax = axList(iAx);
+        [tileIdx, ~] = i_getAxesTileInfo(ax);
+        if isfinite(tileIdx)
+            tileHit = true;
+            lay = i_findTiledLayoutParent(ax);
+            if ~isempty(lay)
+                gs = i_getPropSafe(lay, 'GridSize', [1 1]);
+                ts = i_getPropSafe(lay, 'TileSpacing', 'none');
+                pd = i_getPropSafe(lay, 'Padding', 'none');
+                layoutModel.gridSize = double(gs);
+                layoutModel.tileSpacing = ts;
+                layoutModel.padding = pd;
+            end
+            break;
+        end
+    end
+
+    if tileHit
+        layoutModel.mode = 'tiled';
+    end
+end
+
+function [category, reason] = classifyAxes(ax, layoutModel)
+    tagVal = lower(strtrim(string(i_getPropSafe(ax, 'Tag', ''))));
+    if tagVal == "mt_legend_axes"
+        category = 'manualLegend';
+        reason = 'tag:MT_Legend_Axes';
+        return;
+    end
+
+    visible = strcmpi(char(string(i_getPropSafe(ax, 'Visible', 'on'))), 'on');
+    hasPlottable = i_hasMeaningfulPlottableChildren(ax);
+    [tileIdx, ~] = i_getAxesTileInfo(ax);
+    isTiled = strcmp(layoutModel.mode, 'tiled') && isfinite(tileIdx);
+
+    if (~visible) && (~hasPlottable)
+        category = 'auxiliary';
+        reason = 'invisible-and-empty';
+        return;
+    end
+
+    if isTiled || hasPlottable
+        category = 'primary';
+        if isTiled
+            reason = 'tiled-member';
+        else
+            reason = 'has-plottable-children';
+        end
+        return;
+    end
+
+    category = 'auxiliary';
+    reason = 'non-primary-fallback';
+end
+
+function [cleanFig, handleMaps] = rebuildFigure(exportModel, exportOpts)
+    cleanFig = figure;
+    drawnow;
+    cleanFig.Visible = 'off';
+    if isfield(exportModel.figure, 'color') && isnumeric(exportModel.figure.color) && numel(exportModel.figure.color) >= 3
+        cleanFig.Color = exportModel.figure.color;
+    end
+    if isfield(exportModel.figure, 'renderer') && ~isempty(exportModel.figure.renderer)
+        try, cleanFig.Renderer = exportModel.figure.renderer; catch, end
+    end
+    if isfield(exportModel.figure, 'positionPixels') && isnumeric(exportModel.figure.positionPixels) && numel(exportModel.figure.positionPixels) >= 4
+        try
+            oldUnits = cleanFig.Units;
+            cleanFig.Units = 'pixels';
+            cleanFig.Position = exportModel.figure.positionPixels;
+            cleanFig.Units = oldUnits;
+        catch
+        end
+    end
+    if isfield(exportModel.figure, 'colormap') && ~isempty(exportModel.figure.colormap)
+        try, colormap(cleanFig, exportModel.figure.colormap); catch, end
+    end
+
+    handleMaps = struct();
+    handleMaps.axesByKey = containers.Map('KeyType', 'char', 'ValueType', 'any');
+    handleMaps.plotBySrcId = containers.Map('KeyType', 'char', 'ValueType', 'any');
+    handleMaps.warnings = strings(0,1);
+    handleMaps.layoutHandle = [];
+
+    if strcmp(exportModel.layout.mode, 'tiled')
+        try
+            gs = exportModel.layout.gridSize;
+            handleMaps.layoutHandle = tiledlayout(cleanFig, gs(1), gs(2));
+            try, handleMaps.layoutHandle.TileSpacing = exportModel.layout.tileSpacing; catch, end
+            try, handleMaps.layoutHandle.Padding = exportModel.layout.padding; catch, end
+        catch
+            handleMaps.layoutHandle = [];
+        end
+    end
+
+    if nargin >= 2 && isstruct(exportOpts)
+        % reserved for future options; no callbacks/appdata are set here intentionally.
+    end
+end
+
+function [cleanFig, handleMaps] = rebuildAxes(cleanFig, exportModel, handleMaps)
+    primary = exportModel.axes(arrayfun(@(a) a.isPrimary, exportModel.axes));
+    for iAx = 1:numel(primary)
+        axModel = primary(iAx);
+        dstAx = [];
+        if strcmp(exportModel.layout.mode, 'tiled') && ~isempty(handleMaps.layoutHandle) && isfinite(axModel.tileIndex)
+            try
+                dstAx = nexttile(handleMaps.layoutHandle, axModel.tileIndex);
+                if isnumeric(axModel.tileSpan) && numel(axModel.tileSpan) == 2
+                    try, dstAx.Layout.TileSpan = axModel.tileSpan; catch, end
+                end
+            catch
+                dstAx = [];
+            end
+        end
+
+        if isempty(dstAx) || ~isgraphics(dstAx, 'axes')
+            dstAx = axes('Parent', cleanFig, 'Units', 'normalized', 'Position', axModel.positionNorm);
+        end
+
+        i_applyAxesProps(dstAx, axModel.axisProps);
+        handleMaps.axesByKey(char(axModel.key)) = dstAx;
+        handleMaps = copyAxesChildren(axModel.srcHandle, dstAx, axModel.children, handleMaps, exportModel);
+
+        if isfield(axModel.axisProps, 'Colormap') && ~isempty(axModel.axisProps.Colormap)
+            try, colormap(dstAx, axModel.axisProps.Colormap); catch, end
+        end
+    end
+end
+
+function handleMaps = copyAxesChildren(srcAx, dstAx, childModels, handleMaps, exportModel)
+    if isempty(srcAx) || ~isgraphics(srcAx, 'axes') || isempty(dstAx) || ~isgraphics(dstAx, 'axes')
+        return;
+    end
+
+    if nargin >= 5 && isstruct(exportModel)
+        % no-op; reserved for future context-sensitive copy behavior.
+    end
+
+    for iChild = 1:numel(childModels)
+        cm = childModels(iChild);
+        if ~cm.copyEligible || isempty(cm.srcHandle) || ~isgraphics(cm.srcHandle)
+            continue;
+        end
+        try
+            newObj = copyobj(cm.srcHandle, dstAx);
+            if ~isempty(newObj)
+                handleMaps.plotBySrcId(char(cm.srcId)) = newObj(1);
+            end
+        catch ME
+            handleMaps.warnings(end+1,1) = "Child copy skipped (" + string(cm.className) + "): " + string(ME.message);
+        end
+    end
+end
+
+function [cleanFig, handleMaps] = rebuildColorbars(cleanFig, exportModel, handleMaps)
+    for iCb = 1:numel(exportModel.colorbars)
+        cbModel = exportModel.colorbars(iCb);
+        k = char(cbModel.hostAxesKey);
+        if ~isKey(handleMaps.axesByKey, k)
+            handleMaps.warnings(end+1,1) = "Colorbar skipped: missing mapped host axes.";
+            continue;
+        end
+        dstAx = handleMaps.axesByKey(k);
+        try
+            cb = colorbar(dstAx);
+            i_applyColorbarProps(cb, cbModel.props);
+        catch ME
+            handleMaps.warnings(end+1,1) = "Colorbar rebuild failed: " + string(ME.message);
+        end
+    end
+
+    if nargin >= 1
+        % keeps signature explicit and stable
+    end
+end
+
+function [cleanFig, handleMaps] = rebuildLegends(cleanFig, exportModel, handleMaps)
+    for iLg = 1:numel(exportModel.legends)
+        lgModel = exportModel.legends(iLg);
+        hostKey = char(lgModel.hostAxesKey);
+        if ~isKey(handleMaps.axesByKey, hostKey)
+            handleMaps.warnings(end+1,1) = "Legend skipped: missing mapped host axes.";
+            continue;
+        end
+
+        mappedHandles = gobjects(0,1);
+        mappedLabels = strings(0,1);
+        for j = 1:numel(lgModel.entrySrcIds)
+            srcId = char(lgModel.entrySrcIds(j));
+            if isKey(handleMaps.plotBySrcId, srcId)
+                mappedHandles(end+1,1) = handleMaps.plotBySrcId(srcId); %#ok<AGROW>
+                if j <= numel(lgModel.labels)
+                    mappedLabels(end+1,1) = lgModel.labels(j); %#ok<AGROW>
+                else
+                    mappedLabels(end+1,1) = ""; %#ok<AGROW>
+                end
+            end
+        end
+
+        if isempty(mappedHandles)
+            handleMaps.warnings(end+1,1) = "Legend skipped: no mapped plot handles.";
+            continue;
+        end
+
+        dstAx = handleMaps.axesByKey(hostKey);
+        try
+            lg = legend(dstAx, mappedHandles, cellstr(mappedLabels));
+            try, lg.AutoUpdate = 'off'; catch, end
+            i_applyLegendProps(lg, lgModel.props);
+        catch ME
+            handleMaps.warnings(end+1,1) = "Legend rebuild failed: " + string(ME.message);
+        end
+    end
+
+    if nargin >= 1
+        % keeps signature explicit and stable
+    end
+end
+
+function cleanFig = rebuildAnnotations(cleanFig, exportModel, handleMaps)
+    if ~isempty(exportModel.annotations)
+        handleMaps.warnings(end+1,1) = "Annotation reconstruction partially supported; unsupported annotations were skipped.";
+    end
+end
+
+function finalizeAndSave(cleanFig, outFile, exportOpts)
+    savefig(cleanFig, outFile);
+    if ~isempty(cleanFig) && isgraphics(cleanFig, 'figure')
+        close(cleanFig);
+    end
+
+    if nargin >= 3 && isstruct(exportOpts)
+        % reserved for future save-time options
+    end
+end
+
+function i_legacyTopLevelCopyAndSave(figOne, outFileK, exportOpts)
+    cleanFig = [];
+    try
+        cleanFig = figure('Visible', 'off');
+        srcChildren = allchild(figOne);
+        for iChild = numel(srcChildren):-1:1
+            hChild = srcChildren(iChild);
+            if ~isgraphics(hChild)
+                continue;
+            end
+            childClass = lower(string(class(hChild)));
+            if contains(childClass, 'menu') || contains(childClass, 'toolbar') || contains(childClass, 'uipanel')
+                continue;
+            end
+            try
+                copyobj(hChild, cleanFig);
+            catch
+            end
+        end
+        if isprop(figOne, 'Color') && isprop(cleanFig, 'Color')
+            cleanFig.Color = figOne.Color;
+        end
+        finalizeAndSave(cleanFig, outFileK, exportOpts);
+    catch ME
+        if ~isempty(cleanFig) && isgraphics(cleanFig, 'figure')
+            close(cleanFig);
+        end
+        rethrow(ME);
+    end
+end
+
+function i_emitExportWarnings(figOne, warningsIn, exportOpts)
+    verbose = true;
+    if nargin >= 3 && isstruct(exportOpts) && isfield(exportOpts, 'exportVerbose') && ~isempty(exportOpts.exportVerbose)
+        verbose = logical(exportOpts.exportVerbose);
+    end
+    if ~verbose || isempty(warningsIn)
+        return;
+    end
+
+    allWarnings = unique(warningsIn(:), 'stable');
+    if isempty(allWarnings)
+        return;
+    end
+
+    msg = sprintf('FCS_export warnings for "%s":\n%s', char(i_figureNameSafe(figOne)), char(strjoin(allWarnings, newline)));
+    warning('FCS_export:Warnings', '%s', char(msg));
+end
+
+function out = i_figureNameSafe(fig)
+    out = "(unnamed)";
+    try
+        nm = string(fig.Name);
+        if strlength(strtrim(nm)) > 0
+            out = nm;
+        end
+    catch
+    end
+end
+
+function tf = i_axesKeyIsPrimary(axModels, key)
+    tf = false;
+    for i = 1:numel(axModels)
+        if strcmp(char(axModels(i).key), char(key)) && axModels(i).isPrimary
+            tf = true;
+            return;
+        end
+    end
+end
+
+function key = i_handleKey(h)
+    key = "";
+    try
+        key = string(sprintf('%.17g', double(h)));
+    catch
+    end
+end
+
+function idNum = i_handleIdNumeric(h)
+    idNum = inf;
+    try
+        idNum = double(h);
+    catch
+    end
+end
+
+function posPix = i_getFigurePositionPixels(fig)
+    posPix = [100 100 640 480];
+    if isempty(fig) || ~isgraphics(fig, 'figure')
+        return;
+    end
+    try
+        oldUnits = fig.Units;
+        fig.Units = 'pixels';
+        posPix = fig.Position;
+        fig.Units = oldUnits;
+    catch
+    end
+end
+
+function [tileIdx, tileSpan] = i_getAxesTileInfo(ax)
+    tileIdx = NaN;
+    tileSpan = [1 1];
+    try
+        if isprop(ax, 'Layout')
+            lay = ax.Layout;
+            if ~isempty(lay)
+                try
+                    t = lay.Tile;
+                    if isnumeric(t) && isfinite(t)
+                        tileIdx = double(t);
+                    end
+                catch
+                end
+                try
+                    ts = lay.TileSpan;
+                    if isnumeric(ts) && numel(ts) == 2
+                        tileSpan = double(ts(:)');
+                    end
+                catch
+                end
+            end
+        end
+    catch
+    end
+end
+
+function lay = i_findTiledLayoutParent(ax)
+    lay = [];
+    p = [];
+    try, p = ax.Parent; catch, end
+    while ~isempty(p)
+        cls = lower(string(class(p)));
+        if contains(cls, 'tiledchartlayout')
+            lay = p;
+            return;
+        end
+        try
+            p = p.Parent;
+        catch
+            p = [];
+        end
+    end
+end
+
+function axProps = i_captureAxesProps(ax)
+    axProps = struct();
+    propNames = {'XLim','YLim','ZLim','CLim','ALim','XScale','YScale','ZScale','XDir','YDir','ZDir', ...
+        'DataAspectRatio','PlotBoxAspectRatio','View','Box','FontName','FontSize','LineWidth','Color','ColorOrder','Colormap'};
+    for i = 1:numel(propNames)
+        pn = propNames{i};
+        if isprop(ax, pn)
+            try, axProps.(pn) = ax.(pn); catch, end
+        end
+    end
+    axProps.Visible = i_getPropSafe(ax, 'Visible', 'on');
+end
+
+function i_applyAxesProps(ax, axProps)
+    fns = fieldnames(axProps);
+    for i = 1:numel(fns)
+        fn = fns{i};
+        if strcmp(fn, 'Colormap')
+            continue;
+        end
+        if isprop(ax, fn)
+            try, ax.(fn) = axProps.(fn); catch, end
+        end
+    end
+end
+
+function childModels = i_discoverAxesChildren(ax)
+    childModels = struct('srcHandle', {}, 'srcId', {}, 'className', {}, 'copyEligible', {}, 'sortA', {}, 'sortB', {}, 'sortHandleId', {});
+    ch = allchild(ax);
+    for i = 1:numel(ch)
+        h = ch(i);
+        if ~isgraphics(h)
+            continue;
+        end
+
+        cls = string(class(h));
+        childModel = struct();
+        childModel.srcHandle = h;
+        childModel.srcId = i_handleKey(h);
+        childModel.className = cls;
+        childModel.copyEligible = i_isChildCopyEligible(h);
+        [childModel.sortA, childModel.sortB] = i_childSortScalar(h);
+        childModel.sortHandleId = i_handleIdNumeric(h);
+        childModels(end+1,1) = childModel; %#ok<AGROW>
+    end
+
+    if isempty(childModels)
+        return;
+    end
+
+    mat = [[childModels.sortA]' [childModels.sortB]' [childModels.sortHandleId]'];
+    [~, ord] = sortrows(mat, [1 2 3]);
+    childModels = childModels(ord);
+end
+
+function tf = i_isChildCopyEligible(h)
+    tf = false;
+    if isempty(h) || ~isgraphics(h)
+        return;
+    end
+    cls = lower(string(class(h)));
+    if contains(cls, 'menu') || contains(cls, 'toolbar') || contains(cls, 'uipanel') || contains(cls, 'uicontainer') || contains(cls, 'appdesigner')
+        return;
+    end
+    tf = true;
+end
+
+function tf = i_hasMeaningfulPlottableChildren(ax)
+    tf = false;
+    ch = allchild(ax);
+    for i = 1:numel(ch)
+        h = ch(i);
+        if ~isgraphics(h)
+            continue;
+        end
+        if i_isMeaningfulPlottableClass(string(class(h)))
+            tf = true;
+            return;
+        end
+    end
+end
+
+function tf = i_isMeaningfulPlottableClass(className)
+    c = lower(string(className));
+    keys = ["line","scatter","bar","errorbar","image","surface","patch","text","histogram","stair","area","contour","heatmap"];
+    tf = any(contains(c, keys));
+end
+
+function [a, b] = i_childSortScalar(h)
+    a = 0;
+    b = 0;
+    try
+        if isprop(h, 'XData')
+            xd = h.XData;
+            if isnumeric(xd) && ~isempty(xd)
+                a = double(xd(1));
+            end
+        end
+    catch
+    end
+    try
+        if isprop(h, 'YData')
+            yd = h.YData;
+            if isnumeric(yd) && ~isempty(yd)
+                b = double(yd(1));
+            end
+        end
+    catch
+    end
+end
+
+function axesOut = i_sortAxesModelsDeterministic(axesIn, layoutModel)
+    axesOut = axesIn;
+    if isempty(axesOut)
+        return;
+    end
+
+    isPrimary = arrayfun(@(a) a.isPrimary, axesOut);
+    primary = axesOut(isPrimary);
+    nonPrimary = axesOut(~isPrimary);
+
+    if isempty(primary)
+        axesOut = [nonPrimary(:)];
+        return;
+    end
+
+    if strcmp(layoutModel.mode, 'tiled')
+        tIdx = arrayfun(@(a) i_nanToInf(a.tileIndex), primary);
+        ts1 = arrayfun(@(a) i_nanToInf(a.tileSpan(1)), primary);
+        ts2 = arrayfun(@(a) i_nanToInf(a.tileSpan(2)), primary);
+        hid = arrayfun(@(a) i_nanToInf(a.sortHandleId), primary);
+        mat = [tIdx(:) ts1(:) ts2(:) hid(:)];
+        [~, ord] = sortrows(mat, [1 2 3 4]);
+        primary = primary(ord);
+    else
+        y = arrayfun(@(a) i_nanToInf(a.positionNorm(2)), primary);
+        x = arrayfun(@(a) i_nanToInf(a.positionNorm(1)), primary);
+        hid = arrayfun(@(a) i_nanToInf(a.sortHandleId), primary);
+        mat = [-y(:) x(:) hid(:)];
+        [~, ord] = sortrows(mat, [1 2 3]);
+        primary = primary(ord);
+    end
+
+    axesOut = [primary(:); nonPrimary(:)];
+end
+
+function v = i_nanToInf(v)
+    if ~isfinite(v)
+        v = inf;
+    end
+end
+
+function pos = i_getAxesPositionNorm(ax)
+    pos = [0.13 0.11 0.775 0.815];
+    if isempty(ax) || ~isgraphics(ax)
+        return;
+    end
+    try
+        oldUnits = ax.Units;
+        ax.Units = 'normalized';
+        pos = ax.Position;
+        ax.Units = oldUnits;
+    catch
+    end
+end
+
+function cmap = i_getColormapSafe(target, defaultVal)
+    cmap = defaultVal;
+    try
+        cmap = colormap(target);
+    catch
+    end
+end
+
+function val = i_getPropSafe(obj, propName, defaultVal)
+    val = defaultVal;
+    try
+        if isprop(obj, propName)
+            val = obj.(propName);
+        end
+    catch
+    end
+end
+
+function props = i_captureColorbarProps(cb)
+    props = struct();
+    propNames = {'Location','Limits','Ticks','TickLabels','Direction','FontName','FontSize','LineWidth','Color','Box'};
+    for i = 1:numel(propNames)
+        pn = propNames{i};
+        if isprop(cb, pn)
+            try, props.(pn) = cb.(pn); catch, end
+        end
+    end
+    if isprop(cb, 'Label') && ~isempty(cb.Label)
+        props.LabelString = i_getPropSafe(cb.Label, 'String', '');
+        props.LabelInterpreter = i_getPropSafe(cb.Label, 'Interpreter', 'tex');
+    end
+end
+
+function i_applyColorbarProps(cb, props)
+    fns = fieldnames(props);
+    for i = 1:numel(fns)
+        fn = fns{i};
+        if strcmp(fn, 'LabelString') || strcmp(fn, 'LabelInterpreter')
+            continue;
+        end
+        if isprop(cb, fn)
+            try, cb.(fn) = props.(fn); catch, end
+        end
+    end
+    try
+        if isfield(props, 'LabelString')
+            cb.Label.String = props.LabelString;
+        end
+        if isfield(props, 'LabelInterpreter')
+            cb.Label.Interpreter = props.LabelInterpreter;
+        end
+    catch
+    end
+end
+
+function labels = i_getLegendLabelsSafe(lg)
+    labels = strings(0,1);
+    raw = i_getPropSafe(lg, 'String', {});
+    if ischar(raw)
+        labels = string({raw});
+    elseif isstring(raw)
+        labels = raw(:);
+    elseif iscell(raw)
+        labels = string(raw(:));
+    end
+end
+
+function props = i_captureLegendProps(lg)
+    props = struct();
+    propNames = {'Location','Orientation','Box','NumColumns','FontName','FontSize','Interpreter','TextColor'};
+    for i = 1:numel(propNames)
+        pn = propNames{i};
+        if isprop(lg, pn)
+            try, props.(pn) = lg.(pn); catch, end
+        end
+    end
+end
+
+function i_applyLegendProps(lg, props)
+    fns = fieldnames(props);
+    for i = 1:numel(fns)
+        fn = fns{i};
+        if isprop(lg, fn)
+            try, lg.(fn) = props.(fn); catch, end
         end
     end
 end

@@ -1,4 +1,12 @@
 function FinalFigureFormatterGUI()
+% ========================================================================
+% DEPRECATION NOTICE (LEGACY GEOMETRY ENGINE)
+% This file is deprecated for new development.
+% It remains for backward compatibility only.
+% Do not extend or reuse this file for new layout logic.
+% New layout logic must use explicit target lists and stateless margin
+% normalization.
+% ========================================================================
 % FINALFIGUREFORMATTER – Compact GUI for formatting figures safely
 % Skips all your GUI tools automatically:
 %   CtrlGUI, Final Figure Formatter, FigureTools, refLineGUI

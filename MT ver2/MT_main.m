@@ -28,11 +28,11 @@ figureMode = 'paper';   % 'regular' or 'paper'
 Unfiltered = false;
 
 % Add paths
-baseFolder = 'C:\Users\matan\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Matlab functions';
+baseFolder = 'L:\My Drive\Quantum materials lab\Quantum materials lab\Matlab functions';
 addpath(genpath(baseFolder));
 
 %% dir
-dir = 'C:\Users\matan\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\MG 119 M1 Out of plane MPMS\MT DC ZFC FCC FCW\Paper';
+dir = 'L:\My Drive\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\MG 119 M1 Out of plane MPMS\MT DC ZFC FCC FCW\Paper';
 
 %% Import files (AUTO detect mode)
 [fileList,sortedFields,colors,mass] = getFileList_MT(dir, color_scheme);
@@ -178,4 +178,4 @@ if formatFigures
     end
 end
 %}
-add_MT_legend(gcf, legendData);
+

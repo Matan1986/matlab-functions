@@ -8,6 +8,9 @@ function FigureControlStudio()
 %   See documentation generator for ComposeSpec section.
 
     ui = uifigure('Name', 'FigureControlStudio', 'Position', [100 100 900 600]);
+    % Deterministic GUI marker (more robust than Name matching).
+    ui.Tag = "FCS_ROOT";
+    setappdata(ui, 'FCS_Root', true);
 
     root = uigridlayout(ui, [1 2]);
     root.ColumnWidth = {280, '1x'};
@@ -24,8 +27,8 @@ function FigureControlStudio()
     tabs.Layout.Column = 2;
 
     % ---------------- Left: Targets ----------------
-    tgtGrid = uigridlayout(targetPanel, [12 1]);
-    tgtGrid.RowHeight = {22, 22, 22, 22, 28, 28, '1x', 22, 24, 22, 28, 1};
+    tgtGrid = uigridlayout(targetPanel, [14 1]);
+    tgtGrid.RowHeight = {22, 22, 22, 22, 28, 28, '1x', 22, 24, 22, 28, 28, 28, 1};
     tgtGrid.ColumnWidth = {'1x'};
     tgtGrid.Padding = [8 8 8 8];
 
@@ -66,17 +69,56 @@ ddScope = uidropdown(tgtGrid, ...
     lblHint.FontColor = [0.35 0.35 0.35];
     btnResetDefaults = uibutton(tgtGrid, 'Text', 'Reset to Defaults', 'ButtonPushedFcn', @onResetDefaults);
 
+    sizeGrid = uigridlayout(tgtGrid, [1 4]);
+    sizeGrid.ColumnWidth = {42, '1x', 48, '1x'};
+    sizeGrid.RowHeight = {24};
+    sizeGrid.Padding = [0 0 0 0];
+    sizeGrid.ColumnSpacing = 6;
+
+    uilabel(sizeGrid, 'Text', 'Width');
+    nfGlobalFigWidth = uieditfield(sizeGrid, 'numeric', ...
+        'Value', 1200, ...
+        'Limits', [1 Inf], ...
+        'RoundFractionalValues', true);
+    uilabel(sizeGrid, 'Text', 'Height');
+    nfGlobalFigHeight = uieditfield(sizeGrid, 'numeric', ...
+        'Value', 900, ...
+        'Limits', [1 Inf], ...
+        'RoundFractionalValues', true);
+
+    btnApplySizeToAll = uibutton(tgtGrid, 'Text', 'Apply Size To All', 'ButtonPushedFcn', @applyGlobalFigureSize); %#ok<NASGU>
+
     % explicit-list cache
     explicitHandleCache = gobjects(0,1);
 
-    % ---------------- Tab 1: Typography ----------------
-    tTypo = uitab(tabs, 'Title', 'Typography');
-    tabRootTypo = uigridlayout(tTypo, [3 1]);
-    tabRootTypo.RowHeight = {'fit', '1x', 'fit'};
-    tabRootTypo.ColumnWidth = {'1x'};
-    tabRootTypo.Padding = [12 12 12 12];
+    % ---------------- Main tabs (creation order) ----------------
+    tLayoutGeometry = uitab(tabs, 'Title', 'Layout & Geometry');
+    tTextLegend = uitab(tabs, 'Title', 'Text & Legend');
+    tColorsBackground = uitab(tabs, 'Title', 'Colors & Background');
+    tLinesReferences = uitab(tabs, 'Title', 'Lines & References');
+    tExport = uitab(tabs, 'Title', 'Export');
+    tCompose = uitab(tabs, 'Title', 'Compose');
+    tWorkflow = uitab(tabs, 'Title', 'Workflow');
 
-    secTypoMain = uigridlayout(tabRootTypo, [2 2]);
+    % ---------------- Tab 1: Text & Legend ----------------
+    tabRootTextLegend = uigridlayout(tTextLegend, [3 1]);
+    tabRootTextLegend.RowHeight = {'fit', 'fit', '1x'};
+    tabRootTextLegend.ColumnWidth = {'1x'};
+    tabRootTextLegend.Padding = [12 12 12 12];
+    tabRootTextLegend.RowSpacing = 16;
+    tabRootTextLegend.Scrollable = 'on';
+
+    pTextAxis = uipanel(tabRootTextLegend, 'Title', 'Text & Axis');
+    pTextAxis.Layout.Row = 1;
+    pTextAxis.Layout.Column = 1;
+
+    textAxisRoot = uigridlayout(pTextAxis, [3 1]);
+    textAxisRoot.RowHeight = {'fit', 'fit', 'fit'};
+    textAxisRoot.ColumnWidth = {'1x'};
+    textAxisRoot.Padding = [10 10 10 10];
+    textAxisRoot.RowSpacing = 10;
+
+    secTypoMain = uigridlayout(textAxisRoot, [2 2]);
     secTypoMain.Layout.Row = 1;
     secTypoMain.Layout.Column = 1;
     secTypoMain.ColumnWidth = {170, '1x'};
@@ -97,29 +139,99 @@ ddScope = uidropdown(tgtGrid, ...
     ddAxisPreset.Layout.Row = 2;
     ddAxisPreset.Layout.Column = 2;
 
-    typoActionBar = uigridlayout(tabRootTypo, [1 1]);
+    secAnnotationText = uigridlayout(textAxisRoot, [2 1]);
+    secAnnotationText.Layout.Row = 2;
+    secAnnotationText.Layout.Column = 1;
+    secAnnotationText.ColumnWidth = {'1x'};
+    secAnnotationText.RowHeight = {'fit', 'fit'};
+    secAnnotationText.Padding = [0 0 0 0];
+    secAnnotationText.RowSpacing = 6;
+
+    lblSecAnnotationText = uilabel(secAnnotationText, 'Text', 'Annotation Text', 'HorizontalAlignment', 'left');
+    lblSecAnnotationText.FontWeight = 'bold';
+    lblSecAnnotationText.Layout.Row = 1;
+    lblSecAnnotationText.Layout.Column = 1;
+
+    secAnnotationTextBody = uigridlayout(secAnnotationText, [5 2]);
+    secAnnotationTextBody.Layout.Row = 2;
+    secAnnotationTextBody.Layout.Column = 1;
+    secAnnotationTextBody.ColumnWidth = {170, '1x'};
+    secAnnotationTextBody.RowHeight = {'fit', 'fit', 'fit', 'fit', 'fit'};
+    secAnnotationTextBody.Padding = [0 0 0 0];
+
+    lblAnnFontName = uilabel(secAnnotationTextBody, 'Text', 'Font name', 'HorizontalAlignment', 'left');
+    lblAnnFontName.Layout.Row = 1;
+    lblAnnFontName.Layout.Column = 1;
+    efAnnFontName = uieditfield(secAnnotationTextBody, 'text', 'Value', 'Helvetica', ...
+        'ValueChangedFcn', @onPersistedControlChanged);
+    efAnnFontName.Layout.Row = 1;
+    efAnnFontName.Layout.Column = 2;
+
+    lblAnnFontSize = uilabel(secAnnotationTextBody, 'Text', 'Font size', 'HorizontalAlignment', 'left');
+    lblAnnFontSize.Layout.Row = 2;
+    lblAnnFontSize.Layout.Column = 1;
+    nfAnnFontSize = uieditfield(secAnnotationTextBody, 'numeric', 'Value', 11, 'Limits', [1 Inf], ...
+        'ValueChangedFcn', @onPersistedControlChanged);
+    nfAnnFontSize.Layout.Row = 2;
+    nfAnnFontSize.Layout.Column = 2;
+
+    lblAnnFontWeight = uilabel(secAnnotationTextBody, 'Text', 'Font weight', 'HorizontalAlignment', 'left');
+    lblAnnFontWeight.Layout.Row = 3;
+    lblAnnFontWeight.Layout.Column = 1;
+    ddAnnFontWeight = uidropdown(secAnnotationTextBody, 'Items', {'normal','bold'}, 'Value', 'normal', ...
+        'ValueChangedFcn', @onPersistedControlChanged);
+    ddAnnFontWeight.Layout.Row = 3;
+    ddAnnFontWeight.Layout.Column = 2;
+
+    lblAnnInterpreter = uilabel(secAnnotationTextBody, 'Text', 'Interpreter', 'HorizontalAlignment', 'left');
+    lblAnnInterpreter.Layout.Row = 4;
+    lblAnnInterpreter.Layout.Column = 1;
+    ddAnnInterpreter = uidropdown(secAnnotationTextBody, 'Items', {'tex','latex','none'}, 'Value', 'tex', ...
+        'ValueChangedFcn', @onPersistedControlChanged);
+    ddAnnInterpreter.Layout.Row = 4;
+    ddAnnInterpreter.Layout.Column = 2;
+
+    lblAnnColor = uilabel(secAnnotationTextBody, 'Text', 'Color (RGB)', 'HorizontalAlignment', 'left');
+    lblAnnColor.Layout.Row = 5;
+    lblAnnColor.Layout.Column = 1;
+    efAnnColor = uieditfield(secAnnotationTextBody, 'text', 'Value', '[0 0 0]', ...
+        'ValueChangedFcn', @onPersistedControlChanged);
+    efAnnColor.Tooltip = 'RGB format: 0..1. Examples: [0.9 0.2 0.1] or 0.9 0.2 0.1 or 0.9,0.2,0.1.';
+    efAnnColor.Layout.Row = 5;
+    efAnnColor.Layout.Column = 2;
+
+    typoActionBar = uigridlayout(textAxisRoot, [1 2]);
     typoActionBar.Layout.Row = 3;
     typoActionBar.Layout.Column = 1;
-    typoActionBar.ColumnWidth = {'1x'};
+    typoActionBar.ColumnWidth = {'1x', '1x'};
     typoActionBar.RowHeight = {'fit'};
     typoActionBar.Padding = [0 0 0 0];
+    typoActionBar.ColumnSpacing = 8;
 
     btnApplyTypo = uibutton(typoActionBar, 'Text', 'Apply', 'ButtonPushedFcn', @onApplyTypography);
     btnApplyTypo.Layout.Row = 1;
     btnApplyTypo.Layout.Column = 1;
 
-    % ---------------- Tab 2: Legend ----------------
-    tLegend = uitab(tabs, 'Title', 'Legend');
-    tabRootLegend = uigridlayout(tLegend, [4 1]);
-    tabRootLegend.RowHeight = {'fit', 'fit', '1x', 'fit'};
-    tabRootLegend.ColumnWidth = {'1x'};
-    tabRootLegend.Padding = [12 12 12 12];
+    btnPublicationLabelAlignment = uibutton(typoActionBar, 'Text', 'Publication Label Alignment', ...
+        'ButtonPushedFcn', @onPublicationLabelAlignment);
+    btnPublicationLabelAlignment.Layout.Row = 1;
+    btnPublicationLabelAlignment.Layout.Column = 2;
 
-    secLegendA = uigridlayout(tabRootLegend, [4 2]);
+    pLegend = uipanel(tabRootTextLegend, 'Title', 'Legend');
+    pLegend.Layout.Row = 2;
+    pLegend.Layout.Column = 1;
+
+    legendRoot = uigridlayout(pLegend, [3 1]);
+    legendRoot.RowHeight = {'fit', 'fit', 'fit'};
+    legendRoot.ColumnWidth = {'1x'};
+    legendRoot.Padding = [10 10 10 10];
+    legendRoot.RowSpacing = 10;
+
+    secLegendA = uigridlayout(legendRoot, [5 2]);
     secLegendA.Layout.Row = 1;
     secLegendA.Layout.Column = 1;
     secLegendA.ColumnWidth = {170, '1x'};
-    secLegendA.RowHeight = {'fit', 'fit', 'fit', 'fit'};
+    secLegendA.RowHeight = {'fit', 'fit', 'fit', 'fit', 'fit'};
     secLegendA.Padding = [0 0 0 0];
 
     lblLegendFontOverride = uilabel(secLegendA, 'Text', 'Font Size (override)', 'HorizontalAlignment', 'left');
@@ -147,7 +259,12 @@ ddScope = uidropdown(tgtGrid, ...
     cbLegendAllowRebuild.Layout.Row = 4;
     cbLegendAllowRebuild.Layout.Column = [1 2];
 
-    secLegendB = uigridlayout(tabRootLegend, [1 1]);
+    cbMoveManualLegend = uicheckbox(secLegendA, 'Text', 'Move Manual Legend (drag)', 'Value', false, ...
+        'ValueChangedFcn', @onManualLegendDragModeChanged);
+    cbMoveManualLegend.Layout.Row = 5;
+    cbMoveManualLegend.Layout.Column = [1 2];
+
+    secLegendB = uigridlayout(legendRoot, [1 1]);
     secLegendB.Layout.Row = 2;
     secLegendB.Layout.Column = 1;
     secLegendB.RowHeight = {'fit'};
@@ -191,8 +308,8 @@ ddScope = uidropdown(tgtGrid, ...
     btnLegendSE.Layout.Row = 3;
     btnLegendSE.Layout.Column = 3;
 
-    legendActionBar = uigridlayout(tabRootLegend, [1 1]);
-    legendActionBar.Layout.Row = 4;
+    legendActionBar = uigridlayout(legendRoot, [1 1]);
+    legendActionBar.Layout.Row = 3;
     legendActionBar.Layout.Column = 1;
     legendActionBar.ColumnWidth = {'1x'};
     legendActionBar.RowHeight = {'fit'};
@@ -202,14 +319,29 @@ ddScope = uidropdown(tgtGrid, ...
     btnApplyLegend.Layout.Row = 1;
     btnApplyLegend.Layout.Column = 1;
 
-    % ---------------- Tab 3: Appearance ----------------
-    tAppearance = uitab(tabs, 'Title', 'Appearance');
-    tabRootAppearance = uigridlayout(tAppearance, [5 1]);
-    tabRootAppearance.RowHeight = {'fit', 'fit', 'fit', '1x', 'fit'};
-    tabRootAppearance.ColumnWidth = {'1x'};
-    tabRootAppearance.Padding = [12 12 12 12];
-    tabRootAppearance.RowSpacing = 12;
-    tabRootAppearance.Scrollable = 'on';
+    % ---------------- Tab 2: Colors & Background ----------------
+    tabRootColorsBackground = uigridlayout(tColorsBackground, [4 1]);
+    tabRootColorsBackground.RowHeight = {'fit', 'fit', 'fit', '1x'};
+    tabRootColorsBackground.ColumnWidth = {'1x'};
+    tabRootColorsBackground.Padding = [12 12 12 12];
+    tabRootColorsBackground.RowSpacing = 12;
+    tabRootColorsBackground.Scrollable = 'on';
+
+    % ---------------- Tab 3: Lines & References ----------------
+    tabRootLinesReferences = uigridlayout(tLinesReferences, [3 1]);
+    tabRootLinesReferences.RowHeight = {'fit', 'fit', '1x'};
+    tabRootLinesReferences.ColumnWidth = {'1x'};
+    tabRootLinesReferences.Padding = [12 12 12 12];
+    tabRootLinesReferences.RowSpacing = 12;
+    tabRootLinesReferences.Scrollable = 'on';
+
+    % ---------------- Tab 4: Layout & Geometry ----------------
+    tabRootLayoutGeometry = uigridlayout(tLayoutGeometry, [3 1]);
+    tabRootLayoutGeometry.RowHeight = {'fit', 'fit', '1x'};
+    tabRootLayoutGeometry.ColumnWidth = {'1x'};
+    tabRootLayoutGeometry.Padding = [12 12 12 12];
+    tabRootLayoutGeometry.RowSpacing = 12;
+    tabRootLayoutGeometry.Scrollable = 'on';
 
     cmapItems = i_getAvailableColormapNames();
     if isempty(cmapItems)
@@ -221,7 +353,7 @@ ddScope = uidropdown(tgtGrid, ...
     end
     cmapItems = [{'keep'}, cmapItems];
 
-    secColors = uigridlayout(tabRootAppearance, [2 1]);
+    secColors = uigridlayout(tabRootColorsBackground, [2 1]);
     secColors.Layout.Row = 1;
     secColors.Layout.Column = 1;
     secColors.ColumnWidth = {'1x'};
@@ -273,98 +405,177 @@ ddScope = uidropdown(tgtGrid, ...
     cbSpreadReverse.Layout.Row = 3;
     cbSpreadReverse.Layout.Column = [1 2];
 
-    secLinesAxes = uigridlayout(tabRootAppearance, [12 2]);
-    secLinesAxes.Layout.Row = 2;
+    secBackground = uigridlayout(tabRootColorsBackground, [2 1]);
+    secBackground.Layout.Row = 2;
+    secBackground.Layout.Column = 1;
+    secBackground.ColumnWidth = {'1x'};
+    secBackground.RowHeight = {'fit', 'fit'};
+    secBackground.Padding = [0 0 0 0];
+    secBackground.RowSpacing = 6;
+
+    lblSecBackground = uilabel(secBackground, 'Text', 'Background', 'HorizontalAlignment', 'left');
+    lblSecBackground.FontWeight = 'bold';
+    lblSecBackground.Layout.Row = 1;
+    lblSecBackground.Layout.Column = 1;
+
+    secBackgroundBody = uigridlayout(secBackground, [2 1]);
+    secBackgroundBody.Layout.Row = 2;
+    secBackgroundBody.Layout.Column = 1;
+    secBackgroundBody.ColumnWidth = {'1x'};
+    secBackgroundBody.RowHeight = {'fit', 'fit'};
+    secBackgroundBody.Padding = [0 0 0 0];
+    secBackgroundBody.RowSpacing = 6;
+
+    cbBgWhiteFigure = uicheckbox(secBackgroundBody, 'Text', 'Background white (figure)', 'Value', false, ...
+        'ValueChangedFcn', @onBackgroundToggleChanged);
+    cbBgWhiteFigure.Layout.Row = 1;
+    cbBgWhiteFigure.Layout.Column = 1;
+
+    cbBgTransparentAxes = uicheckbox(secBackgroundBody, 'Text', 'Transparent axes background', 'Value', false, ...
+        'ValueChangedFcn', @onBackgroundToggleChanged);
+    cbBgTransparentAxes.Layout.Row = 2;
+    cbBgTransparentAxes.Layout.Column = 1;
+
+    secQuickPresetsColors = uigridlayout(tabRootColorsBackground, [2 1]);
+    secQuickPresetsColors.Layout.Row = 3;
+    secQuickPresetsColors.Layout.Column = 1;
+    secQuickPresetsColors.ColumnWidth = {'1x'};
+    secQuickPresetsColors.RowHeight = {'fit', 'fit'};
+    secQuickPresetsColors.Padding = [0 0 0 0];
+    secQuickPresetsColors.RowSpacing = 6;
+
+    lblSecQuickPresetsColors = uilabel(secQuickPresetsColors, 'Text', 'Quick Presets', 'HorizontalAlignment', 'left');
+    lblSecQuickPresetsColors.FontWeight = 'bold';
+    lblSecQuickPresetsColors.Layout.Row = 1;
+    lblSecQuickPresetsColors.Layout.Column = 1;
+
+    secAppSmart = uigridlayout(secQuickPresetsColors, [2 1]);
+    secAppSmart.Layout.Row = 2;
+    secAppSmart.Layout.Column = 1;
+    secAppSmart.ColumnWidth = {'1x'};
+    secAppSmart.RowHeight = {'fit', 'fit'};
+    secAppSmart.Padding = [0 0 0 0];
+
+    lblQuickPresetSmartInfo = uilabel(secAppSmart, 'Text', 'Applies using current settings.', 'HorizontalAlignment', 'left');
+    lblQuickPresetSmartInfo.Layout.Row = 1;
+    lblQuickPresetSmartInfo.Layout.Column = 1;
+
+    btnApplySmartPack = uibutton(secAppSmart, 'Text', 'Apply Smart Colormap Pack', 'ButtonPushedFcn', @onApplySmartPack);
+    btnApplySmartPack.Layout.Row = 2;
+    btnApplySmartPack.Layout.Column = 1;
+
+    secLinesAxes = uigridlayout(tabRootLinesReferences, [14 2]);
+    secLinesAxes.Layout.Row = 1;
     secLinesAxes.Layout.Column = 1;
     secLinesAxes.ColumnWidth = {'1x','1x'};
-    secLinesAxes.RowHeight = {'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 40};
+    secLinesAxes.RowHeight = {'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 40};
     secLinesAxes.Padding = [12 12 12 12];
     secLinesAxes.RowSpacing = 6;
 
-    lblSecLinesAxes = uilabel(secLinesAxes, 'Text', 'Lines & Axes', 'HorizontalAlignment', 'left');
+    lblSecLinesAxes = uilabel(secLinesAxes, 'Text', 'Lines & References', 'HorizontalAlignment', 'left');
     lblSecLinesAxes.FontWeight = 'bold';
     lblSecLinesAxes.Layout.Row = 1;
     lblSecLinesAxes.Layout.Column = [1 2];
 
-    cbBgWhiteFigure = uicheckbox(secLinesAxes, 'Text', 'Background white (figure)', 'Value', false, ...
-        'ValueChangedFcn', @onBackgroundToggleChanged);
-    cbBgWhiteFigure.Layout.Row = 2;
-    cbBgWhiteFigure.Layout.Column = [1 2];
-
-    cbBgTransparentAxes = uicheckbox(secLinesAxes, 'Text', 'Transparent axes background', 'Value', false, ...
-        'ValueChangedFcn', @onBackgroundToggleChanged);
-    cbBgTransparentAxes.Layout.Row = 3;
-    cbBgTransparentAxes.Layout.Column = [1 2];
-
     lblDataLineStyle = uilabel(secLinesAxes, 'Text', 'Data line style', 'HorizontalAlignment', 'left');
-    lblDataLineStyle.Layout.Row = 4;
+    lblDataLineStyle.Layout.Row = 2;
     lblDataLineStyle.Layout.Column = 1;
     ddDataLineStyle = uidropdown(secLinesAxes, 'Items', {'(keep)','-','--',':','-.'}, 'Value', '(keep)', ...
         'ValueChangedFcn', @onPersistedControlChanged);
-    ddDataLineStyle.Layout.Row = 4;
+    ddDataLineStyle.Layout.Row = 2;
     ddDataLineStyle.Layout.Column = 2;
 
     lblDataLineWidth = uilabel(secLinesAxes, 'Text', 'Data line width', 'HorizontalAlignment', 'left');
-    lblDataLineWidth.Layout.Row = 5;
+    lblDataLineWidth.Layout.Row = 3;
     lblDataLineWidth.Layout.Column = 1;
     nfDataLineWidth = uieditfield(secLinesAxes, 'numeric', 'Value', 1.5, 'Limits', [0 Inf], ...
         'ValueChangedFcn', @onPersistedControlChanged);
-    nfDataLineWidth.Layout.Row = 5;
+    nfDataLineWidth.Layout.Row = 3;
     nfDataLineWidth.Layout.Column = 2;
 
     lblDataMarkerSize = uilabel(secLinesAxes, 'Text', 'Data marker size', 'HorizontalAlignment', 'left');
-    lblDataMarkerSize.Layout.Row = 6;
+    lblDataMarkerSize.Layout.Row = 4;
     lblDataMarkerSize.Layout.Column = 1;
     nfDataMarkerSize = uieditfield(secLinesAxes, 'numeric', 'Value', 6, 'Limits', [0 Inf], ...
         'ValueChangedFcn', @onPersistedControlChanged);
-    nfDataMarkerSize.Layout.Row = 6;
+    nfDataMarkerSize.Layout.Row = 4;
     nfDataMarkerSize.Layout.Column = 2;
 
     lblFitLineStyle = uilabel(secLinesAxes, 'Text', 'Fit line style', 'HorizontalAlignment', 'left');
-    lblFitLineStyle.Layout.Row = 7;
+    lblFitLineStyle.Layout.Row = 5;
     lblFitLineStyle.Layout.Column = 1;
     ddFitLineStyle = uidropdown(secLinesAxes, 'Items', {'(keep)','-','--',':','-.'}, 'Value', '(keep)', ...
         'ValueChangedFcn', @onPersistedControlChanged);
-    ddFitLineStyle.Layout.Row = 7;
+    ddFitLineStyle.Layout.Row = 5;
     ddFitLineStyle.Layout.Column = 2;
 
     lblFitLineWidth = uilabel(secLinesAxes, 'Text', 'Fit line width', 'HorizontalAlignment', 'left');
-    lblFitLineWidth.Layout.Row = 8;
+    lblFitLineWidth.Layout.Row = 6;
     lblFitLineWidth.Layout.Column = 1;
     nfFitLineWidth = uieditfield(secLinesAxes, 'numeric', 'Value', 1.5, 'Limits', [0 Inf], ...
         'ValueChangedFcn', @onPersistedControlChanged);
-    nfFitLineWidth.Layout.Row = 8;
+    nfFitLineWidth.Layout.Row = 6;
     nfFitLineWidth.Layout.Column = 2;
 
     lblFitMarkerSize = uilabel(secLinesAxes, 'Text', 'Fit marker size', 'HorizontalAlignment', 'left');
-    lblFitMarkerSize.Layout.Row = 9;
+    lblFitMarkerSize.Layout.Row = 7;
     lblFitMarkerSize.Layout.Column = 1;
     nfFitMarkerSize = uieditfield(secLinesAxes, 'numeric', 'Value', 6, 'Limits', [0 Inf], ...
         'ValueChangedFcn', @onPersistedControlChanged);
-    nfFitMarkerSize.Layout.Row = 9;
+    nfFitMarkerSize.Layout.Row = 7;
     nfFitMarkerSize.Layout.Column = 2;
 
+    lblSecReferenceLines = uilabel(secLinesAxes, 'Text', 'Reference Lines', 'HorizontalAlignment', 'left');
+    lblSecReferenceLines.FontWeight = 'bold';
+    lblSecReferenceLines.Layout.Row = 8;
+    lblSecReferenceLines.Layout.Column = [1 2];
+
+    lblRefLineWidth = uilabel(secLinesAxes, 'Text', 'Line width', 'HorizontalAlignment', 'left');
+    lblRefLineWidth.Layout.Row = 9;
+    lblRefLineWidth.Layout.Column = 1;
+    nfRefLineWidth = uieditfield(secLinesAxes, 'numeric', 'Value', 1.0, 'Limits', [0 Inf], ...
+        'ValueChangedFcn', @onPersistedControlChanged);
+    nfRefLineWidth.Layout.Row = 9;
+    nfRefLineWidth.Layout.Column = 2;
+
+    lblRefLineStyle = uilabel(secLinesAxes, 'Text', 'Line style', 'HorizontalAlignment', 'left');
+    lblRefLineStyle.Layout.Row = 10;
+    lblRefLineStyle.Layout.Column = 1;
+    ddRefLineStyle = uidropdown(secLinesAxes, 'Items', {'-','--',':','-.'}, 'Value', '--', ...
+        'ValueChangedFcn', @onPersistedControlChanged);
+    ddRefLineStyle.Layout.Row = 10;
+    ddRefLineStyle.Layout.Column = 2;
+
+    lblRefLineColor = uilabel(secLinesAxes, 'Text', 'Color (RGB or keep)', 'HorizontalAlignment', 'left');
+    lblRefLineColor.Layout.Row = 11;
+    lblRefLineColor.Layout.Column = 1;
+    efRefLineColor = uieditfield(secLinesAxes, 'text', 'Value', '(keep)', ...
+        'ValueChangedFcn', @onPersistedControlChanged);
+    efRefLineColor.Tooltip = 'RGB format: 0..1. Examples: [0.9 0.2 0.1] or 0.9 0.2 0.1 or 0.9,0.2,0.1. Use ''keep'' to leave unchanged.';
+    efRefLineColor.Layout.Row = 11;
+    efRefLineColor.Layout.Column = 2;
+
     lblPanelsPerRow = uilabel(secLinesAxes, 'Text', 'Panels per row:', 'HorizontalAlignment', 'left');
-    lblPanelsPerRow.Layout.Row = 10;
+    lblPanelsPerRow.Layout.Row = 12;
     lblPanelsPerRow.Layout.Column = 1;
     ddPanelsPerRow = uidropdown(secLinesAxes, 'Items', {'1','2','3'}, 'Value', '2', ...
         'ValueChangedFcn', @onPersistedControlChanged);
-    ddPanelsPerRow.Layout.Row = 10;
+    ddPanelsPerRow.Layout.Row = 12;
     ddPanelsPerRow.Layout.Column = 2;
 
     cbReversePlotOrder = uicheckbox(secLinesAxes, 'Text', 'Reverse plot order', 'Value', false, ...
         'ValueChangedFcn', @onPersistedControlChanged);
-    cbReversePlotOrder.Layout.Row = 11;
+    cbReversePlotOrder.Layout.Row = 13;
     cbReversePlotOrder.Layout.Column = [1 2];
 
     btnApplyAppearance = uibutton(secLinesAxes, 'Text', 'Apply Appearance', 'ButtonPushedFcn', @onApplyAppearance);
-    btnApplyAppearance.Layout.Row = 12;
+    btnApplyAppearance.Layout.Row = 14;
     btnApplyAppearance.Layout.Column = [1 2];
 
-    secQuickPresets = uigridlayout(tabRootAppearance, [2 1]);
-    secQuickPresets.Layout.Row = 3;
+    secQuickPresets = uigridlayout(tabRootLinesReferences, [2 1]);
+    secQuickPresets.Layout.Row = 2;
     secQuickPresets.Layout.Column = 1;
-    secQuickPresets.ColumnWidth = {'1x', '1x'};
+    secQuickPresets.ColumnWidth = {'1x'};
     secQuickPresets.RowHeight = {'fit', 'fit'};
     secQuickPresets.Padding = [0 0 0 0];
     secQuickPresets.RowSpacing = 6;
@@ -374,11 +585,11 @@ ddScope = uidropdown(tgtGrid, ...
     lblSecQuickPresets.Layout.Row = 1;
     lblSecQuickPresets.Layout.Column = 1;
 
-    secAppC = uigridlayout(secQuickPresets, [3 1]);
+    secAppC = uigridlayout(secQuickPresets, [2 1]);
     secAppC.Layout.Row = 2;
     secAppC.Layout.Column = 1;
     secAppC.ColumnWidth = {'1x'};
-    secAppC.RowHeight = {'fit', 'fit', 'fit'};
+    secAppC.RowHeight = {'fit', 'fit'};
     secAppC.Padding = [0 0 0 0];
 
     lblQuickPresetInfo = uilabel(secAppC, 'Text', 'Applies using current settings.', 'HorizontalAlignment', 'left');
@@ -389,19 +600,76 @@ ddScope = uidropdown(tgtGrid, ...
     btnApplyPublicationStyle.Layout.Row = 2;
     btnApplyPublicationStyle.Layout.Column = [1 2];
 
-    btnApplySmartPack = uibutton(secAppC, 'Text', 'Apply Smart Colormap Pack', 'ButtonPushedFcn', @onApplySmartPack);
-    btnApplySmartPack.Layout.Row = 3;
-    btnApplySmartPack.Layout.Column = [1 2];
+    secAxesTransform = uigridlayout(tabRootLayoutGeometry, [2 1]);
+    secAxesTransform.Layout.Row = 1;
+    secAxesTransform.Layout.Column = 1;
+    secAxesTransform.ColumnWidth = {'1x'};
+    secAxesTransform.RowHeight = {'fit', 'fit'};
+    secAxesTransform.Padding = [0 0 0 0];
+    secAxesTransform.RowSpacing = 6;
 
-    secSpacerAppearance = uigridlayout(tabRootAppearance, [1 1]);
-    secSpacerAppearance.Layout.Row = 4;
-    secSpacerAppearance.Layout.Column = 1;
-    secSpacerAppearance.ColumnWidth = {'1x'};
-    secSpacerAppearance.RowHeight = {22};
-    secSpacerAppearance.Padding = [0 0 0 0];
+    lblSecAxesTransform = uilabel(secAxesTransform, 'Text', 'Axes Transform', 'HorizontalAlignment', 'left');
+    lblSecAxesTransform.FontWeight = 'bold';
+    lblSecAxesTransform.Layout.Row = 1;
+    lblSecAxesTransform.Layout.Column = 1;
 
-    secFigureSize = uigridlayout(tabRootAppearance, [2 1]);
-    secFigureSize.Layout.Row = 5;
+    secAxesTransformBody = uigridlayout(secAxesTransform, [4 3]);
+    secAxesTransformBody.Layout.Row = 2;
+    secAxesTransformBody.Layout.Column = 1;
+    secAxesTransformBody.ColumnWidth = {170, '1x', 60};
+    secAxesTransformBody.RowHeight = {'fit', 'fit', 'fit', 'fit'};
+    secAxesTransformBody.Padding = [0 0 0 0];
+    secAxesTransformBody.RowSpacing = 6;
+    secAxesTransformBody.ColumnSpacing = 8;
+
+    lblAxScale = uilabel(secAxesTransformBody, 'Text', 'Scale', 'HorizontalAlignment', 'left');
+    lblAxScale.Layout.Row = 1;
+    lblAxScale.Layout.Column = 1;
+    slAxScale = uislider(secAxesTransformBody, ...
+        'Limits', [0.5 1.5], ...
+        'Value', 1.0, ...
+        'ValueChangingFcn', @onAxesTransformValueChanging, ...
+        'ValueChangedFcn', @onAxesTransformChanged);
+    slAxScale.Layout.Row = 1;
+    slAxScale.Layout.Column = 2;
+    lblAxScaleValue = uilabel(secAxesTransformBody, 'Text', '1.00', 'HorizontalAlignment', 'right');
+    lblAxScaleValue.Layout.Row = 1;
+    lblAxScaleValue.Layout.Column = 3;
+
+    lblAxOffsetX = uilabel(secAxesTransformBody, 'Text', 'Horizontal Offset', 'HorizontalAlignment', 'left');
+    lblAxOffsetX.Layout.Row = 2;
+    lblAxOffsetX.Layout.Column = 1;
+    slAxOffsetX = uislider(secAxesTransformBody, ...
+        'Limits', [-0.2 0.2], ...
+        'Value', 0.0, ...
+        'ValueChangingFcn', @onAxesTransformValueChanging, ...
+        'ValueChangedFcn', @onAxesTransformChanged);
+    slAxOffsetX.Layout.Row = 2;
+    slAxOffsetX.Layout.Column = 2;
+    lblAxOffsetXValue = uilabel(secAxesTransformBody, 'Text', '0.00', 'HorizontalAlignment', 'right');
+    lblAxOffsetXValue.Layout.Row = 2;
+    lblAxOffsetXValue.Layout.Column = 3;
+
+    lblAxOffsetY = uilabel(secAxesTransformBody, 'Text', 'Vertical Offset', 'HorizontalAlignment', 'left');
+    lblAxOffsetY.Layout.Row = 3;
+    lblAxOffsetY.Layout.Column = 1;
+    slAxOffsetY = uislider(secAxesTransformBody, ...
+        'Limits', [-0.2 0.2], ...
+        'Value', 0.0, ...
+        'ValueChangingFcn', @onAxesTransformValueChanging, ...
+        'ValueChangedFcn', @onAxesTransformChanged);
+    slAxOffsetY.Layout.Row = 3;
+    slAxOffsetY.Layout.Column = 2;
+    lblAxOffsetYValue = uilabel(secAxesTransformBody, 'Text', '0.00', 'HorizontalAlignment', 'right');
+    lblAxOffsetYValue.Layout.Row = 3;
+    lblAxOffsetYValue.Layout.Column = 3;
+
+    btnResetTransform = uibutton(secAxesTransformBody, 'Text', 'Reset Transform', 'ButtonPushedFcn', @onResetTransform);
+    btnResetTransform.Layout.Row = 4;
+    btnResetTransform.Layout.Column = [2 3];
+
+    secFigureSize = uigridlayout(tabRootLayoutGeometry, [2 1]);
+    secFigureSize.Layout.Row = 2;
     secFigureSize.Layout.Column = 1;
     secFigureSize.ColumnWidth = {'1x'};
     secFigureSize.RowHeight = {'fit', 'fit'};
@@ -413,11 +681,11 @@ ddScope = uidropdown(tgtGrid, ...
     lblSecFigureSize.Layout.Row = 1;
     lblSecFigureSize.Layout.Column = 1;
 
-    secAppD = uigridlayout(secFigureSize, [5 2]);
+    secAppD = uigridlayout(secFigureSize, [7 2]);
     secAppD.Layout.Row = 2;
     secAppD.Layout.Column = 1;
     secAppD.ColumnWidth = {170, '1x'};
-    secAppD.RowHeight = {'fit', 'fit', 'fit', 'fit', 'fit'};
+    secAppD.RowHeight = {'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit'};
     secAppD.Padding = [0 0 0 0];
 
     lblWsWidth = uilabel(secAppD, 'Text', 'Target Width (cm)', 'HorizontalAlignment', 'left');
@@ -456,8 +724,62 @@ ddScope = uidropdown(tgtGrid, ...
     btnApplyWorkspaceSize.Layout.Row = 5;
     btnApplyWorkspaceSize.Layout.Column = [1 2];
 
-    % ---------------- Tab 4: Export ----------------
-    tExport = uitab(tabs, 'Title', 'Export');
+    btnEqualizeCenterAxesGroup = uibutton(secAppD, ...
+        'Text', 'Equalize & Center Axes Group (All Figures)', ...
+        'ButtonPushedFcn', @onEqualizeCenterAxesGroup);
+    btnEqualizeCenterAxesGroup.Layout.Row = 6;
+    btnEqualizeCenterAxesGroup.Layout.Column = [1 2];
+
+    btnFinalizePublicationLayout = uibutton(secAppD, ...
+        'Text', 'Finalize Publication Layout', ...
+        'ButtonPushedFcn', @onFinalizePublicationLayout);
+    btnFinalizePublicationLayout.Layout.Row = 7;
+    btnFinalizePublicationLayout.Layout.Column = [1 2];
+
+    secSpacerLayoutGeometry = uigridlayout(tabRootLayoutGeometry, [1 1]);
+    secSpacerLayoutGeometry.Layout.Row = 3;
+    secSpacerLayoutGeometry.Layout.Column = 1;
+    secSpacerLayoutGeometry.ColumnWidth = {'1x'};
+    secSpacerLayoutGeometry.RowHeight = {22};
+    secSpacerLayoutGeometry.Padding = [0 0 0 0];
+
+    % ---------------- Tab 5: Workflow ----------------
+    tabRootWorkflow = uigridlayout(tWorkflow, [2 1]);
+    tabRootWorkflow.ColumnWidth = {'1x'};
+    tabRootWorkflow.RowHeight = {'fit', '1x'};
+    tabRootWorkflow.Padding = [12 12 12 12];
+    tabRootWorkflow.RowSpacing = 8;
+
+    lblWorkflowTitle = uilabel(tabRootWorkflow, 'Text', 'Publication Workflow', 'HorizontalAlignment', 'left');
+    lblWorkflowTitle.FontWeight = 'bold';
+    lblWorkflowTitle.Layout.Row = 1;
+    lblWorkflowTitle.Layout.Column = 1;
+
+    lblWorkflowBody = uilabel(tabRootWorkflow, ...
+        'Text', sprintf(['Step 1 — Set Figure Size\n' ...
+        'Use "Apply Size" in Layout & Geometry.\n' ...
+        'Set final publication dimensions (do not change later).\n\n' ...
+        'Step 2 — Apply Publication Style\n' ...
+        'Use "Apply Publication Style" in Lines & References.\n' ...
+        'Finalize fonts, ticks, line width, etc.\n\n' ...
+        'Step 3 — Finalize Publication Layout\n' ...
+        'Use "Finalize Publication Layout".\n' ...
+        'This normalizes margins across all target figures using TightInset.\n' ...
+        'If you change labels or font size → run this step again.\n\n' ...
+        'Step 4 — Export\n' ...
+        'Use the Export tab to generate final output.\n\n' ...
+        'Notes:\n' ...
+        '- Do not rely on manual offsets for margin alignment.\n' ...
+        '- Always finalize typography before layout normalization.\n' ...
+        '- Layout normalization modifies axes Position only.\n' ...
+        '- No limits or data are changed.']), ...
+        'HorizontalAlignment', 'left', ...
+        'VerticalAlignment', 'top', ...
+        'WordWrap', 'on');
+    lblWorkflowBody.Layout.Row = 2;
+    lblWorkflowBody.Layout.Column = 1;
+
+    % ---------------- Tab 6: Export ----------------
     tabRootExport = uigridlayout(tExport, [5 1]);
     tabRootExport.ColumnWidth = {'1x'};
     tabRootExport.RowHeight = {'fit', 'fit', 'fit', '1x', 'fit'};
@@ -527,11 +849,10 @@ ddScope = uidropdown(tgtGrid, ...
 
     exportOutDir = pwd;
 
-    % ---------------- Tab 5: Compose ----------------
-    tCompose = uitab(tabs, 'Title', 'Compose');
+    % ---------------- Tab 7: Compose ----------------
     tabRootCompose = uigridlayout(tCompose, [5 1]);
     tabRootCompose.ColumnWidth = {'1x'};
-    tabRootCompose.RowHeight = {'fit', 'fit', 'fit', '1x', 'fit'};
+    tabRootCompose.RowHeight = {'fit', 'fit', 'fit', 'fit', 'fit'};
     tabRootCompose.Padding = [12 12 12 12];
 
     secComposeA = uigridlayout(tabRootCompose, [5 2]);
@@ -637,6 +958,56 @@ ddScope = uidropdown(tgtGrid, ...
     btnLoadLayout.Layout.Row = 2;
     btnLoadLayout.Layout.Column = 2;
 
+    secComposeSpacing = uigridlayout(tabRootCompose, [2 1]);
+    secComposeSpacing.Layout.Row = 4;
+    secComposeSpacing.Layout.Column = 1;
+    secComposeSpacing.ColumnWidth = {'1x'};
+    secComposeSpacing.RowHeight = {'fit', 'fit'};
+    secComposeSpacing.Padding = [0 0 0 0];
+    secComposeSpacing.RowSpacing = 6;
+
+    lblSecComposeSpacing = uilabel(secComposeSpacing, 'Text', 'Compose Layout Spacing', 'HorizontalAlignment', 'left');
+    lblSecComposeSpacing.FontWeight = 'bold';
+    lblSecComposeSpacing.Layout.Row = 1;
+    lblSecComposeSpacing.Layout.Column = 1;
+
+    secComposeSpacingBody = uigridlayout(secComposeSpacing, [2 3]);
+    secComposeSpacingBody.Layout.Row = 2;
+    secComposeSpacingBody.Layout.Column = 1;
+    secComposeSpacingBody.ColumnWidth = {190, '1x', 60};
+    secComposeSpacingBody.RowHeight = {'fit', 'fit'};
+    secComposeSpacingBody.Padding = [0 0 0 0];
+    secComposeSpacingBody.RowSpacing = 6;
+    secComposeSpacingBody.ColumnSpacing = 8;
+
+    lblComposeHGap = uilabel(secComposeSpacingBody, 'Text', 'Horizontal Gap', 'HorizontalAlignment', 'left');
+    lblComposeHGap.Layout.Row = 1;
+    lblComposeHGap.Layout.Column = 1;
+    slComposeHGap = uislider(secComposeSpacingBody, ...
+        'Limits', [0 0.1], ...
+        'Value', 0.02, ...
+        'ValueChangingFcn', @onComposeGapValueChanging, ...
+        'ValueChangedFcn', @onComposeGapChanged);
+    slComposeHGap.Layout.Row = 1;
+    slComposeHGap.Layout.Column = 2;
+    lblComposeHGapValue = uilabel(secComposeSpacingBody, 'Text', '0.020', 'HorizontalAlignment', 'right');
+    lblComposeHGapValue.Layout.Row = 1;
+    lblComposeHGapValue.Layout.Column = 3;
+
+    lblComposeVGap = uilabel(secComposeSpacingBody, 'Text', 'Vertical Gap', 'HorizontalAlignment', 'left');
+    lblComposeVGap.Layout.Row = 2;
+    lblComposeVGap.Layout.Column = 1;
+    slComposeVGap = uislider(secComposeSpacingBody, ...
+        'Limits', [0 0.1], ...
+        'Value', 0.02, ...
+        'ValueChangingFcn', @onComposeGapValueChanging, ...
+        'ValueChangedFcn', @onComposeGapChanged);
+    slComposeVGap.Layout.Row = 2;
+    slComposeVGap.Layout.Column = 2;
+    lblComposeVGapValue = uilabel(secComposeSpacingBody, 'Text', '0.020', 'HorizontalAlignment', 'right');
+    lblComposeVGapValue.Layout.Row = 2;
+    lblComposeVGapValue.Layout.Column = 3;
+
     composeActionBar = uigridlayout(tabRootCompose, [1 1]);
     composeActionBar.Layout.Row = 5;
     composeActionBar.Layout.Column = 1;
@@ -648,7 +1019,7 @@ ddScope = uidropdown(tgtGrid, ...
     btnCompose.Layout.Row = 1;
     btnCompose.Layout.Column = 1;
 
-    % ---------------- Tab 6: Diagnostics (optional) ----------------
+    % ---------------- Tab 8: Diagnostics (optional) ----------------
     tDiag = uitab(tabs, 'Title', 'Diagnostics');
     tabRootDiag = uigridlayout(tDiag, [3 1]);
     tabRootDiag.RowHeight = {'fit', '1x', 'fit'};
@@ -688,10 +1059,14 @@ ddScope = uidropdown(tgtGrid, ...
         'autoLabels', true, ...
         'labelPosition', "Top-left", ...
         'labelFontSize', 11, ...
+        'composeHGap', 0.02, ...
+        'composeVGap', 0.02, ...
         'legendPlacementMode', "Inside", ...
         'legendLocation', "best", ...
         'legendReverse', false, ...
         'legendAllowRebuild', false, ...
+        'moveManualLegend', false, ...
+        'manualLegendPositions', struct('figureKey', {}, 'position', {}), ...
         'appearanceMapName', string(cmapDefault), ...
         'appearanceSpreadMode', "medium", ...
         'appearanceSpreadReverse', false, ...
@@ -703,19 +1078,40 @@ ddScope = uidropdown(tgtGrid, ...
         'fitLineStyle', "(keep)", ...
         'fitLineWidth', 1.5, ...
         'fitMarkerSize', 6, ...
+        'refLineWidth', 1.0, ...
+        'refLineStyle', "--", ...
+        'refLineColor', "(keep)", ...
+        'annFontName', "Helvetica", ...
+        'annFontSize', 11, ...
+        'annFontWeight', "normal", ...
+        'annInterpreter', "tex", ...
+        'annColor', "[0 0 0]", ...
+        'targetWidthCm', 12, ...
+        'heightMode', "Auto (ratio)", ...
+        'heightCm', 9, ...
+        'baseRatio', 0.75, ...
+        'axesTransformScale', 1.0, ...
+        'axesTransformOffsetX', 0.0, ...
+        'axesTransformOffsetY', 0.0, ...
         'reversePlotOrder', false, ...
         'panelsPerRow', "2", ...
         'exportCompose', false);
     suppressUIStateSave = false;
     legendLocationState = char(defaultUIState.legendLocation);
+    axesBasePositions = containers.Map('KeyType', 'char', 'ValueType', 'any');
+    manualLegendPositions = containers.Map('KeyType', 'char', 'ValueType', 'any');
+    manualLegendDragState = struct('active', false, 'fig', gobjects(0,1), 'ax', gobjects(0,1), 'startPoint', [0 0], 'startPos', [0 0 1 1]);
 
     % ---------------- Initialize ----------------
     i_loadUIState();
+    i_updateAxesTransformLabels();
+    i_updateComposeGapLabels();
     onScopeModeChanged();
     onWidthPresetChanged();
     onWorkspaceHeightModeChanged();
     onLegendPlacementModeChanged();
     onRefreshExplicit();
+    i_applyManualLegendDragModeToFigures(explicitHandleCache);
 
     % =========================================================
     % Nested callbacks and helpers
@@ -759,7 +1155,9 @@ ddScope = uidropdown(tgtGrid, ...
             figs(figs == ui) = [];
 
             explicitHandleCache = figs(:);
+            i_captureAxesBasePositions(explicitHandleCache);
             refreshExplicitListbox([]);
+            i_applyManualLegendDragModeToFigures(explicitHandleCache);
 
         catch ME
             uialert(ui, ME.message, 'Refresh Failed');
@@ -780,14 +1178,25 @@ ddScope = uidropdown(tgtGrid, ...
         ids = (1:n)';
         for k = 1:n
             f = explicitHandleCache(k);
-            numTxt = '?';
-            nameTxt = '';
+            % Some figures have empty Number -> string([]) returns 0x0, causing assignment mismatch.
+            numTxt = "UI";
+            nameTxt = "";
             try
-                numTxt = string(f.Number);
+                if isprop(f, 'Number')
+                    nVal = f.Number;
+                    if isnumeric(nVal) && isscalar(nVal) && ~isempty(nVal)
+                        numTxt = string(nVal);
+                    end
+                end
             catch
             end
             try
-                nameTxt = string(f.Name);
+                if isprop(f, 'Name')
+                    nName = string(f.Name);
+                    if ~isempty(nName)
+                        nameTxt = nName(1);
+                    end
+                end
             catch
             end
             if strlength(strtrim(nameTxt)) == 0
@@ -884,6 +1293,88 @@ ddScope = uidropdown(tgtGrid, ...
         i_saveUIState();
     end
 
+    function onAxesTransformValueChanging(src, evt)
+        if nargin >= 2 && isstruct(evt) && isfield(evt, 'Value')
+            if isequal(src, slAxScale)
+                src.Value = i_quantizeSliderValue(double(evt.Value), [0.5 1.5], 0.01);
+            elseif isequal(src, slAxOffsetX)
+                src.Value = i_quantizeSliderValue(double(evt.Value), [-0.2 0.2], 0.01);
+            elseif isequal(src, slAxOffsetY)
+                src.Value = i_quantizeSliderValue(double(evt.Value), [-0.2 0.2], 0.01);
+            end
+        end
+        i_updateAxesTransformLabels();
+    end
+
+    function onAxesTransformChanged(src, ~)
+        if isequal(src, slAxScale)
+            src.Value = i_quantizeSliderValue(double(src.Value), [0.5 1.5], 0.01);
+        elseif isequal(src, slAxOffsetX)
+            src.Value = i_quantizeSliderValue(double(src.Value), [-0.2 0.2], 0.01);
+        elseif isequal(src, slAxOffsetY)
+            src.Value = i_quantizeSliderValue(double(src.Value), [-0.2 0.2], 0.01);
+        end
+        i_updateAxesTransformLabels();
+        i_saveUIState();
+    end
+
+    function onResetTransform(~, ~)
+        slAxScale.Value = 1.0;
+        slAxOffsetX.Value = 0.0;
+        slAxOffsetY.Value = 0.0;
+        i_updateAxesTransformLabels();
+        i_saveUIState();
+
+        figs = resolveExplicitListTargetsOrAlert("Axes Transform");
+        if isempty(figs)
+            return;
+        end
+
+        for k = 1:numel(figs)
+            fig = figs(k);
+            if isgraphics(fig, 'figure')
+                i_applyManualAxesTransform(fig);
+            end
+        end
+    end
+
+    function i_updateAxesTransformLabels()
+        lblAxScaleValue.Text = sprintf('%.2f', double(slAxScale.Value));
+        lblAxOffsetXValue.Text = sprintf('%.2f', double(slAxOffsetX.Value));
+        lblAxOffsetYValue.Text = sprintf('%.2f', double(slAxOffsetY.Value));
+    end
+
+    function onComposeGapValueChanging(src, evt)
+        if nargin >= 2 && isstruct(evt) && isfield(evt, 'Value')
+            if isequal(src, slComposeHGap)
+                src.Value = i_quantizeSliderValue(double(evt.Value), [0 0.1], 0.001);
+            elseif isequal(src, slComposeVGap)
+                src.Value = i_quantizeSliderValue(double(evt.Value), [0 0.1], 0.001);
+            end
+        end
+        i_updateComposeGapLabels();
+    end
+
+    function onComposeGapChanged(src, ~)
+        if isequal(src, slComposeHGap)
+            src.Value = i_quantizeSliderValue(double(src.Value), [0 0.1], 0.001);
+        elseif isequal(src, slComposeVGap)
+            src.Value = i_quantizeSliderValue(double(src.Value), [0 0.1], 0.001);
+        end
+        i_updateComposeGapLabels();
+        i_saveUIState();
+    end
+
+    function i_updateComposeGapLabels()
+        lblComposeHGapValue.Text = sprintf('%.3f', double(slComposeHGap.Value));
+        lblComposeVGapValue.Text = sprintf('%.3f', double(slComposeVGap.Value));
+    end
+
+    function v = i_quantizeSliderValue(v, lims, step)
+        v = round(v / step) * step;
+        v = min(max(v, lims(1)), lims(2));
+    end
+
     function onWorkspaceHeightModeChanged(~, ~)
         isCustom = string(ddWsHeightMode.Value) == "Custom";
         if isCustom
@@ -901,6 +1392,261 @@ ddScope = uidropdown(tgtGrid, ...
         i_saveUIState();
     end
 
+    function onManualLegendDragModeChanged(~, ~)
+        i_applyManualLegendDragModeToFigures(explicitHandleCache);
+        i_saveUIState();
+    end
+
+    function i_applyManualLegendDragModeToFigures(figs)
+        dragEnabled = logical(cbMoveManualLegend.Value);
+        if isempty(figs)
+            return;
+        end
+
+        for k = 1:numel(figs)
+            fig = figs(k);
+            if ~isgraphics(fig, 'figure')
+                continue;
+            end
+
+            axList = findall(fig, 'Type', 'axes');
+            for a = 1:numel(axList)
+                ax = axList(a);
+                if ~isgraphics(ax, 'axes') || ~i_isManualLegendAxes(ax)
+                    continue;
+                end
+
+                try
+                    ax.Units = 'normalized';
+                catch
+                end
+
+                i_applySavedManualLegendPosition(ax);
+                i_configureManualLegendAxesInteractivity(ax, dragEnabled);
+            end
+        end
+
+        if ~dragEnabled
+            i_stopManualLegendDrag();
+        end
+    end
+
+    function i_applySavedManualLegendPosition(ax)
+        if isempty(ax) || ~isgraphics(ax, 'axes')
+            return;
+        end
+
+        fig = ancestor(ax, 'figure');
+        if isempty(fig) || ~isgraphics(fig, 'figure')
+            return;
+        end
+
+        key = i_manualLegendFigureKey(fig);
+        key = char(key);
+        if ~isKey(manualLegendPositions, key)
+            return;
+        end
+
+        pos = manualLegendPositions(key);
+        if ~isnumeric(pos) || numel(pos) < 4 || any(~isfinite(pos(1:4)))
+            return;
+        end
+
+        try
+            ax.Units = 'normalized';
+            ax.Position = i_clampAxesPositionIfNeeded(double(pos(1:4)));
+        catch
+        end
+    end
+
+    function i_configureManualLegendAxesInteractivity(ax, dragEnabled)
+        if isempty(ax) || ~isgraphics(ax, 'axes')
+            return;
+        end
+
+        if dragEnabled
+            try, ax.PickableParts = 'all'; catch, end
+            try, ax.HitTest = 'on'; catch, end
+            try, ax.ButtonDownFcn = @onManualLegendAxesButtonDown; catch, end
+        else
+            try, ax.ButtonDownFcn = []; catch, end
+            try, ax.PickableParts = 'none'; catch, end
+            try, ax.HitTest = 'off'; catch, end
+        end
+
+        kids = allchild(ax);
+        for iKid = 1:numel(kids)
+            h = kids(iKid);
+            if ~isgraphics(h)
+                continue;
+            end
+            try, h.PickableParts = 'none'; catch, end
+            try, h.HitTest = 'off'; catch, end
+        end
+    end
+
+    function onManualLegendAxesButtonDown(src, ~)
+        if ~logical(cbMoveManualLegend.Value) || ~isgraphics(src, 'axes')
+            return;
+        end
+
+        fig = ancestor(src, 'figure');
+        if isempty(fig) || ~isgraphics(fig, 'figure')
+            return;
+        end
+
+        try
+            src.Units = 'normalized';
+            startPos = double(src.Position);
+        catch
+            return;
+        end
+
+        manualLegendDragState.active = true;
+        manualLegendDragState.fig = fig;
+        manualLegendDragState.ax = src;
+        manualLegendDragState.startPoint = i_getFigurePointerNormalized(fig);
+        manualLegendDragState.startPos = startPos;
+
+        try
+            fig.WindowButtonMotionFcn = @onManualLegendDragMotion;
+            fig.WindowButtonUpFcn = @onManualLegendDragStop;
+        catch
+            i_stopManualLegendDrag();
+        end
+    end
+
+    function onManualLegendDragMotion(~, ~)
+        if ~manualLegendDragState.active
+            return;
+        end
+
+        ax = manualLegendDragState.ax;
+        fig = manualLegendDragState.fig;
+        if ~isgraphics(fig, 'figure') || ~isgraphics(ax, 'axes')
+            i_stopManualLegendDrag();
+            return;
+        end
+
+        pNow = i_getFigurePointerNormalized(fig);
+        delta = pNow - manualLegendDragState.startPoint;
+        newPos = manualLegendDragState.startPos;
+        newPos(1:2) = newPos(1:2) + delta;
+        newPos = i_clampAxesPositionIfNeeded(newPos);
+
+        try
+            ax.Units = 'normalized';
+            ax.Position = newPos;
+        catch
+            i_stopManualLegendDrag();
+        end
+    end
+
+    function onManualLegendDragStop(~, ~)
+        if manualLegendDragState.active && isgraphics(manualLegendDragState.ax, 'axes')
+            ax = manualLegendDragState.ax;
+            fig = ancestor(ax, 'figure');
+            if ~isempty(fig) && isgraphics(fig, 'figure')
+                try
+                    ax.Units = 'normalized';
+                    pos = double(ax.Position);
+                    manualLegendPositions(char(i_manualLegendFigureKey(fig))) = pos;
+                catch
+                end
+            end
+        end
+
+        i_stopManualLegendDrag();
+        i_saveUIState();
+    end
+
+    function i_stopManualLegendDrag()
+        if manualLegendDragState.active && isgraphics(manualLegendDragState.fig, 'figure')
+            try, manualLegendDragState.fig.WindowButtonMotionFcn = []; catch, end
+            try, manualLegendDragState.fig.WindowButtonUpFcn = []; catch, end
+        end
+        manualLegendDragState = struct('active', false, 'fig', gobjects(0,1), 'ax', gobjects(0,1), 'startPoint', [0 0], 'startPos', [0 0 1 1]);
+    end
+
+    function pNorm = i_getFigurePointerNormalized(fig)
+        pNorm = [0 0];
+        if isempty(fig) || ~isgraphics(fig, 'figure')
+            return;
+        end
+        try
+            oldUnits = fig.Units;
+            fig.Units = 'pixels';
+            figPos = fig.Position;
+            cp = fig.CurrentPoint;
+            fig.Units = oldUnits;
+            if numel(figPos) >= 4 && figPos(3) > 0 && figPos(4) > 0
+                pNorm = [cp(1) / figPos(3), cp(2) / figPos(4)];
+            end
+        catch
+            pNorm = [0 0];
+        end
+    end
+
+    function key = i_manualLegendFigureKey(fig)
+        key = "";
+        if isempty(fig) || ~isgraphics(fig, 'figure')
+            return;
+        end
+        numTxt = "?";
+        nameTxt = "";
+        try, numTxt = string(fig.Number); catch, end
+        try, nameTxt = strtrim(string(fig.Name)); catch, end
+        key = "fig:" + numTxt + "|" + lower(nameTxt);
+    end
+
+    function i_restoreManualLegendPositionState(savedState)
+        manualLegendPositions = containers.Map('KeyType', 'char', 'ValueType', 'any');
+        if ~isstruct(savedState) || isempty(savedState)
+            return;
+        end
+
+        for i = 1:numel(savedState)
+            if ~isfield(savedState, 'figureKey') || ~isfield(savedState, 'position')
+                continue;
+            end
+            key = string(savedState(i).figureKey);
+            pos = savedState(i).position;
+            if strlength(strtrim(key)) == 0
+                continue;
+            end
+            if ~isnumeric(pos) || numel(pos) < 4 || any(~isfinite(pos(1:4)))
+                continue;
+            end
+            manualLegendPositions(char(key)) = double(pos(1:4));
+        end
+    end
+
+    function out = i_serializeManualLegendPositionState()
+        out = struct('figureKey', {}, 'position', {});
+        if isempty(manualLegendPositions)
+            return;
+        end
+
+        keys = manualLegendPositions.keys;
+        if isempty(keys)
+            return;
+        end
+
+        out = repmat(struct('figureKey', '', 'position', [0 0 1 1]), numel(keys), 1);
+        idx = 0;
+        for i = 1:numel(keys)
+            key = keys{i};
+            pos = manualLegendPositions(key);
+            if ~isnumeric(pos) || numel(pos) < 4 || any(~isfinite(pos(1:4)))
+                continue;
+            end
+            idx = idx + 1;
+            out(idx).figureKey = key;
+            out(idx).position = double(pos(1:4));
+        end
+        out = out(1:idx);
+    end
+
     function onResetDefaults(~, ~)
         suppressUIStateSave = true;
         ddScope.Value = char(defaultUIState.scopeMode);
@@ -912,10 +1658,15 @@ ddScope = uidropdown(tgtGrid, ...
         cbAutoLabel.Value = logical(defaultUIState.autoLabels);
         ddLabelPos.Value = char(defaultUIState.labelPosition);
         nfLabelFont.Value = double(defaultUIState.labelFontSize);
+        slComposeHGap.Value = double(defaultUIState.composeHGap);
+        slComposeVGap.Value = double(defaultUIState.composeVGap);
+        i_updateComposeGapLabels();
         ddLegendPlacementMode.Value = char(defaultUIState.legendPlacementMode);
         legendLocationState = char(defaultUIState.legendLocation);
         cbLegendReverse.Value = logical(defaultUIState.legendReverse);
         cbLegendAllowRebuild.Value = logical(defaultUIState.legendAllowRebuild);
+        cbMoveManualLegend.Value = logical(defaultUIState.moveManualLegend);
+        manualLegendPositions = containers.Map('KeyType', 'char', 'ValueType', 'any');
         ddCmap.Value = char(defaultUIState.appearanceMapName);
         ddSpreadMode.Value = char(defaultUIState.appearanceSpreadMode);
         cbSpreadReverse.Value = logical(defaultUIState.appearanceSpreadReverse);
@@ -927,7 +1678,23 @@ ddScope = uidropdown(tgtGrid, ...
         ddFitLineStyle.Value = char(defaultUIState.fitLineStyle);
         nfFitLineWidth.Value = double(defaultUIState.fitLineWidth);
         nfFitMarkerSize.Value = double(defaultUIState.fitMarkerSize);
+        nfRefLineWidth.Value = double(defaultUIState.refLineWidth);
+        ddRefLineStyle.Value = char(defaultUIState.refLineStyle);
+        efRefLineColor.Value = char(defaultUIState.refLineColor);
+        efAnnFontName.Value = char(defaultUIState.annFontName);
+        nfAnnFontSize.Value = double(defaultUIState.annFontSize);
+        ddAnnFontWeight.Value = char(defaultUIState.annFontWeight);
+        ddAnnInterpreter.Value = char(defaultUIState.annInterpreter);
+        efAnnColor.Value = char(defaultUIState.annColor);
+        nfWsWidth.Value = double(defaultUIState.targetWidthCm);
+        ddWsHeightMode.Value = char(defaultUIState.heightMode);
+        nfWsHeight.Value = double(defaultUIState.heightCm);
+        nfWsBaseRatio.Value = double(defaultUIState.baseRatio);
         cbReversePlotOrder.Value = logical(defaultUIState.reversePlotOrder);
+        slAxScale.Value = double(defaultUIState.axesTransformScale);
+        slAxOffsetX.Value = double(defaultUIState.axesTransformOffsetX);
+        slAxOffsetY.Value = double(defaultUIState.axesTransformOffsetY);
+        i_updateAxesTransformLabels();
         ddPanelsPerRow.Value = char(defaultUIState.panelsPerRow);
         cbExportCompose.Value = logical(defaultUIState.exportCompose);
 
@@ -935,8 +1702,69 @@ ddScope = uidropdown(tgtGrid, ...
         onWidthPresetChanged();
         onLegendPlacementModeChanged();
         onRefreshExplicit();
+        i_applyManualLegendDragModeToFigures(explicitHandleCache);
         suppressUIStateSave = false;
         i_saveUIState();
+    end
+
+    function applyGlobalFigureSize(~, ~)
+        widthPx = double(nfGlobalFigWidth.Value);
+        heightPx = double(nfGlobalFigHeight.Value);
+
+        if ~isfinite(widthPx) || widthPx <= 0 || ~isfinite(heightPx) || heightPx <= 0
+            return;
+        end
+
+        widthPx = round(widthPx);
+        heightPx = round(heightPx);
+
+        figs = findall(0, 'Type', 'figure');
+        if isempty(figs)
+            return;
+        end
+
+        for k = 1:numel(figs)
+            f = figs(k);
+            if isempty(f) || ~isgraphics(f, 'figure')
+                continue;
+            end
+
+            isFCSRoot = false;
+            try
+                isFCSRoot = isappdata(f, 'FCS_Root');
+            catch
+                isFCSRoot = false;
+            end
+            if ~isFCSRoot
+                try
+                    isFCSRoot = strcmpi(string(f.Tag), "FCS_ROOT");
+                catch
+                    isFCSRoot = false;
+                end
+            end
+            if isFCSRoot
+                continue;
+            end
+
+            try
+                if ~strcmpi(string(f.Visible), "on")
+                    continue;
+                end
+            catch
+                continue;
+            end
+
+            try
+                f.Units = 'pixels';
+                pos = f.Position;
+                if isnumeric(pos) && numel(pos) >= 4
+                    pos(3) = widthPx;
+                    pos(4) = heightPx;
+                    f.Position = pos;
+                end
+            catch
+            end
+        end
     end
 
     function scopeSpec = buildScopeSpecFromUI()
@@ -1193,7 +2021,7 @@ ddScope = uidropdown(tgtGrid, ...
             axList = findall(fig, 'Type', 'axes');
             for a = 1:numel(axList)
                 ax = axList(a);
-                if ~isgraphics(ax, 'axes')
+                if ~isgraphics(ax, 'axes') || ~i_isPrimaryPlotAxes(ax)
                     continue;
                 end
 
@@ -1413,6 +2241,12 @@ ddScope = uidropdown(tgtGrid, ...
             end
 
             stats.figuresTouched = stats.figuresTouched + 1;
+            if isfield(opts, 'figureColor') && ~isempty(opts.figureColor) && isprop(fig, 'Color')
+                try
+                    fig.Color = opts.figureColor;
+                catch
+                end
+            end
             i_applyBackgroundAppearance(fig, opts);
 
             axList = findall(fig, 'Type', 'axes');
@@ -1423,35 +2257,72 @@ ddScope = uidropdown(tgtGrid, ...
                 end
 
                 stats.axesTouched = stats.axesTouched + 1;
+                isPrimaryAxes = i_isPrimaryPlotAxes(ax);
                 
                 % Publication style settings (optional):
                 % When invoked from onApplyPublicationStyle, opts contains
                 % additional fields for font sizes and axis appearance.
-                if isfield(opts, 'axesFont') && isfinite(opts.axesFont) && opts.axesFont > 0
+                if isPrimaryAxes && isfield(opts, 'axesFont') && isfinite(opts.axesFont) && opts.axesFont > 0
                     if isprop(ax, 'FontSize')
                         ax.FontSize = opts.axesFont;
                     end
                 end
                 
-                if isfield(opts, 'tickDir') && ~isempty(opts.tickDir)
+                if isPrimaryAxes && isfield(opts, 'tickDir') && ~isempty(opts.tickDir)
                     if isprop(ax, 'TickDir')
                         ax.TickDir = char(opts.tickDir);
                     end
                 end
                 
-                if isfield(opts, 'box') && ~isempty(opts.box)
+                if isPrimaryAxes && isfield(opts, 'box') && ~isempty(opts.box)
                     if isprop(ax, 'Box')
                         ax.Box = char(opts.box);
                     end
                 end
                 
-                if isfield(opts, 'axesLineWidth') && isfinite(opts.axesLineWidth) && opts.axesLineWidth > 0
+                if isPrimaryAxes && isfield(opts, 'axesLineWidth') && isfinite(opts.axesLineWidth) && opts.axesLineWidth > 0
                     if isprop(ax, 'LineWidth')
                         ax.LineWidth = opts.axesLineWidth;
                     end
                 end
+
+                if isPrimaryAxes && isfield(opts, 'layer') && ~isempty(opts.layer)
+                    if isprop(ax, 'Layer')
+                        ax.Layer = char(opts.layer);
+                    end
+                end
+
+                if isPrimaryAxes && isfield(opts, 'tickLength') && isnumeric(opts.tickLength) && numel(opts.tickLength) >= 2
+                    if isprop(ax, 'TickLength')
+                        try
+                            ax.TickLength = double(opts.tickLength(1:2));
+                        catch
+                        end
+                    end
+                end
+
+                if isPrimaryAxes && isfield(opts, 'xMinorTick') && ~isempty(opts.xMinorTick)
+                    if isprop(ax, 'XMinorTick')
+                        ax.XMinorTick = char(opts.xMinorTick);
+                    end
+                end
+
+                if isPrimaryAxes && isfield(opts, 'yMinorTick') && ~isempty(opts.yMinorTick)
+                    if isprop(ax, 'YMinorTick')
+                        ax.YMinorTick = char(opts.yMinorTick);
+                    end
+                end
+
+                if isPrimaryAxes && isfield(opts, 'axesColor') && ~isempty(opts.axesColor)
+                    if isprop(ax, 'Color')
+                        try
+                            ax.Color = opts.axesColor;
+                        catch
+                        end
+                    end
+                end
                 
-                if isfield(opts, 'labelFont') && isfinite(opts.labelFont) && opts.labelFont > 0
+                if isPrimaryAxes && isfield(opts, 'labelFont') && isfinite(opts.labelFont) && opts.labelFont > 0
                     if isprop(ax, 'XLabel')
                         xl = ax.XLabel;
                         if ~isempty(xl) && isgraphics(xl) && isprop(xl, 'FontSize')
@@ -1540,6 +2411,12 @@ ddScope = uidropdown(tgtGrid, ...
 
                 i_applyLineStyleBundle(dataLines, opts.dataLineStyle, opts.dataLineWidth, opts.dataMarkerSize);
                 i_applyLineStyleBundle(fitLines, opts.fitLineStyle, opts.fitLineWidth, opts.fitMarkerSize);
+
+                refObjs = i_getReferenceObjects(ax, dataLines, fitLines);
+                i_applyReferenceStyle(refObjs, opts);
+
+                annTextObjs = i_getAnnotationTextObjects(ax);
+                i_applyAnnotationTextStyle(annTextObjs, opts);
             end
         end
     end
@@ -1657,6 +2534,212 @@ ddScope = uidropdown(tgtGrid, ...
             if applyMarker && isprop(ln, 'MarkerSize')
                 ln.MarkerSize = markerSize;
             end
+        end
+    end
+
+    function refObjs = i_getReferenceObjects(ax, dataLines, fitLines)
+        refObjs = gobjects(0,1);
+        if isempty(ax) || ~isgraphics(ax, 'axes')
+            return;
+        end
+
+        try
+            ch = allchild(ax);
+        catch
+            ch = gobjects(0,1);
+        end
+
+        constantLines = gobjects(0,1);
+        for i = 1:numel(ch)
+            h = ch(i);
+            try
+                if isa(h, 'matlab.graphics.chart.decoration.ConstantLine')
+                    constantLines(end+1,1) = h; %#ok<AGROW>
+                end
+            catch
+            end
+        end
+
+        lineRefs = gobjects(0,1);
+        try
+            allLines = findall(ax, 'Type', 'line');
+        catch
+            allLines = gobjects(0,1);
+        end
+
+        excluded = [dataLines(:); fitLines(:)];
+        for i = 1:numel(allLines)
+            ln = allLines(i);
+            if ~isgraphics(ln, 'line')
+                continue;
+            end
+            if any(ln == excluded)
+                continue;
+            end
+            lineRefs(end+1,1) = ln; %#ok<AGROW>
+        end
+
+        refObjs = [constantLines; lineRefs];
+        if isempty(refObjs)
+            return;
+        end
+        try
+            refObjs = unique(refObjs, 'stable');
+        catch
+        end
+    end
+
+    function i_applyReferenceStyle(refObjs, opts)
+        if isempty(refObjs)
+            return;
+        end
+
+        refWidth = NaN;
+        if isfield(opts, 'refLineWidth') && isfinite(opts.refLineWidth) && opts.refLineWidth >= 0
+            refWidth = opts.refLineWidth;
+        end
+
+        refStyle = "";
+        if isfield(opts, 'refLineStyle') && strlength(strtrim(string(opts.refLineStyle))) > 0
+            refStyle = string(opts.refLineStyle);
+        end
+
+        [refColor, applyRefColor] = i_parseColorSpec(opts.refLineColor, true);
+
+        for i = 1:numel(refObjs)
+            obj = refObjs(i);
+            if ~isgraphics(obj)
+                continue;
+            end
+            try
+                if isfinite(refWidth) && isprop(obj, 'LineWidth')
+                    obj.LineWidth = refWidth;
+                end
+                if strlength(refStyle) > 0 && isprop(obj, 'LineStyle')
+                    obj.LineStyle = char(refStyle);
+                end
+                if applyRefColor && isprop(obj, 'Color')
+                    obj.Color = refColor;
+                end
+            catch
+            end
+        end
+    end
+
+    function annTextObjs = i_getAnnotationTextObjects(ax)
+        annTextObjs = gobjects(0,1);
+        if isempty(ax) || ~isgraphics(ax, 'axes')
+            return;
+        end
+
+        try
+            tx = findall(ax, 'Type', 'text');
+        catch
+            tx = gobjects(0,1);
+        end
+        if isempty(tx)
+            return;
+        end
+
+        excluded = gobjects(0,1);
+        try, excluded(end+1,1) = ax.Title; catch, end %#ok<AGROW>
+        try, excluded(end+1,1) = ax.XLabel; catch, end %#ok<AGROW>
+        try, excluded(end+1,1) = ax.YLabel; catch, end %#ok<AGROW>
+
+        keep = false(numel(tx), 1);
+        for i = 1:numel(tx)
+            t = tx(i);
+            if ~isgraphics(t, 'text')
+                continue;
+            end
+            if any(t == excluded)
+                continue;
+            end
+            lg = [];
+            try
+                lg = ancestor(t, 'legend');
+            catch
+            end
+            if ~isempty(lg)
+                continue;
+            end
+            keep(i) = true;
+        end
+
+        annTextObjs = tx(keep);
+    end
+
+    function i_applyAnnotationTextStyle(annTextObjs, opts)
+        if isempty(annTextObjs)
+            return;
+        end
+
+        fontName = "Helvetica";
+        if isfield(opts, 'annFontName') && strlength(strtrim(string(opts.annFontName))) > 0
+            fontName = string(opts.annFontName);
+        end
+
+        fontSize = NaN;
+        if isfield(opts, 'annFontSize') && isfinite(opts.annFontSize) && opts.annFontSize > 0
+            fontSize = opts.annFontSize;
+        end
+
+        fontWeight = "normal";
+        if isfield(opts, 'annFontWeight') && strlength(strtrim(string(opts.annFontWeight))) > 0
+            fontWeight = lower(strtrim(string(opts.annFontWeight)));
+        end
+
+        interpreter = "tex";
+        if isfield(opts, 'annInterpreter') && strlength(strtrim(string(opts.annInterpreter))) > 0
+            interpreter = lower(strtrim(string(opts.annInterpreter)));
+        end
+
+        [annColor, hasAnnColor] = i_parseColorSpec(opts.annColor, false);
+        if ~hasAnnColor
+            annColor = [0 0 0];
+        end
+
+        for i = 1:numel(annTextObjs)
+            obj = annTextObjs(i);
+            if ~isgraphics(obj, 'text')
+                continue;
+            end
+            try
+                if isprop(obj, 'FontName')
+                    obj.FontName = char(fontName);
+                end
+                if isfinite(fontSize) && isprop(obj, 'FontSize')
+                    obj.FontSize = fontSize;
+                end
+                if isprop(obj, 'FontWeight')
+                    obj.FontWeight = char(fontWeight);
+                end
+                if isprop(obj, 'Interpreter')
+                    obj.Interpreter = char(interpreter);
+                end
+                if isprop(obj, 'Color')
+                    obj.Color = annColor;
+                end
+            catch
+            end
+        end
+    end
+
+    function [rgb, hasColor] = i_parseColorSpec(rawValue, allowKeep)
+        rgb = [0 0 0];
+        hasColor = false;
+
+        s = strtrim(char(string(rawValue)));
+        if allowKeep && (isempty(s) || strcmpi(s, '(keep)') || strcmpi(s, 'keep'))
+            return;
+        end
+
+        s = strrep(s, '[', '');
+        s = strrep(s, ']', '');
+        vals = sscanf(s, '%f');
+        if numel(vals) == 3 && all(isfinite(vals)) && all(vals >= 0) && all(vals <= 1)
+            rgb = vals(:)';
+            hasColor = true;
         end
     end
 
@@ -2091,6 +3174,165 @@ ddScope = uidropdown(tgtGrid, ...
         end
     end
 
+    function onPublicationLabelAlignment(~, ~)
+        figs = resolveExplicitListTargetsOrAlert("Publication Label Alignment");
+        if isempty(figs)
+            return;
+        end
+
+        kTypographic = 1.2;
+        debugAlignOneFigure = true;
+        debugFig = [];
+        if debugAlignOneFigure && ~isempty(figs)
+            debugFig = figs(1);
+        end
+
+        try
+            for k = 1:numel(figs)
+                fig = figs(k);
+                if ~isgraphics(fig, 'figure')
+                    continue;
+                end
+
+                axList = findall(fig, 'Type', 'axes');
+                for a = 1:numel(axList)
+                    ax = axList(a);
+                    if ~isgraphics(ax, 'axes')
+                        continue;
+                    end
+
+                    isPrimaryAxes = i_isPrimaryPlotAxes(ax);
+                    isManualLegendAxes = i_isManualLegendAxes(ax);
+                    axTag = "";
+                    axHandleVisibility = "";
+                    axVisible = "";
+                    axPos = [NaN NaN NaN NaN];
+                    axUnitsNow = "";
+                    try
+                        axTag = string(ax.Tag);
+                    catch
+                    end
+                    try
+                        axHandleVisibility = string(ax.HandleVisibility);
+                    catch
+                    end
+                    try
+                        axVisible = string(ax.Visible);
+                    catch
+                    end
+                    try
+                        axPos = double(ax.Position);
+                    catch
+                    end
+                    try
+                        axUnitsNow = string(ax.Units);
+                    catch
+                    end
+
+                    if debugAlignOneFigure && ~isempty(debugFig) && isequal(fig, debugFig)
+                        fprintf('[AlignLabels][Axis] idx=%d tag="%s" handleVis=%s visible=%s units=%s pos=[%.6f %.6f %.6f %.6f] isPrimary=%d isManualLegend=%d\n', ...
+                            a, char(axTag), char(axHandleVisibility), char(axVisible), char(axUnitsNow), ...
+                            axPos(1), axPos(2), axPos(3), axPos(4), isPrimaryAxes, isManualLegendAxes);
+                    end
+
+                    isAlignEligible = isPrimaryAxes && ~isManualLegendAxes && strcmpi(char(axVisible), 'on') && ~strcmpi(char(axHandleVisibility), 'off');
+                    if ~isAlignEligible
+                        continue;
+                    end
+
+                    tiBlock1Before = [NaN NaN NaN NaN];
+                    tiBlock1After = [NaN NaN NaN NaN];
+                    try
+                        tiBlock1Before = double(ax.TightInset);
+                    catch
+                    end
+
+                    try
+                        xl = ax.XLabel;
+                        if ~isempty(xl) && isgraphics(xl)
+                            origAxUnits = ax.Units;
+                            origXLabelUnits = xl.Units;
+                            origXLabelPos = xl.Position;
+
+                            ax.Units = 'pixels';
+                            axPosPx = double(ax.Position);
+                            tiBefore = double(ax.TightInset);
+
+                            if ~isnumeric(axPosPx) || numel(axPosPx) < 4 || ~isfinite(axPosPx(3)) || axPosPx(3) <= 0
+                                ax.Units = origAxUnits;
+                                continue;
+                            end
+
+                            baseFontSize = ax.FontSize;
+                            if ~isfinite(baseFontSize) || baseFontSize <= 0
+                                baseFontSize = 11;
+                            end
+                            offsetYPx = 1.7 * baseFontSize;
+
+                            xl.Units = 'pixels';
+                            xl.Position = [axPosPx(3)/2, -offsetYPx, 0];
+                            xl.HorizontalAlignment = 'center';
+                            xl.Units = origXLabelUnits;
+
+                            drawnow limitrate;
+                            tiAfter = double(ax.TightInset);
+
+                            if numel(tiBefore) >= 4 && numel(tiAfter) >= 4
+                                if any(abs(double(tiAfter(1:4)) - double(tiBefore(1:4))) > 1e-9)
+                                    xl.Units = origXLabelUnits;
+                                    xl.Position = origXLabelPos;
+                                    drawnow limitrate;
+                                end
+                            end
+
+                            if k == 1 && a == 1
+                                fprintf('[AlignLabels] TightInset before=[%.6f %.6f %.6f %.6f], after=[%.6f %.6f %.6f %.6f]\n', ...
+                                    tiBefore(1), tiBefore(2), tiBefore(3), tiBefore(4), ...
+                                    tiAfter(1), tiAfter(2), tiAfter(3), tiAfter(4));
+                            end
+
+                            ax.Units = origAxUnits;
+                        end
+                    catch
+                    end
+
+                    try
+                        tiBlock1After = double(ax.TightInset);
+                    catch
+                    end
+
+                    if debugAlignOneFigure && ~isempty(debugFig) && isequal(fig, debugFig)
+                        fprintf('[AlignLabels][Block1] axis=%d tiBefore=[%.6f %.6f %.6f %.6f] tiAfter=[%.6f %.6f %.6f %.6f]\n', ...
+                            a, tiBlock1Before(1), tiBlock1Before(2), tiBlock1Before(3), tiBlock1Before(4), ...
+                            tiBlock1After(1), tiBlock1After(2), tiBlock1After(3), tiBlock1After(4));
+                    end
+
+                    tiBlock2Before = [NaN NaN NaN NaN];
+                    tiBlock2After = [NaN NaN NaN NaN];
+                    try
+                        tiBlock2Before = double(ax.TightInset);
+                    catch
+                    end
+
+                    alignAxisLabelsPublication(ax);
+
+                    try
+                        tiBlock2After = double(ax.TightInset);
+                    catch
+                    end
+
+                    if debugAlignOneFigure && ~isempty(debugFig) && isequal(fig, debugFig)
+                        fprintf('[AlignLabels][Block2] axis=%d tiBefore=[%.6f %.6f %.6f %.6f] tiAfter=[%.6f %.6f %.6f %.6f]\n', ...
+                            a, tiBlock2Before(1), tiBlock2Before(2), tiBlock2Before(3), tiBlock2Before(4), ...
+                            tiBlock2After(1), tiBlock2After(2), tiBlock2After(3), tiBlock2After(4));
+                    end
+                end
+            end
+        catch ME
+            uialert(ui, ME.message, 'Publication Label Alignment Failed');
+        end
+    end
+
     function onApplyLegend(~, ~)
         figs = resolveExplicitListTargetsOrAlert("Legend");
         if isempty(figs), return; end
@@ -2113,6 +3355,7 @@ ddScope = uidropdown(tgtGrid, ...
                 allowRebuild = logical(cbLegendAllowRebuild.Value);
                 i_applyLegendReverseExistingOnly(figs, allowRebuild, legendLocationState);
             end
+            i_applyManualLegendDragModeToFigures(figs);
         catch ME
             uialert(ui, ME.message, 'Legend Apply Failed');
         end
@@ -2142,6 +3385,14 @@ ddScope = uidropdown(tgtGrid, ...
         opts.fitLineStyle = string(ddFitLineStyle.Value);
         opts.fitLineWidth = double(nfFitLineWidth.Value);
         opts.fitMarkerSize = double(nfFitMarkerSize.Value);
+        opts.refLineWidth = double(nfRefLineWidth.Value);
+        opts.refLineStyle = string(ddRefLineStyle.Value);
+        opts.refLineColor = string(efRefLineColor.Value);
+        opts.annFontName = string(efAnnFontName.Value);
+        opts.annFontSize = double(nfAnnFontSize.Value);
+        opts.annFontWeight = string(ddAnnFontWeight.Value);
+        opts.annInterpreter = string(ddAnnInterpreter.Value);
+        opts.annColor = string(efAnnColor.Value);
         opts.reversePlotOrder = logical(cbReversePlotOrder.Value);
 
         if ~isempty(fieldnames(overrides))
@@ -2153,6 +3404,18 @@ ddScope = uidropdown(tgtGrid, ...
 
         try
             stats = i_applyAppearanceSettings(figs, opts);
+            applyManualTransformRequested = ...
+                abs(double(slAxScale.Value) - 1.0) > 1e-12 || ...
+                abs(double(slAxOffsetX.Value)) > 1e-12 || ...
+                abs(double(slAxOffsetY.Value)) > 1e-12;
+
+            if applyManualTransformRequested
+                for kk = 1:numel(figs)
+                    if isgraphics(figs(kk), 'figure')
+                        i_applyManualAxesTransform(figs(kk));
+                    end
+                end
+            end
             taDiag.Value = {sprintf('Appearance applied: %d fig, %d axes, %d lines, %d colorbars', ...
                 stats.figuresTouched, stats.axesTouched, stats.linesTouched, stats.colorbarsTouched)};
         catch ME
@@ -2175,9 +3438,15 @@ ddScope = uidropdown(tgtGrid, ...
         overrides = struct();
         overrides.axesFont = preset.axesFont;
         overrides.labelFont = preset.labelFont;
-        overrides.axesLineWidth = preset.lineWidth;
-        overrides.tickDir = 'out';
-        overrides.box = 'off';
+        overrides.axesLineWidth = 1.1;
+        overrides.tickDir = 'in';
+        overrides.box = 'on';
+        overrides.layer = 'top';
+        overrides.tickLength = [0.02 0.02];
+        overrides.xMinorTick = 'on';
+        overrides.yMinorTick = 'on';
+        overrides.figureColor = 'w';
+        overrides.axesColor = 'none';
 
         onApplyAppearance([], [], overrides);
     end
@@ -2222,7 +3491,6 @@ ddScope = uidropdown(tgtGrid, ...
             return;
         end
 
-        defaultAxPos = [0.13 0.11 0.775 0.815];
         for k = 1:numel(figs)
             fig = figs(k);
             if ~isgraphics(fig, 'figure')
@@ -2237,19 +3505,308 @@ ddScope = uidropdown(tgtGrid, ...
             catch
             end
 
+        end
+
+        for k = 1:numel(figs)
+            fig = figs(k);
+            if ~isgraphics(fig, 'figure')
+                continue;
+            end
+            i_applyManualAxesTransform(fig);
+        end
+
+        onEqualizeCenterAxesGroup([], []);
+    end
+
+    function onEqualizeCenterAxesGroup(~, ~)
+        figs = resolveExplicitListTargetsOrAlert("Layout & Geometry");
+        if isempty(figs), return; end
+
+        info = struct('fig', {}, 'axes', {}, 'positions', {}, 'xmin', {}, 'ymin', {}, 'xmax', {}, 'ymax', {}, 'width', {}, 'height', {});
+
+        for k = 1:numel(figs)
+            fig = figs(k);
+            if ~isgraphics(fig, 'figure')
+                continue;
+            end
+
             axList = findall(fig, 'Type', 'axes');
+            primaryAxes = gobjects(0,1);
+            positions = zeros(0,4);
+
             for a = 1:numel(axList)
                 ax = axList(a);
-                if ~isgraphics(ax, 'axes') || i_isTiledLayoutManagedAxes(ax)
+                if ~isgraphics(ax, 'axes') || ~i_isPrimaryPlotAxes(ax)
                     continue;
                 end
                 try
+                    oldUnits = ax.Units;
                     ax.Units = 'normalized';
-                    ax.Position = defaultAxPos;
+                    pos = double(ax.Position);
+                    ax.Units = oldUnits;
+                catch
+                    continue;
+                end
+                if numel(pos) < 4 || any(~isfinite(pos(1:4))) || pos(3) <= 0 || pos(4) <= 0
+                    continue;
+                end
+                primaryAxes(end+1,1) = ax; %#ok<AGROW>
+                positions(end+1,:) = pos(1:4); %#ok<AGROW>
+            end
+
+            if isempty(primaryAxes)
+                continue;
+            end
+
+            xmin = min(positions(:,1));
+            ymin = min(positions(:,2));
+            xmax = max(positions(:,1) + positions(:,3));
+            ymax = max(positions(:,2) + positions(:,4));
+            width = xmax - xmin;
+            height = ymax - ymin;
+            if ~isfinite(width) || ~isfinite(height) || width <= 0 || height <= 0
+                continue;
+            end
+
+            info(end+1).fig = fig; %#ok<AGROW>
+            info(end).axes = primaryAxes;
+            info(end).positions = positions;
+            info(end).xmin = xmin;
+            info(end).ymin = ymin;
+            info(end).xmax = xmax;
+            info(end).ymax = ymax;
+            info(end).width = width;
+            info(end).height = height;
+        end
+
+        if isempty(info)
+            uialert(ui, 'No primary plot axes found in selected figures.', 'Layout & Geometry');
+            return;
+        end
+
+        allWidths = [info.width];
+        allHeights = [info.height];
+        w = min(allWidths);
+        h = min(allHeights);
+        if ~isfinite(w) || ~isfinite(h) || w <= 0 || h <= 0
+            uialert(ui, 'Unable to compute valid global group size.', 'Layout & Geometry');
+            return;
+        end
+
+        for iFig = 1:numel(info)
+            figInfo = info(iFig);
+            sx = w / figInfo.width;
+            sy = h / figInfo.height;
+
+            scaledCenterX = figInfo.xmin + w/2;
+            scaledCenterY = figInfo.ymin + h/2;
+            dx = 0.5 - scaledCenterX;
+            dy = 0.5 - scaledCenterY;
+
+            for a = 1:numel(figInfo.axes)
+                ax = figInfo.axes(a);
+                if ~isgraphics(ax, 'axes')
+                    continue;
+                end
+
+                oldPos = figInfo.positions(a,:);
+                newPos = [ ...
+                    figInfo.xmin + (oldPos(1) - figInfo.xmin) * sx + dx, ...
+                    figInfo.ymin + (oldPos(2) - figInfo.ymin) * sy + dy, ...
+                    oldPos(3) * sx, ...
+                    oldPos(4) * sy];
+
+                try
+                    oldUnits = ax.Units;
+                    ax.Units = 'normalized';
+                    ax.Position = newPos;
+                    ax.Units = oldUnits;
                 catch
                 end
             end
         end
+    end
+
+    function onFinalizePublicationLayout(~, ~)
+        figs = resolveExplicitListTargetsOrAlert("Finalize Publication Layout");
+        if isempty(figs), return; end
+
+        try
+            normalizeAxesMarginsUnified(figs);
+        catch ME
+            uialert(ui, ME.message, 'Finalize Publication Layout');
+            return;
+        end
+    end
+
+    function i_captureAxesBasePositions(figs)
+        axesBasePositions = containers.Map('KeyType', 'char', 'ValueType', 'any');
+        if isempty(figs)
+            return;
+        end
+
+        for k = 1:numel(figs)
+            fig = figs(k);
+            if isempty(fig) || ~isgraphics(fig, 'figure')
+                continue;
+            end
+
+            axList = findall(fig, 'Type', 'axes');
+            for a = 1:numel(axList)
+                ax = axList(a);
+                if ~isgraphics(ax, 'axes') || i_isTiledLayoutManagedAxes(ax) || ~i_isPrimaryPlotAxes(ax)
+                    continue;
+                end
+                try
+                    ax.Units = 'normalized';
+                    key = i_axesSnapshotKey(ax);
+                    axesBasePositions(key) = double(ax.Position);
+                catch
+                end
+            end
+        end
+    end
+
+    function i_applyManualAxesTransform(fig)
+        if isempty(fig) || ~isgraphics(fig, 'figure')
+            return;
+        end
+
+        scale = i_quantizeSliderValue(double(slAxScale.Value), [0.5 1.5], 0.01);
+        offsetX = i_quantizeSliderValue(double(slAxOffsetX.Value), [-0.2 0.2], 0.01);
+        offsetY = i_quantizeSliderValue(double(slAxOffsetY.Value), [-0.2 0.2], 0.01);
+
+        axList = findall(fig, 'Type', 'axes');
+        for a = 1:numel(axList)
+            ax = axList(a);
+            if ~isgraphics(ax, 'axes') || i_isTiledLayoutManagedAxes(ax) || ~i_isPrimaryPlotAxes(ax)
+                continue;
+            end
+            try
+                ax.Units = 'normalized';
+                basePos = i_getAxesBasePositionFromSnapshot(ax);
+                if isempty(basePos)
+                    continue;
+                end
+                newPos = i_computeManualAxesPosition(basePos, scale, offsetX, offsetY);
+                ax.Position = newPos;
+            catch
+            end
+        end
+    end
+
+    function basePos = i_getAxesBasePositionFromSnapshot(ax)
+        basePos = [];
+        if isempty(ax) || ~isgraphics(ax, 'axes')
+            return;
+        end
+
+        key = i_axesSnapshotKey(ax);
+        if isKey(axesBasePositions, key)
+            cand = axesBasePositions(key);
+            if isnumeric(cand) && numel(cand) >= 4 && all(isfinite(cand(1:4)))
+                basePos = double(cand(1:4));
+            end
+        end
+    end
+
+    function key = i_axesSnapshotKey(ax)
+        key = "";
+        if isempty(ax) || ~isgraphics(ax)
+            return;
+        end
+        try
+            key = string(sprintf('%.17g', double(ax)));
+        catch
+            key = "";
+        end
+    end
+
+    function posOut = i_computeManualAxesPosition(posIn, scale, offsetX, offsetY)
+        if ~isnumeric(posIn) || numel(posIn) < 4
+            posOut = [0 0 1 1];
+            return;
+        end
+
+        newWidth = posIn(3) * scale;
+        newHeight = posIn(4) * scale;
+
+        centerX = posIn(1) + posIn(3) / 2;
+        centerY = posIn(2) + posIn(4) / 2;
+
+        newLeft = centerX - newWidth / 2 + offsetX;
+        newBottom = centerY - newHeight / 2 + offsetY;
+
+        posOut = [newLeft newBottom newWidth newHeight];
+        posOut = i_clampAxesPositionIfNeeded(posOut);
+    end
+
+    function pos = i_clampAxesPositionIfNeeded(pos)
+        if pos(1) < 0
+            pos(1) = 0;
+        end
+        if pos(2) < 0
+            pos(2) = 0;
+        end
+        if pos(1) + pos(3) > 1
+            pos(1) = max(0, 1 - pos(3));
+        end
+        if pos(2) + pos(4) > 1
+            pos(2) = max(0, 1 - pos(4));
+        end
+    end
+
+    function tf = i_isPrimaryPlotAxes(ax)
+        tf = false;
+        if isempty(ax) || ~isgraphics(ax, 'axes')
+            return;
+        end
+
+        if i_isManualLegendAxes(ax)
+            return;
+        end
+
+        try
+            tagVal = lower(strtrim(string(ax.Tag)));
+        catch
+            tagVal = "";
+        end
+
+        if contains(tagVal, "legend") || contains(tagVal, "colorbar")
+            return;
+        end
+
+        tf = true;
+    end
+
+    function tf = i_isManualLegendAxes(ax)
+        tf = false;
+        if isempty(ax) || ~isgraphics(ax, 'axes')
+            return;
+        end
+
+        tagVal = "";
+        try
+            tagVal = lower(strtrim(string(ax.Tag)));
+        catch
+        end
+
+        if tagVal == "plotsmtcombinedmanuallegendaxes"
+            tf = true;
+            return;
+        end
+
+        if tagVal == "mt_legend_axes"
+            tf = true;
+            return;
+        end
+
+        if contains(tagVal, "legend_axes")
+            tf = true;
+            return;
+        end
+
+        % No appdata handle dependency: manual legend axes are identified by tag.
     end
 
     function tf = i_isTiledLayoutManagedAxes(ax)
@@ -2473,21 +4030,8 @@ ddScope = uidropdown(tgtGrid, ...
                 end
         end
 
-        heightCm = max(3.0, widthCm * (rows / cols));
-
-        densityMode = string(ddLayoutDensity.Value);
-        switch densityMode
-            case "Tight"
-                densityPadding = 'compact';
-                densitySpacing = 'compact';
-            case "Spacious"
-                densityPadding = 'loose';
-                densitySpacing = 'loose';
-            otherwise
-                % Normal density maps to MATLAB tiledlayout normal spacing.
-                densityPadding = 'normal';
-                densitySpacing = 'normal';
-        end
+        hGap = i_quantizeSliderValue(double(slComposeHGap.Value), [0 0.1], 0.001);
+        vGap = i_quantizeSliderValue(double(slComposeVGap.Value), [0 0.1], 0.001);
 
         scalePercent = double(nfOverallSizePct.Value);
         if ~isfinite(scalePercent)
@@ -2496,37 +4040,124 @@ ddScope = uidropdown(tgtGrid, ...
         scalePercent = max(80, min(130, scalePercent));
         scaleFactor = scalePercent / 100;
 
-        % Overall size scale is applied uniformly after base width/height are resolved.
-        widthCm = widthCm * scaleFactor;
-        heightCm = heightCm * scaleFactor;
+        % Overall size scale is preview-only; publication export size comes from composeSpec.size.
 
-        spec = i_buildComposeSpecFromUI(rows, cols, widthCm, heightCm); %#ok<NASGU>
+        % Natural compose window sizing in pixels, derived from source figure windows.
+        nPlaced = numel(figs);
+        srcWidthsPx = zeros(nPlaced,1);
+        srcHeightsPx = zeros(nPlaced,1);
+
+        for iFig = 1:nPlaced
+            srcFig = figs(iFig);
+
+            wPx = NaN;
+            hPx = NaN;
+            try
+                ppx = getpixelposition(srcFig, true);
+                if isnumeric(ppx) && numel(ppx) >= 4
+                    wPx = double(ppx(3));
+                    hPx = double(ppx(4));
+                end
+            catch
+            end
+
+            if ~isfinite(wPx) || ~isfinite(hPx) || wPx <= 1 || hPx <= 1
+                try
+                    oldUnitsSrc = srcFig.Units;
+                    srcFig.Units = 'pixels';
+                    p = double(srcFig.Position);
+                    srcFig.Units = oldUnitsSrc;
+                    if isnumeric(p) && numel(p) >= 4
+                        wPx = double(p(3));
+                        hPx = double(p(4));
+                    end
+                catch
+                end
+            end
+
+            if ~isfinite(wPx) || wPx <= 1
+                wPx = 800;
+            end
+            if ~isfinite(hPx) || hPx <= 1
+                hPx = 600;
+            end
+
+            srcWidthsPx(iFig) = wPx;
+            srcHeightsPx(iFig) = hPx;
+        end
+
+        refWidthPx = median(srcWidthsPx(srcWidthsPx > 1));
+        if isempty(refWidthPx) || ~isfinite(refWidthPx)
+            refWidthPx = 800;
+        end
+        refHeightPx = median(srcHeightsPx(srcHeightsPx > 1));
+        if isempty(refHeightPx) || ~isfinite(refHeightPx)
+            refHeightPx = 600;
+        end
+
+        hGapPx = max(0, round(hGap * refWidthPx));
+        vGapPx = max(0, round(vGap * refHeightPx));
+        padXPx = 24;
+        padYPx = 24;
+
+        colWidthsPx = zeros(1, cols);
+        rowHeightsPx = zeros(1, rows);
+        for iFig = 1:nPlaced
+            colIndex = mod(iFig - 1, cols) + 1;
+            rowIndex = floor((iFig - 1) / cols) + 1;
+            colWidthsPx(colIndex) = max(colWidthsPx(colIndex), srcWidthsPx(iFig));
+            rowHeightsPx(rowIndex) = max(rowHeightsPx(rowIndex), srcHeightsPx(iFig));
+        end
+
+        defaultColWidthPx = max(1, round(refWidthPx));
+        defaultRowHeightPx = max(1, round(refHeightPx));
+        colWidthsPx(colWidthsPx <= 0) = defaultColWidthPx;
+        rowHeightsPx(rowHeightsPx <= 0) = defaultRowHeightPx;
+
+        totalWidthPx = round(sum(colWidthsPx) + max(0, cols - 1) * hGapPx + 2 * padXPx);
+        totalHeightPx = round(sum(rowHeightsPx) + max(0, rows - 1) * vGapPx + 2 * padYPx);
+
+        aspect = totalHeightPx / totalWidthPx;
+        heightCm = widthCm * aspect;
+        composeSpec = i_buildComposeSpecFromUI(rows, cols, widthCm, heightCm);
+
+        totalWidthPx = max(200, round(totalWidthPx * scaleFactor));
+        totalHeightPx = max(200, round(totalHeightPx * scaleFactor));
 
         newFig = figure('Name', 'Composed Figure', ...
-                        'Units', 'centimeters', ...
-                        'Position', [2 2 widthCm heightCm], ...
-                        'Renderer', 'painters', ...
-                        'PaperPositionMode', 'auto');
+                        'Units', 'pixels', ...
+                        'Position', [100 100 totalWidthPx totalHeightPx], ...
+                        'Renderer', 'painters');
 
-                newFig.Units = 'centimeters';
-                newFig.Position = [2 2 widthCm heightCm];
+                newFig.Units = 'pixels';
+                posNew = newFig.Position;
+                newFig.Position = [posNew(1) posNew(2) totalWidthPx totalHeightPx];
 
-                tl = tiledlayout(newFig, rows, cols, 'Padding', densityPadding, 'TileSpacing', densitySpacing);
+                tl = tiledlayout(newFig, rows, cols, 'Padding', 'none', 'TileSpacing', 'none');
 
         autoLabel = logical(cbAutoLabel.Value);
         labelPos = string(ddLabelPos.Value);
         labelFs = max(1, double(nfLabelFont.Value));
         composeWarnings = strings(0,1);
+        composeVerbose = false;
+        try
+            if exist('options', 'var') && isstruct(options) && isfield(options, 'Verbose')
+                composeVerbose = logical(options.Verbose);
+            end
+        catch
+        end
 
         for k = 1:numel(figs)
             tileAx = nexttile(tl, k);
-            tilePos = i_getTilePosition(tileAx);
             delete(tileAx);
+
+            tilePos = i_computeComposeContainerPosition(k, rows, cols, hGap, vGap);
 
             panel = uipanel('Parent', newFig, ...
                             'Units', 'normalized', ...
                             'Position', tilePos, ...
-                            'BorderType', 'none');
+                            'BorderType', 'none', ...
+                            'Clipping', 'off');
 
             srcFig = figs(k);
             figName = "(unnamed)";
@@ -2538,7 +4169,7 @@ ddScope = uidropdown(tgtGrid, ...
             catch
             end
 
-            [childrenToCopy, skipAnnotationCount, skipUnsupportedCount] = i_filterComposeChildren(srcFig);
+            [childrenToCopy, skipAnnotationCount, skipUnsupportedCount, srcManualLegendAxes] = i_filterComposeChildren(srcFig);
 
             groupedCopyFailed = false;
             fallbackSkipCount = 0;
@@ -2572,6 +4203,20 @@ ddScope = uidropdown(tgtGrid, ...
                 end
             end
 
+            [manualLegendCopied, manualLegendCopyFailed] = i_preserveCopiedAxesPositions(srcFig, panel, newFig, tilePos, srcManualLegendAxes);
+
+            if isappdata(srcFig, 'ComposeLegendData')
+                ld = getappdata(srcFig, 'ComposeLegendData');
+                if isstruct(ld) && isfield(ld, 'enabled') && logical(ld.enabled) && isfield(ld, 'mode') && strcmpi(string(ld.mode), "external")
+                    renderCombinedLegendOverlayInParent(panel, ld);
+                end
+            end
+
+            if composeVerbose
+                fprintf('[Compose] panel %d: detectedManualLegendAxes=%d, copied=%d, failed=%d\n', ...
+                    k, numel(srcManualLegendAxes), manualLegendCopied, manualLegendCopyFailed);
+            end
+
             assocReport = i_verifyPanelLegendColorbarAssociations(panel);
 
             warnParts = strings(0,1);
@@ -2590,6 +4235,9 @@ ddScope = uidropdown(tgtGrid, ...
             end
             if fallbackSkipCount > 0
                 warnParts(end+1,1) = "fallback skipped=" + string(fallbackSkipCount); %#ok<AGROW>
+            end
+            if manualLegendCopyFailed > 0
+                warnParts(end+1,1) = "manual-legend copy skipped=" + string(manualLegendCopyFailed); %#ok<AGROW>
             end
             if assocReport.brokenLegendCount > 0
                 warnParts(end+1,1) = "legend-association-risk=" + string(assocReport.brokenLegendCount); %#ok<AGROW>
@@ -2637,9 +4285,381 @@ ddScope = uidropdown(tgtGrid, ...
                 return;
             end
             try
-                exportgraphics(newFig, fullfile(filePath, fileName), 'ContentType', 'vector');
+                exportFig = i_createComposeFlattenedExportFigure(newFig);
+                cleanupExportFig = onCleanup(@() i_safeDeleteGraphics(exportFig)); %#ok<NASGU>
+                i_applyComposeExportPhysicalSize(exportFig, composeSpec.size.widthCm, composeSpec.size.heightCm);
+                i_logComposeExportFigureDiagnostics(exportFig);
+                exportgraphics(exportFig, fullfile(filePath, fileName), 'ContentType', 'vector');
             catch ME
                 uialert(ui, ME.message, 'Compose Export Failed');
+            end
+        end
+    end
+
+    function exportFig = i_createComposeFlattenedExportFigure(sourceFig)
+        exportFig = [];
+        if isempty(sourceFig) || ~isgraphics(sourceFig, 'figure')
+            error('FigureControlStudio:ComposeExportInvalidFigure', 'Invalid compose figure for export flattening.');
+        end
+
+        srcSizePx = [1200 800];
+        try
+            oldUnitsSrc = sourceFig.Units;
+            sourceFig.Units = 'pixels';
+            srcPos = double(sourceFig.Position);
+            sourceFig.Units = oldUnitsSrc;
+            if isnumeric(srcPos) && numel(srcPos) >= 4 && all(isfinite(srcPos(3:4)))
+                srcSizePx = max([200 200], round(srcPos(3:4)));
+            end
+        catch
+        end
+
+        exportFig = figure('Visible', 'off', ...
+                           'Color', 'w', ...
+                           'Renderer', 'painters', ...
+                           'Units', 'pixels', ...
+                           'Position', [100 100 srcSizePx(1) srcSizePx(2)]);
+
+        srcAxes = findall(sourceFig, 'Type', 'axes');
+        srcManualLegendAxes = srcAxes(false(size(srcAxes)));
+        srcDataAxes = srcAxes(false(size(srcAxes)));
+        for i = 1:numel(srcAxes)
+            ax = srcAxes(i);
+            if i_isManualLegendAxes(ax)
+                srcManualLegendAxes(end+1,1) = ax; %#ok<AGROW>
+            else
+                srcDataAxes(end+1,1) = ax; %#ok<AGROW>
+            end
+        end
+
+        for i = 1:numel(srcDataAxes)
+            i_copyComposeObjectToFlattenedFigure(srcDataAxes(i), sourceFig, exportFig);
+        end
+
+        srcLegends = findall(sourceFig, 'Type', 'legend');
+        for i = 1:numel(srcLegends)
+            i_copyComposeObjectToFlattenedFigure(srcLegends(i), sourceFig, exportFig);
+        end
+
+        srcColorbars = findall(sourceFig, 'Type', 'colorbar');
+        for i = 1:numel(srcColorbars)
+            i_copyComposeObjectToFlattenedFigure(srcColorbars(i), sourceFig, exportFig);
+        end
+
+        for i = 1:numel(srcManualLegendAxes)
+            copied = i_copyComposeObjectToFlattenedFigure(srcManualLegendAxes(i), sourceFig, exportFig);
+            if ~isempty(copied) && isgraphics(copied)
+                try
+                    uistack(copied, 'top');
+                catch
+                end
+            end
+        end
+    end
+
+    function copied = i_copyComposeObjectToFlattenedFigure(srcObj, sourceFig, exportFig)
+        copied = [];
+        if isempty(srcObj) || ~isgraphics(srcObj) || isempty(sourceFig) || ~isgraphics(sourceFig, 'figure') || isempty(exportFig) || ~isgraphics(exportFig, 'figure')
+            return;
+        end
+
+        objPosFig = i_getComposeObjectFigureNormalizedPosition(srcObj, sourceFig);
+
+        try
+            copied = copyobj(srcObj, exportFig);
+        catch
+            return;
+        end
+
+        if isempty(copied) || ~isgraphics(copied)
+            return;
+        end
+
+        try
+            if isprop(copied, 'Units')
+                copied.Units = 'normalized';
+            end
+            if isprop(copied, 'Position') && isnumeric(objPosFig) && numel(objPosFig) >= 4
+                copied.Position = i_clampRectNormalized(double(objPosFig(1:4)));
+            end
+        catch
+        end
+    end
+
+    function posFig = i_getComposeObjectFigureNormalizedPosition(srcObj, sourceFig)
+        posFig = [0 0 1 1];
+        if isempty(srcObj) || ~isgraphics(srcObj) || isempty(sourceFig) || ~isgraphics(sourceFig, 'figure')
+            return;
+        end
+
+        if ~isprop(srcObj, 'Position')
+            return;
+        end
+
+        try
+            oldUnitsObj = [];
+            if isprop(srcObj, 'Units')
+                oldUnitsObj = srcObj.Units;
+                srcObj.Units = 'normalized';
+            end
+            posObj = double(srcObj.Position);
+            if ~isempty(oldUnitsObj)
+                srcObj.Units = oldUnitsObj;
+            end
+        catch
+            return;
+        end
+
+        if ~isnumeric(posObj) || numel(posObj) < 4 || any(~isfinite(posObj(1:4)))
+            return;
+        end
+
+        posFig = double(posObj(1:4));
+
+        parentObj = [];
+        try
+            parentObj = srcObj.Parent;
+        catch
+        end
+
+        while ~isempty(parentObj) && ~isequal(parentObj, sourceFig)
+            if ~isgraphics(parentObj)
+                break;
+            end
+
+            if ~isgraphics(parentObj, 'uipanel')
+                break;
+            end
+
+            try
+                oldUnitsParent = parentObj.Units;
+                parentObj.Units = 'normalized';
+                parentPos = double(parentObj.Position);
+                parentObj.Units = oldUnitsParent;
+            catch
+                break;
+            end
+
+            if ~isnumeric(parentPos) || numel(parentPos) < 4 || any(~isfinite(parentPos(1:4)))
+                break;
+            end
+
+            posFig = [ ...
+                parentPos(1) + posFig(1) * parentPos(3), ...
+                parentPos(2) + posFig(2) * parentPos(4), ...
+                posFig(3) * parentPos(3), ...
+                posFig(4) * parentPos(4)];
+
+            try
+                parentObj = parentObj.Parent;
+            catch
+                break;
+            end
+        end
+
+        posFig = i_clampRectNormalized(posFig);
+    end
+
+    function i_safeDeleteGraphics(h)
+        if isempty(h)
+            return;
+        end
+        try
+            if isgraphics(h)
+                delete(h);
+            end
+        catch
+        end
+    end
+
+    function i_applyComposeExportPhysicalSize(exportFig, widthCm, heightCm)
+        if isempty(exportFig) || ~isgraphics(exportFig, 'figure')
+            return;
+        end
+        if ~isfinite(widthCm) || widthCm <= 0 || ~isfinite(heightCm) || heightCm <= 0
+            return;
+        end
+
+        exportFig.Units = 'centimeters';
+        pos = exportFig.Position;
+        pos(3) = double(widthCm);
+        pos(4) = double(heightCm);
+        exportFig.Position = pos;
+        exportFig.Renderer = 'painters';
+    end
+
+    function i_logComposeExportFigureDiagnostics(exportFig)
+        if isempty(exportFig) || ~isgraphics(exportFig, 'figure')
+            return;
+        end
+
+        figUnits = get(exportFig, 'Units');
+        figPosition = get(exportFig, 'Position');
+        paperUnits = get(exportFig, 'PaperUnits');
+        paperPositionMode = get(exportFig, 'PaperPositionMode');
+        paperPosition = get(exportFig, 'PaperPosition');
+        paperSize = get(exportFig, 'PaperSize');
+
+        screenDpi = get(0, 'ScreenPixelsPerInch');
+
+        oldUnits = exportFig.Units;
+        exportFig.Units = 'pixels';
+        posPx = double(exportFig.Position);
+        exportFig.Units = oldUnits;
+
+        widthIn = NaN;
+        heightIn = NaN;
+        widthCm = NaN;
+        heightCm = NaN;
+        if isnumeric(posPx) && numel(posPx) >= 4 && isfinite(screenDpi) && screenDpi > 0
+            widthIn = posPx(3) / screenDpi;
+            heightIn = posPx(4) / screenDpi;
+            widthCm = widthIn * 2.54;
+            heightCm = heightIn * 2.54;
+        end
+
+        fprintf('\n=== Compose Export Diagnostics (right before exportgraphics) ===\n');
+        fprintf('get(exportFig,''Units'') = %s\n', string(figUnits));
+        fprintf('get(exportFig,''Position'') = [%g %g %g %g]\n', figPosition(1), figPosition(2), figPosition(3), figPosition(4));
+        fprintf('get(exportFig,''PaperUnits'') = %s\n', string(paperUnits));
+        fprintf('get(exportFig,''PaperPositionMode'') = %s\n', string(paperPositionMode));
+        fprintf('get(exportFig,''PaperPosition'') = [%g %g %g %g]\n', paperPosition(1), paperPosition(2), paperPosition(3), paperPosition(4));
+        fprintf('get(exportFig,''PaperSize'') = [%g %g]\n', paperSize(1), paperSize(2));
+        fprintf('get(0,''ScreenPixelsPerInch'') = %g\n', screenDpi);
+        fprintf('exportFig pixel size = [%g x %g] px\n', posPx(3), posPx(4));
+        fprintf('pixel->inch = [%g x %g] in\n', widthIn, heightIn);
+        fprintf('pixel->cm = [%g x %g] cm\n', widthCm, heightCm);
+        fprintf('===============================================================\n\n');
+    end
+
+    function tilePos = i_computeComposeContainerPosition(k, rows, cols, hGap, vGap)
+        tilePos = [0 0 1 1];
+        if ~isfinite(k) || ~isfinite(rows) || ~isfinite(cols) || rows < 1 || cols < 1
+            return;
+        end
+
+        colIndex = mod(k - 1, cols);
+        rowIndex = floor((k - 1) / cols);
+
+        widthPerCell = (1 - (cols - 1) * hGap) / cols;
+        heightPerCell = (1 - (rows - 1) * vGap) / rows;
+
+        if ~isfinite(widthPerCell) || widthPerCell <= 0
+            widthPerCell = 1 / cols;
+            hGap = 0;
+        end
+        if ~isfinite(heightPerCell) || heightPerCell <= 0
+            heightPerCell = 1 / rows;
+            vGap = 0;
+        end
+
+        x = colIndex * (widthPerCell + hGap);
+        yFromTop = rowIndex * (heightPerCell + vGap);
+        y = 1 - yFromTop - heightPerCell;
+
+        tilePos = [x y widthPerCell heightPerCell];
+
+        tilePos(1) = min(max(tilePos(1), 0), 1);
+        tilePos(2) = min(max(tilePos(2), 0), 1);
+        tilePos(3) = min(max(tilePos(3), 0.001), 1);
+        tilePos(4) = min(max(tilePos(4), 0.001), 1);
+        if tilePos(1) + tilePos(3) > 1
+            tilePos(1) = max(0, 1 - tilePos(3));
+        end
+        if tilePos(2) + tilePos(4) > 1
+            tilePos(2) = max(0, 1 - tilePos(4));
+        end
+    end
+
+    function [manualLegendCopied, manualLegendCopyFailed] = i_preserveCopiedAxesPositions(srcFig, panel, newFig, tilePos, srcManualLegendAxes)
+        manualLegendCopied = 0;
+        manualLegendCopyFailed = 0;
+
+        if isempty(srcFig) || ~isgraphics(srcFig, 'figure') || isempty(panel) || ~isgraphics(panel)
+            return;
+        end
+
+        srcAxes = findall(srcFig, 'Type', 'axes');
+        dstAxes = findall(panel, 'Type', 'axes');
+        if ~isempty(srcAxes) && ~isempty(dstAxes)
+            srcIsManualLegend = false(size(srcAxes));
+            for i = 1:numel(srcAxes)
+                srcIsManualLegend(i) = i_isManualLegendAxes(srcAxes(i));
+            end
+
+            dstIsManualLegend = false(size(dstAxes));
+            for i = 1:numel(dstAxes)
+                dstIsManualLegend(i) = i_isManualLegendAxes(dstAxes(i));
+            end
+
+            srcAxes = srcAxes(~srcIsManualLegend);
+            dstAxes = dstAxes(~dstIsManualLegend);
+
+            try
+                [~, idxSrc] = sort(double(srcAxes), 'ascend');
+                srcAxes = srcAxes(idxSrc);
+            catch
+            end
+            try
+                [~, idxDst] = sort(double(dstAxes), 'ascend');
+                dstAxes = dstAxes(idxDst);
+            catch
+            end
+
+            n = min(numel(srcAxes), numel(dstAxes));
+            for i = 1:n
+                oldAx = srcAxes(i);
+                newAx = dstAxes(i);
+                if ~isgraphics(oldAx, 'axes') || ~isgraphics(newAx, 'axes')
+                    continue;
+                end
+
+                try
+                    oldUnits = oldAx.Units;
+                    oldAx.Units = 'normalized';
+                    srcOuterPos = oldAx.OuterPosition;
+                    oldAx.Units = oldUnits;
+
+                    newAx.Units = 'normalized';
+                    newAx.OuterPosition = srcOuterPos;
+                catch
+                end
+            end
+        end
+
+        if nargin < 5 || isempty(srcManualLegendAxes) || isempty(newFig) || ~isgraphics(newFig, 'figure')
+            return;
+        end
+
+        for iLeg = 1:numel(srcManualLegendAxes)
+            srcLegAx = srcManualLegendAxes(iLeg);
+            if ~isgraphics(srcLegAx, 'axes')
+                continue;
+            end
+
+            try
+                oldUnitsLeg = srcLegAx.Units;
+                srcLegAx.Units = 'normalized';
+                srcOuterPos = double(srcLegAx.OuterPosition);
+                srcLegAx.Units = oldUnitsLeg;
+
+                mappedFigureOuterPos = [ ...
+                    tilePos(1) + srcOuterPos(1) * tilePos(3), ...
+                    tilePos(2) + srcOuterPos(2) * tilePos(4), ...
+                    srcOuterPos(3) * tilePos(3), ...
+                    srcOuterPos(4) * tilePos(4)];
+
+                newLegAx = copyobj(srcLegAx, newFig);
+                newLegAx.Units = 'normalized';
+                newLegAx.OuterPosition = i_clampRectNormalized(mappedFigureOuterPos);
+
+                if isprop(newLegAx, 'Clipping')
+                    newLegAx.Clipping = 'off';
+                end
+                i_bringGraphicsToFront(newLegAx);
+                manualLegendCopied = manualLegendCopied + 1;
+            catch
+                manualLegendCopyFailed = manualLegendCopyFailed + 1;
             end
         end
     end
@@ -2664,14 +4684,17 @@ ddScope = uidropdown(tgtGrid, ...
         end
     end
 
-    function [childrenToCopy, skipAnnotationCount, skipUnsupportedCount] = i_filterComposeChildren(srcFig)
+    function [childrenToCopy, skipAnnotationCount, skipUnsupportedCount, manualLegendAxes] = i_filterComposeChildren(srcFig)
         childrenToCopy = gobjects(0,1);
         skipAnnotationCount = 0;
         skipUnsupportedCount = 0;
+        manualLegendAxes = gobjects(0,1);
 
         if isempty(srcFig) || ~isgraphics(srcFig, 'figure')
             return;
         end
+
+        manualLegendAxes = i_getManualLegendAxesForFigure(srcFig);
 
         srcChildren = allchild(srcFig);
         keep = false(numel(srcChildren), 1);
@@ -2717,6 +4740,197 @@ ddScope = uidropdown(tgtGrid, ...
         end
 
         childrenToCopy = srcChildren(keep);
+    end
+
+    function axesOut = i_getManualLegendAxesForFigure(fig)
+        axesOut = gobjects(0,1);
+        if isempty(fig) || ~isgraphics(fig, 'figure')
+            return;
+        end
+
+        srcAxes = findall(fig, 'Type', 'axes');
+        if isempty(srcAxes)
+            return;
+        end
+
+        keep = false(numel(srcAxes),1);
+        for i = 1:numel(srcAxes)
+            keep(i) = i_isManualLegendAxes(srcAxes(i));
+        end
+        axesOut = srcAxes(keep);
+
+        try
+            [~, idx] = sort(double(axesOut), 'ascend');
+            axesOut = axesOut(idx);
+        catch
+        end
+    end
+
+    function axesOut = i_getPrimaryAxesForCompose(container)
+        axesOut = gobjects(0,1);
+        if isempty(container) || ~isgraphics(container)
+            return;
+        end
+
+        srcAxes = findall(container, 'Type', 'axes');
+        if isempty(srcAxes)
+            return;
+        end
+
+        keep = false(numel(srcAxes),1);
+        for i = 1:numel(srcAxes)
+            keep(i) = i_isPrimaryPlotAxes(srcAxes(i));
+        end
+        axesOut = srcAxes(keep);
+
+        try
+            [~, idx] = sort(double(axesOut), 'ascend');
+            axesOut = axesOut(idx);
+        catch
+        end
+    end
+
+    function bbox = i_computeAxesBBoxNormalized(axList)
+        bbox = [0 0 1 1];
+        if isempty(axList)
+            return;
+        end
+
+        mins = [inf inf];
+        maxs = [-inf -inf];
+        validCount = 0;
+        for i = 1:numel(axList)
+            ax = axList(i);
+            if ~isgraphics(ax, 'axes')
+                continue;
+            end
+            pos = i_getNormalizedPosition(ax);
+            if ~all(isfinite(pos)) || numel(pos) < 4 || pos(3) <= 0 || pos(4) <= 0
+                continue;
+            end
+            mins(1) = min(mins(1), pos(1));
+            mins(2) = min(mins(2), pos(2));
+            maxs(1) = max(maxs(1), pos(1) + pos(3));
+            maxs(2) = max(maxs(2), pos(2) + pos(4));
+            validCount = validCount + 1;
+        end
+
+        if validCount == 0
+            return;
+        end
+
+        bbox = [mins(1) mins(2) max(1e-6, maxs(1)-mins(1)) max(1e-6, maxs(2)-mins(2))];
+    end
+
+    function posNorm = i_getNormalizedPosition(h)
+        posNorm = [0 0 1 1];
+        if isempty(h) || ~isgraphics(h)
+            return;
+        end
+        try
+            oldUnits = h.Units;
+            h.Units = 'normalized';
+            posNorm = double(h.Position);
+            h.Units = oldUnits;
+        catch
+            try
+                posNorm = double(h.Position);
+            catch
+                posNorm = [0 0 1 1];
+            end
+        end
+        if ~isnumeric(posNorm) || numel(posNorm) < 4
+            posNorm = [0 0 1 1];
+        else
+            posNorm = double(posNorm(1:4));
+        end
+    end
+
+    function mappedPos = i_mapPositionBetweenBBoxes(pos, srcBBox, dstBBox)
+        mappedPos = pos;
+
+        if ~isnumeric(pos) || numel(pos) < 4
+            mappedPos = [0 0 1 1];
+            return;
+        end
+        if ~isnumeric(srcBBox) || numel(srcBBox) < 4
+            srcBBox = [0 0 1 1];
+        end
+        if ~isnumeric(dstBBox) || numel(dstBBox) < 4
+            dstBBox = [0 0 1 1];
+        end
+
+        srcW = max(1e-9, double(srcBBox(3)));
+        srcH = max(1e-9, double(srcBBox(4)));
+        dstW = max(1e-9, double(dstBBox(3)));
+        dstH = max(1e-9, double(dstBBox(4)));
+
+        x0 = (double(pos(1)) - double(srcBBox(1))) / srcW;
+        y0 = (double(pos(2)) - double(srcBBox(2))) / srcH;
+        w0 = double(pos(3)) / srcW;
+        h0 = double(pos(4)) / srcH;
+
+        mappedPos = [double(dstBBox(1)) + x0 * dstW, ...
+                     double(dstBBox(2)) + y0 * dstH, ...
+                     w0 * dstW, ...
+                     h0 * dstH];
+        mappedPos = i_clampRectNormalized(mappedPos);
+    end
+
+    function rectOut = i_clampRectNormalized(rectIn)
+        rectOut = [0 0 1 1];
+        if ~isnumeric(rectIn) || numel(rectIn) < 4
+            return;
+        end
+
+        rectOut = double(rectIn(1:4));
+        if ~all(isfinite(rectOut))
+            rectOut = [0 0 1 1];
+            return;
+        end
+
+        rectOut(3) = min(max(rectOut(3), 0.001), 1);
+        rectOut(4) = min(max(rectOut(4), 0.001), 1);
+        rectOut(1) = min(max(rectOut(1), 0), 1);
+        rectOut(2) = min(max(rectOut(2), 0), 1);
+
+        if rectOut(1) + rectOut(3) > 1
+            rectOut(1) = max(0, 1 - rectOut(3));
+        end
+        if rectOut(2) + rectOut(4) > 1
+            rectOut(2) = max(0, 1 - rectOut(4));
+        end
+    end
+
+    function i_bringGraphicsToFront(hObj)
+        if isempty(hObj) || ~isgraphics(hObj)
+            return;
+        end
+
+        try
+            uistack(hObj, 'top');
+            return;
+        catch
+        end
+
+        parentObj = [];
+        try
+            parentObj = hObj.Parent;
+        catch
+        end
+        if isempty(parentObj) || ~isgraphics(parentObj)
+            return;
+        end
+
+        try
+            childrenNow = parentObj.Children;
+            keepMask = true(size(childrenNow));
+            for i = 1:numel(childrenNow)
+                keepMask(i) = ~isequal(childrenNow(i), hObj);
+            end
+            parentObj.Children = [hObj; childrenNow(keepMask)];
+        catch
+        end
     end
 
     function report = i_verifyPanelLegendColorbarAssociations(panel)
@@ -3339,6 +5553,13 @@ ddScope = uidropdown(tgtGrid, ...
             if isfield(uiState, 'labelFontSize') && isnumeric(uiState.labelFontSize) && isfinite(uiState.labelFontSize)
                 nfLabelFont.Value = max(1, double(uiState.labelFontSize));
             end
+            if isfield(uiState, 'composeHGap') && isnumeric(uiState.composeHGap) && isfinite(uiState.composeHGap)
+                slComposeHGap.Value = i_quantizeSliderValue(double(uiState.composeHGap), [0 0.1], 0.001);
+            end
+            if isfield(uiState, 'composeVGap') && isnumeric(uiState.composeVGap) && isfinite(uiState.composeVGap)
+                slComposeVGap.Value = i_quantizeSliderValue(double(uiState.composeVGap), [0 0.1], 0.001);
+            end
+            i_updateComposeGapLabels();
             if isfield(uiState, 'legendPlacementMode') && ~isempty(uiState.legendPlacementMode)
                 cand = string(uiState.legendPlacementMode);
                 if any(string(ddLegendPlacementMode.Items) == cand)
@@ -3353,6 +5574,12 @@ ddScope = uidropdown(tgtGrid, ...
             end
             if isfield(uiState, 'legendAllowRebuild') && ~isempty(uiState.legendAllowRebuild)
                 cbLegendAllowRebuild.Value = logical(uiState.legendAllowRebuild);
+            end
+            if isfield(uiState, 'moveManualLegend') && ~isempty(uiState.moveManualLegend)
+                cbMoveManualLegend.Value = logical(uiState.moveManualLegend);
+            end
+            if isfield(uiState, 'manualLegendPositions')
+                i_restoreManualLegendPositionState(uiState.manualLegendPositions);
             end
             if isfield(uiState, 'appearanceMapName') && ~isempty(uiState.appearanceMapName)
                 cand = string(uiState.appearanceMapName);
@@ -3399,6 +5626,64 @@ ddScope = uidropdown(tgtGrid, ...
             if isfield(uiState, 'fitMarkerSize') && isnumeric(uiState.fitMarkerSize) && isfinite(uiState.fitMarkerSize)
                 nfFitMarkerSize.Value = max(0, double(uiState.fitMarkerSize));
             end
+            if isfield(uiState, 'refLineWidth') && isnumeric(uiState.refLineWidth) && isfinite(uiState.refLineWidth)
+                nfRefLineWidth.Value = max(0, double(uiState.refLineWidth));
+            end
+            if isfield(uiState, 'refLineStyle') && ~isempty(uiState.refLineStyle)
+                cand = string(uiState.refLineStyle);
+                if any(string(ddRefLineStyle.Items) == cand)
+                    ddRefLineStyle.Value = char(cand);
+                end
+            end
+            if isfield(uiState, 'refLineColor') && ~isempty(uiState.refLineColor)
+                efRefLineColor.Value = char(string(uiState.refLineColor));
+            end
+            if isfield(uiState, 'annFontName') && ~isempty(uiState.annFontName)
+                efAnnFontName.Value = char(string(uiState.annFontName));
+            end
+            if isfield(uiState, 'annFontSize') && isnumeric(uiState.annFontSize) && isfinite(uiState.annFontSize)
+                nfAnnFontSize.Value = max(1, double(uiState.annFontSize));
+            end
+            if isfield(uiState, 'annFontWeight') && ~isempty(uiState.annFontWeight)
+                cand = lower(strtrim(string(uiState.annFontWeight)));
+                if any(string(ddAnnFontWeight.Items) == cand)
+                    ddAnnFontWeight.Value = char(cand);
+                end
+            end
+            if isfield(uiState, 'annInterpreter') && ~isempty(uiState.annInterpreter)
+                cand = lower(strtrim(string(uiState.annInterpreter)));
+                if any(string(ddAnnInterpreter.Items) == cand)
+                    ddAnnInterpreter.Value = char(cand);
+                end
+            end
+            if isfield(uiState, 'annColor') && ~isempty(uiState.annColor)
+                efAnnColor.Value = char(string(uiState.annColor));
+            end
+            if isfield(uiState, 'targetWidthCm') && isnumeric(uiState.targetWidthCm) && isfinite(uiState.targetWidthCm)
+                nfWsWidth.Value = min(max(double(uiState.targetWidthCm), 5), 40);
+            end
+            if isfield(uiState, 'heightMode') && ~isempty(uiState.heightMode)
+                cand = string(uiState.heightMode);
+                if any(string(ddWsHeightMode.Items) == cand)
+                    ddWsHeightMode.Value = char(cand);
+                end
+            end
+            if isfield(uiState, 'heightCm') && isnumeric(uiState.heightCm) && isfinite(uiState.heightCm)
+                nfWsHeight.Value = min(max(double(uiState.heightCm), 5), 40);
+            end
+            if isfield(uiState, 'baseRatio') && isnumeric(uiState.baseRatio) && isfinite(uiState.baseRatio)
+                nfWsBaseRatio.Value = min(max(double(uiState.baseRatio), 0.3), 2);
+            end
+            if isfield(uiState, 'axesTransformScale') && isnumeric(uiState.axesTransformScale) && isfinite(uiState.axesTransformScale)
+                slAxScale.Value = i_quantizeSliderValue(double(uiState.axesTransformScale), [0.5 1.5], 0.01);
+            end
+            if isfield(uiState, 'axesTransformOffsetX') && isnumeric(uiState.axesTransformOffsetX) && isfinite(uiState.axesTransformOffsetX)
+                slAxOffsetX.Value = i_quantizeSliderValue(double(uiState.axesTransformOffsetX), [-0.2 0.2], 0.01);
+            end
+            if isfield(uiState, 'axesTransformOffsetY') && isnumeric(uiState.axesTransformOffsetY) && isfinite(uiState.axesTransformOffsetY)
+                slAxOffsetY.Value = i_quantizeSliderValue(double(uiState.axesTransformOffsetY), [-0.2 0.2], 0.01);
+            end
+            i_updateAxesTransformLabels();
             if isfield(uiState, 'reversePlotOrder') && ~isempty(uiState.reversePlotOrder)
                 cbReversePlotOrder.Value = logical(uiState.reversePlotOrder);
             end
@@ -3431,10 +5716,14 @@ ddScope = uidropdown(tgtGrid, ...
         uiState.autoLabels = logical(cbAutoLabel.Value);
         uiState.labelPosition = string(ddLabelPos.Value);
         uiState.labelFontSize = double(nfLabelFont.Value);
+        uiState.composeHGap = double(slComposeHGap.Value);
+        uiState.composeVGap = double(slComposeVGap.Value);
         uiState.legendPlacementMode = string(ddLegendPlacementMode.Value);
         uiState.legendLocation = string(legendLocationState);
         uiState.legendReverse = logical(cbLegendReverse.Value);
         uiState.legendAllowRebuild = logical(cbLegendAllowRebuild.Value);
+        uiState.moveManualLegend = logical(cbMoveManualLegend.Value);
+        uiState.manualLegendPositions = i_serializeManualLegendPositionState();
         uiState.appearanceMapName = string(ddCmap.Value);
         uiState.appearanceSpreadMode = string(ddSpreadMode.Value);
         uiState.appearanceSpreadReverse = logical(cbSpreadReverse.Value);
@@ -3446,6 +5735,21 @@ ddScope = uidropdown(tgtGrid, ...
         uiState.fitLineStyle = string(ddFitLineStyle.Value);
         uiState.fitLineWidth = double(nfFitLineWidth.Value);
         uiState.fitMarkerSize = double(nfFitMarkerSize.Value);
+        uiState.refLineWidth = double(nfRefLineWidth.Value);
+        uiState.refLineStyle = string(ddRefLineStyle.Value);
+        uiState.refLineColor = string(efRefLineColor.Value);
+        uiState.annFontName = string(efAnnFontName.Value);
+        uiState.annFontSize = double(nfAnnFontSize.Value);
+        uiState.annFontWeight = string(ddAnnFontWeight.Value);
+        uiState.annInterpreter = string(ddAnnInterpreter.Value);
+        uiState.annColor = string(efAnnColor.Value);
+        uiState.targetWidthCm = double(nfWsWidth.Value);
+        uiState.heightMode = string(ddWsHeightMode.Value);
+        uiState.heightCm = double(nfWsHeight.Value);
+        uiState.baseRatio = double(nfWsBaseRatio.Value);
+        uiState.axesTransformScale = double(slAxScale.Value);
+        uiState.axesTransformOffsetX = double(slAxOffsetX.Value);
+        uiState.axesTransformOffsetY = double(slAxOffsetY.Value);
         uiState.reversePlotOrder = logical(cbReversePlotOrder.Value);
         uiState.panelsPerRow = string(ddPanelsPerRow.Value);
         uiState.exportCompose = logical(cbExportCompose.Value);

@@ -1,3 +1,11 @@
+% ========================================================================
+% DEPRECATION NOTICE (LEGACY GEOMETRY ENGINE)
+% This file is deprecated for new development.
+% It remains for backward compatibility only.
+% Do not extend or reuse this file for new layout logic.
+% New layout logic must use explicit target lists and stateless margin
+% normalization.
+% ========================================================================
 classdef SmartFigureEngine
     methods(Static)
         function style = computeSmartStyle(panelWidth, panelHeight, nx, ny, mode)

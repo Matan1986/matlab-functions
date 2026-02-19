@@ -28,11 +28,9 @@ switch lower(figureMode)
     case 'small'
         lw = 2;
         fs = fontsize;
-        dy = 0.65;
     otherwise   % 'paper'
         lw = 2.5;
         fs = fontsize;
-        dy = 0.55;
 end
 
 yMarginFrac = 0.10;
@@ -180,11 +178,16 @@ switch plotQuantity
         figName = sprintf('MG%d — Combined M/H(T)', growth_num);
 end
 
-figure('Name',figName,'NumberTitle','off','Color','w');
-ax = axes('Parent',gcf); hold(ax,'on');
+fig = figure('Name',figName,'NumberTitle','off','Color','w');
+ax  = axes('Parent',fig);
+hold(ax,'on');
 grid(ax,'on'); box(ax,'on');
 
 allT = [];
+zfcHandles = gobjects(nF,1);
+fcwHandles = gobjects(nF,1);
+zfcLabels = strings(nF,1);
+fcwLabels = strings(nF,1);
 
 %% ==============================================================
 %% PASS 2 — plotting (ON SCALED DATA)
@@ -235,7 +238,23 @@ for i = numel(sortedFields):-1:1
             c = greyColor;
         end
 
-        plot(ax, segT, ydata, 'LineWidth', lw, 'Color', c);
+        h = plot(ax, segT, ydata, ...
+            'LineWidth', lw, ...
+            'Color', c, ...
+            'HandleVisibility','off');
+
+        if j == 1
+            h.DisplayName = sprintf('%.1f T', sortedFields(i)/1e4);
+            h.HandleVisibility = 'on';
+            zfcHandles(i) = h;
+            zfcLabels(i) = string(h.DisplayName);
+        elseif j == 2
+            h.DisplayName = sprintf('%.1f T', sortedFields(i)/1e4);
+            h.HandleVisibility = 'on';
+            fcwHandles(i) = h;
+            fcwLabels(i) = string(h.DisplayName);
+        end
+
         allT = [allT; segT(:)]; %#ok<AGROW>
     end
 end
@@ -258,16 +277,16 @@ switch unitsMode
     case 'raw'
         unitStrDisp = 'emu';
     case 'per_mass'
-        unitStrDisp = 'emu g^{-1} Oe^{-1}';
+        unitStrDisp = 'emu\,g^{-1}\,Oe^{-1}';
     case 'per_Co'
-        unitStrDisp = '\mu_B Co^{-1} Oe^{-1}';
+        unitStrDisp = '\mu_B\,Co^{-1}\,Oe^{-1}';
 end
 
 if useAutoYScale && scalePower ~= 0
-    ylab = sprintf('$\\mathrm{%s\\ (10^{-%d}\\ %s)}$', ...
+    ylab = sprintf('$%s\\ (10^{-%d}\\,\\mathrm{%s})$', ...
         baseLabel, scalePower, unitStrDisp);
 else
-    ylab = sprintf('$\\mathrm{%s\\ (%s)}$', ...
+    ylab = sprintf('$%s\\ (\\mathrm{%s})$', ...
         baseLabel, unitStrDisp);
 end
 
@@ -288,63 +307,93 @@ ax.XLimMode = 'manual';
 ax.YLim = globalYLim;
 ax.YLimMode = 'manual';
 ax.TickLabelInterpreter = 'tex';
-ax.TickDir = 'out';
+ax.TickDir = 'in';
+ax.Box = 'on';
+ax.XAxisLocation = 'bottom';
+ax.YAxisLocation = 'left';
+ax.TickDirMode = 'manual';
+ax.TickLength = [0.02 0.02];
 ax.Layer   = 'top';
 
 %% ==============================================================
-%% CUSTOM LEGEND — ZFC | FCW
+%% CUSTOM LEGEND AXES — ZFC | FCW | FIELD
 %% ==============================================================
-if strcmpi(legendMode,'internal')
+[fieldsSorted, order] = sort(fields_T,'descend');
+nLegend = numel(fieldsSorted);
 
-    delete(findobj(gcf,'Type','legend'));
-
-    fieldsUni = sort(fields_T,'descend');
-    nU = numel(fieldsUni);
-
-    colZ = zeros(nU,3);
-    colF = zeros(nU,3);
-
-    for k = 1:nU
-        idx = find(abs(fields_T - fieldsUni(k)) < 1e-9, 1);
-        r   = fieldRank(idx);
-        colZ(k,:) = colorsZFC(r,:);
-        colF(k,:) = colorsFCW(r,:);
-    end
-
-    axLeg = axes( ...
-        'Parent', gcf, ...
-        'Units','normalized', ...
-        'Position',[0.68 0.28 0.18 0.62], ...
-        'Visible','off', ...
-        'XLim',[0 1], ...
-        'YLim',[0 nU+1], ...
-        'YDir','reverse', ...
-        'Tag','MT_Legend_Axes', ...
-        'HandleVisibility','off', ...
-        'PickableParts','none');
-
-
-    lineLen = 0.28;
-    xZ1 = 0.02; xZ2 = xZ1 + lineLen;
-    xF1 = 0.40; xF2 = xF1 + lineLen;
-    xTxt = 0.78;
-
-    fsHeader = fs + 4;
-    fsRow    = fs + 2;
-
-    text(axLeg,mean([xZ1 xZ2]),0.3,'ZFC','FontSize',fsHeader,'HorizontalAlignment','center');
-    text(axLeg,mean([xF1 xF2]),0.3,'FCW','FontSize',fsHeader,'HorizontalAlignment','center');
-
-    for k = 1:nU
-        y = k*dy + 0.4;
-        line(axLeg,[xZ1 xZ2],[y y],'Color',colZ(k,:),'LineWidth',lw);
-        line(axLeg,[xF1 xF2],[y y],'Color',colF(k,:),'LineWidth',lw);
-        text(axLeg,xTxt,y,sprintf('%.1f T',fieldsUni(k)), ...
-            'FontSize',fsRow,'HorizontalAlignment','left');
-    end
-    uistack(axLeg,'top');
-
+oldLegendAx = [];
+oldLegendAx = findall(fig, 'Type', 'axes', 'Tag', 'PlotsMTCombinedManualLegendAxes');
+if ~isempty(oldLegendAx)
+    delete(oldLegendAx);
 end
+if isappdata(fig, 'PlotsMTCombinedLegendAxesHandle')
+    rmappdata(fig, 'PlotsMTCombinedLegendAxesHandle');
+end
+
+axLeg = axes('Parent',fig, ...
+    'Units','normalized', ...
+    'Position',[0.60 0.30 0.30 0.55], ...
+    'Visible','on', ...
+    'HitTest','on', ...
+    'PickableParts','all', ...
+    'HandleVisibility','on', ...
+    'Color','none', ...
+    'XColor','none', ...
+    'YColor','none', ...
+    'XLim',[0 1], ...
+    'YLim',[0 nLegend+1], ...
+    'YDir','reverse');
+axLeg.Tag = 'PlotsMTCombinedManualLegendAxes';
+axLeg.UserData = [];
+
+uistack(axLeg,'top');
+axLeg.Clipping = 'off';
+
+% ---- headers (only once) ----
+text(axLeg,0.15,0.5,'ZFC', ...
+    'FontWeight','normal', ...
+    'Interpreter','latex', ...
+    'FontSize', fs-2, ...
+    'HitTest','on', ...
+    'PickableParts','all');
+
+text(axLeg,0.45,0.5,'FCW', ...
+    'FontWeight','normal', ...
+    'Interpreter','latex', ...
+    'FontSize', fs-2, ...
+    'HitTest','on', ...
+    'PickableParts','all');
+
+for k = 1:nLegend
+    idx = order(k);
+    y = k + 0.5;
+
+    zfcColor = colorsZFC(fieldRank(idx),:);
+    fcwColor = colorsFCW(fieldRank(idx),:);
+
+    line(axLeg,[0.05 0.20],[y y], ...
+        'Color',zfcColor, ...
+        'LineWidth',lw, ...
+        'HitTest','on', ...
+        'PickableParts','all', ...
+        'UserData',[]);
+
+    line(axLeg,[0.30 0.45],[y y], ...
+        'Color',fcwColor, ...
+        'LineWidth',lw, ...
+        'HitTest','on', ...
+        'PickableParts','all', ...
+        'UserData',[]);
+
+    text(axLeg,0.70,y, sprintf('%.1f T',fieldsSorted(k)), ...
+        'HorizontalAlignment','left', ...
+        'Interpreter','latex', ...
+        'FontSize', fs-4, ...
+        'HitTest','on', ...
+        'PickableParts','all', ...
+        'UserData',[]);
+end
+
 %% ==============================================================
 %% OUTPUT
 %% ==============================================================
@@ -355,6 +404,10 @@ legendData.colorsZFC    = colorsZFC;
 legendData.colorsFCW    = colorsFCW;
 legendData.fontsize     = fs;
 legendData.lw           = lw;
-legendData.dy           = dy;
+legendData.dy           = [];
+
+if ~strcmpi(string(legendMode), "none")
+    setappdata(fig, 'ComposeLegendData', legendData);
+end
 
 end

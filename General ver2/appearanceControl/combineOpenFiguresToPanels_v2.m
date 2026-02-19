@@ -1,4 +1,12 @@
 function outFig = combineOpenFiguresToPanels_v2(nx, ny, figW, figH)
+% ========================================================================
+% DEPRECATION NOTICE (LEGACY GEOMETRY ENGINE)
+% This file is deprecated for new development.
+% It remains for backward compatibility only.
+% Do not extend or reuse this file for new layout logic.
+% New layout logic must use explicit target lists and stateless margin
+% normalization.
+% ========================================================================
 % Combine open MATLAB figures into one ARTICLE figure (no font logic!)
 
 skipNames = ["CtrlGUI","Final Figure Formatter","FigureTools","refLineGUI", ...

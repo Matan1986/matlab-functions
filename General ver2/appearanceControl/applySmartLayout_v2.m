@@ -1,4 +1,12 @@
 function fig = applySmartLayout_v2(nx, ny, journal, columnMode)
+% ========================================================================
+% DEPRECATION NOTICE (LEGACY GEOMETRY ENGINE)
+% This file is deprecated for new development.
+% It remains for backward compatibility only.
+% Do not extend or reuse this file for new layout logic.
+% New layout logic must use explicit target lists and stateless margin
+% normalization.
+% ========================================================================
 % SMART LAYOUT v2 — ARTICLE ORCHESTRATOR
 % nx, ny      : number of MATLAB FIGURES to combine across/down
 % journal     : "PRL" | "Nature"
