@@ -27,8 +27,8 @@ function FigureControlStudio()
     tabs.Layout.Column = 2;
 
     % ---------------- Left: Targets ----------------
-    tgtGrid = uigridlayout(targetPanel, [14 1]);
-    tgtGrid.RowHeight = {22, 22, 22, 22, 28, 28, '1x', 22, 24, 22, 28, 28, 28, 1};
+    tgtGrid = uigridlayout(targetPanel, [11 1]);
+    tgtGrid.RowHeight = {22, 22, 22, 22, 28, '1x', 24, 22, 22, 24, 'fit'};
     tgtGrid.ColumnWidth = {'1x'};
     tgtGrid.Padding = [8 8 8 8];
 
@@ -62,14 +62,38 @@ ddScope = uidropdown(tgtGrid, ...
     lbFigures.ItemsData = [];
     lbFigures.Value = {};
 
+    lbFigures.Layout.Row = 6;
+    lbFigures.Layout.Column = 1;
+
+    moveGrid.Layout.Row = 7;
+    moveGrid.Layout.Column = 1;
+
     cbExcludeGUIs = uicheckbox(tgtGrid, 'Text', 'Exclude Known GUIs', 'Value', true, 'ValueChangedFcn', @onExcludeChanged);
+    cbExcludeGUIs.Layout.Row = 8;
+    cbExcludeGUIs.Layout.Column = 1;
 
     lblDetected = uilabel(tgtGrid, 'Text', 'Detected: 0');
-    lblHint = uilabel(tgtGrid, 'Text', 'Tip: Use Refresh for Explicit List mode');
-    lblHint.FontColor = [0.35 0.35 0.35];
-    btnResetDefaults = uibutton(tgtGrid, 'Text', 'Reset to Defaults', 'ButtonPushedFcn', @onResetDefaults);
+    lblDetected.Layout.Row = 9;
+    lblDetected.Layout.Column = 1;
 
-    sizeGrid = uigridlayout(tgtGrid, [1 4]);
+    btnAdvancedToggle = uibutton(tgtGrid, 'Text', 'Advanced ▸', 'ButtonPushedFcn', @onToggleAdvanced);
+    btnAdvancedToggle.Layout.Row = 10;
+    btnAdvancedToggle.Layout.Column = 1;
+
+    pAdvanced = uipanel(tgtGrid, 'Title', 'Advanced');
+    pAdvanced.Layout.Row = 11;
+    pAdvanced.Layout.Column = 1;
+    pAdvanced.Visible = 'off';
+
+    advancedGrid = uigridlayout(pAdvanced, [2 1]);
+    advancedGrid.ColumnWidth = {'1x'};
+    advancedGrid.RowHeight = {'fit', 'fit'};
+    advancedGrid.Padding = [8 8 8 8];
+    advancedGrid.RowSpacing = 6;
+
+    btnResetDefaults = uibutton(advancedGrid, 'Text', 'Reset to Defaults', 'ButtonPushedFcn', @onResetDefaults);
+
+    sizeGrid = uigridlayout(advancedGrid, [1 4]);
     sizeGrid.ColumnWidth = {42, '1x', 48, '1x'};
     sizeGrid.RowHeight = {24};
     sizeGrid.Padding = [0 0 0 0];
@@ -86,21 +110,17 @@ ddScope = uidropdown(tgtGrid, ...
         'Limits', [1 Inf], ...
         'RoundFractionalValues', true);
 
-    btnApplySizeToAll = uibutton(tgtGrid, 'Text', 'Apply Size To All', 'ButtonPushedFcn', @applyGlobalFigureSize); %#ok<NASGU>
-
     % explicit-list cache
     explicitHandleCache = gobjects(0,1);
 
     % ---------------- Main tabs (creation order) ----------------
-    tLayoutGeometry = uitab(tabs, 'Title', 'Layout & Geometry');
-    tTextLegend = uitab(tabs, 'Title', 'Text & Legend');
-    tColorsBackground = uitab(tabs, 'Title', 'Colors & Background');
-    tLinesReferences = uitab(tabs, 'Title', 'Lines & References');
-    tExport = uitab(tabs, 'Title', 'Export');
+    tLayoutGeometry = uitab(tabs, 'Title', 'Layout');
+    tTextLegend = uitab(tabs, 'Title', 'Text');
+    tColorsBackground = uitab(tabs, 'Title', 'Style');
     tCompose = uitab(tabs, 'Title', 'Compose');
-    tWorkflow = uitab(tabs, 'Title', 'Workflow');
+    tExport = uitab(tabs, 'Title', 'Export');
 
-    % ---------------- Tab 1: Text & Legend ----------------
+    % ---------------- Text ----------------
     tabRootTextLegend = uigridlayout(tTextLegend, [3 1]);
     tabRootTextLegend.RowHeight = {'fit', 'fit', '1x'};
     tabRootTextLegend.ColumnWidth = {'1x'};
@@ -112,8 +132,8 @@ ddScope = uidropdown(tgtGrid, ...
     pTextAxis.Layout.Row = 1;
     pTextAxis.Layout.Column = 1;
 
-    textAxisRoot = uigridlayout(pTextAxis, [3 1]);
-    textAxisRoot.RowHeight = {'fit', 'fit', 'fit'};
+    textAxisRoot = uigridlayout(pTextAxis, [2 1]);
+    textAxisRoot.RowHeight = {'fit', 'fit'};
     textAxisRoot.ColumnWidth = {'1x'};
     textAxisRoot.Padding = [10 10 10 10];
     textAxisRoot.RowSpacing = 10;
@@ -128,21 +148,24 @@ ddScope = uidropdown(tgtGrid, ...
     lblTypoFontSize = uilabel(secTypoMain, 'Text', 'Font Size', 'HorizontalAlignment', 'left');
     lblTypoFontSize.Layout.Row = 1;
     lblTypoFontSize.Layout.Column = 1;
-    nfFontSize = uieditfield(secTypoMain, 'numeric', 'Value', 11, 'Limits', [1 Inf], 'RoundFractionalValues', true);
+    nfFontSize = uieditfield(secTypoMain, 'numeric', 'Value', 11, 'Limits', [1 Inf], 'RoundFractionalValues', true, ...
+        'ValueChangedFcn', @onTypographyControlChanged);
     nfFontSize.Layout.Row = 1;
     nfFontSize.Layout.Column = 2;
 
     lblTypoAxisPreset = uilabel(secTypoMain, 'Text', 'Axis Policy preset', 'HorizontalAlignment', 'left');
     lblTypoAxisPreset.Layout.Row = 2;
     lblTypoAxisPreset.Layout.Column = 1;
-    ddAxisPreset = uidropdown(secTypoMain, 'Items', {'paper'}, 'Value', 'paper');
+    ddAxisPreset = uidropdown(secTypoMain, 'Items', {'paper'}, 'Value', 'paper', ...
+        'ValueChangedFcn', @onTypographyControlChanged);
     ddAxisPreset.Layout.Row = 2;
     ddAxisPreset.Layout.Column = 2;
 
     lblTypoProfile = uilabel(secTypoMain, 'Text', 'Typography profile', 'HorizontalAlignment', 'left');
     lblTypoProfile.Layout.Row = 3;
     lblTypoProfile.Layout.Column = 1;
-    ddTypoProfile = uidropdown(secTypoMain, 'Items', cellstr(FCS_listTypographyProfiles()), 'Value', 'Default');
+    ddTypoProfile = uidropdown(secTypoMain, 'Items', cellstr(FCS_listTypographyProfiles()), 'Value', 'Default', ...
+        'ValueChangedFcn', @onTypographyControlChanged);
     ddTypoProfile.Layout.Row = 3;
     ddTypoProfile.Layout.Column = 2;
 
@@ -170,7 +193,7 @@ ddScope = uidropdown(tgtGrid, ...
     lblAnnFontName.Layout.Row = 1;
     lblAnnFontName.Layout.Column = 1;
     efAnnFontName = uieditfield(secAnnotationTextBody, 'text', 'Value', 'Helvetica', ...
-        'ValueChangedFcn', @onPersistedControlChanged);
+        'ValueChangedFcn', @onTypographyControlChanged);
     efAnnFontName.Layout.Row = 1;
     efAnnFontName.Layout.Column = 2;
 
@@ -178,7 +201,7 @@ ddScope = uidropdown(tgtGrid, ...
     lblAnnFontSize.Layout.Row = 2;
     lblAnnFontSize.Layout.Column = 1;
     nfAnnFontSize = uieditfield(secAnnotationTextBody, 'numeric', 'Value', 11, 'Limits', [1 Inf], ...
-        'ValueChangedFcn', @onPersistedControlChanged);
+        'ValueChangedFcn', @onTypographyControlChanged);
     nfAnnFontSize.Layout.Row = 2;
     nfAnnFontSize.Layout.Column = 2;
 
@@ -186,7 +209,7 @@ ddScope = uidropdown(tgtGrid, ...
     lblAnnFontWeight.Layout.Row = 3;
     lblAnnFontWeight.Layout.Column = 1;
     ddAnnFontWeight = uidropdown(secAnnotationTextBody, 'Items', {'normal','bold'}, 'Value', 'normal', ...
-        'ValueChangedFcn', @onPersistedControlChanged);
+        'ValueChangedFcn', @onTypographyControlChanged);
     ddAnnFontWeight.Layout.Row = 3;
     ddAnnFontWeight.Layout.Column = 2;
 
@@ -194,7 +217,7 @@ ddScope = uidropdown(tgtGrid, ...
     lblAnnInterpreter.Layout.Row = 4;
     lblAnnInterpreter.Layout.Column = 1;
     ddAnnInterpreter = uidropdown(secAnnotationTextBody, 'Items', {'tex','latex','none'}, 'Value', 'tex', ...
-        'ValueChangedFcn', @onPersistedControlChanged);
+        'ValueChangedFcn', @onTypographyControlChanged);
     ddAnnInterpreter.Layout.Row = 4;
     ddAnnInterpreter.Layout.Column = 2;
 
@@ -202,49 +225,33 @@ ddScope = uidropdown(tgtGrid, ...
     lblAnnColor.Layout.Row = 5;
     lblAnnColor.Layout.Column = 1;
     efAnnColor = uieditfield(secAnnotationTextBody, 'text', 'Value', '[0 0 0]', ...
-        'ValueChangedFcn', @onPersistedControlChanged);
+        'ValueChangedFcn', @onTypographyControlChanged);
     efAnnColor.Tooltip = 'RGB format: 0..1. Examples: [0.9 0.2 0.1] or 0.9 0.2 0.1 or 0.9,0.2,0.1.';
     efAnnColor.Layout.Row = 5;
     efAnnColor.Layout.Column = 2;
-
-    typoActionBar = uigridlayout(textAxisRoot, [1 2]);
-    typoActionBar.Layout.Row = 3;
-    typoActionBar.Layout.Column = 1;
-    typoActionBar.ColumnWidth = {'1x', '1x'};
-    typoActionBar.RowHeight = {'fit'};
-    typoActionBar.Padding = [0 0 0 0];
-    typoActionBar.ColumnSpacing = 8;
-
-    btnApplyTypo = uibutton(typoActionBar, 'Text', 'Apply', 'ButtonPushedFcn', @onApplyTypography);
-    btnApplyTypo.Layout.Row = 1;
-    btnApplyTypo.Layout.Column = 1;
-
-    btnPublicationLabelAlignment = uibutton(typoActionBar, 'Text', 'Publication Label Alignment', ...
-        'ButtonPushedFcn', @onPublicationLabelAlignment);
-    btnPublicationLabelAlignment.Layout.Row = 1;
-    btnPublicationLabelAlignment.Layout.Column = 2;
 
     pLegend = uipanel(tabRootTextLegend, 'Title', 'Legend');
     pLegend.Layout.Row = 2;
     pLegend.Layout.Column = 1;
 
-    legendRoot = uigridlayout(pLegend, [3 1]);
-    legendRoot.RowHeight = {'fit', 'fit', 'fit'};
+    legendRoot = uigridlayout(pLegend, [2 1]);
+    legendRoot.RowHeight = {'fit', 'fit'};
     legendRoot.ColumnWidth = {'1x'};
     legendRoot.Padding = [10 10 10 10];
     legendRoot.RowSpacing = 10;
 
-    secLegendA = uigridlayout(legendRoot, [5 2]);
+    secLegendA = uigridlayout(legendRoot, [2 2]);
     secLegendA.Layout.Row = 1;
     secLegendA.Layout.Column = 1;
     secLegendA.ColumnWidth = {170, '1x'};
-    secLegendA.RowHeight = {'fit', 'fit', 'fit', 'fit', 'fit'};
+    secLegendA.RowHeight = {'fit', 'fit'};
     secLegendA.Padding = [0 0 0 0];
 
     lblLegendFontOverride = uilabel(secLegendA, 'Text', 'Font Size (override)', 'HorizontalAlignment', 'left');
     lblLegendFontOverride.Layout.Row = 1;
     lblLegendFontOverride.Layout.Column = 1;
-    efLegendFontSize = uieditfield(secLegendA, 'text', 'Placeholder', '(inherit base)');
+    efLegendFontSize = uieditfield(secLegendA, 'text', 'Placeholder', '(inherit base)', ...
+        'ValueChangedFcn', @onTypographyControlChanged);
     efLegendFontSize.Layout.Row = 1;
     efLegendFontSize.Layout.Column = 2;
 
@@ -255,21 +262,6 @@ ddScope = uidropdown(tgtGrid, ...
         'ValueChangedFcn', @onLegendPlacementModeChanged);
     ddLegendPlacementMode.Layout.Row = 2;
     ddLegendPlacementMode.Layout.Column = 2;
-
-    cbLegendReverse = uicheckbox(secLegendA, 'Text', 'Reverse legend entries', 'Value', false, ...
-        'ValueChangedFcn', @onPersistedControlChanged);
-    cbLegendReverse.Layout.Row = 3;
-    cbLegendReverse.Layout.Column = [1 2];
-
-    cbLegendAllowRebuild = uicheckbox(secLegendA, 'Text', 'Allow legend rebuild (advanced)', 'Value', false, ...
-        'ValueChangedFcn', @onPersistedControlChanged);
-    cbLegendAllowRebuild.Layout.Row = 4;
-    cbLegendAllowRebuild.Layout.Column = [1 2];
-
-    cbMoveManualLegend = uicheckbox(secLegendA, 'Text', 'Move Manual Legend (drag)', 'Value', false, ...
-        'ValueChangedFcn', @onManualLegendDragModeChanged);
-    cbMoveManualLegend.Layout.Row = 5;
-    cbMoveManualLegend.Layout.Column = [1 2];
 
     secLegendB = uigridlayout(legendRoot, [1 1]);
     secLegendB.Layout.Row = 2;
@@ -315,36 +307,17 @@ ddScope = uidropdown(tgtGrid, ...
     btnLegendSE.Layout.Row = 3;
     btnLegendSE.Layout.Column = 3;
 
-    legendActionBar = uigridlayout(legendRoot, [1 1]);
-    legendActionBar.Layout.Row = 3;
-    legendActionBar.Layout.Column = 1;
-    legendActionBar.ColumnWidth = {'1x'};
-    legendActionBar.RowHeight = {'fit'};
-    legendActionBar.Padding = [0 0 0 0];
+    % ---------------- Style ----------------
+    tabRootStyle = uigridlayout(tColorsBackground, [3 1]);
+    tabRootStyle.RowHeight = {'fit', 'fit', 'fit'};
+    tabRootStyle.ColumnWidth = {'1x'};
+    tabRootStyle.Padding = [12 12 12 12];
+    tabRootStyle.RowSpacing = 12;
+    tabRootStyle.Scrollable = 'on';
 
-    btnApplyLegend = uibutton(legendActionBar, 'Text', 'Apply', 'ButtonPushedFcn', @onApplyLegend);
-    btnApplyLegend.Layout.Row = 1;
-    btnApplyLegend.Layout.Column = 1;
-
-    % ---------------- Tab 2: Colors & Background ----------------
-    tabRootColorsBackground = uigridlayout(tColorsBackground, [4 1]);
-    tabRootColorsBackground.RowHeight = {'fit', 'fit', 'fit', '1x'};
-    tabRootColorsBackground.ColumnWidth = {'1x'};
-    tabRootColorsBackground.Padding = [12 12 12 12];
-    tabRootColorsBackground.RowSpacing = 12;
-    tabRootColorsBackground.Scrollable = 'on';
-
-    % ---------------- Tab 3: Lines & References ----------------
-    tabRootLinesReferences = uigridlayout(tLinesReferences, [3 1]);
-    tabRootLinesReferences.RowHeight = {'fit', 'fit', '1x'};
-    tabRootLinesReferences.ColumnWidth = {'1x'};
-    tabRootLinesReferences.Padding = [12 12 12 12];
-    tabRootLinesReferences.RowSpacing = 12;
-    tabRootLinesReferences.Scrollable = 'on';
-
-    % ---------------- Tab 4: Layout & Geometry ----------------
+    % ---------------- Layout ----------------
     tabRootLayoutGeometry = uigridlayout(tLayoutGeometry, [3 1]);
-    tabRootLayoutGeometry.RowHeight = {'fit', 'fit', '1x'};
+    tabRootLayoutGeometry.RowHeight = {'fit', 'fit', 'fit'};
     tabRootLayoutGeometry.ColumnWidth = {'1x'};
     tabRootLayoutGeometry.Padding = [12 12 12 12];
     tabRootLayoutGeometry.RowSpacing = 12;
@@ -360,7 +333,7 @@ ddScope = uidropdown(tgtGrid, ...
     end
     cmapItems = [{'keep'}, cmapItems];
 
-    secColors = uigridlayout(tabRootColorsBackground, [2 1]);
+    secColors = uigridlayout(tabRootStyle, [2 1]);
     secColors.Layout.Row = 1;
     secColors.Layout.Column = 1;
     secColors.ColumnWidth = {'1x'};
@@ -392,7 +365,7 @@ ddScope = uidropdown(tgtGrid, ...
     lblAppColormap.Layout.Row = 1;
     lblAppColormap.Layout.Column = 1;
     ddCmap = uidropdown(secAppA, 'Items', cmapItems, 'Value', cmapDefault, ...
-        'ValueChangedFcn', @onPersistedControlChanged);
+        'ValueChangedFcn', @onAppearanceControlChanged);
     ddCmap.Layout.Row = 1;
     ddCmap.Layout.Column = 2;
 
@@ -403,16 +376,16 @@ ddScope = uidropdown(tgtGrid, ...
         'Items', {'keep','ultra-narrow','ultra-narrow-rev','narrow','narrow-rev','medium','medium-rev', ...
                   'wide','wide-rev','ultra','ultra-rev','full','full-rev'}, ...
         'Value', 'medium', ...
-        'ValueChangedFcn', @onPersistedControlChanged);
+        'ValueChangedFcn', @onAppearanceControlChanged);
     ddSpreadMode.Layout.Row = 2;
     ddSpreadMode.Layout.Column = 2;
 
     cbSpreadReverse = uicheckbox(secAppA, 'Text', 'Reverse spread order', 'Value', false, ...
-        'ValueChangedFcn', @onPersistedControlChanged);
+        'ValueChangedFcn', @onAppearanceControlChanged);
     cbSpreadReverse.Layout.Row = 3;
     cbSpreadReverse.Layout.Column = [1 2];
 
-    secBackground = uigridlayout(tabRootColorsBackground, [2 1]);
+    secBackground = uigridlayout(tabRootStyle, [2 1]);
     secBackground.Layout.Row = 2;
     secBackground.Layout.Column = 1;
     secBackground.ColumnWidth = {'1x'};
@@ -434,48 +407,20 @@ ddScope = uidropdown(tgtGrid, ...
     secBackgroundBody.RowSpacing = 6;
 
     cbBgWhiteFigure = uicheckbox(secBackgroundBody, 'Text', 'Background white (figure)', 'Value', false, ...
-        'ValueChangedFcn', @onBackgroundToggleChanged);
+        'ValueChangedFcn', @onAppearanceControlChanged);
     cbBgWhiteFigure.Layout.Row = 1;
     cbBgWhiteFigure.Layout.Column = 1;
 
     cbBgTransparentAxes = uicheckbox(secBackgroundBody, 'Text', 'Transparent axes background', 'Value', false, ...
-        'ValueChangedFcn', @onBackgroundToggleChanged);
+        'ValueChangedFcn', @onAppearanceControlChanged);
     cbBgTransparentAxes.Layout.Row = 2;
     cbBgTransparentAxes.Layout.Column = 1;
 
-    secQuickPresetsColors = uigridlayout(tabRootColorsBackground, [2 1]);
-    secQuickPresetsColors.Layout.Row = 3;
-    secQuickPresetsColors.Layout.Column = 1;
-    secQuickPresetsColors.ColumnWidth = {'1x'};
-    secQuickPresetsColors.RowHeight = {'fit', 'fit'};
-    secQuickPresetsColors.Padding = [0 0 0 0];
-    secQuickPresetsColors.RowSpacing = 6;
-
-    lblSecQuickPresetsColors = uilabel(secQuickPresetsColors, 'Text', 'Quick Presets', 'HorizontalAlignment', 'left');
-    lblSecQuickPresetsColors.FontWeight = 'bold';
-    lblSecQuickPresetsColors.Layout.Row = 1;
-    lblSecQuickPresetsColors.Layout.Column = 1;
-
-    secAppSmart = uigridlayout(secQuickPresetsColors, [2 1]);
-    secAppSmart.Layout.Row = 2;
-    secAppSmart.Layout.Column = 1;
-    secAppSmart.ColumnWidth = {'1x'};
-    secAppSmart.RowHeight = {'fit', 'fit'};
-    secAppSmart.Padding = [0 0 0 0];
-
-    lblQuickPresetSmartInfo = uilabel(secAppSmart, 'Text', 'Applies using current settings.', 'HorizontalAlignment', 'left');
-    lblQuickPresetSmartInfo.Layout.Row = 1;
-    lblQuickPresetSmartInfo.Layout.Column = 1;
-
-    btnApplySmartPack = uibutton(secAppSmart, 'Text', 'Apply Smart Colormap Pack', 'ButtonPushedFcn', @onApplySmartPack);
-    btnApplySmartPack.Layout.Row = 2;
-    btnApplySmartPack.Layout.Column = 1;
-
-    secLinesAxes = uigridlayout(tabRootLinesReferences, [14 2]);
-    secLinesAxes.Layout.Row = 1;
+    secLinesAxes = uigridlayout(tabRootStyle, [13 2]);
+    secLinesAxes.Layout.Row = 3;
     secLinesAxes.Layout.Column = 1;
     secLinesAxes.ColumnWidth = {'1x','1x'};
-    secLinesAxes.RowHeight = {'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 40};
+    secLinesAxes.RowHeight = {'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit'};
     secLinesAxes.Padding = [12 12 12 12];
     secLinesAxes.RowSpacing = 6;
 
@@ -488,7 +433,7 @@ ddScope = uidropdown(tgtGrid, ...
     lblDataLineStyle.Layout.Row = 2;
     lblDataLineStyle.Layout.Column = 1;
     ddDataLineStyle = uidropdown(secLinesAxes, 'Items', {'(keep)','-','--',':','-.'}, 'Value', '(keep)', ...
-        'ValueChangedFcn', @onPersistedControlChanged);
+        'ValueChangedFcn', @onAppearanceControlChanged);
     ddDataLineStyle.Layout.Row = 2;
     ddDataLineStyle.Layout.Column = 2;
 
@@ -496,7 +441,7 @@ ddScope = uidropdown(tgtGrid, ...
     lblDataLineWidth.Layout.Row = 3;
     lblDataLineWidth.Layout.Column = 1;
     nfDataLineWidth = uieditfield(secLinesAxes, 'numeric', 'Value', 1.5, 'Limits', [0 Inf], ...
-        'ValueChangedFcn', @onPersistedControlChanged);
+        'ValueChangedFcn', @onAppearanceControlChanged);
     nfDataLineWidth.Layout.Row = 3;
     nfDataLineWidth.Layout.Column = 2;
 
@@ -504,7 +449,7 @@ ddScope = uidropdown(tgtGrid, ...
     lblDataMarkerSize.Layout.Row = 4;
     lblDataMarkerSize.Layout.Column = 1;
     nfDataMarkerSize = uieditfield(secLinesAxes, 'numeric', 'Value', 6, 'Limits', [0 Inf], ...
-        'ValueChangedFcn', @onPersistedControlChanged);
+        'ValueChangedFcn', @onAppearanceControlChanged);
     nfDataMarkerSize.Layout.Row = 4;
     nfDataMarkerSize.Layout.Column = 2;
 
@@ -512,7 +457,7 @@ ddScope = uidropdown(tgtGrid, ...
     lblFitLineStyle.Layout.Row = 5;
     lblFitLineStyle.Layout.Column = 1;
     ddFitLineStyle = uidropdown(secLinesAxes, 'Items', {'(keep)','-','--',':','-.'}, 'Value', '(keep)', ...
-        'ValueChangedFcn', @onPersistedControlChanged);
+        'ValueChangedFcn', @onAppearanceControlChanged);
     ddFitLineStyle.Layout.Row = 5;
     ddFitLineStyle.Layout.Column = 2;
 
@@ -520,7 +465,7 @@ ddScope = uidropdown(tgtGrid, ...
     lblFitLineWidth.Layout.Row = 6;
     lblFitLineWidth.Layout.Column = 1;
     nfFitLineWidth = uieditfield(secLinesAxes, 'numeric', 'Value', 1.5, 'Limits', [0 Inf], ...
-        'ValueChangedFcn', @onPersistedControlChanged);
+        'ValueChangedFcn', @onAppearanceControlChanged);
     nfFitLineWidth.Layout.Row = 6;
     nfFitLineWidth.Layout.Column = 2;
 
@@ -528,7 +473,7 @@ ddScope = uidropdown(tgtGrid, ...
     lblFitMarkerSize.Layout.Row = 7;
     lblFitMarkerSize.Layout.Column = 1;
     nfFitMarkerSize = uieditfield(secLinesAxes, 'numeric', 'Value', 6, 'Limits', [0 Inf], ...
-        'ValueChangedFcn', @onPersistedControlChanged);
+        'ValueChangedFcn', @onAppearanceControlChanged);
     nfFitMarkerSize.Layout.Row = 7;
     nfFitMarkerSize.Layout.Column = 2;
 
@@ -541,7 +486,7 @@ ddScope = uidropdown(tgtGrid, ...
     lblRefLineWidth.Layout.Row = 9;
     lblRefLineWidth.Layout.Column = 1;
     nfRefLineWidth = uieditfield(secLinesAxes, 'numeric', 'Value', 1.0, 'Limits', [0 Inf], ...
-        'ValueChangedFcn', @onPersistedControlChanged);
+        'ValueChangedFcn', @onAppearanceControlChanged);
     nfRefLineWidth.Layout.Row = 9;
     nfRefLineWidth.Layout.Column = 2;
 
@@ -549,7 +494,7 @@ ddScope = uidropdown(tgtGrid, ...
     lblRefLineStyle.Layout.Row = 10;
     lblRefLineStyle.Layout.Column = 1;
     ddRefLineStyle = uidropdown(secLinesAxes, 'Items', {'-','--',':','-.'}, 'Value', '--', ...
-        'ValueChangedFcn', @onPersistedControlChanged);
+        'ValueChangedFcn', @onAppearanceControlChanged);
     ddRefLineStyle.Layout.Row = 10;
     ddRefLineStyle.Layout.Column = 2;
 
@@ -557,7 +502,7 @@ ddScope = uidropdown(tgtGrid, ...
     lblRefLineColor.Layout.Row = 11;
     lblRefLineColor.Layout.Column = 1;
     efRefLineColor = uieditfield(secLinesAxes, 'text', 'Value', '(keep)', ...
-        'ValueChangedFcn', @onPersistedControlChanged);
+        'ValueChangedFcn', @onAppearanceControlChanged);
     efRefLineColor.Tooltip = 'RGB format: 0..1. Examples: [0.9 0.2 0.1] or 0.9 0.2 0.1 or 0.9,0.2,0.1. Use ''keep'' to leave unchanged.';
     efRefLineColor.Layout.Row = 11;
     efRefLineColor.Layout.Column = 2;
@@ -571,44 +516,91 @@ ddScope = uidropdown(tgtGrid, ...
     ddPanelsPerRow.Layout.Column = 2;
 
     cbReversePlotOrder = uicheckbox(secLinesAxes, 'Text', 'Reverse plot order', 'Value', false, ...
-        'ValueChangedFcn', @onPersistedControlChanged);
+        'ValueChangedFcn', @onAppearanceControlChanged);
     cbReversePlotOrder.Layout.Row = 13;
     cbReversePlotOrder.Layout.Column = [1 2];
 
-    btnApplyAppearance = uibutton(secLinesAxes, 'Text', 'Apply Appearance', 'ButtonPushedFcn', @onApplyAppearance);
-    btnApplyAppearance.Layout.Row = 14;
-    btnApplyAppearance.Layout.Column = [1 2];
+    secFigureSize = uigridlayout(tabRootLayoutGeometry, [2 1]);
+    secFigureSize.Layout.Row = 1;
+    secFigureSize.Layout.Column = 1;
+    secFigureSize.ColumnWidth = {'1x'};
+    secFigureSize.RowHeight = {'fit', 'fit'};
+    secFigureSize.Padding = [0 0 0 0];
+    secFigureSize.RowSpacing = 6;
 
-    secQuickPresets = uigridlayout(tabRootLinesReferences, [2 1]);
-    secQuickPresets.Layout.Row = 2;
-    secQuickPresets.Layout.Column = 1;
-    secQuickPresets.ColumnWidth = {'1x'};
-    secQuickPresets.RowHeight = {'fit', 'fit'};
-    secQuickPresets.Padding = [0 0 0 0];
-    secQuickPresets.RowSpacing = 6;
+    lblSecFigureSize = uilabel(secFigureSize, 'Text', 'Figure Size', 'HorizontalAlignment', 'left');
+    lblSecFigureSize.FontWeight = 'bold';
+    lblSecFigureSize.Layout.Row = 1;
+    lblSecFigureSize.Layout.Column = 1;
 
-    lblSecQuickPresets = uilabel(secQuickPresets, 'Text', 'Quick Presets', 'HorizontalAlignment', 'left');
-    lblSecQuickPresets.FontWeight = 'bold';
-    lblSecQuickPresets.Layout.Row = 1;
-    lblSecQuickPresets.Layout.Column = 1;
+    secAppD = uigridlayout(secFigureSize, [6 2]);
+    secAppD.Layout.Row = 2;
+    secAppD.Layout.Column = 1;
+    secAppD.ColumnWidth = {170, '1x'};
+    secAppD.RowHeight = {'fit', 'fit', 'fit', 'fit', 'fit', 'fit'};
+    secAppD.Padding = [0 0 0 0];
 
-    secAppC = uigridlayout(secQuickPresets, [2 1]);
-    secAppC.Layout.Row = 2;
-    secAppC.Layout.Column = 1;
-    secAppC.ColumnWidth = {'1x'};
-    secAppC.RowHeight = {'fit', 'fit'};
-    secAppC.Padding = [0 0 0 0];
+    lblWsWidth = uilabel(secAppD, 'Text', 'Target Width (cm)', 'HorizontalAlignment', 'left');
+    lblWsWidth.Layout.Row = 1;
+    lblWsWidth.Layout.Column = 1;
+    nfWsWidth = uieditfield(secAppD, 'numeric', 'Value', 12, 'Limits', [5 40], ...
+        'ValueChangedFcn', @onPersistedControlChanged);
+    nfWsWidth.Layout.Row = 1;
+    nfWsWidth.Layout.Column = 2;
 
-    lblQuickPresetInfo = uilabel(secAppC, 'Text', 'Applies using current settings.', 'HorizontalAlignment', 'left');
-    lblQuickPresetInfo.Layout.Row = 1;
-    lblQuickPresetInfo.Layout.Column = [1 2];
+    lblWsHeightMode = uilabel(secAppD, 'Text', 'Height Mode', 'HorizontalAlignment', 'left');
+    lblWsHeightMode.Layout.Row = 2;
+    lblWsHeightMode.Layout.Column = 1;
+    ddWsHeightMode = uidropdown(secAppD, 'Items', {'Auto (ratio)','Auto (grid × ratio)','Custom'}, 'Value', 'Auto (ratio)', ...
+        'ValueChangedFcn', @onWorkspaceHeightModeChanged);
+    ddWsHeightMode.Layout.Row = 2;
+    ddWsHeightMode.Layout.Column = 2;
 
-    btnApplyPublicationStyle = uibutton(secAppC, 'Text', 'Apply Publication Style', 'ButtonPushedFcn', @onApplyPublicationStyle);
-    btnApplyPublicationStyle.Layout.Row = 2;
-    btnApplyPublicationStyle.Layout.Column = [1 2];
+    lblWsHeight = uilabel(secAppD, 'Text', 'Height (cm)', 'HorizontalAlignment', 'left');
+    lblWsHeight.Layout.Row = 3;
+    lblWsHeight.Layout.Column = 1;
+    nfWsHeight = uieditfield(secAppD, 'numeric', 'Value', 9, 'Limits', [5 40], ...
+        'ValueChangedFcn', @onPersistedControlChanged);
+    nfWsHeight.Layout.Row = 3;
+    nfWsHeight.Layout.Column = 2;
+
+    lblWsBaseRatio = uilabel(secAppD, 'Text', 'Base ratio (H/W)', 'HorizontalAlignment', 'left');
+    lblWsBaseRatio.Layout.Row = 4;
+    lblWsBaseRatio.Layout.Column = 1;
+    nfWsBaseRatio = uieditfield(secAppD, 'numeric', 'Value', 0.75, 'Limits', [0.3 2], ...
+        'ValueChangedFcn', @onPersistedControlChanged);
+    nfWsBaseRatio.Layout.Row = 4;
+    nfWsBaseRatio.Layout.Column = 2;
+
+    btnApplyWorkspaceSize = uibutton(secAppD, 'Text', 'Apply Size', 'ButtonPushedFcn', @onApplyWorkspaceSize);
+    btnApplyWorkspaceSize.Layout.Row = 5;
+    btnApplyWorkspaceSize.Layout.Column = [1 2];
+
+    btnApplySizeToAll = uibutton(secAppD, 'Text', 'Apply Size To Targets', 'ButtonPushedFcn', @applyGlobalFigureSize); %#ok<NASGU>
+    btnApplySizeToAll.Layout.Row = 6;
+    btnApplySizeToAll.Layout.Column = [1 2];
+
+    secEqualize = uigridlayout(tabRootLayoutGeometry, [2 1]);
+    secEqualize.Layout.Row = 2;
+    secEqualize.Layout.Column = 1;
+    secEqualize.ColumnWidth = {'1x'};
+    secEqualize.RowHeight = {'fit', 'fit'};
+    secEqualize.Padding = [0 0 0 0];
+    secEqualize.RowSpacing = 6;
+
+    lblSecEqualize = uilabel(secEqualize, 'Text', 'Equalize', 'HorizontalAlignment', 'left');
+    lblSecEqualize.FontWeight = 'bold';
+    lblSecEqualize.Layout.Row = 1;
+    lblSecEqualize.Layout.Column = 1;
+
+    btnEqualizeCenterAxesGroup = uibutton(secEqualize, ...
+        'Text', 'Equalize & Center Axes Group (All Figures)', ...
+        'ButtonPushedFcn', @onEqualizeCenterAxesGroup);
+    btnEqualizeCenterAxesGroup.Layout.Row = 2;
+    btnEqualizeCenterAxesGroup.Layout.Column = 1;
 
     secAxesTransform = uigridlayout(tabRootLayoutGeometry, [2 1]);
-    secAxesTransform.Layout.Row = 1;
+    secAxesTransform.Layout.Row = 3;
     secAxesTransform.Layout.Column = 1;
     secAxesTransform.ColumnWidth = {'1x'};
     secAxesTransform.RowHeight = {'fit', 'fit'};
@@ -675,118 +667,7 @@ ddScope = uidropdown(tgtGrid, ...
     btnResetTransform.Layout.Row = 4;
     btnResetTransform.Layout.Column = [2 3];
 
-    secFigureSize = uigridlayout(tabRootLayoutGeometry, [2 1]);
-    secFigureSize.Layout.Row = 2;
-    secFigureSize.Layout.Column = 1;
-    secFigureSize.ColumnWidth = {'1x'};
-    secFigureSize.RowHeight = {'fit', 'fit'};
-    secFigureSize.Padding = [0 0 0 0];
-    secFigureSize.RowSpacing = 6;
-
-    lblSecFigureSize = uilabel(secFigureSize, 'Text', 'Figure Size', 'HorizontalAlignment', 'left');
-    lblSecFigureSize.FontWeight = 'bold';
-    lblSecFigureSize.Layout.Row = 1;
-    lblSecFigureSize.Layout.Column = 1;
-
-    secAppD = uigridlayout(secFigureSize, [7 2]);
-    secAppD.Layout.Row = 2;
-    secAppD.Layout.Column = 1;
-    secAppD.ColumnWidth = {170, '1x'};
-    secAppD.RowHeight = {'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit'};
-    secAppD.Padding = [0 0 0 0];
-
-    lblWsWidth = uilabel(secAppD, 'Text', 'Target Width (cm)', 'HorizontalAlignment', 'left');
-    lblWsWidth.Layout.Row = 1;
-    lblWsWidth.Layout.Column = 1;
-    nfWsWidth = uieditfield(secAppD, 'numeric', 'Value', 12, 'Limits', [5 40], ...
-        'ValueChangedFcn', @onPersistedControlChanged);
-    nfWsWidth.Layout.Row = 1;
-    nfWsWidth.Layout.Column = 2;
-
-    lblWsHeightMode = uilabel(secAppD, 'Text', 'Height Mode', 'HorizontalAlignment', 'left');
-    lblWsHeightMode.Layout.Row = 2;
-    lblWsHeightMode.Layout.Column = 1;
-    ddWsHeightMode = uidropdown(secAppD, 'Items', {'Auto (ratio)','Auto (grid × ratio)','Custom'}, 'Value', 'Auto (ratio)', ...
-        'ValueChangedFcn', @onWorkspaceHeightModeChanged);
-    ddWsHeightMode.Layout.Row = 2;
-    ddWsHeightMode.Layout.Column = 2;
-
-    lblWsHeight = uilabel(secAppD, 'Text', 'Height (cm)', 'HorizontalAlignment', 'left');
-    lblWsHeight.Layout.Row = 3;
-    lblWsHeight.Layout.Column = 1;
-    nfWsHeight = uieditfield(secAppD, 'numeric', 'Value', 9, 'Limits', [5 40], ...
-        'ValueChangedFcn', @onPersistedControlChanged);
-    nfWsHeight.Layout.Row = 3;
-    nfWsHeight.Layout.Column = 2;
-
-    lblWsBaseRatio = uilabel(secAppD, 'Text', 'Base ratio (H/W)', 'HorizontalAlignment', 'left');
-    lblWsBaseRatio.Layout.Row = 4;
-    lblWsBaseRatio.Layout.Column = 1;
-    nfWsBaseRatio = uieditfield(secAppD, 'numeric', 'Value', 0.75, 'Limits', [0.3 2], ...
-        'ValueChangedFcn', @onPersistedControlChanged);
-    nfWsBaseRatio.Layout.Row = 4;
-    nfWsBaseRatio.Layout.Column = 2;
-
-    btnApplyWorkspaceSize = uibutton(secAppD, 'Text', 'Apply Size', 'ButtonPushedFcn', @onApplyWorkspaceSize);
-    btnApplyWorkspaceSize.Layout.Row = 5;
-    btnApplyWorkspaceSize.Layout.Column = [1 2];
-
-    btnEqualizeCenterAxesGroup = uibutton(secAppD, ...
-        'Text', 'Equalize & Center Axes Group (All Figures)', ...
-        'ButtonPushedFcn', @onEqualizeCenterAxesGroup);
-    btnEqualizeCenterAxesGroup.Layout.Row = 6;
-    btnEqualizeCenterAxesGroup.Layout.Column = [1 2];
-
-    btnFinalizePublicationLayout = uibutton(secAppD, ...
-        'Text', 'Finalize Publication Layout', ...
-        'ButtonPushedFcn', @onFinalizePublicationLayout);
-    btnFinalizePublicationLayout.Layout.Row = 7;
-    btnFinalizePublicationLayout.Layout.Column = [1 2];
-
-    secSpacerLayoutGeometry = uigridlayout(tabRootLayoutGeometry, [1 1]);
-    secSpacerLayoutGeometry.Layout.Row = 3;
-    secSpacerLayoutGeometry.Layout.Column = 1;
-    secSpacerLayoutGeometry.ColumnWidth = {'1x'};
-    secSpacerLayoutGeometry.RowHeight = {22};
-    secSpacerLayoutGeometry.Padding = [0 0 0 0];
-
-    % ---------------- Tab 5: Workflow ----------------
-    tabRootWorkflow = uigridlayout(tWorkflow, [2 1]);
-    tabRootWorkflow.ColumnWidth = {'1x'};
-    tabRootWorkflow.RowHeight = {'fit', '1x'};
-    tabRootWorkflow.Padding = [12 12 12 12];
-    tabRootWorkflow.RowSpacing = 8;
-
-    lblWorkflowTitle = uilabel(tabRootWorkflow, 'Text', 'Publication Workflow', 'HorizontalAlignment', 'left');
-    lblWorkflowTitle.FontWeight = 'bold';
-    lblWorkflowTitle.Layout.Row = 1;
-    lblWorkflowTitle.Layout.Column = 1;
-
-    lblWorkflowBody = uilabel(tabRootWorkflow, ...
-        'Text', sprintf(['Step 1 — Set Figure Size\n' ...
-        'Use "Apply Size" in Layout & Geometry.\n' ...
-        'Set final publication dimensions (do not change later).\n\n' ...
-        'Step 2 — Apply Publication Style\n' ...
-        'Use "Apply Publication Style" in Lines & References.\n' ...
-        'Finalize fonts, ticks, line width, etc.\n\n' ...
-        'Step 3 — Finalize Publication Layout\n' ...
-        'Use "Finalize Publication Layout".\n' ...
-        'This normalizes margins across all target figures using TightInset.\n' ...
-        'If you change labels or font size → run this step again.\n\n' ...
-        'Step 4 — Export\n' ...
-        'Use the Export tab to generate final output.\n\n' ...
-        'Notes:\n' ...
-        '- Do not rely on manual offsets for margin alignment.\n' ...
-        '- Always finalize typography before layout normalization.\n' ...
-        '- Layout normalization modifies axes Position only.\n' ...
-        '- No limits or data are changed.']), ...
-        'HorizontalAlignment', 'left', ...
-        'VerticalAlignment', 'top', ...
-        'WordWrap', 'on');
-    lblWorkflowBody.Layout.Row = 2;
-    lblWorkflowBody.Layout.Column = 1;
-
-    % ---------------- Tab 6: Export ----------------
+    % ---------------- Export ----------------
     tabRootExport = uigridlayout(tExport, [5 1]);
     tabRootExport.ColumnWidth = {'1x'};
     tabRootExport.RowHeight = {'fit', 'fit', 'fit', '1x', 'fit'};
@@ -821,6 +702,11 @@ ddScope = uidropdown(tgtGrid, ...
     ddFilenameFrom.Layout.Row = 4;
     ddFilenameFrom.Layout.Column = 2;
 
+    cbExportComposedOnly = uicheckbox(secExportA, 'Text', 'Export composed file only', 'Value', false, ...
+        'ValueChangedFcn', @onPersistedControlChanged);
+    cbExportComposedOnly.Layout.Row = 5;
+    cbExportComposedOnly.Layout.Column = [1 2];
+
     secExportB = uigridlayout(tabRootExport, [2 1]);
     secExportB.Layout.Row = 2;
     secExportB.Layout.Column = 1;
@@ -832,9 +718,10 @@ ddScope = uidropdown(tgtGrid, ...
     btnChooseFolder.Layout.Row = 1;
     btnChooseFolder.Layout.Column = 1;
 
-    lblFolder = uilabel(secExportB, 'Text', pwd, 'WordWrap', 'on');
-    lblFolder.Layout.Row = 2;
-    lblFolder.Layout.Column = 1;
+    efExportDir = uieditfield(secExportB, 'text', 'Value', pwd, ...
+        'ValueChangedFcn', @onPersistedControlChanged);
+    efExportDir.Layout.Row = 2;
+    efExportDir.Layout.Column = 1;
 
     secExportC = uigridlayout(tabRootExport, [1 1]);
     secExportC.Layout.Row = 3;
@@ -854,9 +741,7 @@ ddScope = uidropdown(tgtGrid, ...
     btnApplyExport.Layout.Row = 1;
     btnApplyExport.Layout.Column = 1;
 
-    exportOutDir = pwd;
-
-    % ---------------- Tab 7: Compose ----------------
+    % ---------------- Compose ----------------
     tabRootCompose = uigridlayout(tCompose, [5 1]);
     tabRootCompose.ColumnWidth = {'1x'};
     tabRootCompose.RowHeight = {'fit', 'fit', 'fit', 'fit', 'fit'};
@@ -945,24 +830,19 @@ ddScope = uidropdown(tgtGrid, ...
     nfOverallSizePct.Layout.Row = 4;
     nfOverallSizePct.Layout.Column = 2;
 
-    secComposeC = uigridlayout(tabRootCompose, [2 2]);
+    secComposeC = uigridlayout(tabRootCompose, [1 2]);
     secComposeC.Layout.Row = 3;
     secComposeC.Layout.Column = 1;
     secComposeC.ColumnWidth = {'1x', '1x'};
-    secComposeC.RowHeight = {'fit', 'fit'};
+    secComposeC.RowHeight = {'fit'};
     secComposeC.Padding = [0 0 0 0];
 
-    cbExportCompose = uicheckbox(secComposeC, 'Text', 'Export immediately as PDF', 'Value', false, ...
-        'ValueChangedFcn', @onPersistedControlChanged);
-    cbExportCompose.Layout.Row = 1;
-    cbExportCompose.Layout.Column = [1 2];
-
     btnSaveLayout = uibutton(secComposeC, 'Text', 'Save Layout...', 'ButtonPushedFcn', @onSaveLayout);
-    btnSaveLayout.Layout.Row = 2;
+    btnSaveLayout.Layout.Row = 1;
     btnSaveLayout.Layout.Column = 1;
 
     btnLoadLayout = uibutton(secComposeC, 'Text', 'Load Layout...', 'ButtonPushedFcn', @onLoadLayout);
-    btnLoadLayout.Layout.Row = 2;
+    btnLoadLayout.Layout.Row = 1;
     btnLoadLayout.Layout.Column = 2;
 
     secComposeSpacing = uigridlayout(tabRootCompose, [2 1]);
@@ -1026,35 +906,9 @@ ddScope = uidropdown(tgtGrid, ...
     btnCompose.Layout.Row = 1;
     btnCompose.Layout.Column = 1;
 
-    % ---------------- Tab 8: Diagnostics (optional) ----------------
-    tDiag = uitab(tabs, 'Title', 'Diagnostics');
-    tabRootDiag = uigridlayout(tDiag, [3 1]);
-    tabRootDiag.RowHeight = {'fit', '1x', 'fit'};
-    tabRootDiag.ColumnWidth = {'1x'};
-    tabRootDiag.Padding = [12 12 12 12];
-
-    secDiagTop = uigridlayout(tabRootDiag, [1 1]);
-    secDiagTop.Layout.Row = 1;
-    secDiagTop.Layout.Column = 1;
-    secDiagTop.RowHeight = {'fit'};
-    secDiagTop.ColumnWidth = {'1x'};
-    secDiagTop.Padding = [0 0 0 0];
-
-    btnTargetReport = uibutton(secDiagTop, 'Text', 'Print Target Report', 'ButtonPushedFcn', @onTargetReport);
-    btnTargetReport.Layout.Row = 1;
-    btnTargetReport.Layout.Column = 1;
-
-    secDiagBottom = uigridlayout(tabRootDiag, [1 1]);
-    secDiagBottom.Layout.Row = 3;
-    secDiagBottom.Layout.Column = 1;
-    secDiagBottom.RowHeight = {'fit'};
-    secDiagBottom.ColumnWidth = {'1x'};
-    secDiagBottom.Padding = [0 0 0 0];
-
-    taDiag = uitextarea(secDiagBottom, 'Editable', 'off');
-    taDiag.Layout.Row = 1;
-    taDiag.Layout.Column = 1;
-    taDiag.Value = {'Diagnostics ready.'};
+    diagSink = uipanel(ui, 'Visible', 'off');
+    taDiag = uitextarea(diagSink, 'Editable', 'off', 'Visible', 'off');
+    taDiag.Value = {'Status ready.'};
 
     defaultUIState = struct( ...
         'scopeMode', "Explicit List", ...
@@ -1102,12 +956,18 @@ ddScope = uidropdown(tgtGrid, ...
         'axesTransformOffsetY', 0.0, ...
         'reversePlotOrder', false, ...
         'panelsPerRow', "2", ...
-        'exportCompose', false);
+        'exportComposedOnly', false, ...
+        'exportOutDir', string(pwd));
     suppressUIStateSave = false;
+    isRestoringUIState = false;
+    enableUIDiag = false;
+    pendingRestore = struct('lbFigures', []);
+    hasPendingRestore = false;
     legendLocationState = char(defaultUIState.legendLocation);
     axesBasePositions = containers.Map('KeyType', 'char', 'ValueType', 'any');
     manualLegendPositions = containers.Map('KeyType', 'char', 'ValueType', 'any');
     manualLegendDragState = struct('active', false, 'fig', gobjects(0,1), 'ax', gobjects(0,1), 'startPoint', [0 0], 'startPos', [0 0 1 1]);
+    lastComposedFigure = gobjects(0,1);
 
     % ---------------- Initialize ----------------
     i_loadUIState();
@@ -1145,6 +1005,7 @@ ddScope = uidropdown(tgtGrid, ...
                 btnMoveDown.Enable = matlab.lang.OnOffSwitchState.on;
         end
         i_saveUIState();
+        i_debugUIStateDiff('after onScopeModeChanged');
     end
 
     function onExcludeChanged(~, ~)
@@ -1152,6 +1013,17 @@ ddScope = uidropdown(tgtGrid, ...
             onRefreshExplicit();
         end
         i_saveUIState();
+    end
+
+    function onToggleAdvanced(~, ~)
+        isExpanded = strcmp(char(pAdvanced.Visible), 'on');
+        if isExpanded
+            pAdvanced.Visible = 'off';
+            btnAdvancedToggle.Text = 'Advanced ▸';
+        else
+            pAdvanced.Visible = 'on';
+            btnAdvancedToggle.Text = 'Advanced ▾';
+        end
     end
 
     function onRefreshExplicit(~, ~)
@@ -1164,11 +1036,44 @@ ddScope = uidropdown(tgtGrid, ...
             explicitHandleCache = figs(:);
             i_captureAxesBasePositions(explicitHandleCache);
             refreshExplicitListbox([]);
+            i_applyPendingRestoreAfterPopulation();
             i_applyManualLegendDragModeToFigures(explicitHandleCache);
+            i_debugUIStateDiff('after onRefreshExplicit');
 
         catch ME
             uialert(ui, ME.message, 'Refresh Failed');
         end
+    end
+
+    function i_applyPendingRestoreAfterPopulation()
+        if ~hasPendingRestore
+            return;
+        end
+        if ~isstruct(pendingRestore) || ~isfield(pendingRestore, 'lbFigures') || isempty(pendingRestore.lbFigures)
+            i_clearPendingRestore();
+            return;
+        end
+
+        oldSuppressUIStateSave = suppressUIStateSave;
+        oldIsRestoringUIState = isRestoringUIState;
+        suppressUIStateSave = true;
+        isRestoringUIState = true;
+        restoreGuard = onCleanup(@() i_restoreUIStateFlags(oldSuppressUIStateSave, oldIsRestoringUIState)); %#ok<NASGU>
+
+        savedValue = pendingRestore.lbFigures;
+        if i_tryAssignListboxValue(lbFigures, savedValue, 'lbFigures')
+            i_clearPendingRestore();
+        end
+    end
+
+    function i_clearPendingRestore()
+        pendingRestore = struct('lbFigures', []);
+        hasPendingRestore = false;
+    end
+
+    function i_restoreUIStateFlags(oldSuppressValue, oldRestoringValue)
+        suppressUIStateSave = oldSuppressValue;
+        isRestoringUIState = oldRestoringValue;
     end
 
     function refreshExplicitListbox(selectedIdx)
@@ -1294,10 +1199,26 @@ ddScope = uidropdown(tgtGrid, ...
     function onLegendPlacementModeChanged(~, ~)
         i_updateLegendArrowAvailability();
         i_saveUIState();
+
+        figs = i_getExplicitListTargetsNoAlert();
+        if isempty(figs)
+            return;
+        end
+        i_applyLegendLocationExistingOnly(figs, legendLocationState);
     end
 
     function onPersistedControlChanged(~, ~)
         i_saveUIState();
+    end
+
+    function onTypographyControlChanged(~, ~)
+        i_saveUIState();
+        onApplyTypography([], []);
+    end
+
+    function onAppearanceControlChanged(~, ~)
+        i_saveUIState();
+        onApplyAppearance([], []);
     end
 
     function onAxesTransformValueChanging(src, evt)
@@ -1323,6 +1244,17 @@ ddScope = uidropdown(tgtGrid, ...
         end
         i_updateAxesTransformLabels();
         i_saveUIState();
+
+        figs = resolveTargetsOrAlert();
+        if isempty(figs)
+            return;
+        end
+        for k = 1:numel(figs)
+            fig = figs(k);
+            if isgraphics(fig, 'figure')
+                i_applyManualAxesTransform(fig);
+            end
+        end
     end
 
     function onResetTransform(~, ~)
@@ -1399,13 +1331,8 @@ ddScope = uidropdown(tgtGrid, ...
         i_saveUIState();
     end
 
-    function onManualLegendDragModeChanged(~, ~)
-        i_applyManualLegendDragModeToFigures(explicitHandleCache);
-        i_saveUIState();
-    end
-
     function i_applyManualLegendDragModeToFigures(figs)
-        dragEnabled = logical(cbMoveManualLegend.Value);
+        dragEnabled = false;
         if isempty(figs)
             return;
         end
@@ -1493,7 +1420,7 @@ ddScope = uidropdown(tgtGrid, ...
     end
 
     function onManualLegendAxesButtonDown(src, ~)
-        if ~logical(cbMoveManualLegend.Value) || ~isgraphics(src, 'axes')
+        if ~isgraphics(src, 'axes')
             return;
         end
 
@@ -1670,9 +1597,6 @@ ddScope = uidropdown(tgtGrid, ...
         i_updateComposeGapLabels();
         ddLegendPlacementMode.Value = char(defaultUIState.legendPlacementMode);
         legendLocationState = char(defaultUIState.legendLocation);
-        cbLegendReverse.Value = logical(defaultUIState.legendReverse);
-        cbLegendAllowRebuild.Value = logical(defaultUIState.legendAllowRebuild);
-        cbMoveManualLegend.Value = logical(defaultUIState.moveManualLegend);
         manualLegendPositions = containers.Map('KeyType', 'char', 'ValueType', 'any');
         ddCmap.Value = char(defaultUIState.appearanceMapName);
         ddSpreadMode.Value = char(defaultUIState.appearanceSpreadMode);
@@ -1703,7 +1627,8 @@ ddScope = uidropdown(tgtGrid, ...
         slAxOffsetY.Value = double(defaultUIState.axesTransformOffsetY);
         i_updateAxesTransformLabels();
         ddPanelsPerRow.Value = char(defaultUIState.panelsPerRow);
-        cbExportCompose.Value = logical(defaultUIState.exportCompose);
+        cbExportComposedOnly.Value = logical(defaultUIState.exportComposedOnly);
+        efExportDir.Value = char(defaultUIState.exportOutDir);
 
         onScopeModeChanged();
         onWidthPresetChanged();
@@ -1725,7 +1650,7 @@ ddScope = uidropdown(tgtGrid, ...
         widthPx = round(widthPx);
         heightPx = round(heightPx);
 
-        figs = findall(0, 'Type', 'figure');
+        figs = resolveTargetsOrAlert("Layout");
         if isempty(figs)
             return;
         end
@@ -1733,23 +1658,6 @@ ddScope = uidropdown(tgtGrid, ...
         for k = 1:numel(figs)
             f = figs(k);
             if isempty(f) || ~isgraphics(f, 'figure')
-                continue;
-            end
-
-            isFCSRoot = false;
-            try
-                isFCSRoot = isappdata(f, 'FCS_Root');
-            catch
-                isFCSRoot = false;
-            end
-            if ~isFCSRoot
-                try
-                    isFCSRoot = strcmpi(string(f.Tag), "FCS_ROOT");
-                catch
-                    isFCSRoot = false;
-                end
-            end
-            if isFCSRoot
                 continue;
             end
 
@@ -1809,14 +1717,17 @@ ddScope = uidropdown(tgtGrid, ...
         scopeSpec.excludeKnownGUIs = logical(cbExcludeGUIs.Value);
     end
 
-    function figs = resolveTargetsOrAlert()
+    function figs = resolveTargetsOrAlert(actionName)
+        if nargin < 1 || strlength(string(actionName)) == 0
+            actionName = "Targets";
+        end
         scopeSpec = buildScopeSpecFromUI();
         figs = FCS_resolveTargets(scopeSpec);
         figs = figs(isgraphics(figs, 'figure'));
         figs(figs == ui) = [];
 
         if isempty(figs)
-            uialert(ui, 'No target figures found for the selected scope.', 'No Targets');
+            uialert(ui, 'No target figures found for the selected scope.', char(actionName));
             return;
         end
 
@@ -1831,7 +1742,7 @@ ddScope = uidropdown(tgtGrid, ...
         figs = figs(valid);
 
         if isempty(figs)
-            uialert(ui, 'Resolved targets are not valid figure handles.', 'Invalid Targets');
+            uialert(ui, 'Resolved targets are not valid figure handles.', char(actionName));
         end
     end
 
@@ -2266,8 +2177,8 @@ ddScope = uidropdown(tgtGrid, ...
                 stats.axesTouched = stats.axesTouched + 1;
                 isPrimaryAxes = i_isPrimaryPlotAxes(ax);
                 
-                % Publication style settings (optional):
-                % When invoked from onApplyPublicationStyle, opts contains
+                % Style settings (optional):
+                % When invoked from style apply callback, opts contains
                 % additional fields for font sizes and axis appearance.
                 if isPrimaryAxes && isfield(opts, 'axesFont') && isfinite(opts.axesFont) && opts.axesFont > 0
                     if isprop(ax, 'FontSize')
@@ -3149,7 +3060,7 @@ ddScope = uidropdown(tgtGrid, ...
         i_applyLegendLocationExistingOnly(figs, resolvedLocation);
     end
 
-    function onApplyTypography(~, ~)
+    function onApplyTypography(varargin)
         figs = resolveTargetsOrAlert();
         if isempty(figs), return; end
 
@@ -3289,19 +3200,16 @@ ddScope = uidropdown(tgtGrid, ...
         try
             i_applyLegendSettingsExistingOnly(figs, legendLocationState);
             i_applyLegendFontSize(figs, effectiveLegendFontSize);
-            if logical(cbLegendReverse.Value)
-                allowRebuild = logical(cbLegendAllowRebuild.Value);
-                i_applyLegendReverseExistingOnly(figs, allowRebuild, legendLocationState);
-            end
             i_applyManualLegendDragModeToFigures(figs);
         catch ME
             uialert(ui, ME.message, 'Legend Apply Failed');
         end
     end
 
-    function onApplyAppearance(~, ~, overrides)
-        if nargin < 3 || ~isstruct(overrides)
-            overrides = struct();
+    function onApplyAppearance(varargin)
+        overrides = struct();
+        if nargin >= 3 && isstruct(varargin{3})
+            overrides = varargin{3};
         end
 
         figs = resolveExplicitListTargetsOrAlert("Appearance");
@@ -3445,19 +3353,15 @@ ddScope = uidropdown(tgtGrid, ...
 
         end
 
-        for k = 1:numel(figs)
-            fig = figs(k);
-            if ~isgraphics(fig, 'figure')
-                continue;
-            end
-            i_applyManualAxesTransform(fig);
-        end
-
-        onEqualizeCenterAxesGroup([], []);
+        onEqualizeCenterAxesGroup([], [], false);
+        i_captureAxesBasePositions(figs);
     end
 
-    function onEqualizeCenterAxesGroup(~, ~)
-        figs = resolveExplicitListTargetsOrAlert("Layout & Geometry");
+    function onEqualizeCenterAxesGroup(~, ~, applyManualTransform)
+        if nargin < 3
+            applyManualTransform = true;
+        end
+        figs = resolveExplicitListTargetsOrAlert("Layout");
         if isempty(figs), return; end
 
         info = struct('fig', {}, 'axes', {}, 'positions', {}, 'xmin', {}, 'ymin', {}, 'xmax', {}, 'ymax', {}, 'width', {}, 'height', {});
@@ -3518,7 +3422,7 @@ ddScope = uidropdown(tgtGrid, ...
         end
 
         if isempty(info)
-            uialert(ui, 'No primary plot axes found in selected figures.', 'Layout & Geometry');
+            uialert(ui, 'No primary plot axes found in selected figures.', 'Layout');
             return;
         end
 
@@ -3527,7 +3431,7 @@ ddScope = uidropdown(tgtGrid, ...
         w = min(allWidths);
         h = min(allHeights);
         if ~isfinite(w) || ~isfinite(h) || w <= 0 || h <= 0
-            uialert(ui, 'Unable to compute valid global group size.', 'Layout & Geometry');
+            uialert(ui, 'Unable to compute valid global group size.', 'Layout');
             return;
         end
 
@@ -3563,22 +3467,26 @@ ddScope = uidropdown(tgtGrid, ...
                 end
             end
         end
-    end
 
-    function onFinalizePublicationLayout(~, ~)
-        figs = resolveExplicitListTargetsOrAlert("Finalize Publication Layout");
-        if isempty(figs), return; end
+        i_captureAxesBasePositions(figs);
 
-        try
-            normalizeAxesMarginsUnified(figs);
-        catch ME
-            uialert(ui, ME.message, 'Finalize Publication Layout');
-            return;
+        manualTransformActive = abs(double(slAxScale.Value) - 1.0) > 1e-12 || ...
+            abs(double(slAxOffsetX.Value)) > 1e-12 || ...
+            abs(double(slAxOffsetY.Value)) > 1e-12;
+        if applyManualTransform && manualTransformActive
+            for k = 1:numel(figs)
+                fig = figs(k);
+                if isgraphics(fig, 'figure')
+                    i_applyManualAxesTransform(fig);
+                end
+            end
         end
     end
 
     function i_captureAxesBasePositions(figs)
-        axesBasePositions = containers.Map('KeyType', 'char', 'ValueType', 'any');
+        if isempty(axesBasePositions) || ~isa(axesBasePositions, 'containers.Map')
+            axesBasePositions = containers.Map('KeyType', 'char', 'ValueType', 'any');
+        end
         if isempty(figs)
             return;
         end
@@ -3785,21 +3693,33 @@ ddScope = uidropdown(tgtGrid, ...
     end
 
     function onChooseFolder(~, ~)
-        p = uigetdir(exportOutDir, 'Select export folder');
+        baseDir = char(string(efExportDir.Value));
+        if isempty(baseDir) || exist(baseDir, 'dir') ~= 7
+            baseDir = pwd;
+        end
+        p = uigetdir(baseDir, 'Select export folder');
         if isequal(p, 0)
             return;
         end
-        exportOutDir = p;
-        lblFolder.Text = exportOutDir;
+        efExportDir.Value = char(p);
+        i_saveUIState();
     end
 
     function onApplyExport(~, ~)
-        figs = resolveTargetsOrAlert();
+        if logical(cbExportComposedOnly.Value)
+            if isempty(lastComposedFigure) || ~isgraphics(lastComposedFigure, 'figure')
+                uialert(ui, 'No composed figure is available to export.', 'Export');
+                return;
+            end
+            figs = lastComposedFigure;
+        else
+            figs = resolveTargetsOrAlert('Export');
+        end
         if isempty(figs), return; end
 
         exportOpts = struct();
         exportOpts.format = char(ddExportFmt.Value);
-        exportOpts.outDir = exportOutDir;
+        exportOpts.outDir = char(string(efExportDir.Value));
         exportOpts.overwrite = logical(cbOverwrite.Value);
         exportOpts.vectorMode = logical(cbVector.Value);
         exportOpts.filenameFrom = char(ddFilenameFrom.Value);
@@ -3841,7 +3761,7 @@ ddScope = uidropdown(tgtGrid, ...
 
             taDiag.Value = cellstr(lines);
         catch ME
-            taDiag.Value = {['Diagnostics error: ' ME.message]};
+            taDiag.Value = {['Status error: ' ME.message]};
         end
     end
 
@@ -4217,20 +4137,21 @@ ddScope = uidropdown(tgtGrid, ...
             uialert(ui, char(msg), 'Compose warnings');
         end
 
-        if logical(cbExportCompose.Value)
-            [fileName, filePath] = uiputfile({'*.pdf','PDF file (*.pdf)'}, 'Export composed figure as PDF');
-            if isequal(fileName, 0) || isequal(filePath, 0)
-                return;
-            end
-            try
-                exportFig = i_createComposeFlattenedExportFigure(newFig);
-                cleanupExportFig = onCleanup(@() i_safeDeleteGraphics(exportFig)); %#ok<NASGU>
-                i_applyComposeExportPhysicalSize(exportFig, composeSpec.size.widthCm, composeSpec.size.heightCm);
-                i_logComposeExportFigureDiagnostics(exportFig);
-                exportgraphics(exportFig, fullfile(filePath, fileName), 'ContentType', 'vector');
-            catch ME
-                uialert(ui, ME.message, 'Compose Export Failed');
-            end
+        if isgraphics(newFig, 'figure')
+            sel = lbFigures.Value;
+            sel = double(sel(:));
+            sel = sel(sel >= 1 & sel <= numel(explicitHandleCache));
+            sel = unique(sel, 'stable');
+
+            explicitHandleCache = [explicitHandleCache; newFig];
+            i_captureAxesBasePositions(newFig);
+
+            newIdx = numel(explicitHandleCache);
+            refreshExplicitListbox([sel; newIdx]);
+
+            lastComposedFigure = newFig;
+            i_applyManualLegendDragModeToFigures(explicitHandleCache);
+            i_saveUIState();
         end
     end
 
@@ -4456,7 +4377,7 @@ ddScope = uidropdown(tgtGrid, ...
             heightCm = heightIn * 2.54;
         end
 
-        fprintf('\n=== Compose Export Diagnostics (right before exportgraphics) ===\n');
+        fprintf('\n=== Compose Export Status (right before exportgraphics) ===\n');
         fprintf('get(exportFig,''Units'') = %s\n', string(figUnits));
         fprintf('get(exportFig,''Position'') = [%g %g %g %g]\n', figPosition(1), figPosition(2), figPosition(3), figPosition(4));
         fprintf('get(exportFig,''PaperUnits'') = %s\n', string(paperUnits));
@@ -5430,6 +5351,13 @@ ddScope = uidropdown(tgtGrid, ...
     end
 
     function i_loadUIState()
+        oldSuppressUIStateSave = suppressUIStateSave;
+        oldIsRestoringUIState = isRestoringUIState;
+        suppressUIStateSave = true;
+        isRestoringUIState = true;
+        restoreGuard = onCleanup(@() i_restoreUIStateFlags(oldSuppressUIStateSave, oldIsRestoringUIState)); %#ok<NASGU>
+        i_clearPendingRestore();
+
         up = userpath;
         if isempty(up)
             stateFile = fullfile(pwd, 'FCS_ui_state.mat');
@@ -5461,14 +5389,55 @@ ddScope = uidropdown(tgtGrid, ...
                     ddScope.Value = char(cand);
                 end
             end
+            if isfield(uiState, 'ddScope')
+                i_tryAssignDropdownValue(ddScope, uiState.ddScope, 'ddScope');
+            end
+            if isfield(uiState, 'efTag')
+                efTag.Value = uiState.efTag;
+            end
+            if isfield(uiState, 'efNameContains')
+                efNameContains.Value = uiState.efNameContains;
+            end
+            if isfield(uiState, 'lbFigures')
+                if i_tryAssignListboxValue(lbFigures, uiState.lbFigures, 'lbFigures')
+                    i_clearPendingRestore();
+                else
+                    pendingRestore.lbFigures = uiState.lbFigures;
+                    hasPendingRestore = true;
+                end
+            end
             if isfield(uiState, 'excludeKnownGUIs') && ~isempty(uiState.excludeKnownGUIs)
                 cbExcludeGUIs.Value = logical(uiState.excludeKnownGUIs);
+            end
+            if isfield(uiState, 'cbExcludeGUIs')
+                cbExcludeGUIs.Value = uiState.cbExcludeGUIs;
+            end
+            if isfield(uiState, 'nfGlobalFigWidth')
+                nfGlobalFigWidth.Value = uiState.nfGlobalFigWidth;
+            end
+            if isfield(uiState, 'nfGlobalFigHeight')
+                nfGlobalFigHeight.Value = uiState.nfGlobalFigHeight;
             end
             if isfield(uiState, 'gridRows') && isnumeric(uiState.gridRows) && isfinite(uiState.gridRows)
                 nfRows.Value = max(1, round(double(uiState.gridRows)));
             end
+            if isfield(uiState, 'nfRows')
+                nfRows.Value = uiState.nfRows;
+            end
             if isfield(uiState, 'gridCols') && isnumeric(uiState.gridCols) && isfinite(uiState.gridCols)
                 nfCols.Value = max(1, round(double(uiState.gridCols)));
+            end
+            if isfield(uiState, 'nfCols')
+                nfCols.Value = uiState.nfCols;
+            end
+            if isfield(uiState, 'nfFontSize')
+                nfFontSize.Value = uiState.nfFontSize;
+            end
+            if isfield(uiState, 'ddAxisPreset')
+                i_tryAssignDropdownValue(ddAxisPreset, uiState.ddAxisPreset, 'ddAxisPreset');
+            end
+            if isfield(uiState, 'ddTypoProfile')
+                i_tryAssignDropdownValue(ddTypoProfile, uiState.ddTypoProfile, 'ddTypoProfile');
             end
             if isfield(uiState, 'widthPreset') && ~isempty(uiState.widthPreset)
                 cand = string(uiState.widthPreset);
@@ -5476,11 +5445,20 @@ ddScope = uidropdown(tgtGrid, ...
                     ddWidthPreset.Value = char(cand);
                 end
             end
+            if isfield(uiState, 'ddWidthPreset')
+                i_tryAssignDropdownValue(ddWidthPreset, uiState.ddWidthPreset, 'ddWidthPreset');
+            end
             if isfield(uiState, 'customWidth') && isnumeric(uiState.customWidth) && isfinite(uiState.customWidth)
                 nfCustomWidth.Value = max(0.1, double(uiState.customWidth));
             end
+            if isfield(uiState, 'nfCustomWidth')
+                nfCustomWidth.Value = uiState.nfCustomWidth;
+            end
             if isfield(uiState, 'autoLabels') && ~isempty(uiState.autoLabels)
                 cbAutoLabel.Value = logical(uiState.autoLabels);
+            end
+            if isfield(uiState, 'cbAutoLabel')
+                cbAutoLabel.Value = uiState.cbAutoLabel;
             end
             if isfield(uiState, 'labelPosition') && ~isempty(uiState.labelPosition)
                 cand = string(uiState.labelPosition);
@@ -5488,14 +5466,26 @@ ddScope = uidropdown(tgtGrid, ...
                     ddLabelPos.Value = char(cand);
                 end
             end
+            if isfield(uiState, 'ddLabelPos')
+                i_tryAssignDropdownValue(ddLabelPos, uiState.ddLabelPos, 'ddLabelPos');
+            end
             if isfield(uiState, 'labelFontSize') && isnumeric(uiState.labelFontSize) && isfinite(uiState.labelFontSize)
                 nfLabelFont.Value = max(1, double(uiState.labelFontSize));
+            end
+            if isfield(uiState, 'nfLabelFont')
+                nfLabelFont.Value = uiState.nfLabelFont;
             end
             if isfield(uiState, 'composeHGap') && isnumeric(uiState.composeHGap) && isfinite(uiState.composeHGap)
                 slComposeHGap.Value = i_quantizeSliderValue(double(uiState.composeHGap), [0 0.1], 0.001);
             end
+            if isfield(uiState, 'slComposeHGap')
+                slComposeHGap.Value = uiState.slComposeHGap;
+            end
             if isfield(uiState, 'composeVGap') && isnumeric(uiState.composeVGap) && isfinite(uiState.composeVGap)
                 slComposeVGap.Value = i_quantizeSliderValue(double(uiState.composeVGap), [0 0.1], 0.001);
+            end
+            if isfield(uiState, 'slComposeVGap')
+                slComposeVGap.Value = uiState.slComposeVGap;
             end
             i_updateComposeGapLabels();
             if isfield(uiState, 'legendPlacementMode') && ~isempty(uiState.legendPlacementMode)
@@ -5504,17 +5494,14 @@ ddScope = uidropdown(tgtGrid, ...
                     ddLegendPlacementMode.Value = char(cand);
                 end
             end
+            if isfield(uiState, 'efLegendFontSize')
+                efLegendFontSize.Value = uiState.efLegendFontSize;
+            end
+            if isfield(uiState, 'ddLegendPlacementMode')
+                i_tryAssignDropdownValue(ddLegendPlacementMode, uiState.ddLegendPlacementMode, 'ddLegendPlacementMode');
+            end
             if isfield(uiState, 'legendLocation') && ~isempty(uiState.legendLocation)
                 legendLocationState = char(string(uiState.legendLocation));
-            end
-            if isfield(uiState, 'legendReverse') && ~isempty(uiState.legendReverse)
-                cbLegendReverse.Value = logical(uiState.legendReverse);
-            end
-            if isfield(uiState, 'legendAllowRebuild') && ~isempty(uiState.legendAllowRebuild)
-                cbLegendAllowRebuild.Value = logical(uiState.legendAllowRebuild);
-            end
-            if isfield(uiState, 'moveManualLegend') && ~isempty(uiState.moveManualLegend)
-                cbMoveManualLegend.Value = logical(uiState.moveManualLegend);
             end
             if isfield(uiState, 'manualLegendPositions')
                 i_restoreManualLegendPositionState(uiState.manualLegendPositions);
@@ -5525,20 +5512,35 @@ ddScope = uidropdown(tgtGrid, ...
                     ddCmap.Value = char(cand);
                 end
             end
+            if isfield(uiState, 'ddCmap')
+                i_tryAssignDropdownValue(ddCmap, uiState.ddCmap, 'ddCmap');
+            end
             if isfield(uiState, 'appearanceSpreadMode') && ~isempty(uiState.appearanceSpreadMode)
                 cand = string(uiState.appearanceSpreadMode);
                 if any(string(ddSpreadMode.Items) == cand)
                     ddSpreadMode.Value = char(cand);
                 end
             end
+            if isfield(uiState, 'ddSpreadMode')
+                i_tryAssignDropdownValue(ddSpreadMode, uiState.ddSpreadMode, 'ddSpreadMode');
+            end
             if isfield(uiState, 'appearanceSpreadReverse') && ~isempty(uiState.appearanceSpreadReverse)
                 cbSpreadReverse.Value = logical(uiState.appearanceSpreadReverse);
+            end
+            if isfield(uiState, 'cbSpreadReverse')
+                cbSpreadReverse.Value = uiState.cbSpreadReverse;
             end
             if isfield(uiState, 'bgWhiteFigure') && ~isempty(uiState.bgWhiteFigure)
                 cbBgWhiteFigure.Value = logical(uiState.bgWhiteFigure);
             end
+            if isfield(uiState, 'cbBgWhiteFigure')
+                cbBgWhiteFigure.Value = uiState.cbBgWhiteFigure;
+            end
             if isfield(uiState, 'bgTransparentAxes') && ~isempty(uiState.bgTransparentAxes)
                 cbBgTransparentAxes.Value = logical(uiState.bgTransparentAxes);
+            end
+            if isfield(uiState, 'cbBgTransparentAxes')
+                cbBgTransparentAxes.Value = uiState.cbBgTransparentAxes;
             end
             if isfield(uiState, 'dataLineStyle') && ~isempty(uiState.dataLineStyle)
                 cand = string(uiState.dataLineStyle);
@@ -5546,11 +5548,20 @@ ddScope = uidropdown(tgtGrid, ...
                     ddDataLineStyle.Value = char(cand);
                 end
             end
+            if isfield(uiState, 'ddDataLineStyle')
+                i_tryAssignDropdownValue(ddDataLineStyle, uiState.ddDataLineStyle, 'ddDataLineStyle');
+            end
             if isfield(uiState, 'dataLineWidth') && isnumeric(uiState.dataLineWidth) && isfinite(uiState.dataLineWidth)
                 nfDataLineWidth.Value = max(0, double(uiState.dataLineWidth));
             end
+            if isfield(uiState, 'nfDataLineWidth')
+                nfDataLineWidth.Value = uiState.nfDataLineWidth;
+            end
             if isfield(uiState, 'dataMarkerSize') && isnumeric(uiState.dataMarkerSize) && isfinite(uiState.dataMarkerSize)
                 nfDataMarkerSize.Value = max(0, double(uiState.dataMarkerSize));
+            end
+            if isfield(uiState, 'nfDataMarkerSize')
+                nfDataMarkerSize.Value = uiState.nfDataMarkerSize;
             end
             if isfield(uiState, 'fitLineStyle') && ~isempty(uiState.fitLineStyle)
                 cand = string(uiState.fitLineStyle);
@@ -5558,14 +5569,26 @@ ddScope = uidropdown(tgtGrid, ...
                     ddFitLineStyle.Value = char(cand);
                 end
             end
+            if isfield(uiState, 'ddFitLineStyle')
+                i_tryAssignDropdownValue(ddFitLineStyle, uiState.ddFitLineStyle, 'ddFitLineStyle');
+            end
             if isfield(uiState, 'fitLineWidth') && isnumeric(uiState.fitLineWidth) && isfinite(uiState.fitLineWidth)
                 nfFitLineWidth.Value = max(0, double(uiState.fitLineWidth));
+            end
+            if isfield(uiState, 'nfFitLineWidth')
+                nfFitLineWidth.Value = uiState.nfFitLineWidth;
             end
             if isfield(uiState, 'fitMarkerSize') && isnumeric(uiState.fitMarkerSize) && isfinite(uiState.fitMarkerSize)
                 nfFitMarkerSize.Value = max(0, double(uiState.fitMarkerSize));
             end
+            if isfield(uiState, 'nfFitMarkerSize')
+                nfFitMarkerSize.Value = uiState.nfFitMarkerSize;
+            end
             if isfield(uiState, 'refLineWidth') && isnumeric(uiState.refLineWidth) && isfinite(uiState.refLineWidth)
                 nfRefLineWidth.Value = max(0, double(uiState.refLineWidth));
+            end
+            if isfield(uiState, 'nfRefLineWidth')
+                nfRefLineWidth.Value = uiState.nfRefLineWidth;
             end
             if isfield(uiState, 'refLineStyle') && ~isempty(uiState.refLineStyle)
                 cand = string(uiState.refLineStyle);
@@ -5573,14 +5596,26 @@ ddScope = uidropdown(tgtGrid, ...
                     ddRefLineStyle.Value = char(cand);
                 end
             end
+            if isfield(uiState, 'ddRefLineStyle')
+                i_tryAssignDropdownValue(ddRefLineStyle, uiState.ddRefLineStyle, 'ddRefLineStyle');
+            end
             if isfield(uiState, 'refLineColor') && ~isempty(uiState.refLineColor)
                 efRefLineColor.Value = char(string(uiState.refLineColor));
+            end
+            if isfield(uiState, 'efRefLineColor')
+                efRefLineColor.Value = uiState.efRefLineColor;
             end
             if isfield(uiState, 'annFontName') && ~isempty(uiState.annFontName)
                 efAnnFontName.Value = char(string(uiState.annFontName));
             end
+            if isfield(uiState, 'efAnnFontName')
+                efAnnFontName.Value = uiState.efAnnFontName;
+            end
             if isfield(uiState, 'annFontSize') && isnumeric(uiState.annFontSize) && isfinite(uiState.annFontSize)
                 nfAnnFontSize.Value = max(1, double(uiState.annFontSize));
+            end
+            if isfield(uiState, 'nfAnnFontSize')
+                nfAnnFontSize.Value = uiState.nfAnnFontSize;
             end
             if isfield(uiState, 'annFontWeight') && ~isempty(uiState.annFontWeight)
                 cand = lower(strtrim(string(uiState.annFontWeight)));
@@ -5588,17 +5623,29 @@ ddScope = uidropdown(tgtGrid, ...
                     ddAnnFontWeight.Value = char(cand);
                 end
             end
+            if isfield(uiState, 'ddAnnFontWeight')
+                i_tryAssignDropdownValue(ddAnnFontWeight, uiState.ddAnnFontWeight, 'ddAnnFontWeight');
+            end
             if isfield(uiState, 'annInterpreter') && ~isempty(uiState.annInterpreter)
                 cand = lower(strtrim(string(uiState.annInterpreter)));
                 if any(string(ddAnnInterpreter.Items) == cand)
                     ddAnnInterpreter.Value = char(cand);
                 end
             end
+            if isfield(uiState, 'ddAnnInterpreter')
+                i_tryAssignDropdownValue(ddAnnInterpreter, uiState.ddAnnInterpreter, 'ddAnnInterpreter');
+            end
             if isfield(uiState, 'annColor') && ~isempty(uiState.annColor)
                 efAnnColor.Value = char(string(uiState.annColor));
             end
+            if isfield(uiState, 'efAnnColor')
+                efAnnColor.Value = uiState.efAnnColor;
+            end
             if isfield(uiState, 'targetWidthCm') && isnumeric(uiState.targetWidthCm) && isfinite(uiState.targetWidthCm)
                 nfWsWidth.Value = min(max(double(uiState.targetWidthCm), 5), 40);
+            end
+            if isfield(uiState, 'nfWsWidth')
+                nfWsWidth.Value = uiState.nfWsWidth;
             end
             if isfield(uiState, 'heightMode') && ~isempty(uiState.heightMode)
                 cand = string(uiState.heightMode);
@@ -5606,24 +5653,48 @@ ddScope = uidropdown(tgtGrid, ...
                     ddWsHeightMode.Value = char(cand);
                 end
             end
+            if isfield(uiState, 'ddWsHeightMode')
+                i_tryAssignDropdownValue(ddWsHeightMode, uiState.ddWsHeightMode, 'ddWsHeightMode');
+            end
             if isfield(uiState, 'heightCm') && isnumeric(uiState.heightCm) && isfinite(uiState.heightCm)
                 nfWsHeight.Value = min(max(double(uiState.heightCm), 5), 40);
+            end
+            if isfield(uiState, 'nfWsHeight')
+                nfWsHeight.Value = uiState.nfWsHeight;
             end
             if isfield(uiState, 'baseRatio') && isnumeric(uiState.baseRatio) && isfinite(uiState.baseRatio)
                 nfWsBaseRatio.Value = min(max(double(uiState.baseRatio), 0.3), 2);
             end
+            if isfield(uiState, 'nfWsBaseRatio')
+                nfWsBaseRatio.Value = uiState.nfWsBaseRatio;
+            end
             if isfield(uiState, 'axesTransformScale') && isnumeric(uiState.axesTransformScale) && isfinite(uiState.axesTransformScale)
                 slAxScale.Value = i_quantizeSliderValue(double(uiState.axesTransformScale), [0.5 1.5], 0.01);
+            end
+            if isfield(uiState, 'slAxScale')
+                slAxScale.Value = uiState.slAxScale;
             end
             if isfield(uiState, 'axesTransformOffsetX') && isnumeric(uiState.axesTransformOffsetX) && isfinite(uiState.axesTransformOffsetX)
                 slAxOffsetX.Value = i_quantizeSliderValue(double(uiState.axesTransformOffsetX), [-0.2 0.2], 0.01);
             end
+            if isfield(uiState, 'slAxOffsetX')
+                slAxOffsetX.Value = uiState.slAxOffsetX;
+            end
             if isfield(uiState, 'axesTransformOffsetY') && isnumeric(uiState.axesTransformOffsetY) && isfinite(uiState.axesTransformOffsetY)
                 slAxOffsetY.Value = i_quantizeSliderValue(double(uiState.axesTransformOffsetY), [-0.2 0.2], 0.01);
+            end
+            if isfield(uiState, 'slAxOffsetY')
+                slAxOffsetY.Value = uiState.slAxOffsetY;
             end
             i_updateAxesTransformLabels();
             if isfield(uiState, 'reversePlotOrder') && ~isempty(uiState.reversePlotOrder)
                 cbReversePlotOrder.Value = logical(uiState.reversePlotOrder);
+            end
+            if isfield(uiState, 'ddPanelsPerRow')
+                i_tryAssignDropdownValue(ddPanelsPerRow, uiState.ddPanelsPerRow, 'ddPanelsPerRow');
+            end
+            if isfield(uiState, 'cbReversePlotOrder')
+                cbReversePlotOrder.Value = uiState.cbReversePlotOrder;
             end
             if isfield(uiState, 'panelsPerRow') && ~isempty(uiState.panelsPerRow)
                 cand = string(uiState.panelsPerRow);
@@ -5631,11 +5702,266 @@ ddScope = uidropdown(tgtGrid, ...
                     ddPanelsPerRow.Value = char(cand);
                 end
             end
-            if isfield(uiState, 'exportCompose') && ~isempty(uiState.exportCompose)
-                cbExportCompose.Value = logical(uiState.exportCompose);
+            if isfield(uiState, 'exportComposedOnly') && ~isempty(uiState.exportComposedOnly)
+                cbExportComposedOnly.Value = logical(uiState.exportComposedOnly);
             end
+            if isfield(uiState, 'ddExportFmt')
+                i_tryAssignDropdownValue(ddExportFmt, uiState.ddExportFmt, 'ddExportFmt');
+            end
+            if isfield(uiState, 'cbVector')
+                cbVector.Value = uiState.cbVector;
+            end
+            if isfield(uiState, 'cbOverwrite')
+                cbOverwrite.Value = uiState.cbOverwrite;
+            end
+            if isfield(uiState, 'ddFilenameFrom')
+                i_tryAssignDropdownValue(ddFilenameFrom, uiState.ddFilenameFrom, 'ddFilenameFrom');
+            end
+            if isfield(uiState, 'cbExportComposedOnly')
+                cbExportComposedOnly.Value = logical(uiState.cbExportComposedOnly);
+            end
+            if isfield(uiState, 'exportOutDir')
+                efExportDir.Value = char(string(uiState.exportOutDir));
+            end
+            i_updateAxesTransformLabels();
+            i_updateComposeGapLabels();
+            i_debugUIStateDiff('after i_loadUIState');
         catch
             % Graceful fallback to defaults/UI creation values
+        end
+    end
+
+    function tf = i_tryAssignDropdownValue(ctrl, savedValue, fieldName)
+        tf = false;
+        try
+            items = string(ctrl.Items);
+            cand = string(savedValue);
+            if isempty(cand)
+                i_diagNote(sprintf('restore skipped for %s: empty saved value', fieldName));
+                return;
+            end
+            cand = cand(1);
+            if ~any(items == cand)
+                i_diagNote(sprintf('restore skipped for %s: value not in Items (%s)', fieldName, char(cand)));
+                return;
+            end
+            ctrl.Value = char(cand);
+            tf = true;
+        catch ME
+            i_diagNote(sprintf('restore failed for %s: %s', fieldName, ME.message));
+        end
+    end
+
+    function tf = i_tryAssignListboxValue(ctrl, savedValue, fieldName)
+        tf = false;
+        try
+            if isnumeric(savedValue)
+                selected = double(savedValue(:));
+                if isempty(selected)
+                    ctrl.Value = [];
+                    tf = true;
+                    return;
+                end
+                itemsData = ctrl.ItemsData;
+                if ~isnumeric(itemsData)
+                    i_diagNote(sprintf('restore skipped for %s: ItemsData not numeric', fieldName));
+                    return;
+                end
+                ids = double(itemsData(:));
+                valid = selected(ismember(selected, ids));
+                if isempty(valid)
+                    i_diagNote(sprintf('restore skipped for %s: no valid selection in ItemsData', fieldName));
+                    return;
+                end
+                ctrl.Value = unique(valid, 'stable');
+                tf = true;
+                return;
+            end
+
+            if ischar(savedValue) || isstring(savedValue) || iscell(savedValue)
+                ctrl.Value = savedValue;
+                tf = true;
+                return;
+            end
+
+            i_diagNote(sprintf('restore skipped for %s: unsupported value type (%s)', fieldName, class(savedValue)));
+        catch ME
+            i_diagNote(sprintf('restore failed for %s: %s', fieldName, ME.message));
+        end
+    end
+
+    function i_diagNote(msg)
+        if ~enableUIDiag
+            return;
+        end
+        fprintf('%s\n', msg);
+        i_appendDebugToDiag(msg);
+    end
+
+    function i_debugUIStateDiff(stageLabel)
+        if ~enableUIDiag
+            return;
+        end
+
+        up = userpath;
+        if isempty(up)
+            stateFile = fullfile(pwd, 'FCS_ui_state.mat');
+        else
+            parts = strsplit(up, pathsep);
+            parts = parts(~cellfun(@isempty, parts));
+            if isempty(parts)
+                stateRoot = pwd;
+            else
+                stateRoot = parts{1};
+            end
+            stateFile = fullfile(stateRoot, 'FCS_ui_state.mat');
+        end
+
+        if exist(stateFile, 'file') ~= 2
+            i_appendDebugToDiag(sprintf('[%s] uiState file not found.', char(string(stageLabel))));
+            return;
+        end
+
+        try
+            S = load(stateFile, 'uiState');
+            if ~isstruct(S) || ~isfield(S, 'uiState') || ~isstruct(S.uiState)
+                i_appendDebugToDiag(sprintf('[%s] uiState missing/invalid.', char(string(stageLabel))));
+                return;
+            end
+            uiState = S.uiState;
+
+            fieldNames = {
+                'ddScope','efTag','efNameContains','lbFigures','cbExcludeGUIs', ...
+                'nfGlobalFigWidth','nfGlobalFigHeight','nfRows','nfCols', ...
+                'nfFontSize','ddAxisPreset','ddTypoProfile', ...
+                'efLegendFontSize','ddLegendPlacementMode', ...
+                'ddCmap','ddSpreadMode','cbSpreadReverse','cbBgWhiteFigure','cbBgTransparentAxes', ...
+                'ddDataLineStyle','nfDataLineWidth','nfDataMarkerSize','ddFitLineStyle','nfFitLineWidth','nfFitMarkerSize', ...
+                'nfRefLineWidth','ddRefLineStyle','efRefLineColor', ...
+                'efAnnFontName','nfAnnFontSize','ddAnnFontWeight','ddAnnInterpreter','efAnnColor', ...
+                'nfWsWidth','ddWsHeightMode','nfWsHeight','nfWsBaseRatio', ...
+                'slAxScale','slAxOffsetX','slAxOffsetY', ...
+                'ddPanelsPerRow','cbReversePlotOrder', ...
+                'ddExportFmt','cbVector','cbOverwrite','ddFilenameFrom','cbExportComposedOnly','exportOutDir'};
+
+            currentValues = {
+                ddScope.Value, efTag.Value, efNameContains.Value, lbFigures.Value, cbExcludeGUIs.Value, ...
+                nfGlobalFigWidth.Value, nfGlobalFigHeight.Value, nfRows.Value, nfCols.Value, ...
+                nfFontSize.Value, ddAxisPreset.Value, ddTypoProfile.Value, ...
+                efLegendFontSize.Value, ddLegendPlacementMode.Value, ...
+                ddCmap.Value, ddSpreadMode.Value, cbSpreadReverse.Value, cbBgWhiteFigure.Value, cbBgTransparentAxes.Value, ...
+                ddDataLineStyle.Value, nfDataLineWidth.Value, nfDataMarkerSize.Value, ddFitLineStyle.Value, nfFitLineWidth.Value, nfFitMarkerSize.Value, ...
+                nfRefLineWidth.Value, ddRefLineStyle.Value, efRefLineColor.Value, ...
+                efAnnFontName.Value, nfAnnFontSize.Value, ddAnnFontWeight.Value, ddAnnInterpreter.Value, efAnnColor.Value, ...
+                nfWsWidth.Value, ddWsHeightMode.Value, nfWsHeight.Value, nfWsBaseRatio.Value, ...
+                slAxScale.Value, slAxOffsetX.Value, slAxOffsetY.Value, ...
+                ddPanelsPerRow.Value, cbReversePlotOrder.Value, ...
+                ddExportFmt.Value, cbVector.Value, cbOverwrite.Value, ddFilenameFrom.Value, cbExportComposedOnly.Value, efExportDir.Value};
+
+            diffs = {};
+            for iField = 1:numel(fieldNames)
+                fName = fieldNames{iField};
+                if ~isfield(uiState, fName)
+                    continue;
+                end
+                savedValue = uiState.(fName);
+                currentValue = currentValues{iField};
+                if i_valuesEqual(savedValue, currentValue)
+                    continue;
+                end
+                diffs{end+1,1} = sprintf('%s | saved=%s | current=%s', ...
+                    fName, i_valueToText(savedValue), i_valueToText(currentValue));
+            end
+
+            header = sprintf('[%s] uiState diff count: %d', char(string(stageLabel)), numel(diffs));
+            fprintf('%s\n', header);
+            if isempty(diffs)
+                i_appendDebugToDiag(header);
+            else
+                outLines = [{header}; diffs(:)];
+                for iLine = 1:numel(outLines)
+                    fprintf('  %s\n', outLines{iLine});
+                end
+                i_appendDebugToDiag(outLines);
+            end
+        catch ME
+            i_appendDebugToDiag(sprintf('[%s] uiState diff failed: %s', char(string(stageLabel)), ME.message));
+        end
+    end
+
+    function tf = i_valuesEqual(a, b)
+        try
+            tf = isequaln(a, b);
+            if tf
+                return;
+            end
+        catch
+        end
+        try
+            tf = isequaln(string(a), string(b));
+            if tf
+                return;
+            end
+        catch
+        end
+        try
+            if isnumeric(a) && isnumeric(b)
+                tf = isequaln(double(a), double(b));
+                return;
+            end
+        catch
+        end
+        tf = false;
+    end
+
+    function txt = i_valueToText(v)
+        try
+            if isstring(v)
+                txt = char(strjoin(v(:), ','));
+                return;
+            end
+            if ischar(v)
+                txt = v;
+                return;
+            end
+            if isnumeric(v) || islogical(v)
+                txt = mat2str(v);
+                return;
+            end
+            if iscell(v)
+                if iscellstr(v)
+                    txt = ['{' strjoin(v(:)', ', ') '}'];
+                else
+                    txt = ['<cell ' mat2str(size(v)) '>'];
+                end
+                return;
+            end
+            txt = ['<' class(v) '>'];
+        catch
+            txt = '<unprintable>';
+        end
+    end
+
+    function i_appendDebugToDiag(linesIn)
+        if nargin < 1 || isempty(linesIn)
+            return;
+        end
+
+        if ischar(linesIn) || isstring(linesIn)
+            newLines = cellstr(string(linesIn));
+        else
+            newLines = cellstr(string(linesIn(:)));
+        end
+
+        try
+            if isgraphics(taDiag)
+                current = taDiag.Value;
+                if ischar(current) || isstring(current)
+                    current = cellstr(string(current));
+                end
+                taDiag.Value = [current(:); newLines(:)];
+            end
+        catch
         end
     end
 
@@ -5646,51 +5972,103 @@ ddScope = uidropdown(tgtGrid, ...
 
         uiState = struct();
         uiState.scopeMode = string(ddScope.Value);
+        uiState.ddScope = ddScope.Value;
+        uiState.efTag = efTag.Value;
+        uiState.efNameContains = efNameContains.Value;
+        uiState.lbFigures = lbFigures.Value;
         uiState.excludeKnownGUIs = logical(cbExcludeGUIs.Value);
+        uiState.cbExcludeGUIs = cbExcludeGUIs.Value;
+        uiState.nfGlobalFigWidth = nfGlobalFigWidth.Value;
+        uiState.nfGlobalFigHeight = nfGlobalFigHeight.Value;
         uiState.gridRows = double(nfRows.Value);
+        uiState.nfRows = nfRows.Value;
         uiState.gridCols = double(nfCols.Value);
+        uiState.nfCols = nfCols.Value;
+        uiState.nfFontSize = nfFontSize.Value;
+        uiState.ddAxisPreset = ddAxisPreset.Value;
+        uiState.ddTypoProfile = ddTypoProfile.Value;
         uiState.widthPreset = string(ddWidthPreset.Value);
+        uiState.ddWidthPreset = ddWidthPreset.Value;
         uiState.customWidth = double(nfCustomWidth.Value);
+        uiState.nfCustomWidth = nfCustomWidth.Value;
         uiState.autoLabels = logical(cbAutoLabel.Value);
+        uiState.cbAutoLabel = cbAutoLabel.Value;
         uiState.labelPosition = string(ddLabelPos.Value);
+        uiState.ddLabelPos = ddLabelPos.Value;
         uiState.labelFontSize = double(nfLabelFont.Value);
+        uiState.nfLabelFont = nfLabelFont.Value;
         uiState.composeHGap = double(slComposeHGap.Value);
+        uiState.slComposeHGap = slComposeHGap.Value;
         uiState.composeVGap = double(slComposeVGap.Value);
+        uiState.slComposeVGap = slComposeVGap.Value;
+        uiState.efLegendFontSize = efLegendFontSize.Value;
         uiState.legendPlacementMode = string(ddLegendPlacementMode.Value);
+        uiState.ddLegendPlacementMode = ddLegendPlacementMode.Value;
         uiState.legendLocation = string(legendLocationState);
-        uiState.legendReverse = logical(cbLegendReverse.Value);
-        uiState.legendAllowRebuild = logical(cbLegendAllowRebuild.Value);
-        uiState.moveManualLegend = logical(cbMoveManualLegend.Value);
         uiState.manualLegendPositions = i_serializeManualLegendPositionState();
         uiState.appearanceMapName = string(ddCmap.Value);
+        uiState.ddCmap = ddCmap.Value;
         uiState.appearanceSpreadMode = string(ddSpreadMode.Value);
+        uiState.ddSpreadMode = ddSpreadMode.Value;
         uiState.appearanceSpreadReverse = logical(cbSpreadReverse.Value);
+        uiState.cbSpreadReverse = cbSpreadReverse.Value;
         uiState.bgWhiteFigure = logical(cbBgWhiteFigure.Value);
+        uiState.cbBgWhiteFigure = cbBgWhiteFigure.Value;
         uiState.bgTransparentAxes = logical(cbBgTransparentAxes.Value);
+        uiState.cbBgTransparentAxes = cbBgTransparentAxes.Value;
         uiState.dataLineStyle = string(ddDataLineStyle.Value);
+        uiState.ddDataLineStyle = ddDataLineStyle.Value;
         uiState.dataLineWidth = double(nfDataLineWidth.Value);
+        uiState.nfDataLineWidth = nfDataLineWidth.Value;
         uiState.dataMarkerSize = double(nfDataMarkerSize.Value);
+        uiState.nfDataMarkerSize = nfDataMarkerSize.Value;
         uiState.fitLineStyle = string(ddFitLineStyle.Value);
+        uiState.ddFitLineStyle = ddFitLineStyle.Value;
         uiState.fitLineWidth = double(nfFitLineWidth.Value);
+        uiState.nfFitLineWidth = nfFitLineWidth.Value;
         uiState.fitMarkerSize = double(nfFitMarkerSize.Value);
+        uiState.nfFitMarkerSize = nfFitMarkerSize.Value;
         uiState.refLineWidth = double(nfRefLineWidth.Value);
+        uiState.nfRefLineWidth = nfRefLineWidth.Value;
         uiState.refLineStyle = string(ddRefLineStyle.Value);
+        uiState.ddRefLineStyle = ddRefLineStyle.Value;
         uiState.refLineColor = string(efRefLineColor.Value);
+        uiState.efRefLineColor = efRefLineColor.Value;
         uiState.annFontName = string(efAnnFontName.Value);
+        uiState.efAnnFontName = efAnnFontName.Value;
         uiState.annFontSize = double(nfAnnFontSize.Value);
+        uiState.nfAnnFontSize = nfAnnFontSize.Value;
         uiState.annFontWeight = string(ddAnnFontWeight.Value);
+        uiState.ddAnnFontWeight = ddAnnFontWeight.Value;
         uiState.annInterpreter = string(ddAnnInterpreter.Value);
+        uiState.ddAnnInterpreter = ddAnnInterpreter.Value;
         uiState.annColor = string(efAnnColor.Value);
+        uiState.efAnnColor = efAnnColor.Value;
         uiState.targetWidthCm = double(nfWsWidth.Value);
+        uiState.nfWsWidth = nfWsWidth.Value;
         uiState.heightMode = string(ddWsHeightMode.Value);
+        uiState.ddWsHeightMode = ddWsHeightMode.Value;
         uiState.heightCm = double(nfWsHeight.Value);
+        uiState.nfWsHeight = nfWsHeight.Value;
         uiState.baseRatio = double(nfWsBaseRatio.Value);
+        uiState.nfWsBaseRatio = nfWsBaseRatio.Value;
         uiState.axesTransformScale = double(slAxScale.Value);
+        uiState.slAxScale = slAxScale.Value;
         uiState.axesTransformOffsetX = double(slAxOffsetX.Value);
+        uiState.slAxOffsetX = slAxOffsetX.Value;
         uiState.axesTransformOffsetY = double(slAxOffsetY.Value);
+        uiState.slAxOffsetY = slAxOffsetY.Value;
         uiState.reversePlotOrder = logical(cbReversePlotOrder.Value);
+        uiState.cbReversePlotOrder = cbReversePlotOrder.Value;
         uiState.panelsPerRow = string(ddPanelsPerRow.Value);
-        uiState.exportCompose = logical(cbExportCompose.Value);
+        uiState.ddPanelsPerRow = ddPanelsPerRow.Value;
+        uiState.ddExportFmt = ddExportFmt.Value;
+        uiState.cbVector = cbVector.Value;
+        uiState.cbOverwrite = cbOverwrite.Value;
+        uiState.ddFilenameFrom = ddFilenameFrom.Value;
+        uiState.exportComposedOnly = logical(cbExportComposedOnly.Value);
+        uiState.cbExportComposedOnly = cbExportComposedOnly.Value;
+        uiState.exportOutDir = string(efExportDir.Value);
 
         up = userpath;
         if isempty(up)

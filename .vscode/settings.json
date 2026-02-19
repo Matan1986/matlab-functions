@@ -1,6 +1,9 @@
 {
     "chat.tools.terminal.autoApprove": {
         "matlab": true,
-        "&": true
-    }
+        "&": true,
+        "where": true,
+        "Get-Command": true
+    },
+    "chat.agent.maxRequests": 100
 }

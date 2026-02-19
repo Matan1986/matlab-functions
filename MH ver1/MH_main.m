@@ -22,10 +22,10 @@ filterParams.maxInterpLength = 15;
 % ==========================
 % Paths
 % ==========================
-baseFolder = 'C:\Users\matan\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Matlab functions';
+baseFolder = 'C:\Users\User\matlab-functions';
 addpath(genpath(baseFolder));
 
-dir = "C:\Users\matan\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\MG119 VSM PPMS\MH different temperatures";
+dir = "L:\My Drive\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\MG119 VSM PPMS\MH different temperatures";
 
 % ==========================
 % Load file list (AUTO detect mode)
