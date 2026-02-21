@@ -11,6 +11,9 @@ function FigureControlStudio()
     % Deterministic GUI marker (more robust than Name matching).
     ui.Tag = "FCS_ROOT";
     setappdata(ui, 'FCS_Root', true);
+    if isprop(ui, 'WindowKeyPressFcn')
+        ui.WindowKeyPressFcn = @onWindowKeyPressDiagnostic;
+    end
 
     root = uigridlayout(ui, [1 2]);
     root.ColumnWidth = {280, '1x'};
@@ -316,11 +319,11 @@ ddScope = uidropdown(tgtGrid, ...
     tabRootStyle.Scrollable = 'on';
 
     % ---------------- Layout ----------------
-    tabRootLayoutGeometry = uigridlayout(tLayoutGeometry, [3 1]);
-    tabRootLayoutGeometry.RowHeight = {'fit', 'fit', 'fit'};
+    tabRootLayoutGeometry = uigridlayout(tLayoutGeometry, [5 1]);
+    tabRootLayoutGeometry.RowHeight = {'fit', 14, 'fit', 14, 'fit'};
     tabRootLayoutGeometry.ColumnWidth = {'1x'};
     tabRootLayoutGeometry.Padding = [12 12 12 12];
-    tabRootLayoutGeometry.RowSpacing = 12;
+    tabRootLayoutGeometry.RowSpacing = 0;
     tabRootLayoutGeometry.Scrollable = 'on';
 
     cmapItems = i_getAvailableColormapNames();
@@ -490,6 +493,17 @@ ddScope = uidropdown(tgtGrid, ...
     nfRefLineWidth.Layout.Row = 9;
     nfRefLineWidth.Layout.Column = 2;
 
+    styleNumericImmediateFields = [nfDataLineWidth; nfDataMarkerSize; nfFitLineWidth; nfFitMarkerSize; nfRefLineWidth];
+    for iStyleField = 1:numel(styleNumericImmediateFields)
+        fld = styleNumericImmediateFields(iStyleField);
+        if isprop(fld, 'Tag')
+            fld.Tag = 'FCS_STYLE_NUMERIC_ENTER_APPLY';
+        end
+        if isprop(fld, 'KeyPressFcn')
+            fld.KeyPressFcn = @onStyleNumericEnterKey;
+        end
+    end
+
     lblRefLineStyle = uilabel(secLinesAxes, 'Text', 'Line style', 'HorizontalAlignment', 'left');
     lblRefLineStyle.Layout.Row = 10;
     lblRefLineStyle.Layout.Column = 1;
@@ -528,67 +542,54 @@ ddScope = uidropdown(tgtGrid, ...
     secFigureSize.Padding = [0 0 0 0];
     secFigureSize.RowSpacing = 6;
 
-    lblSecFigureSize = uilabel(secFigureSize, 'Text', 'Figure Size', 'HorizontalAlignment', 'left');
+    lblSecFigureSize = uilabel(secFigureSize, 'Text', 'Figure Geometry', 'HorizontalAlignment', 'left');
     lblSecFigureSize.FontWeight = 'bold';
     lblSecFigureSize.Layout.Row = 1;
     lblSecFigureSize.Layout.Column = 1;
 
-    secAppD = uigridlayout(secFigureSize, [6 2]);
+    secAppD = uigridlayout(secFigureSize, [4 2]);
     secAppD.Layout.Row = 2;
     secAppD.Layout.Column = 1;
     secAppD.ColumnWidth = {170, '1x'};
-    secAppD.RowHeight = {'fit', 'fit', 'fit', 'fit', 'fit', 'fit'};
+    secAppD.RowHeight = {'fit', 'fit', 'fit', 'fit'};
     secAppD.Padding = [0 0 0 0];
 
     lblWsWidth = uilabel(secAppD, 'Text', 'Target Width (cm)', 'HorizontalAlignment', 'left');
     lblWsWidth.Layout.Row = 1;
     lblWsWidth.Layout.Column = 1;
     nfWsWidth = uieditfield(secAppD, 'numeric', 'Value', 12, 'Limits', [5 40], ...
-        'ValueChangedFcn', @onPersistedControlChanged);
+        'ValueChangedFcn', @onWorkspaceGeometryChanged);
     nfWsWidth.Layout.Row = 1;
     nfWsWidth.Layout.Column = 2;
 
-    lblWsHeightMode = uilabel(secAppD, 'Text', 'Height Mode', 'HorizontalAlignment', 'left');
-    lblWsHeightMode.Layout.Row = 2;
-    lblWsHeightMode.Layout.Column = 1;
-    ddWsHeightMode = uidropdown(secAppD, 'Items', {'Auto (ratio)','Auto (grid × ratio)','Custom'}, 'Value', 'Auto (ratio)', ...
-        'ValueChangedFcn', @onWorkspaceHeightModeChanged);
-    ddWsHeightMode.Layout.Row = 2;
-    ddWsHeightMode.Layout.Column = 2;
-
-    lblWsHeight = uilabel(secAppD, 'Text', 'Height (cm)', 'HorizontalAlignment', 'left');
-    lblWsHeight.Layout.Row = 3;
-    lblWsHeight.Layout.Column = 1;
-    nfWsHeight = uieditfield(secAppD, 'numeric', 'Value', 9, 'Limits', [5 40], ...
-        'ValueChangedFcn', @onPersistedControlChanged);
-    nfWsHeight.Layout.Row = 3;
-    nfWsHeight.Layout.Column = 2;
-
     lblWsBaseRatio = uilabel(secAppD, 'Text', 'Base ratio (H/W)', 'HorizontalAlignment', 'left');
-    lblWsBaseRatio.Layout.Row = 4;
+    lblWsBaseRatio.Layout.Row = 2;
     lblWsBaseRatio.Layout.Column = 1;
     nfWsBaseRatio = uieditfield(secAppD, 'numeric', 'Value', 0.75, 'Limits', [0.3 2], ...
-        'ValueChangedFcn', @onPersistedControlChanged);
-    nfWsBaseRatio.Layout.Row = 4;
+        'ValueChangedFcn', @onWorkspaceGeometryChanged);
+    nfWsBaseRatio.Layout.Row = 2;
     nfWsBaseRatio.Layout.Column = 2;
 
+    lblWsHeight = uilabel(secAppD, 'Text', 'Height (computed cm)', 'HorizontalAlignment', 'left');
+    lblWsHeight.Layout.Row = 3;
+    lblWsHeight.Layout.Column = 1;
+    lblWsHeightComputed = uilabel(secAppD, 'Text', '9.00', 'HorizontalAlignment', 'left');
+    lblWsHeightComputed.Layout.Row = 3;
+    lblWsHeightComputed.Layout.Column = 2;
+
     btnApplyWorkspaceSize = uibutton(secAppD, 'Text', 'Apply Size', 'ButtonPushedFcn', @onApplyWorkspaceSize);
-    btnApplyWorkspaceSize.Layout.Row = 5;
+    btnApplyWorkspaceSize.Layout.Row = 4;
     btnApplyWorkspaceSize.Layout.Column = [1 2];
 
-    btnApplySizeToAll = uibutton(secAppD, 'Text', 'Apply Size To Targets', 'ButtonPushedFcn', @applyGlobalFigureSize); %#ok<NASGU>
-    btnApplySizeToAll.Layout.Row = 6;
-    btnApplySizeToAll.Layout.Column = [1 2];
-
     secEqualize = uigridlayout(tabRootLayoutGeometry, [2 1]);
-    secEqualize.Layout.Row = 2;
+    secEqualize.Layout.Row = 3;
     secEqualize.Layout.Column = 1;
     secEqualize.ColumnWidth = {'1x'};
     secEqualize.RowHeight = {'fit', 'fit'};
-    secEqualize.Padding = [0 0 0 0];
-    secEqualize.RowSpacing = 6;
+    secEqualize.Padding = [0 4 0 4];
+    secEqualize.RowSpacing = 8;
 
-    lblSecEqualize = uilabel(secEqualize, 'Text', 'Equalize', 'HorizontalAlignment', 'left');
+    lblSecEqualize = uilabel(secEqualize, 'Text', 'Base Layout', 'HorizontalAlignment', 'left');
     lblSecEqualize.FontWeight = 'bold';
     lblSecEqualize.Layout.Row = 1;
     lblSecEqualize.Layout.Column = 1;
@@ -600,71 +601,85 @@ ddScope = uidropdown(tgtGrid, ...
     btnEqualizeCenterAxesGroup.Layout.Column = 1;
 
     secAxesTransform = uigridlayout(tabRootLayoutGeometry, [2 1]);
-    secAxesTransform.Layout.Row = 3;
+    secAxesTransform.Layout.Row = 5;
     secAxesTransform.Layout.Column = 1;
     secAxesTransform.ColumnWidth = {'1x'};
     secAxesTransform.RowHeight = {'fit', 'fit'};
     secAxesTransform.Padding = [0 0 0 0];
     secAxesTransform.RowSpacing = 6;
 
-    lblSecAxesTransform = uilabel(secAxesTransform, 'Text', 'Axes Transform', 'HorizontalAlignment', 'left');
+    lblSecAxesTransform = uilabel(secAxesTransform, 'Text', 'Transform', 'HorizontalAlignment', 'left');
     lblSecAxesTransform.FontWeight = 'bold';
     lblSecAxesTransform.Layout.Row = 1;
     lblSecAxesTransform.Layout.Column = 1;
 
-    secAxesTransformBody = uigridlayout(secAxesTransform, [4 3]);
+    secAxesTransformBody = uigridlayout(secAxesTransform, [5 3]);
     secAxesTransformBody.Layout.Row = 2;
     secAxesTransformBody.Layout.Column = 1;
     secAxesTransformBody.ColumnWidth = {170, '1x', 60};
-    secAxesTransformBody.RowHeight = {'fit', 'fit', 'fit', 'fit'};
+    secAxesTransformBody.RowHeight = {'fit', 'fit', 'fit', 'fit', 'fit'};
     secAxesTransformBody.Padding = [0 0 0 0];
     secAxesTransformBody.RowSpacing = 6;
     secAxesTransformBody.ColumnSpacing = 8;
 
-    lblAxScale = uilabel(secAxesTransformBody, 'Text', 'Scale', 'HorizontalAlignment', 'left');
-    lblAxScale.Layout.Row = 1;
-    lblAxScale.Layout.Column = 1;
-    slAxScale = uislider(secAxesTransformBody, ...
+    lblAxScaleX = uilabel(secAxesTransformBody, 'Text', 'Scale X', 'HorizontalAlignment', 'left');
+    lblAxScaleX.Layout.Row = 1;
+    lblAxScaleX.Layout.Column = 1;
+    slAxScaleX = uislider(secAxesTransformBody, ...
         'Limits', [0.5 1.5], ...
         'Value', 1.0, ...
         'ValueChangingFcn', @onAxesTransformValueChanging, ...
         'ValueChangedFcn', @onAxesTransformChanged);
-    slAxScale.Layout.Row = 1;
-    slAxScale.Layout.Column = 2;
-    lblAxScaleValue = uilabel(secAxesTransformBody, 'Text', '1.00', 'HorizontalAlignment', 'right');
-    lblAxScaleValue.Layout.Row = 1;
-    lblAxScaleValue.Layout.Column = 3;
+    slAxScaleX.Layout.Row = 1;
+    slAxScaleX.Layout.Column = 2;
+    lblAxScaleXValue = uilabel(secAxesTransformBody, 'Text', '1.00', 'HorizontalAlignment', 'right');
+    lblAxScaleXValue.Layout.Row = 1;
+    lblAxScaleXValue.Layout.Column = 3;
+
+    lblAxScaleY = uilabel(secAxesTransformBody, 'Text', 'Scale Y', 'HorizontalAlignment', 'left');
+    lblAxScaleY.Layout.Row = 2;
+    lblAxScaleY.Layout.Column = 1;
+    slAxScaleY = uislider(secAxesTransformBody, ...
+        'Limits', [0.5 1.5], ...
+        'Value', 1.0, ...
+        'ValueChangingFcn', @onAxesTransformValueChanging, ...
+        'ValueChangedFcn', @onAxesTransformChanged);
+    slAxScaleY.Layout.Row = 2;
+    slAxScaleY.Layout.Column = 2;
+    lblAxScaleYValue = uilabel(secAxesTransformBody, 'Text', '1.00', 'HorizontalAlignment', 'right');
+    lblAxScaleYValue.Layout.Row = 2;
+    lblAxScaleYValue.Layout.Column = 3;
 
     lblAxOffsetX = uilabel(secAxesTransformBody, 'Text', 'Horizontal Offset', 'HorizontalAlignment', 'left');
-    lblAxOffsetX.Layout.Row = 2;
+    lblAxOffsetX.Layout.Row = 3;
     lblAxOffsetX.Layout.Column = 1;
     slAxOffsetX = uislider(secAxesTransformBody, ...
         'Limits', [-0.2 0.2], ...
         'Value', 0.0, ...
         'ValueChangingFcn', @onAxesTransformValueChanging, ...
         'ValueChangedFcn', @onAxesTransformChanged);
-    slAxOffsetX.Layout.Row = 2;
+    slAxOffsetX.Layout.Row = 3;
     slAxOffsetX.Layout.Column = 2;
     lblAxOffsetXValue = uilabel(secAxesTransformBody, 'Text', '0.00', 'HorizontalAlignment', 'right');
-    lblAxOffsetXValue.Layout.Row = 2;
+    lblAxOffsetXValue.Layout.Row = 3;
     lblAxOffsetXValue.Layout.Column = 3;
 
     lblAxOffsetY = uilabel(secAxesTransformBody, 'Text', 'Vertical Offset', 'HorizontalAlignment', 'left');
-    lblAxOffsetY.Layout.Row = 3;
+    lblAxOffsetY.Layout.Row = 4;
     lblAxOffsetY.Layout.Column = 1;
     slAxOffsetY = uislider(secAxesTransformBody, ...
         'Limits', [-0.2 0.2], ...
         'Value', 0.0, ...
         'ValueChangingFcn', @onAxesTransformValueChanging, ...
         'ValueChangedFcn', @onAxesTransformChanged);
-    slAxOffsetY.Layout.Row = 3;
+    slAxOffsetY.Layout.Row = 4;
     slAxOffsetY.Layout.Column = 2;
     lblAxOffsetYValue = uilabel(secAxesTransformBody, 'Text', '0.00', 'HorizontalAlignment', 'right');
-    lblAxOffsetYValue.Layout.Row = 3;
+    lblAxOffsetYValue.Layout.Row = 4;
     lblAxOffsetYValue.Layout.Column = 3;
 
     btnResetTransform = uibutton(secAxesTransformBody, 'Text', 'Reset Transform', 'ButtonPushedFcn', @onResetTransform);
-    btnResetTransform.Layout.Row = 4;
+    btnResetTransform.Layout.Row = 5;
     btnResetTransform.Layout.Column = [2 3];
 
     % ---------------- Export ----------------
@@ -948,10 +963,10 @@ ddScope = uidropdown(tgtGrid, ...
         'annInterpreter', "tex", ...
         'annColor', "[0 0 0]", ...
         'targetWidthCm', 12, ...
-        'heightMode', "Auto (ratio)", ...
-        'heightCm', 9, ...
+        'widthCm', 12, ...
         'baseRatio', 0.75, ...
-        'axesTransformScale', 1.0, ...
+        'axesTransformScaleX', 1.0, ...
+        'axesTransformScaleY', 1.0, ...
         'axesTransformOffsetX', 0.0, ...
         'axesTransformOffsetY', 0.0, ...
         'reversePlotOrder', false, ...
@@ -973,9 +988,9 @@ ddScope = uidropdown(tgtGrid, ...
     i_loadUIState();
     i_updateAxesTransformLabels();
     i_updateComposeGapLabels();
+    i_updateWorkspaceHeightDisplay();
     onScopeModeChanged();
     onWidthPresetChanged();
-    onWorkspaceHeightModeChanged();
     onLegendPlacementModeChanged();
     onRefreshExplicit();
     i_applyManualLegendDragModeToFigures(explicitHandleCache);
@@ -1034,7 +1049,7 @@ ddScope = uidropdown(tgtGrid, ...
             figs(figs == ui) = [];
 
             explicitHandleCache = figs(:);
-            i_captureAxesBasePositions(explicitHandleCache);
+            i_captureAxesBasePositionsIfMissing(explicitHandleCache);
             refreshExplicitListbox([]);
             i_applyPendingRestoreAfterPopulation();
             i_applyManualLegendDragModeToFigures(explicitHandleCache);
@@ -1221,9 +1236,86 @@ ddScope = uidropdown(tgtGrid, ...
         onApplyAppearance([], []);
     end
 
+    function onStyleNumericEnterKey(src, evt)
+        % Some uifigure runtime states may not dispatch ValueChanged on the
+        % first Enter; this Enter-only hook safely reuses the normal apply path.
+        keyName = "";
+        if nargin >= 2 && isstruct(evt) && isfield(evt, 'Key')
+            keyName = lower(string(evt.Key));
+        end
+
+        try
+            fprintf('[FCS-KEY][Field] key=%s src=%s tag=%s\n', char(keyName), class(src), string(src.Tag));
+        catch
+            try
+                fprintf('[FCS-KEY][Field] key=%s src=%s\n', char(keyName), class(src));
+            catch
+            end
+        end
+
+        if ~(keyName == "return" || keyName == "enter")
+            return;
+        end
+
+        if isempty(src) || ~isgraphics(src)
+            return;
+        end
+
+        isStyleNumericField = ...
+            isequal(src, nfDataLineWidth) || ...
+            isequal(src, nfDataMarkerSize) || ...
+            isequal(src, nfFitLineWidth) || ...
+            isequal(src, nfFitMarkerSize) || ...
+            isequal(src, nfRefLineWidth);
+        if ~isStyleNumericField
+            return;
+        end
+
+        try
+            src.Value = double(src.Value);
+        catch
+        end
+
+        onAppearanceControlChanged([], []);
+    end
+
+    function onWindowKeyPressDiagnostic(src, evt)
+        keyName = "";
+        if nargin >= 2 && isstruct(evt) && isfield(evt, 'Key')
+            keyName = lower(string(evt.Key));
+        end
+
+        focusedClass = "";
+        focusedTag = "";
+        try
+            focusedObj = [];
+            if isprop(src, 'CurrentObject')
+                focusedObj = src.CurrentObject;
+            end
+            if ~isempty(focusedObj) && isgraphics(focusedObj)
+                focusedClass = string(class(focusedObj));
+                if isprop(focusedObj, 'Tag')
+                    focusedTag = string(focusedObj.Tag);
+                end
+            end
+        catch
+        end
+
+        try
+            fprintf('[FCS-KEY][Window] key=%s focusedClass=%s focusedTag=%s\n', char(keyName), char(focusedClass), char(focusedTag));
+        catch
+            try
+                fprintf('[FCS-KEY][Window] key=%s\n', char(keyName));
+            catch
+            end
+        end
+    end
+
     function onAxesTransformValueChanging(src, evt)
         if nargin >= 2 && isstruct(evt) && isfield(evt, 'Value')
-            if isequal(src, slAxScale)
+            if isequal(src, slAxScaleX)
+                src.Value = i_quantizeSliderValue(double(evt.Value), [0.5 1.5], 0.01);
+            elseif isequal(src, slAxScaleY)
                 src.Value = i_quantizeSliderValue(double(evt.Value), [0.5 1.5], 0.01);
             elseif isequal(src, slAxOffsetX)
                 src.Value = i_quantizeSliderValue(double(evt.Value), [-0.2 0.2], 0.01);
@@ -1235,7 +1327,9 @@ ddScope = uidropdown(tgtGrid, ...
     end
 
     function onAxesTransformChanged(src, ~)
-        if isequal(src, slAxScale)
+        if isequal(src, slAxScaleX)
+            src.Value = i_quantizeSliderValue(double(src.Value), [0.5 1.5], 0.01);
+        elseif isequal(src, slAxScaleY)
             src.Value = i_quantizeSliderValue(double(src.Value), [0.5 1.5], 0.01);
         elseif isequal(src, slAxOffsetX)
             src.Value = i_quantizeSliderValue(double(src.Value), [-0.2 0.2], 0.01);
@@ -1245,7 +1339,7 @@ ddScope = uidropdown(tgtGrid, ...
         i_updateAxesTransformLabels();
         i_saveUIState();
 
-        figs = resolveTargetsOrAlert();
+        figs = resolveTargetsOrAlert("Layout");
         if isempty(figs)
             return;
         end
@@ -1258,13 +1352,22 @@ ddScope = uidropdown(tgtGrid, ...
     end
 
     function onResetTransform(~, ~)
-        slAxScale.Value = 1.0;
+        figs = resolveTargetsOrAlert("Layout");
+        if isempty(figs)
+            return;
+        end
+
+        i_resetManualTransformToIdentityAndApply(figs);
+    end
+
+    function i_resetManualTransformToIdentityAndApply(figs)
+        slAxScaleX.Value = 1.0;
+        slAxScaleY.Value = 1.0;
         slAxOffsetX.Value = 0.0;
         slAxOffsetY.Value = 0.0;
         i_updateAxesTransformLabels();
         i_saveUIState();
 
-        figs = resolveExplicitListTargetsOrAlert("Axes Transform");
         if isempty(figs)
             return;
         end
@@ -1278,7 +1381,8 @@ ddScope = uidropdown(tgtGrid, ...
     end
 
     function i_updateAxesTransformLabels()
-        lblAxScaleValue.Text = sprintf('%.2f', double(slAxScale.Value));
+        lblAxScaleXValue.Text = sprintf('%.2f', double(slAxScaleX.Value));
+        lblAxScaleYValue.Text = sprintf('%.2f', double(slAxScaleY.Value));
         lblAxOffsetXValue.Text = sprintf('%.2f', double(slAxOffsetX.Value));
         lblAxOffsetYValue.Text = sprintf('%.2f', double(slAxOffsetY.Value));
     end
@@ -1314,14 +1418,28 @@ ddScope = uidropdown(tgtGrid, ...
         v = min(max(v, lims(1)), lims(2));
     end
 
-    function onWorkspaceHeightModeChanged(~, ~)
-        isCustom = string(ddWsHeightMode.Value) == "Custom";
-        if isCustom
-            nfWsHeight.Enable = matlab.lang.OnOffSwitchState.on;
-        else
-            nfWsHeight.Enable = matlab.lang.OnOffSwitchState.off;
-        end
+    function onWorkspaceGeometryChanged(~, ~)
+        i_updateWorkspaceHeightDisplay();
         i_saveUIState();
+    end
+
+    function i_updateWorkspaceHeightDisplay()
+        heightCm = i_computeWorkspaceHeightCm();
+        if ~isfinite(heightCm) || heightCm <= 0
+            lblWsHeightComputed.Text = '--';
+            return;
+        end
+        lblWsHeightComputed.Text = sprintf('%.2f', heightCm);
+    end
+
+    function heightCm = i_computeWorkspaceHeightCm()
+        heightCm = NaN;
+        widthCm = double(nfWsWidth.Value);
+        baseRatioHW = double(nfWsBaseRatio.Value);
+        if ~isfinite(widthCm) || widthCm <= 0 || ~isfinite(baseRatioHW) || baseRatioHW <= 0
+            return;
+        end
+        heightCm = widthCm * baseRatioHW;
     end
 
     function onBackgroundToggleChanged(~, ~)
@@ -1618,11 +1736,11 @@ ddScope = uidropdown(tgtGrid, ...
         ddAnnInterpreter.Value = char(defaultUIState.annInterpreter);
         efAnnColor.Value = char(defaultUIState.annColor);
         nfWsWidth.Value = double(defaultUIState.targetWidthCm);
-        ddWsHeightMode.Value = char(defaultUIState.heightMode);
-        nfWsHeight.Value = double(defaultUIState.heightCm);
         nfWsBaseRatio.Value = double(defaultUIState.baseRatio);
+        i_updateWorkspaceHeightDisplay();
         cbReversePlotOrder.Value = logical(defaultUIState.reversePlotOrder);
-        slAxScale.Value = double(defaultUIState.axesTransformScale);
+        slAxScaleX.Value = double(defaultUIState.axesTransformScaleX);
+        slAxScaleY.Value = double(defaultUIState.axesTransformScaleY);
         slAxOffsetX.Value = double(defaultUIState.axesTransformOffsetX);
         slAxOffsetY.Value = double(defaultUIState.axesTransformOffsetY);
         i_updateAxesTransformLabels();
@@ -1637,49 +1755,6 @@ ddScope = uidropdown(tgtGrid, ...
         i_applyManualLegendDragModeToFigures(explicitHandleCache);
         suppressUIStateSave = false;
         i_saveUIState();
-    end
-
-    function applyGlobalFigureSize(~, ~)
-        widthPx = double(nfGlobalFigWidth.Value);
-        heightPx = double(nfGlobalFigHeight.Value);
-
-        if ~isfinite(widthPx) || widthPx <= 0 || ~isfinite(heightPx) || heightPx <= 0
-            return;
-        end
-
-        widthPx = round(widthPx);
-        heightPx = round(heightPx);
-
-        figs = resolveTargetsOrAlert("Layout");
-        if isempty(figs)
-            return;
-        end
-
-        for k = 1:numel(figs)
-            f = figs(k);
-            if isempty(f) || ~isgraphics(f, 'figure')
-                continue;
-            end
-
-            try
-                if ~strcmpi(string(f.Visible), "on")
-                    continue;
-                end
-            catch
-                continue;
-            end
-
-            try
-                f.Units = 'pixels';
-                pos = f.Position;
-                if isnumeric(pos) && numel(pos) >= 4
-                    pos(3) = widthPx;
-                    pos(4) = heightPx;
-                    f.Position = pos;
-                end
-            catch
-            end
-        end
     end
 
     function scopeSpec = buildScopeSpecFromUI()
@@ -3250,18 +3325,6 @@ ddScope = uidropdown(tgtGrid, ...
 
         try
             stats = i_applyAppearanceSettings(figs, opts);
-            applyManualTransformRequested = ...
-                abs(double(slAxScale.Value) - 1.0) > 1e-12 || ...
-                abs(double(slAxOffsetX.Value)) > 1e-12 || ...
-                abs(double(slAxOffsetY.Value)) > 1e-12;
-
-            if applyManualTransformRequested
-                for kk = 1:numel(figs)
-                    if isgraphics(figs(kk), 'figure')
-                        i_applyManualAxesTransform(figs(kk));
-                    end
-                end
-            end
             taDiag.Value = {sprintf('Appearance applied: %d fig, %d axes, %d lines, %d colorbars', ...
                 stats.figuresTouched, stats.axesTouched, stats.linesTouched, stats.colorbarsTouched)};
         catch ME
@@ -3302,38 +3365,15 @@ ddScope = uidropdown(tgtGrid, ...
     end
 
     function onApplyWorkspaceSize(~, ~)
-        figs = resolveExplicitListTargetsOrAlert("Workspace Size");
+        % SIZE ONLY: sets figure dimensions; does not edit axes; does not call Equalize/Transform.
+        figs = resolveTargetsOrAlert("Layout");
         if isempty(figs), return; end
 
         widthCm = double(nfWsWidth.Value);
-        baseRatioHW = double(nfWsBaseRatio.Value);
-        rows = max(1, round(double(nfRows.Value)));
-        cols = max(1, round(double(nfCols.Value)));
 
-        if ~isfinite(widthCm) || widthCm <= 0 || ~isfinite(baseRatioHW) || baseRatioHW <= 0
+        heightCm = i_computeWorkspaceHeightCm();
+        if ~isfinite(widthCm) || widthCm <= 0 || ~isfinite(heightCm) || heightCm <= 0
             uialert(ui, 'Workspace size values must be positive numbers.', 'Workspace Size');
-            return;
-        end
-
-        mode = string(ddWsHeightMode.Value);
-        switch mode
-            case "Auto (ratio)"
-                heightCm = widthCm * baseRatioHW;
-            case "Auto (grid × ratio)"
-                % Robust fallback: if grid values are invalid, use ratio-only mode.
-                if ~isfinite(rows) || ~isfinite(cols) || rows <= 0 || cols <= 0
-                    heightCm = widthCm * baseRatioHW;
-                else
-                    heightCm = widthCm * (rows / cols) * baseRatioHW;
-                end
-            case "Custom"
-                heightCm = double(nfWsHeight.Value);
-            otherwise
-                heightCm = widthCm * baseRatioHW;
-        end
-
-        if ~isfinite(heightCm) || heightCm <= 0
-            uialert(ui, 'Computed workspace height is invalid.', 'Workspace Size');
             return;
         end
 
@@ -3352,17 +3392,14 @@ ddScope = uidropdown(tgtGrid, ...
             end
 
         end
-
-        onEqualizeCenterAxesGroup([], [], false);
-        i_captureAxesBasePositions(figs);
     end
 
-    function onEqualizeCenterAxesGroup(~, ~, applyManualTransform)
-        if nargin < 3
-            applyManualTransform = true;
-        end
-        figs = resolveExplicitListTargetsOrAlert("Layout");
+    function onEqualizeCenterAxesGroup(~, ~)
+        % Equalize defines base axes layout only. Transform is applied separately.
+        figs = resolveTargetsOrAlert("Layout");
         if isempty(figs), return; end
+
+        i_resetManualTransformToIdentityAndApply(figs);
 
         info = struct('fig', {}, 'axes', {}, 'positions', {}, 'xmin', {}, 'ymin', {}, 'xmax', {}, 'ymax', {}, 'width', {}, 'height', {});
 
@@ -3469,21 +3506,19 @@ ddScope = uidropdown(tgtGrid, ...
         end
 
         i_captureAxesBasePositions(figs);
-
-        manualTransformActive = abs(double(slAxScale.Value) - 1.0) > 1e-12 || ...
-            abs(double(slAxOffsetX.Value)) > 1e-12 || ...
-            abs(double(slAxOffsetY.Value)) > 1e-12;
-        if applyManualTransform && manualTransformActive
-            for k = 1:numel(figs)
-                fig = figs(k);
-                if isgraphics(fig, 'figure')
-                    i_applyManualAxesTransform(fig);
-                end
-            end
-        end
     end
 
-    function i_captureAxesBasePositions(figs)
+    function i_captureAxesBasePositions(figs, allowNonIdentity)
+        if nargin < 2
+            allowNonIdentity = false;
+        end
+
+        if ~allowNonIdentity && ~i_isManualTransformIdentity()
+            warning('FigureControlStudio:BaseCaptureSkipped', ...
+                'Skipping full base snapshot capture while manual transform is non-identity.');
+            return;
+        end
+
         if isempty(axesBasePositions) || ~isa(axesBasePositions, 'containers.Map')
             axesBasePositions = containers.Map('KeyType', 'char', 'ValueType', 'any');
         end
@@ -3513,16 +3548,66 @@ ddScope = uidropdown(tgtGrid, ...
         end
     end
 
+    function i_captureAxesBasePositionsIfMissing(figs)
+        if isempty(axesBasePositions) || ~isa(axesBasePositions, 'containers.Map')
+            axesBasePositions = containers.Map('KeyType', 'char', 'ValueType', 'any');
+        end
+        if isempty(figs)
+            return;
+        end
+
+        for k = 1:numel(figs)
+            fig = figs(k);
+            if isempty(fig) || ~isgraphics(fig, 'figure')
+                continue;
+            end
+
+            axList = findall(fig, 'Type', 'axes');
+            for a = 1:numel(axList)
+                ax = axList(a);
+                if ~isgraphics(ax, 'axes') || i_isTiledLayoutManagedAxes(ax) || ~i_isPrimaryPlotAxes(ax)
+                    continue;
+                end
+                try
+                    ax.Units = 'normalized';
+                    key = i_axesSnapshotKey(ax);
+
+                    shouldCapture = true;
+                    if isKey(axesBasePositions, key)
+                        cand = axesBasePositions(key);
+                        shouldCapture = ~(isnumeric(cand) && numel(cand) >= 4 && all(isfinite(cand(1:4))));
+                    end
+
+                    if shouldCapture
+                        axesBasePositions(key) = double(ax.Position);
+                    end
+                catch
+                end
+            end
+        end
+    end
+
+    function tf = i_isManualTransformIdentity()
+        tf = abs(double(slAxScaleX.Value) - 1.0) <= 1e-12 && ...
+             abs(double(slAxScaleY.Value) - 1.0) <= 1e-12 && ...
+             abs(double(slAxOffsetX.Value)) <= 1e-12 && ...
+             abs(double(slAxOffsetY.Value)) <= 1e-12;
+    end
+
     function i_applyManualAxesTransform(fig)
         if isempty(fig) || ~isgraphics(fig, 'figure')
             return;
         end
 
-        scale = i_quantizeSliderValue(double(slAxScale.Value), [0.5 1.5], 0.01);
+        scaleX = i_quantizeSliderValue(double(slAxScaleX.Value), [0.5 1.5], 0.01);
+        scaleY = i_quantizeSliderValue(double(slAxScaleY.Value), [0.5 1.5], 0.01);
         offsetX = i_quantizeSliderValue(double(slAxOffsetX.Value), [-0.2 0.2], 0.01);
         offsetY = i_quantizeSliderValue(double(slAxOffsetY.Value), [-0.2 0.2], 0.01);
 
         axList = findall(fig, 'Type', 'axes');
+
+        validAxes = gobjects(0,1);
+        basePositions = zeros(0,4);
         for a = 1:numel(axList)
             ax = axList(a);
             if ~isgraphics(ax, 'axes') || i_isTiledLayoutManagedAxes(ax) || ~i_isPrimaryPlotAxes(ax)
@@ -3534,8 +3619,58 @@ ddScope = uidropdown(tgtGrid, ...
                 if isempty(basePos)
                     continue;
                 end
-                newPos = i_computeManualAxesPosition(basePos, scale, offsetX, offsetY);
-                ax.Position = newPos;
+                validAxes(end+1,1) = ax; %#ok<AGROW>
+                basePositions(end+1,:) = basePos(1:4); %#ok<AGROW>
+            catch
+            end
+        end
+
+        nAxes = size(basePositions,1);
+        if nAxes == 0
+            return;
+        end
+
+        if nAxes == 1
+            try
+                newPos = i_computeManualAxesPosition(basePositions(1,:), scaleX, scaleY, offsetX, offsetY);
+                validAxes(1).Position = newPos;
+            catch
+            end
+            return;
+        end
+
+        xmin = min(basePositions(:,1));
+        ymin = min(basePositions(:,2));
+        xmax = max(basePositions(:,1) + basePositions(:,3));
+        ymax = max(basePositions(:,2) + basePositions(:,4));
+        unionW = xmax - xmin;
+        unionH = ymax - ymin;
+
+        if ~isfinite(unionW) || ~isfinite(unionH) || unionW <= 0 || unionH <= 0
+            return;
+        end
+
+        unionBase = [xmin ymin unionW unionH];
+        unionNew = i_computeManualAxesPosition(unionBase, scaleX, scaleY, offsetX, offsetY);
+
+        for a = 1:nAxes
+            basePos = basePositions(a,:);
+
+            relX = (basePos(1) - xmin) / unionW;
+            relY = (basePos(2) - ymin) / unionH;
+            relW = basePos(3) / unionW;
+            relH = basePos(4) / unionH;
+
+            newPos = [ ...
+                unionNew(1) + relX * unionNew(3), ...
+                unionNew(2) + relY * unionNew(4), ...
+                relW * unionNew(3), ...
+                relH * unionNew(4)];
+
+            newPos = i_clampAxesPositionIfNeeded(newPos);
+
+            try
+                validAxes(a).Position = newPos;
             catch
             end
         end
@@ -3568,14 +3703,14 @@ ddScope = uidropdown(tgtGrid, ...
         end
     end
 
-    function posOut = i_computeManualAxesPosition(posIn, scale, offsetX, offsetY)
+    function posOut = i_computeManualAxesPosition(posIn, scaleX, scaleY, offsetX, offsetY)
         if ~isnumeric(posIn) || numel(posIn) < 4
             posOut = [0 0 1 1];
             return;
         end
 
-        newWidth = posIn(3) * scale;
-        newHeight = posIn(4) * scale;
+        newWidth = posIn(3) * scaleX;
+        newHeight = posIn(4) * scaleY;
 
         centerX = posIn(1) + posIn(3) / 2;
         centerY = posIn(2) + posIn(4) / 2;
@@ -4144,7 +4279,7 @@ ddScope = uidropdown(tgtGrid, ...
             sel = unique(sel, 'stable');
 
             explicitHandleCache = [explicitHandleCache; newFig];
-            i_captureAxesBasePositions(newFig);
+            i_captureAxesBasePositionsIfMissing(newFig);
 
             newIdx = numel(explicitHandleCache);
             refreshExplicitListbox([sel; newIdx]);
@@ -5644,43 +5779,59 @@ ddScope = uidropdown(tgtGrid, ...
             if isfield(uiState, 'targetWidthCm') && isnumeric(uiState.targetWidthCm) && isfinite(uiState.targetWidthCm)
                 nfWsWidth.Value = min(max(double(uiState.targetWidthCm), 5), 40);
             end
+            if isfield(uiState, 'widthCm') && isnumeric(uiState.widthCm) && isfinite(uiState.widthCm)
+                nfWsWidth.Value = min(max(double(uiState.widthCm), 5), 40);
+            end
             if isfield(uiState, 'nfWsWidth')
                 nfWsWidth.Value = uiState.nfWsWidth;
             end
-            if isfield(uiState, 'heightMode') && ~isempty(uiState.heightMode)
-                cand = string(uiState.heightMode);
-                if any(string(ddWsHeightMode.Items) == cand)
-                    ddWsHeightMode.Value = char(cand);
-                end
-            end
-            if isfield(uiState, 'ddWsHeightMode')
-                i_tryAssignDropdownValue(ddWsHeightMode, uiState.ddWsHeightMode, 'ddWsHeightMode');
-            end
-            if isfield(uiState, 'heightCm') && isnumeric(uiState.heightCm) && isfinite(uiState.heightCm)
-                nfWsHeight.Value = min(max(double(uiState.heightCm), 5), 40);
-            end
-            if isfield(uiState, 'nfWsHeight')
-                nfWsHeight.Value = uiState.nfWsHeight;
-            end
+            % Legacy uiState fields heightMode/ddWsHeightMode/heightCm/nfWsHeight are ignored.
             if isfield(uiState, 'baseRatio') && isnumeric(uiState.baseRatio) && isfinite(uiState.baseRatio)
                 nfWsBaseRatio.Value = min(max(double(uiState.baseRatio), 0.3), 2);
             end
             if isfield(uiState, 'nfWsBaseRatio')
                 nfWsBaseRatio.Value = uiState.nfWsBaseRatio;
             end
-            if isfield(uiState, 'axesTransformScale') && isnumeric(uiState.axesTransformScale) && isfinite(uiState.axesTransformScale)
-                slAxScale.Value = i_quantizeSliderValue(double(uiState.axesTransformScale), [0.5 1.5], 0.01);
+            i_updateWorkspaceHeightDisplay();
+
+            if isfield(uiState, 'scaleX') && isnumeric(uiState.scaleX) && isfinite(uiState.scaleX)
+                slAxScaleX.Value = i_quantizeSliderValue(double(uiState.scaleX), [0.5 1.5], 0.01);
+            elseif isfield(uiState, 'axesTransformScaleX') && isnumeric(uiState.axesTransformScaleX) && isfinite(uiState.axesTransformScaleX)
+                slAxScaleX.Value = i_quantizeSliderValue(double(uiState.axesTransformScaleX), [0.5 1.5], 0.01);
+            elseif isfield(uiState, 'axesTransformScale') && isnumeric(uiState.axesTransformScale) && isfinite(uiState.axesTransformScale)
+                slAxScaleX.Value = i_quantizeSliderValue(double(uiState.axesTransformScale), [0.5 1.5], 0.01);
+            else
+                slAxScaleX.Value = 1.0;
             end
-            if isfield(uiState, 'slAxScale')
-                slAxScale.Value = uiState.slAxScale;
+
+            if isfield(uiState, 'scaleY') && isnumeric(uiState.scaleY) && isfinite(uiState.scaleY)
+                slAxScaleY.Value = i_quantizeSliderValue(double(uiState.scaleY), [0.5 1.5], 0.01);
+            elseif isfield(uiState, 'axesTransformScaleY') && isnumeric(uiState.axesTransformScaleY) && isfinite(uiState.axesTransformScaleY)
+                slAxScaleY.Value = i_quantizeSliderValue(double(uiState.axesTransformScaleY), [0.5 1.5], 0.01);
+            elseif isfield(uiState, 'axesTransformScale') && isnumeric(uiState.axesTransformScale) && isfinite(uiState.axesTransformScale)
+                slAxScaleY.Value = i_quantizeSliderValue(double(uiState.axesTransformScale), [0.5 1.5], 0.01);
+            else
+                slAxScaleY.Value = 1.0;
             end
-            if isfield(uiState, 'axesTransformOffsetX') && isnumeric(uiState.axesTransformOffsetX) && isfinite(uiState.axesTransformOffsetX)
+
+            if isfield(uiState, 'slAxScaleX')
+                slAxScaleX.Value = uiState.slAxScaleX;
+            end
+            if isfield(uiState, 'slAxScaleY')
+                slAxScaleY.Value = uiState.slAxScaleY;
+            end
+
+            if isfield(uiState, 'offsetX') && isnumeric(uiState.offsetX) && isfinite(uiState.offsetX)
+                slAxOffsetX.Value = i_quantizeSliderValue(double(uiState.offsetX), [-0.2 0.2], 0.01);
+            elseif isfield(uiState, 'axesTransformOffsetX') && isnumeric(uiState.axesTransformOffsetX) && isfinite(uiState.axesTransformOffsetX)
                 slAxOffsetX.Value = i_quantizeSliderValue(double(uiState.axesTransformOffsetX), [-0.2 0.2], 0.01);
             end
             if isfield(uiState, 'slAxOffsetX')
                 slAxOffsetX.Value = uiState.slAxOffsetX;
             end
-            if isfield(uiState, 'axesTransformOffsetY') && isnumeric(uiState.axesTransformOffsetY) && isfinite(uiState.axesTransformOffsetY)
+            if isfield(uiState, 'offsetY') && isnumeric(uiState.offsetY) && isfinite(uiState.offsetY)
+                slAxOffsetY.Value = i_quantizeSliderValue(double(uiState.offsetY), [-0.2 0.2], 0.01);
+            elseif isfield(uiState, 'axesTransformOffsetY') && isnumeric(uiState.axesTransformOffsetY) && isfinite(uiState.axesTransformOffsetY)
                 slAxOffsetY.Value = i_quantizeSliderValue(double(uiState.axesTransformOffsetY), [-0.2 0.2], 0.01);
             end
             if isfield(uiState, 'slAxOffsetY')
@@ -5839,8 +5990,8 @@ ddScope = uidropdown(tgtGrid, ...
                 'ddDataLineStyle','nfDataLineWidth','nfDataMarkerSize','ddFitLineStyle','nfFitLineWidth','nfFitMarkerSize', ...
                 'nfRefLineWidth','ddRefLineStyle','efRefLineColor', ...
                 'efAnnFontName','nfAnnFontSize','ddAnnFontWeight','ddAnnInterpreter','efAnnColor', ...
-                'nfWsWidth','ddWsHeightMode','nfWsHeight','nfWsBaseRatio', ...
-                'slAxScale','slAxOffsetX','slAxOffsetY', ...
+                'nfWsWidth','nfWsBaseRatio', ...
+                'slAxScaleX','slAxScaleY','slAxOffsetX','slAxOffsetY', ...
                 'ddPanelsPerRow','cbReversePlotOrder', ...
                 'ddExportFmt','cbVector','cbOverwrite','ddFilenameFrom','cbExportComposedOnly','exportOutDir'};
 
@@ -5853,8 +6004,8 @@ ddScope = uidropdown(tgtGrid, ...
                 ddDataLineStyle.Value, nfDataLineWidth.Value, nfDataMarkerSize.Value, ddFitLineStyle.Value, nfFitLineWidth.Value, nfFitMarkerSize.Value, ...
                 nfRefLineWidth.Value, ddRefLineStyle.Value, efRefLineColor.Value, ...
                 efAnnFontName.Value, nfAnnFontSize.Value, ddAnnFontWeight.Value, ddAnnInterpreter.Value, efAnnColor.Value, ...
-                nfWsWidth.Value, ddWsHeightMode.Value, nfWsHeight.Value, nfWsBaseRatio.Value, ...
-                slAxScale.Value, slAxOffsetX.Value, slAxOffsetY.Value, ...
+                nfWsWidth.Value, nfWsBaseRatio.Value, ...
+                slAxScaleX.Value, slAxScaleY.Value, slAxOffsetX.Value, slAxOffsetY.Value, ...
                 ddPanelsPerRow.Value, cbReversePlotOrder.Value, ...
                 ddExportFmt.Value, cbVector.Value, cbOverwrite.Value, ddFilenameFrom.Value, cbExportComposedOnly.Value, efExportDir.Value};
 
@@ -6044,20 +6195,12 @@ ddScope = uidropdown(tgtGrid, ...
         uiState.ddAnnInterpreter = ddAnnInterpreter.Value;
         uiState.annColor = string(efAnnColor.Value);
         uiState.efAnnColor = efAnnColor.Value;
-        uiState.targetWidthCm = double(nfWsWidth.Value);
-        uiState.nfWsWidth = nfWsWidth.Value;
-        uiState.heightMode = string(ddWsHeightMode.Value);
-        uiState.ddWsHeightMode = ddWsHeightMode.Value;
-        uiState.heightCm = double(nfWsHeight.Value);
-        uiState.nfWsHeight = nfWsHeight.Value;
+        uiState.widthCm = double(nfWsWidth.Value);
         uiState.baseRatio = double(nfWsBaseRatio.Value);
-        uiState.nfWsBaseRatio = nfWsBaseRatio.Value;
-        uiState.axesTransformScale = double(slAxScale.Value);
-        uiState.slAxScale = slAxScale.Value;
-        uiState.axesTransformOffsetX = double(slAxOffsetX.Value);
-        uiState.slAxOffsetX = slAxOffsetX.Value;
-        uiState.axesTransformOffsetY = double(slAxOffsetY.Value);
-        uiState.slAxOffsetY = slAxOffsetY.Value;
+        uiState.scaleX = double(slAxScaleX.Value);
+        uiState.scaleY = double(slAxScaleY.Value);
+        uiState.offsetX = double(slAxOffsetX.Value);
+        uiState.offsetY = double(slAxOffsetY.Value);
         uiState.reversePlotOrder = logical(cbReversePlotOrder.Value);
         uiState.cbReversePlotOrder = cbReversePlotOrder.Value;
         uiState.panelsPerRow = string(ddPanelsPerRow.Value);

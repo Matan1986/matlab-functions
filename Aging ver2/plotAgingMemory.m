@@ -96,8 +96,9 @@ end
 xlabel('Temperature (K)');
 
 if useAutoYScale && scalePower_M ~= 0
-    ylabel(sprintf('M (10^{-%d} %s)', scalePower_M, unitStr), ...
-        'Interpreter','tex');
+    ylabel(sprintf('$M\\,\\left(10^{-%d}\\,\\mu_{\\mathrm{B}}\\,\\mathrm{Co}^{-1}\\right)$', ...
+    scalePower_M), ...
+    'Interpreter','latex');
 else
     ylabel(['M (' unitStr ')'], 'Interpreter','tex');
 end
@@ -105,8 +106,15 @@ end
 title([sample_name ', Aging Memory, M(T)'],'FontWeight','bold');
 
 xlim([0 45]); xticks(0:5:45);
-legend('show','Location','bestoutside');
-box on;
+ax = gca;
+ax.TickDir   = 'in';
+ax.Box       = 'on';
+ax.LineWidth = 1.2;
+ax.Layer     = 'top';
+lgd = legend('show','Location','bestoutside');
+lgd.FontSize = fontsize - 1;
+lgd.FontName = 'Times New Roman';
+lgd.Box      = 'off';      % בלי מסגרת (יותר נקי למאמר)
 set(gca,'FontSize',fontsize);
 
 % ============================================================
@@ -180,14 +188,18 @@ for i = 1:numel(pauseRuns)
     end
 end
 
-xlabel('Temperature (K)');
+xlabel('Temperature (K)', 'Interpreter','latex');
 
-if useAutoYScale && scalePower_dM ~= 0
-    ylabel(sprintf('\\Delta M (10^{-%d} %s)', scalePower_dM, unitStr), ...
-        'Interpreter','tex');
+if useAutoYScale
+    scaleStr = sprintf('10^{-%d}', scalePower_dM);
 else
-    ylabel(['\Delta M (' unitStr ')'], 'Interpreter','tex');
+    scaleStr = sprintf('10^{-%d}', scalePower_dM);
 end
+
+ylabel(sprintf('$\\Delta M\\,\\left(%s\\,\\mu_{\\mathrm{B}}\\,\\mathrm{Co}^{-1}\\right)$', ...
+    scaleStr), ...
+    'Interpreter','latex', ...
+    'FontSize', fontsize-2);
 
 title([sample_name ', Aging Memory, \DeltaM(T)'],'FontWeight','bold');
 

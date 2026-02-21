@@ -7,11 +7,10 @@ clc; clear; close_all_except_ui_figures;
 %% --- User Settings ---
 normalizeByMass = true;
 color_scheme     = 'thermal';
-fontsize         = 18;
+fontsize         = 24;
 linewidth        = 2.2;
 debugMode        = false;
 Bohar_units      = true;  % true → µB/Co ; false → emu/g
-formatFigures    = true;
 useAutoYScale = true;   % true / false
 RobustnessCheck = false;
 %% --- MAIN FIGURE summary mode (FIT-based only) ---
@@ -193,7 +192,7 @@ end
 fitOpts = struct();
 fitOpts.windowFactor = 4;
 fitOpts.minWindow_K  = 25;
-fitOpts.debugPlots   = true;
+fitOpts.debugPlots   = false; %%%%%%%%%%%%%%%%%%%% Debub plots
 
 pauseRuns_fit = fitFMstep_plus_GaussianDip( ...
     pauseRuns_raw, dip_window_K, fitOpts);
@@ -353,21 +352,25 @@ figure('Color','w', ...
 
 
 % ---------- (a) AFM memory (FIT-based) ----------
-subplot(2,1,1); hold on;
+ax1 = subplot(2,1,1); hold(ax1,'on');
 
-ax = gca;
-ax.TickLabelInterpreter = 'latex';
-ax.Box = 'on';
-grid(ax,'off');
+ax1.TickDir = 'in';
+ax1.Box = 'on';
+ax1.Layer = 'top';
+ax1.FontName = 'Times New Roman';
+ax1.TickLabelInterpreter = 'latex';
+ax1.XMinorTick = 'off';
+ax1.YMinorTick = 'off';
+grid(ax1,'off');
 
 % guide line
 plot(Tp, Y_AFM * scaleFactor, '-', ...
-    'Color',[0.45 0.45 0.45], 'LineWidth',2.0);
+    'Color',[0.6 0.6 0.6], 'LineWidth',1.2);
 
 % markers
 for i = 1:numel(Tp)
     plot(Tp(i), Y_AFM(i)*scaleFactor, 'o', ...
-        'MarkerSize',12, ...
+    'MarkerSize',9, ...
         'MarkerFaceColor',Tp_colors(i,:), ...
         'MarkerEdgeColor',markerEdgeColor, ...
         'LineWidth',markerEdgeWidth);
@@ -378,48 +381,64 @@ ylab_AFM = sprintf([ ...
     '$\\mathrm{(10^{-%d}\\ %s)}$' ], ...
     scalePower, unitStr);
 
-ylabel(ylab_AFM,'Interpreter','latex');
+hY1 = ylabel(ylab_AFM,'Interpreter','latex');
+set(hY1,'FontSize',fontsize-2);
 
-set(gca,'FontSize',fontsize)
-set(gca,'XTick',Tp)
-xlim([min(Tp)-1 max(Tp)+1])
+set(ax1,'FontSize',fontsize-2)
+set(ax1,'XTick',Tp)
+xlim(ax1,[min(Tp)-1 max(Tp)+1])
+ylim(ax1,[0 3])
 
 
 % ---------- (b) FM background (FIT-based) ----------
-subplot(2,1,2); hold on;
+ax2 = subplot(2,1,2); hold(ax2,'on');
 
-ax = gca;
-ax.TickLabelInterpreter = 'latex';
-ax.Box = 'on';
-grid(ax,'off');
+ax2.TickDir = 'in';
+ax2.Box = 'on';
+ax2.Layer = 'top';
+ax2.FontName = 'Times New Roman';
+ax2.TickLabelInterpreter = 'latex';
+ax2.XMinorTick = 'off';
+ax2.YMinorTick = 'off';
+grid(ax2,'off');
 
 % guide line
 plot(Tp, Y_FM * scaleFactor, '-', ...
-    'Color',[0.45 0.45 0.45], 'LineWidth',2.0);
+    'Color',[0.6 0.6 0.6], 'LineWidth',1.2);
 
 % markers
 for i = 1:numel(Tp)
     plot(Tp(i), Y_FM(i)*scaleFactor, 'o', ...
-        'MarkerSize',12, ...
+    'MarkerSize',9, ...
         'MarkerFaceColor',Tp_colors(i,:), ...
         'MarkerEdgeColor',markerEdgeColor, ...
         'LineWidth',markerEdgeWidth);
 end
 
 xlabel('Pause temperature (K)','Interpreter','latex');
-ax = gca;
-ax.TickLabelInterpreter = 'latex';
 
 ylab_FM = sprintf([ ...
     '$\\mathrm{FM-like}$\n' ...
     '$\\mathrm{(10^{-%d}\\ \\mu_{\\mathrm{B}}/\\mathrm{Co})}$' ], ...
     scalePower);
 
-ylabel(ylab_FM,'Interpreter','latex');
+hY2 = ylabel(ylab_FM,'Interpreter','latex');
+set(hY2,'FontSize',fontsize-2);
 
-set(gca,'FontSize',fontsize)
-set(gca,'XTick',Tp)
-xlim([min(Tp)-1 max(Tp)+1])
+set(ax2,'FontSize',fontsize-2)
+set(ax2,'XTick',Tp)
+xlim(ax2,[min(Tp)-1 max(Tp)+1])
+ylim(ax2,[0 3])
+
+set(ax1,'XTickLabel',[])
+
+pos1 = ax1.Position;
+pos2 = ax2.Position;
+
+newHeight = 0.38;
+
+ax1.Position = [pos1(1), 0.58, pos1(3), newHeight];
+ax2.Position = [pos2(1), 0.08, pos2(3), newHeight];
 
 
 linkaxes(findall(gcf,'Type','axes'),'x');

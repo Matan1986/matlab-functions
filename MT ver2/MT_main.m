@@ -1,9 +1,9 @@
 %% intro
 clc;
 clear;
-close_all_except_ui_figures;
+% close_all_except_ui_figures;
 
-fontsize = 30;
+fontsize = 24;
 DC       = true;
 color_scheme = 'default';
 formatFigures = true;

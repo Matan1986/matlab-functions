@@ -134,6 +134,14 @@ end
 box on;
 
 %% ---------------- Formatting ----------------
-set(findall(gcf,'-property','FontSize'),'FontSize',fontsize);
+ax = gca;
+ax.FontName   = 'Times New Roman';
+ax.FontSize   = fontsize;
+ax.LineWidth  = 1.2;
+ax.TickDir    = 'in';     % PRL style
+ax.Box        = 'on';
+ax.Layer      = 'top';
+ax.XMinorTick = 'on';
+ax.YMinorTick = 'on';
 
 end

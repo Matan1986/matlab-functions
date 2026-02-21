@@ -13,6 +13,7 @@ keepNames = {
     'Final Figure Formatter'
     'Appearance / Colormap Control'
     'Reference Line Tool'
+    'FigureControlStudio'
 };
 
 % ---- find all figures ----
