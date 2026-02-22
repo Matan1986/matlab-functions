@@ -688,11 +688,11 @@ ddScope = uidropdown(tgtGrid, ...
     tabRootExport.RowHeight = {'fit', 'fit', 'fit', '1x', 'fit'};
     tabRootExport.Padding = [12 12 12 12];
 
-    secExportA = uigridlayout(tabRootExport, [6 2]);
+    secExportA = uigridlayout(tabRootExport, [8 2]);
     secExportA.Layout.Row = 1;
     secExportA.Layout.Column = 1;
     secExportA.ColumnWidth = {140, '1x'};
-    secExportA.RowHeight = {'fit', 'fit', 'fit', 'fit', 'fit', 'fit'};
+    secExportA.RowHeight = {'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit'};
     secExportA.Padding = [0 0 0 0];
 
     lblExportFormat = uilabel(secExportA, 'Text', 'Format', 'HorizontalAlignment', 'left');
@@ -702,24 +702,40 @@ ddScope = uidropdown(tgtGrid, ...
     ddExportFmt.Layout.Row = 1;
     ddExportFmt.Layout.Column = 2;
 
+    lblExportJournal = uilabel(secExportA, 'Text', 'Journal', 'HorizontalAlignment', 'left');
+    lblExportJournal.Layout.Row = 2;
+    lblExportJournal.Layout.Column = 1;
+    ddExportJournal = uidropdown(secExportA, 'Items', {'PRL','Nature'}, 'Value', 'PRL', ...
+        'ValueChangedFcn', @onPersistedControlChanged);
+    ddExportJournal.Layout.Row = 2;
+    ddExportJournal.Layout.Column = 2;
+
+    lblExportColumn = uilabel(secExportA, 'Text', 'Column', 'HorizontalAlignment', 'left');
+    lblExportColumn.Layout.Row = 3;
+    lblExportColumn.Layout.Column = 1;
+    ddExportColumn = uidropdown(secExportA, 'Items', {'Single Column','Double Column'}, 'Value', 'Single Column', ...
+        'ValueChangedFcn', @onPersistedControlChanged);
+    ddExportColumn.Layout.Row = 3;
+    ddExportColumn.Layout.Column = 2;
+
     cbVector = uicheckbox(secExportA, 'Text', 'Vector mode (PDF only)', 'Value', true);
-    cbVector.Layout.Row = 2;
+    cbVector.Layout.Row = 4;
     cbVector.Layout.Column = [1 2];
 
     cbOverwrite = uicheckbox(secExportA, 'Text', 'Overwrite', 'Value', false);
-    cbOverwrite.Layout.Row = 3;
+    cbOverwrite.Layout.Row = 5;
     cbOverwrite.Layout.Column = [1 2];
 
     lblExportFilenameSource = uilabel(secExportA, 'Text', 'Filename source', 'HorizontalAlignment', 'left');
-    lblExportFilenameSource.Layout.Row = 4;
+    lblExportFilenameSource.Layout.Row = 6;
     lblExportFilenameSource.Layout.Column = 1;
     ddFilenameFrom = uidropdown(secExportA, 'Items', {'Name','Number'}, 'Value', 'Name');
-    ddFilenameFrom.Layout.Row = 4;
+    ddFilenameFrom.Layout.Row = 6;
     ddFilenameFrom.Layout.Column = 2;
 
     cbExportComposedOnly = uicheckbox(secExportA, 'Text', 'Export composed file only', 'Value', false, ...
         'ValueChangedFcn', @onPersistedControlChanged);
-    cbExportComposedOnly.Layout.Row = 5;
+    cbExportComposedOnly.Layout.Row = 7;
     cbExportComposedOnly.Layout.Column = [1 2];
 
     secExportB = uigridlayout(tabRootExport, [2 1]);
@@ -972,6 +988,8 @@ ddScope = uidropdown(tgtGrid, ...
         'reversePlotOrder', false, ...
         'panelsPerRow', "2", ...
         'exportComposedOnly', false, ...
+        'exportJournal', "PRL", ...
+        'exportColumn', "Single Column", ...
         'exportOutDir', string(pwd));
     suppressUIStateSave = false;
     isRestoringUIState = false;
@@ -1043,14 +1061,68 @@ ddScope = uidropdown(tgtGrid, ...
 
     function onRefreshExplicit(~, ~)
         try
-            tmpSpec = struct('mode', 'allOpen', 'excludeKnownGUIs', cbExcludeGUIs.Value);
-            figs = FCS_resolveTargets(tmpSpec);
-            figs = figs(isgraphics(figs, 'figure'));
-            figs(figs == ui) = [];
+            % INCREMENTAL UPDATE LOGIC:
+            % - Use existing list order as base reference
+            % - Remove entries for closed figures (preserving order of remaining)
+            % - Append newly opened figures at END only
+            % - Do NOT sort, do NOT rebuild from scratch
+            % - Preserve selection if figure still exists
 
-            explicitHandleCache = figs(:);
+            % Step 1: Capture currently selected figure handles (not indices)
+            selectedFigHandles = gobjects(0,1);
+            try
+                sel = lbFigures.Value;
+                sel = double(sel(:));
+                sel = sel(sel >= 1 & sel <= numel(explicitHandleCache));
+                if ~isempty(sel)
+                    selectedFigHandles = explicitHandleCache(sel);
+                    selectedFigHandles = selectedFigHandles(isgraphics(selectedFigHandles, 'figure'));
+                end
+            catch
+            end
+
+            % Step 2: Get all currently open figures (for comparison only)
+            tmpSpec = struct('mode', 'allOpen', 'excludeKnownGUIs', cbExcludeGUIs.Value);
+            allOpenFigs = FCS_resolveTargets(tmpSpec);
+            allOpenFigs = allOpenFigs(isgraphics(allOpenFigs, 'figure'));
+            allOpenFigs(allOpenFigs == ui) = [];
+
+            % Step 3: Remove closed figures while preserving order of existing entries
+            % This is a minimal diff operation - only removes invalids, no reordering
+            stillValid = isgraphics(explicitHandleCache, 'figure');
+            explicitHandleCache = explicitHandleCache(stillValid);
+
+            % Step 4: Find new figures not currently in the list
+            % We check against existing list to identify additions only
+            newFigs = gobjects(0,1);
+            for k = 1:numel(allOpenFigs)
+                fig = allOpenFigs(k);
+                if ~any(explicitHandleCache == fig)
+                    newFigs(end+1,1) = fig; %#ok<AGROW>
+                end
+            end
+
+            % Step 5: Append new figures at the END (no reordering of existing)
+            if ~isempty(newFigs)
+                explicitHandleCache = [explicitHandleCache; newFigs];
+            end
+
             i_captureAxesBasePositionsIfMissing(explicitHandleCache);
-            refreshExplicitListbox([]);
+
+            % Step 6: Restore selection based on figure handles (not auto-change)
+            % Selected figures that still exist will remain selected at their new indices
+            selectedIndices = [];
+            for k = 1:numel(selectedFigHandles)
+                idx = find(explicitHandleCache == selectedFigHandles(k), 1);
+                if ~isempty(idx)
+                    selectedIndices(end+1) = idx; %#ok<AGROW>
+                end
+            end
+            if isempty(selectedIndices)
+                selectedIndices = [];
+            end
+
+            refreshExplicitListbox(selectedIndices);
             i_applyPendingRestoreAfterPopulation();
             i_applyManualLegendDragModeToFigures(explicitHandleCache);
             i_debugUIStateDiff('after onRefreshExplicit');
@@ -1746,6 +1818,8 @@ ddScope = uidropdown(tgtGrid, ...
         i_updateAxesTransformLabels();
         ddPanelsPerRow.Value = char(defaultUIState.panelsPerRow);
         cbExportComposedOnly.Value = logical(defaultUIState.exportComposedOnly);
+        ddExportJournal.Value = char(defaultUIState.exportJournal);
+        ddExportColumn.Value = char(defaultUIState.exportColumn);
         efExportDir.Value = char(defaultUIState.exportOutDir);
 
         onScopeModeChanged();
@@ -3841,12 +3915,78 @@ ddScope = uidropdown(tgtGrid, ...
     end
 
     function onApplyExport(~, ~)
+        exportTempComposedFig = false;
         if logical(cbExportComposedOnly.Value)
-            if isempty(lastComposedFigure) || ~isgraphics(lastComposedFigure, 'figure')
-                uialert(ui, 'No composed figure is available to export.', 'Export');
+            fig = [];
+            if ~isempty(lastComposedFigure) && isgraphics(lastComposedFigure, 'figure')
+                fig = lastComposedFigure;
+            else
+                [fig, ~, errMsg] = i_buildComposedFigureFromCurrentSelection();
+                if isempty(fig) || ~isgraphics(fig, 'figure')
+                    if isempty(errMsg)
+                        errMsg = 'No composed figure is available to export.';
+                    end
+                    uialert(ui, char(errMsg), 'Export');
+                    return;
+                end
+                exportTempComposedFig = true;
+            end
+            if strcmpi(char(ddExportFmt.Value), 'pdf')
+                outDir = char(string(efExportDir.Value));
+                if isempty(outDir)
+                    outDir = pwd;
+                end
+
+                if exist(outDir, 'dir') ~= 7
+                    mkdir(outDir);
+                end
+
+                modeStr = lower(strtrim(string(ddFilenameFrom.Value)));
+                if modeStr == "name"
+                    baseName = string(fig.Name);
+                    if strlength(strtrim(baseName)) == 0
+                        try
+                            baseName = "Figure" + string(fig.Number);
+                        catch
+                            baseName = "Figure_1";
+                        end
+                    end
+                else
+                    try
+                        baseName = "Figure" + string(fig.Number);
+                    catch
+                        baseName = "Figure_1";
+                    end
+                end
+
+                try
+                    if exist('sanitizeFilename', 'file') == 2
+                        baseName = string(sanitizeFilename(char(baseName)));
+                    end
+                catch
+                end
+                if strlength(baseName) == 0
+                    baseName = "Figure_1";
+                end
+
+                outFile = fullfile(outDir, char(baseName + ".pdf"));
+                if ~logical(cbOverwrite.Value)
+                    [p, n, e] = fileparts(outFile);
+                    k = 1;
+                    while exist(outFile, 'file')
+                        outFile = fullfile(p, sprintf('%s_%d%s', n, k, e));
+                        k = k + 1;
+                    end
+                end
+
+                exportgraphics(fig, outFile, 'ContentType', 'vector');
+
+                if exportTempComposedFig && ~isempty(fig) && isgraphics(fig, 'figure')
+                    close(fig);
+                end
                 return;
             end
-            figs = lastComposedFigure;
+            figs = fig;
         else
             figs = resolveTargetsOrAlert('Export');
         end
@@ -3865,6 +4005,15 @@ ddScope = uidropdown(tgtGrid, ...
         catch ME
             uialert(ui, ME.message, 'Export Apply Failed');
         end
+        if exportTempComposedFig && exist('fig', 'var') && ~isempty(fig) && isgraphics(fig, 'figure')
+            close(fig);
+        end
+    end
+
+    function journalSpecs = i_getJournalSpecs()
+        journalSpecs = struct();
+        journalSpecs.PRL = struct('Single', 8.6, 'Double', 17.8);
+        journalSpecs.Nature = struct('Single', 8.9, 'Double', 18.3);
     end
 
     function onTargetReport(~, ~)
@@ -3977,38 +4126,105 @@ ddScope = uidropdown(tgtGrid, ...
         i_applyComposeSpecToUI(spec);
     end
 
-    function onCompose(~, ~)
-        i_saveUIState();
-
-        if string(ddScope.Value) ~= "Explicit List"
-            uialert(ui, 'Compose is available only in Explicit List scope mode.', 'Compose');
+    function [newFig, composeWarnings] = i_buildComposedFigure(figs, rows, cols, widthCm, hGap, vGap, scaleFactor, autoLabel, labelPos, labelFs)
+        % Pure visual compose: create tiledlayout and copy axes without geometry modification
+        newFig = [];
+        composeWarnings = strings(0,1);
+        
+        if isempty(figs) || rows < 1 || cols < 1
             return;
         end
+        
+        % Create new figure
+        newFig = figure('Name', 'Composed Figure', 'Renderer', 'painters');
+        
+        % Create tiledlayout
+        tl = tiledlayout(newFig, rows, cols, 'Padding', 'compact', 'TileSpacing', 'compact');
+        
+        % Copy each figure's primary axes into tiles
+        for k = 1:numel(figs)
+            srcFig = figs(k);
+            
+            % Find primary axes in source figure
+            allAxes = findall(srcFig, 'Type', 'axes');
+            primaryAxes = gobjects(0,1);
+            
+            for iAx = 1:numel(allAxes)
+                ax = allAxes(iAx);
+                if ~isgraphics(ax, 'axes')
+                    continue;
+                end
+                % Skip legend axes
+                if strcmp(get(ax, 'Tag'), 'legend')
+                    continue;
+                end
+                % Skip axes with no children
+                children = allchild(ax);
+                if isempty(children)
+                    continue;
+                end
+                % Check for plot objects
+                hasPlot = any(arrayfun(@(h) ...
+                    isa(h,'matlab.graphics.chart.primitive.Line') || ...
+                    isa(h,'matlab.graphics.chart.primitive.Scatter') || ...
+                    isa(h,'matlab.graphics.chart.primitive.Image') || ...
+                    isa(h,'matlab.graphics.chart.primitive.Bar') || ...
+                    isa(h,'matlab.graphics.chart.primitive.Area') || ...
+                    isa(h,'matlab.graphics.chart.primitive.ErrorBar') || ...
+                    isa(h,'matlab.graphics.chart.primitive.Surface') || ...
+                    isa(h,'matlab.graphics.primitive.Patch'), children));
+                
+                if hasPlot
+                    primaryAxes(end+1,1) = ax; %#ok<AGROW>
+                end
+            end
+            
+            % Create tile and copy axes
+            nexttile(tl, k);
+            if ~isempty(primaryAxes)
+                try
+                    copyobj(primaryAxes, tl);
+                catch ME
+                    % Fallback: copy one by one
+                    for j = 1:numel(primaryAxes)
+                        try
+                            copyobj(primaryAxes(j), tl);
+                        catch
+                        end
+                    end
+                end
+            end
+        end
+    end
 
+    function [newFig, composeWarnings, errMsg] = i_buildComposedFigureFromCurrentSelection()
+        newFig = [];
+        composeWarnings = strings(0,1);
+        errMsg = '';
+        if string(ddScope.Value) ~= "Explicit List"
+            errMsg = 'Compose is available only in Explicit List scope mode.';
+            return;
+        end
         selected = lbFigures.Value;
         if isempty(selected)
-            uialert(ui, 'Select at least one figure from the explicit list.', 'Compose');
+            errMsg = 'Select at least one figure from the explicit list.';
             return;
         end
-
         selected = double(selected(:));
         selected = selected(selected >= 1 & selected <= numel(explicitHandleCache));
         selected = unique(selected, 'stable');
         figs = explicitHandleCache(selected);
         figs = figs(isgraphics(figs, 'figure'));
-
         if isempty(figs)
-            uialert(ui, 'Selected explicit-list figures are not valid.', 'Compose');
+            errMsg = 'Selected explicit-list figures are not valid.';
             return;
         end
-
         rows = max(1, round(double(nfRows.Value)));
         cols = max(1, round(double(nfCols.Value)));
         if rows * cols < numel(figs)
-            uialert(ui, 'Rows * Columns must be at least the number of selected figures.', 'Compose');
+            errMsg = 'Rows * Columns must be at least the number of selected figures.';
             return;
         end
-
         widthCm = 8.6;
         switch string(ddWidthPreset.Value)
             case "Single column"
@@ -4018,260 +4234,35 @@ ddScope = uidropdown(tgtGrid, ...
             case "Custom"
                 widthCm = double(nfCustomWidth.Value);
                 if ~isfinite(widthCm) || widthCm <= 0
-                    uialert(ui, 'Custom width must be positive.', 'Compose');
+                    errMsg = 'Custom width must be positive.';
                     return;
                 end
         end
-
         hGap = i_quantizeSliderValue(double(slComposeHGap.Value), [0 0.1], 0.001);
         vGap = i_quantizeSliderValue(double(slComposeVGap.Value), [0 0.1], 0.001);
-
         scalePercent = double(nfOverallSizePct.Value);
         if ~isfinite(scalePercent)
             scalePercent = 100;
         end
         scalePercent = max(80, min(130, scalePercent));
         scaleFactor = scalePercent / 100;
-
-        % Overall size scale is preview-only; publication export size comes from composeSpec.size.
-
-        % Natural compose window sizing in pixels, derived from source figure windows.
-        nPlaced = numel(figs);
-        srcWidthsPx = zeros(nPlaced,1);
-        srcHeightsPx = zeros(nPlaced,1);
-
-        for iFig = 1:nPlaced
-            srcFig = figs(iFig);
-
-            wPx = NaN;
-            hPx = NaN;
-            try
-                ppx = getpixelposition(srcFig, true);
-                if isnumeric(ppx) && numel(ppx) >= 4
-                    wPx = double(ppx(3));
-                    hPx = double(ppx(4));
-                end
-            catch
-            end
-
-            if ~isfinite(wPx) || ~isfinite(hPx) || wPx <= 1 || hPx <= 1
-                try
-                    oldUnitsSrc = srcFig.Units;
-                    srcFig.Units = 'pixels';
-                    p = double(srcFig.Position);
-                    srcFig.Units = oldUnitsSrc;
-                    if isnumeric(p) && numel(p) >= 4
-                        wPx = double(p(3));
-                        hPx = double(p(4));
-                    end
-                catch
-                end
-            end
-
-            if ~isfinite(wPx) || wPx <= 1
-                wPx = 800;
-            end
-            if ~isfinite(hPx) || hPx <= 1
-                hPx = 600;
-            end
-
-            srcWidthsPx(iFig) = wPx;
-            srcHeightsPx(iFig) = hPx;
-        end
-
-        refWidthPx = median(srcWidthsPx(srcWidthsPx > 1));
-        if isempty(refWidthPx) || ~isfinite(refWidthPx)
-            refWidthPx = 800;
-        end
-        refHeightPx = median(srcHeightsPx(srcHeightsPx > 1));
-        if isempty(refHeightPx) || ~isfinite(refHeightPx)
-            refHeightPx = 600;
-        end
-
-        hGapPx = max(0, round(hGap * refWidthPx));
-        vGapPx = max(0, round(vGap * refHeightPx));
-        padXPx = 24;
-        padYPx = 24;
-
-        colWidthsPx = zeros(1, cols);
-        rowHeightsPx = zeros(1, rows);
-        for iFig = 1:nPlaced
-            colIndex = mod(iFig - 1, cols) + 1;
-            rowIndex = floor((iFig - 1) / cols) + 1;
-            colWidthsPx(colIndex) = max(colWidthsPx(colIndex), srcWidthsPx(iFig));
-            rowHeightsPx(rowIndex) = max(rowHeightsPx(rowIndex), srcHeightsPx(iFig));
-        end
-
-        defaultColWidthPx = max(1, round(refWidthPx));
-        defaultRowHeightPx = max(1, round(refHeightPx));
-        colWidthsPx(colWidthsPx <= 0) = defaultColWidthPx;
-        rowHeightsPx(rowHeightsPx <= 0) = defaultRowHeightPx;
-
-        totalWidthPx = round(sum(colWidthsPx) + max(0, cols - 1) * hGapPx + 2 * padXPx);
-        totalHeightPx = round(sum(rowHeightsPx) + max(0, rows - 1) * vGapPx + 2 * padYPx);
-
-        aspect = totalHeightPx / totalWidthPx;
-        heightCm = widthCm * aspect;
-        composeSpec = i_buildComposeSpecFromUI(rows, cols, widthCm, heightCm);
-
-        totalWidthPx = max(200, round(totalWidthPx * scaleFactor));
-        totalHeightPx = max(200, round(totalHeightPx * scaleFactor));
-
-        newFig = figure('Name', 'Composed Figure', ...
-                        'Units', 'pixels', ...
-                        'Position', [100 100 totalWidthPx totalHeightPx], ...
-                        'Renderer', 'painters');
-
-                newFig.Units = 'pixels';
-                posNew = newFig.Position;
-                newFig.Position = [posNew(1) posNew(2) totalWidthPx totalHeightPx];
-
-                tl = tiledlayout(newFig, rows, cols, 'Padding', 'none', 'TileSpacing', 'none');
-
         autoLabel = logical(cbAutoLabel.Value);
         labelPos = string(ddLabelPos.Value);
         labelFs = max(1, double(nfLabelFont.Value));
-        composeWarnings = strings(0,1);
-        composeVerbose = false;
-        try
-            if exist('options', 'var') && isstruct(options) && isfield(options, 'Verbose')
-                composeVerbose = logical(options.Verbose);
-            end
-        catch
+        [newFig, composeWarnings] = i_buildComposedFigure(figs, rows, cols, widthCm, hGap, vGap, scaleFactor, autoLabel, labelPos, labelFs);
+    end
+
+    function onCompose(~, ~)
+        i_saveUIState();
+        [newFig, composeWarnings, errMsg] = i_buildComposedFigureFromCurrentSelection();
+        if ~isempty(errMsg)
+            uialert(ui, errMsg, 'Compose');
+            return;
         end
-
-        for k = 1:numel(figs)
-            tileAx = nexttile(tl, k);
-            delete(tileAx);
-
-            tilePos = i_computeComposeContainerPosition(k, rows, cols, hGap, vGap);
-
-            panel = uipanel('Parent', newFig, ...
-                            'Units', 'normalized', ...
-                            'Position', tilePos, ...
-                            'BorderType', 'none', ...
-                            'Clipping', 'off');
-
-            srcFig = figs(k);
-            figName = "(unnamed)";
-            try
-                nm = string(srcFig.Name);
-                if strlength(strtrim(nm)) > 0
-                    figName = nm;
-                end
-            catch
-            end
-
-            [childrenToCopy, skipAnnotationCount, skipUnsupportedCount, srcManualLegendAxes] = i_filterComposeChildren(srcFig);
-
-            groupedCopyFailed = false;
-            fallbackSkipCount = 0;
-            groupedCopyErrorId = "";
-            groupedCopyErrorMsgShort = "";
-
-            if ~isempty(childrenToCopy)
-                % Grouped copy is preferred because MATLAB can remap inter-object
-                % references (e.g., legend/colorbar associations) in one transaction.
-                try
-                    copyobj(childrenToCopy, panel);
-                catch ME
-                    groupedCopyFailed = true;
-                    groupedCopyErrorId = string(ME.identifier);
-                    if strlength(strtrim(groupedCopyErrorId)) == 0
-                        groupedCopyErrorId = "unknown";
-                    end
-                    groupedCopyErrorMsgShort = string(ME.message);
-                    groupedCopyErrorMsgShort = strrep(groupedCopyErrorMsgShort, newline, " ");
-                    if strlength(groupedCopyErrorMsgShort) > 80
-                        groupedCopyErrorMsgShort = extractBefore(groupedCopyErrorMsgShort, 81) + "...";
-                    end
-                    % Deterministic fallback: per-object copy in stable child order.
-                    for j = numel(childrenToCopy):-1:1
-                        try
-                            copyobj(childrenToCopy(j), panel);
-                        catch
-                            fallbackSkipCount = fallbackSkipCount + 1;
-                        end
-                    end
-                end
-            end
-
-            [manualLegendCopied, manualLegendCopyFailed] = i_preserveCopiedAxesPositions(srcFig, panel, newFig, tilePos, srcManualLegendAxes);
-
-            if isappdata(srcFig, 'ComposeLegendData')
-                ld = getappdata(srcFig, 'ComposeLegendData');
-                if isstruct(ld) && isfield(ld, 'enabled') && logical(ld.enabled) && isfield(ld, 'mode') && strcmpi(string(ld.mode), "external")
-                    renderCombinedLegendOverlayInParent(panel, ld);
-                end
-            end
-
-            if composeVerbose
-                fprintf('[Compose] panel %d: detectedManualLegendAxes=%d, copied=%d, failed=%d\n', ...
-                    k, numel(srcManualLegendAxes), manualLegendCopied, manualLegendCopyFailed);
-            end
-
-            assocReport = i_verifyPanelLegendColorbarAssociations(panel);
-
-            warnParts = strings(0,1);
-            if skipAnnotationCount > 0
-                warnParts(end+1,1) = "skipped annotations=" + string(skipAnnotationCount); %#ok<AGROW>
-            end
-            if skipUnsupportedCount > 0
-                warnParts(end+1,1) = "skipped unsupported=" + string(skipUnsupportedCount); %#ok<AGROW>
-            end
-            if groupedCopyFailed
-                warnParts(end+1,1) = "grouped-copy fallback used"; %#ok<AGROW>
-                warnParts(end+1,1) = "grouped-copy error=" + groupedCopyErrorId; %#ok<AGROW>
-                if strlength(groupedCopyErrorMsgShort) > 0
-                    warnParts(end+1,1) = "grouped-copy msg=" + groupedCopyErrorMsgShort; %#ok<AGROW>
-                end
-            end
-            if fallbackSkipCount > 0
-                warnParts(end+1,1) = "fallback skipped=" + string(fallbackSkipCount); %#ok<AGROW>
-            end
-            if manualLegendCopyFailed > 0
-                warnParts(end+1,1) = "manual-legend copy skipped=" + string(manualLegendCopyFailed); %#ok<AGROW>
-            end
-            if assocReport.brokenLegendCount > 0
-                warnParts(end+1,1) = "legend-association-risk=" + string(assocReport.brokenLegendCount); %#ok<AGROW>
-            end
-            if assocReport.brokenColorbarCount > 0
-                warnParts(end+1,1) = "colorbar-association-risk=" + string(assocReport.brokenColorbarCount); %#ok<AGROW>
-            end
-
-            if ~isempty(warnParts)
-                composeWarnings(end+1,1) = "Compose: fig=" + figName + " | " + strjoin(warnParts, ", "); %#ok<AGROW>
-            end
-
-            if autoLabel
-                labelTxt = i_panelLabel(k);
-                switch labelPos
-                    case "Top-right"
-                        x = tilePos(1) + tilePos(3) - 0.05;
-                        y = tilePos(2) + tilePos(4) - 0.03;
-                        hAlign = 'right';
-                    otherwise
-                        x = tilePos(1) + 0.01;
-                        y = tilePos(2) + tilePos(4) - 0.03;
-                        hAlign = 'left';
-                end
-
-                annotation(newFig, 'textbox', [x y 0.05 0.04], ...
-                    'String', labelTxt, ...
-                    'FitBoxToText', 'off', ...
-                    'LineStyle', 'none', ...
-                    'FontWeight', 'bold', ...
-                    'FontSize', labelFs, ...
-                    'HorizontalAlignment', hAlign, ...
-                    'Units', 'normalized');
-            end
-        end
-
         if ~isempty(composeWarnings)
             msg = strjoin(unique(composeWarnings, 'stable'), newline);
             uialert(ui, char(msg), 'Compose warnings');
         end
-
         if isgraphics(newFig, 'figure')
             sel = lbFigures.Value;
             sel = double(sel(:));
@@ -4281,8 +4272,8 @@ ddScope = uidropdown(tgtGrid, ...
             explicitHandleCache = [explicitHandleCache; newFig];
             i_captureAxesBasePositionsIfMissing(newFig);
 
-            newIdx = numel(explicitHandleCache);
-            refreshExplicitListbox([sel; newIdx]);
+            % Keep previous selection only (do not auto-select composed figure)
+            refreshExplicitListbox(sel);
 
             lastComposedFigure = newFig;
             i_applyManualLegendDragModeToFigures(explicitHandleCache);
@@ -5859,6 +5850,14 @@ ddScope = uidropdown(tgtGrid, ...
             if isfield(uiState, 'ddExportFmt')
                 i_tryAssignDropdownValue(ddExportFmt, uiState.ddExportFmt, 'ddExportFmt');
             end
+            if isfield(uiState, 'exportJournal')
+                i_tryAssignDropdownValue(ddExportJournal, uiState.exportJournal, 'exportJournal');
+            end
+            if isfield(uiState, 'exportColumn')
+                i_tryAssignDropdownValue(ddExportColumn, uiState.exportColumn, 'exportColumn');
+            elseif isfield(uiState, 'prlMode')
+                i_tryAssignDropdownValue(ddExportColumn, uiState.prlMode, 'exportColumn');
+            end
             if isfield(uiState, 'cbVector')
                 cbVector.Value = uiState.cbVector;
             end
@@ -5993,7 +5992,7 @@ ddScope = uidropdown(tgtGrid, ...
                 'nfWsWidth','nfWsBaseRatio', ...
                 'slAxScaleX','slAxScaleY','slAxOffsetX','slAxOffsetY', ...
                 'ddPanelsPerRow','cbReversePlotOrder', ...
-                'ddExportFmt','cbVector','cbOverwrite','ddFilenameFrom','cbExportComposedOnly','exportOutDir'};
+                'ddExportFmt','exportJournal','exportColumn','cbVector','cbOverwrite','ddFilenameFrom','cbExportComposedOnly','exportOutDir'};
 
             currentValues = {
                 ddScope.Value, efTag.Value, efNameContains.Value, lbFigures.Value, cbExcludeGUIs.Value, ...
@@ -6007,7 +6006,7 @@ ddScope = uidropdown(tgtGrid, ...
                 nfWsWidth.Value, nfWsBaseRatio.Value, ...
                 slAxScaleX.Value, slAxScaleY.Value, slAxOffsetX.Value, slAxOffsetY.Value, ...
                 ddPanelsPerRow.Value, cbReversePlotOrder.Value, ...
-                ddExportFmt.Value, cbVector.Value, cbOverwrite.Value, ddFilenameFrom.Value, cbExportComposedOnly.Value, efExportDir.Value};
+                ddExportFmt.Value, ddExportJournal.Value, ddExportColumn.Value, cbVector.Value, cbOverwrite.Value, ddFilenameFrom.Value, cbExportComposedOnly.Value, efExportDir.Value};
 
             diffs = {};
             for iField = 1:numel(fieldNames)
@@ -6206,6 +6205,8 @@ ddScope = uidropdown(tgtGrid, ...
         uiState.panelsPerRow = string(ddPanelsPerRow.Value);
         uiState.ddPanelsPerRow = ddPanelsPerRow.Value;
         uiState.ddExportFmt = ddExportFmt.Value;
+        uiState.exportJournal = ddExportJournal.Value;
+        uiState.exportColumn = ddExportColumn.Value;
         uiState.cbVector = cbVector.Value;
         uiState.cbOverwrite = cbOverwrite.Value;
         uiState.ddFilenameFrom = ddFilenameFrom.Value;
@@ -6231,6 +6232,43 @@ ddScope = uidropdown(tgtGrid, ...
             save(stateFile, 'uiState');
         catch
             % Best-effort persistence only
+        end
+    end
+
+    function restorePaperProps(fig, orig)
+        fig.PaperUnits = orig.PaperUnits;
+        fig.PaperPosition = orig.PaperPosition;
+        fig.PaperSize = orig.PaperSize;
+        fig.PaperPositionMode = orig.PaperPositionMode;
+        fig.InvertHardcopy = orig.InvertHardcopy;
+    end
+
+    function i_scalePanel(container, scaleFactor)
+        % Minimal scaling of FontSize and LineWidth for axes in container
+        if nargin < 2 || ~isnumeric(scaleFactor) || scaleFactor <= 0
+            return;
+        end
+        
+        axList = findall(container, 'Type', 'axes');
+        for i = 1:numel(axList)
+            ax = axList(i);
+            if ~isgraphics(ax)
+                continue;
+            end
+            
+            try
+                if isprop(ax, 'FontSize')
+                    ax.FontSize = ax.FontSize * scaleFactor;
+                end
+            catch
+            end
+            
+            try
+                if isprop(ax, 'LineWidth')
+                    ax.LineWidth = ax.LineWidth * scaleFactor;
+                end
+            catch
+            end
         end
     end
 end

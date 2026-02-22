@@ -1,11 +1,12 @@
 clc;
-% clear;
+clear;
 close_all_except_ui_figures;
 format shortEng;
 %% dir & file list
-baseFolder = 'C:\Users\matan\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Matlab functions';
+baseFolder = 'C:\Dev\matlab-functions';
 addpath(genpath(baseFolder));
-dir = "C:\Users\matan\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\FIB5_Switching_old_PPMS\Config3 23\Amp Temp Dep partial ver2";
+dir = "L:\My Drive\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\FIB5_Switching_old_PPMS\Config3 23\Amp Temp Dep all fix\Temp Dep 25mA 10ms 0T 15sec 10pulses 16";
+dir = "L:\My Drive\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\FIB5_Switching_old_PPMS\Config3 23\Amp Temp Dep all fix\Temp Dep 30mA 10ms 0T 15sec 10pulses 12";
 % -------------------------------------------------
 % Amp–Temp Switching Map
 % plotAmpTempSwitchingMap_switchCh(parentDir, metricType, channelMode)
@@ -14,8 +15,9 @@ if detectAmpTempSwitchingMap(dir)
     plotAmpTempMode = "map+fc";       % "map" | "map+fc"
     ampTempMetric = "P2P_percent";   %  "P2P_percent" | "medianAbs" | "meanP2P"
     ChannesToPlotAmpTemp = "switchCh";      % "switchCh"  |  "all"
+    FC_amp_subset = [15 25 35];   % mA
     plotAmpTempSwitchingMap_switchCh( ...
-        dir, ampTempMetric, ChannesToPlotAmpTemp, plotAmpTempMode);
+        dir, ampTempMetric, ChannesToPlotAmpTemp, plotAmpTempMode,FC_amp_subset);
     return;
 end
 %% -------------------------------------------------

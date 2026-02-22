@@ -1,4 +1,4 @@
-function plotAmpTempSwitchingMap_switchCh(parentDir, metricType, channelMode, plotAmpTempMode)
+function plotAmpTempSwitchingMap_switchCh(parentDir, metricType, channelMode, plotAmpTempMode,FC_amp_subset)
 % Amp–Temp switching map with TEMPERATURE BINNING
 % Figure Name = META ONLY (preset-based labels)
 % No title, no LaTeX in Name
@@ -10,6 +10,10 @@ end
 if nargin < 4 || isempty(plotAmpTempMode)
     plotAmpTempMode = "map";
 end
+if nargin < 5 || isempty(FC_amp_subset)
+    FC_amp_subset = [];
+end
+
 doFCstack = (plotAmpTempMode == "map+fc");
 
 % ---------------- defaults ----------------
@@ -54,7 +58,8 @@ T_all    = [];
 
 % -------- channel → label map (preset identity) --------
 chLabelMap = containers.Map('KeyType','int32','ValueType','char');
-interpFactor = 7;   % היה 5 | מומלץ: 7–8 | לא לעבור 10
+interpFactor = 9;   % היה 5 | מומלץ: 7–8 | לא לעבור 10
+fs       = 18;
 
 % ================= MAIN LOOP =================
 for iDir = 1:numel(subDirs)
@@ -161,6 +166,12 @@ end
 
 % ---- optional stacked FC figure ----
 if doFCstack && exist('FCpack','var') && ~isempty(FCpack)
+
+    if ~isempty(FC_amp_subset)
+        keep = ismember([FCpack.amp], FC_amp_subset);
+        FCpack = FCpack(keep);
+    end
+
     plotAmpTemp_FilteredCenteredStacked(FCpack, chLabelMap, Resistivity);
 end
 
@@ -234,8 +245,10 @@ for ch = channelsPlotted
         linspace(min(amps),   max(amps),   interpFactor*numel(amps)));
 
     M_interp = interp2(Tm, Am, M_filled, Tq, Aq, 'linear');
+    M_interp = imgaussfilt(M_interp,0.5);
 
-    hImg = imagesc(Tq(1,:), Aq(:,1), M_interp);
+    % ---- draw image ----
+    hImg = imagesc(ax, Tq(1,:), Aq(:,1), M_interp);
     set(ax,'YDir','normal');
 
     set(hImg, ...
@@ -243,24 +256,53 @@ for ch = channelsPlotted
         'AlphaDataMapping','none', ...
         'Interpolation','bilinear');
 
-    % ---- axes typography ----
-    xlabel(ax,'Temperature (K)','Interpreter','latex');
-    ylabel(ax,'$\mathrm{Pulse\, amplitude\, (mA)}$','Interpreter','latex');
+    % ---- contours ----
+    hold(ax,'on')
 
-    ax.TickLabelInterpreter = 'tex';
+% --- smooth ridge via weighted center of mass ---
+
+Z = M_interp;
+Z = Z - min(Z(:),[],'omitnan');
+Z = Z ./ max(Z(:),[],'omitnan');
+
+p = 3;                 % sharpening exponent (2–4 טוב)
+W = Z.^p;
+
+num = sum(Aq .* W, 1, 'omitnan');
+den = sum(W,       1, 'omitnan');
+Ir  = num ./ max(den, eps);
+
+% final smoothing
+Ir = smoothdata(Ir,'gaussian',21);
+
+Tcut = 32;
+
+mask = Tq(1,:) <= Tcut;
+%{
+plot(ax, Tq(1,mask), Ir(mask), ...
+    'Color',[1 1 1 0.6], ...   % לבן עם 60% שקיפות
+    'LineWidth',1.0);
+%}
+
+    % ---- axes typography ----
+    xlabel(ax,'Temperature (K)','Interpreter','latex','FontSize',fs);
+    ylabel(ax,'$\mathrm{Pulse\, amplitude\, (mA)}$','Interpreter','latex','FontSize',fs);
+
+    ax.TickLabelInterpreter = 'latex';
     ax.TickDir = 'out';
     ax.Layer   = 'top';
+    ax.FontSize = fs;
 
     % ---- colorbar ----
     cb = colorbar(ax);
     switch metricType
         case "P2P_percent"
-            xlabel(cb, physLabel('symbol','R','delta',true,'ratioTo','R','units','\%'),'Interpreter','latex');
+            xlabel(cb, physLabel('symbol','R','delta',true,'ratioTo','R','units','\%'),'Interpreter','latex','FontSize',fs);
         otherwise
-            xlabel(cb, physLabel('symbol','R','delta',true,'ratioTo','R'),'Interpreter','latex');
+            xlabel(cb, physLabel('symbol','R','delta',true,'ratioTo','R'),'Interpreter','latex','FontSize',fs);
     end
-    cb.TickLabelInterpreter = 'tex';
-
+    cb.TickLabelInterpreter = 'latex';
+    cb.FontSize = fs;
     forceLatexFigure(fig);
 end
 end
@@ -449,7 +491,7 @@ for b = 1:Nblocks
         'VerticalAlignment','top', ...
         'Interpreter','latex', ...
         'FontSize', fs-4, ...
-       'BackgroundColor','none', ...   % <-- שקוף
+        'BackgroundColor','none', ...   % <-- שקוף
         'Margin',2);
 
 end
@@ -470,6 +512,10 @@ for b = 1:Nblocks
     ax(b).Position = [left y width h];
 end
 
+
+
+
+%{
 % ================= COLORBAR (SECOND!) =================
 axCB = axes(fig,'Units','normalized',...
     'Position',[0.10 0.13 0.80 0.06],...
@@ -503,9 +549,92 @@ cb.TickDirection = 'out';
 cb.TickLength    = 0;
 cb.FontSize      = fs-4;
 cb.LineWidth     = 0.5;
-cb.TickLabelInterpreter = 'tex';
+cb.TickLabelInterpreter = 'latex';
 
 xlabel(cb,'$\mathrm{Temperature\ (K)}$','Interpreter','latex','FontSize',fs);
+%}
+% ================= EDITABLE ARROW COLORBAR =================
+
+% ================= THIN ARROW COLORBAR =================
+
+cbHeight = 0.02;      % <<< דק
+cbY = 0.105;
+cbX = 0.10;
+cbW = 0.78;
+
+axCB = axes(fig,...
+    'Units','normalized',...
+    'Position',[cbX cbY cbW cbHeight],...
+    'Tag','ArrowColorbarAxes');
+
+N = 400;
+grad = linspace(Tmin,Tmax,N);
+
+hGrad = imagesc(axCB,[Tmin Tmax],[0 1],grad);
+set(hGrad,'Tag','ArrowColorbarImage');
+
+colormap(axCB,cmap);
+
+set(axCB,...
+    'XTick',[],...
+    'YTick',[],...
+    'Box','off',...
+    'TickDir','out',...
+    'FontSize',fs-4,...
+    'LineWidth',0.8);
+
+axCB.XColor = 'none';
+axCB.YColor = 'none';
+% ---- allow space for arrow tip ----
+tipFrac = 0.05;   % fraction of bar width
+tipWidth = tipFrac*(Tmax-Tmin);
+
+xlim(axCB,[Tmin-1.25 Tmax+tipWidth-1.25]);
+ylim(axCB,[0 1]);
+
+hold(axCB,'on')
+
+% ================= ARROW HEAD =================
+lw = 0.15;
+
+tipFrac = 0.04;
+arrowHalfHeight = 1;
+
+dx = tipFrac*(Tmax-Tmin);
+tipX = Tmax + dx;
+
+y0 = 0.5;
+
+% ===== arrow head =====
+hArrowHead = patch(axCB,...
+    [Tmax tipX Tmax],...
+    [y0-arrowHalfHeight y0 y0+arrowHalfHeight],...
+    cmap(end,:),...
+    'EdgeColor','none',...
+    'LineWidth',lw,...
+    'Clipping','off',...
+    'Tag','ArrowColorbarHead');
+
+text(axCB, Tmin+1, 2, sprintf('%g K',Tmin), ...
+    'HorizontalAlignment','center', ...
+    'VerticalAlignment','top', ...
+    'FontSize',fs-4);
+
+text(axCB, Tmax-1, 2, sprintf('%g K',Tmax), ...
+    'HorizontalAlignment','center', ...
+    'VerticalAlignment','top', ...
+    'FontSize',fs-4);
+
+% ================= OUTLINE =================
+% plot(axCB,[Tmin Tmax],[0 0],'k','LineWidth',0.3)
+% plot(axCB,[Tmin Tmax],[1 1],'k','LineWidth',0.3)
+
+axCB.XAxisLocation = 'bottom';
+axCB.TickLabelInterpreter = 'latex';
+
+xlabel(axCB,'$\mathrm{Temperature\ (K)}$',...
+    'Interpreter','latex','FontSize',fs);
+
 
 colormap(fig,cmap);
 forceLatexFigure(fig);

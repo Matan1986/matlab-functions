@@ -21,7 +21,7 @@ AFM_metric_main = 'height';   % 'height' | 'area'
 doFit_MF_Gaussian = true;
 %% --- AFM / FM normalization control ---
 normalizeAFM_FM = true;     % true → normalize AFM and FM separately
-                            % false → plot absolute values (current behavior)
+                            % false → plot absolute values (current behavior)AFM_metric_main
 dip_window_K     = 4;     % ±K window around pause T to find dip
 smoothWindow_K = 6 * dip_window_K;   % FM scale (physics-first)
 %% --- AFM / FM analysis display control ---
@@ -443,8 +443,101 @@ ax2.Position = [pos2(1), 0.08, pos2(3), newHeight];
 
 linkaxes(findall(gcf,'Type','axes'),'x');
 
+%%
+mode = 'experimental';   % 'experimental' 'fit'
+Tsw = [ ...
+4 6 8 10 12.01 14 16 18 20 22 24 26 28 30 32 34 ];
+Rsw = abs([ ...
+-0.118798584194838
+-0.122264267325776
+-0.118851761632771
+-0.101822896954594
+-0.0788304623579251
+-0.0593463579408640
+-0.0498599138258924
+-0.0428929207553538
+-0.0415806933904911
+-0.0430961878264001
+-0.0500748615139096
+-0.0693882621296171
+-0.0809671274875996
+-0.0367692256085554
+-0.00532765237477462
+-0.000552867428264816 ]);
 
+params = struct();
+params.dipWindowK  = 4;     % חלון הדיפ לאינטגרל
+params.wideWindowK = 25;    % חלון רחב להערכת הרקע
+params.lambdaMin   = 0.03;  % טווח סריקת λ
+params.lambdaMax   = 1.2;
+params.nLambda     = 100;   % כמה נקודות לסריקה
+params.fitTmin     = 4;     % טווח פיט
+params.fitTmax     = 34;
 
+result = reconstructSwitchingAmplitude( ...
+    mode, ...
+    pauseRuns, ...
+    params, ...
+    Tp, ...
+    Tsw, ...
+    Rsw);
+
+%% =========================================================
+%  Competition model test (mid/high-T only: 10–30 K)
+% ==========================================================
+fprintf('\nλ = %.3f\n', result.lambda);
+fprintf('a = %.3f\n', result.a);
+fprintf('b = %.3f\n', result.b);
+fprintf('R² = %.3f\n', result.R2);
+
+figure;
+plot(Tsw, Rsw, 'ko','LineWidth',2); hold on;
+plot(Tsw, result.Rhat, 'r-','LineWidth',2);
+legend('Measured','Reconstructed');
+xlabel('T (K)');
+ylabel('\DeltaR');
+
+A = result.D_basis(:);
+B = result.F_basis(:);
+
+mask = (Tsw >= 10) & (Tsw <= 30);
+
+Rplot = Rsw(mask) / max(Rsw(mask));
+
+figure; hold on;
+
+plot(Tsw(mask), Rplot, 'k','LineWidth',3);
+
+plot(Tsw(mask), A(mask), 'b','LineWidth',2);
+plot(Tsw(mask), B(mask), 'g','LineWidth',2);
+
+plot(Tsw(mask), A(mask).*(1-A(mask)), 'm','LineWidth',2);
+
+imb = abs(A - B);
+imb_norm = imb / max(imb(mask));
+
+plot(Tsw(mask), 1 - imb_norm(mask), 'c','LineWidth',2);
+
+legend('Rsw','A','B','A(1-A)','1-norm(|A-B|)');
+grid on;
+
+imb = abs(A - B);
+G = 1 - imb;
+
+mask = (Tsw >= 10) & (Tsw <= 30);
+
+X = [G(mask), ones(sum(mask),1)];
+y = Rsw(mask);
+
+beta = X \ y;
+
+Rhat = X * beta;
+
+SS_tot = sum((y - mean(y)).^2);
+SS_res = sum((Rhat - y).^2);
+R2 = 1 - SS_res/SS_tot;
+
+fprintf('R2 (with offset) = %.4f\n', R2);
 %% --- Step 5: Plot results (with optional offset) ---
 plotAgingMemory(noPause_T, noPause_M, pauseRuns, color_scheme, ...
     fontsize, linewidth, sample_name, Bohar_units, ...
