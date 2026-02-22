@@ -1,2 +1,12 @@
 tmp_*
 *.pdf
+.vscode/
+
+# MATLAB temp files
+*.asv
+*.m~
+
+# Outputs
+**/plots/
+**/*output*.txt
+**/*log*.txt

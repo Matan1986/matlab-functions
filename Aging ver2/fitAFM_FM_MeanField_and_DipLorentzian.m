@@ -220,11 +220,6 @@ end
 
 % ================== helpers ==================
 
-function opts = setDefault(opts, field, val)
-if ~isfield(opts, field) || isempty(opts.(field))
-    opts.(field) = val;
-end
-end
 
 % ---- Mean-field model: C + A*sqrt(1 - T/Tc) below Tc, else C
 function y = meanFieldModel(p, T)

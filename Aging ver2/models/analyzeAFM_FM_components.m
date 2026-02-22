@@ -1,12 +1,34 @@
 function pauseRuns = analyzeAFM_FM_components( ...
     pauseRuns, dip_window_K, smoothWindow_K, ...
     excludeLowT_FM, excludeLowT_K, ...
-    FM_plateau_K, excludeLowT_mode, FM_buffer_K,dipMetric)
+    FM_plateau_K, excludeLowT_mode, FM_buffer_K, dipMetric)
 
-% ============================================================
-% Physics-first AFM / FM decomposition of ΔM(T)
-% with proper uncertainty estimation
-% ============================================================
+% =========================================================
+% analyzeAFM_FM_components
+%
+% PURPOSE:
+%   Decompose DeltaM into AFM-like (sharp dip) and FM-like (smooth background)
+%   components and compute per-pause metrics.
+%
+% INPUTS:
+%   pauseRuns       - struct array with fields T_common, DeltaM, waitK
+%   dip_window_K    - half-window around Tp for AFM dip
+%   smoothWindow_K  - smoothing scale for FM background
+%   excludeLowT_FM  - flag to exclude low-T in FM background
+%   excludeLowT_K   - temperature cutoff for low-T exclusion
+%   FM_plateau_K    - width of FM plateau window
+%   excludeLowT_mode- 'pre' or 'post' handling of low-T exclusion
+%   FM_buffer_K     - buffer distance from dip for FM plateau
+%   dipMetric       - 'height' or 'area'
+%
+% OUTPUTS:
+%   pauseRuns       - updated struct with AFM/FM metrics and components
+%
+% Physics meaning:
+%   AFM = sharp dip in DeltaM (memory component)
+%   FM  = smooth background step around Tp
+%
+% =========================================================
 
 %% ---------------- Defaults ----------------
 if nargin < 3 || isempty(smoothWindow_K)
@@ -35,6 +57,7 @@ dipMetric = lower(string(dipMetric));
 excludeLowT_mode = lower(string(excludeLowT_mode));
 
 %% ---------------- Loop ----------------
+assert(isfield(pauseRuns, 'DeltaM'), 'pauseRuns missing DeltaM');
 for i = 1:numel(pauseRuns)
 
     % ---- persist settings ----

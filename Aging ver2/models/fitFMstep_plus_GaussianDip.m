@@ -1,28 +1,23 @@
 function pauseRuns = fitFMstep_plus_GaussianDip(pauseRuns, dip_window_K, opts)
-% fitFMstep_plus_GaussianDip  (deterministic + fast + data-driven p0)
-% ------------------------------------------------------------
-% Simultaneous fit of:
-%   FM-like background  = step (tanh) + small slope
-%   Memory dip          = Gaussian
+% =========================================================
+% fitFMstep_plus_GaussianDip
 %
-% Fit is done on RAW DeltaM over a wide window around Tp.
-% No toolboxes.
+% PURPOSE:
+%   Fit RAW DeltaM to a step-like FM background plus a Gaussian AFM dip.
 %
-% OUTPUT (per pauseRuns(i)):
-%   .FM_step_A      = 2*|A_step|   (full step magnitude)
-%   .Dip_A          = A_dip
-%   .Dip_sigma
-%   .Dip_T0
-%   .fit_R2
-%   .fit_RMSE
-%   .fit_NRMSE
-%   .fit_chi2_red
-%   .fit_curve
+% INPUTS:
+%   pauseRuns     - struct array with fields T_common, DeltaM, waitK
+%   dip_window_K  - dip window half-width
+%   opts          - fitting options (windowFactor, minWindow_K, etc.)
 %
-% Also stores optional component metrics:
-%   .FM_A, .FM_area_abs, .FM_E
-%   .Dip_area, .Dip_E
-% ------------------------------------------------------------
+% OUTPUTS:
+%   pauseRuns     - updated struct with fit parameters and metrics
+%
+% Physics meaning:
+%   AFM = Gaussian dip centered near Tp
+%   FM  = step-like tanh background
+%
+% =========================================================
 
 if nargin < 3, opts = struct(); end
 opts = setDefault(opts,'windowFactor',4);
@@ -32,7 +27,7 @@ opts = setDefault(opts,'debugPlots',false);
 % --- speed / robustness knobs ---
 opts = setDefault(opts,'MaxIter',600);
 opts = setDefault(opts,'MaxFunEvals',4000);
-opts = setDefault(opts,'multiStart','small');   % 'none' | 'small' | 'medium'
+opts = setDefault(opts,'multiStart','none');   % 'none' | 'small' | 'medium'
 opts = setDefault(opts,'useDataDrivenP0',true);
 
 % --- debug plot cosmetics ---
@@ -256,56 +251,4 @@ for i = 1:numel(pauseRuns)
 
     end
 end
-end
-
-% ============================================================
-function J = cost_step_gauss(p,T,y,Tp,yS,tS)
-
-C=p(1); m=p(2); A=p(3);
-w  = max(p(4)*tS,0.5);
-Ad = abs(p(5));
-T0 = Tp + p(6)*tS;
-s  = max(p(7)*tS,0.4);
-
-yhat = C + m*(T-Tp) + A*tanh((T-Tp)/w) ...
-    - Ad*exp(-(T-T0).^2/(2*s^2));
-
-res = y - yhat;
-
-pen = 0;
-if s > 0.6*tS, pen = pen + 1e4*(s-0.6*tS)^2; end
-if abs(T0-Tp) > 2, pen = pen + 1e4*(abs(T0-Tp)-2)^2; end
-
-J = sum(res.^2)/(yS^2) + pen;
-end
-
-% ============================================================
-function p0 = build_p0_from_data(Tfit, yfit, Tp, W, dip_window_K, yScale, tScale)
-
-edgeMask = abs(Tfit - Tp) > 0.6*W;
-if nnz(edgeMask) < 10, edgeMask = true(size(Tfit)); end
-pp = polyfit(Tfit(edgeMask)-Tp, yfit(edgeMask),1);
-
-m0 = pp(1);
-C0 = pp(2);
-
-dipMask = abs(Tfit-Tp) <= max(dip_window_K,2);
-Tlocal = Tfit(dipMask);
-ylocal = yfit(dipMask);
-[~,kmin] = min(ylocal);
-
-T0_init = Tlocal(kmin);
-ybg0 = C0 + m0*(T0_init-Tp);
-Adip0 = max(0.2*yScale, ybg0-ylocal(kmin));
-
-sigma0 = max(0.8, 0.08*W);
-w0     = max(0.8, 0.08*W);
-
-p0 = [C0, m0, 0.2*yScale, w0/tScale, Adip0, ...
-    (T0_init-Tp)/tScale, sigma0/tScale];
-end
-
-% ============================================================
-function opts = setDefault(opts,f,v)
-if ~isfield(opts,f), opts.(f)=v; end
 end

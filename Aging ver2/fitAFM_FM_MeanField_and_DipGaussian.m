@@ -263,8 +263,3 @@ T0=min(max(T0,min(T)),max(T));
 p=[Ad,T0,s];
 end
 
-function opts = setDefault(opts,f,v)
-if ~isfield(opts,f) || isempty(opts.(f))
-    opts.(f)=v;
-end
-end
