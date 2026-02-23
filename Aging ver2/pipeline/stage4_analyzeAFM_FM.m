@@ -77,7 +77,32 @@ if isfield(cfg, 'debug') && isfield(cfg.debug, 'enable') && cfg.debug.enable
         end
 
         dbg = debugAgingDiagnostics(cfg, Tp, T, dM_raw, dM_filt, windows, metrics, meta);
-        debugRows(end+1) = dbg.row; %#ok<AGROW>
+        
+        % Safe field-aligned struct append
+        if isempty(debugRows)
+            debugRows = dbg.row;
+        else
+            % Align fields before appending
+            f1 = fieldnames(debugRows);
+            f2 = fieldnames(dbg.row);
+            
+            missingInRows = setdiff(f2, f1);
+            missingInDbg  = setdiff(f1, f2);
+            
+            % Add missing fields to debugRows
+            for k = 1:numel(missingInRows)
+                field = missingInRows{k};
+                [debugRows.(field)] = deal(NaN);
+            end
+            
+            % Add missing fields to dbg.row
+            for k = 1:numel(missingInDbg)
+                field = missingInDbg{k};
+                dbg.row.(field) = NaN;
+            end
+            
+            debugRows(end+1) = dbg.row; %#ok<AGROW>
+        end
 
         if debugCfg.makeWindowOverlayPlots
             if shouldPlotTp(Tp, debugCfg.selectedTp) && overlayCount < debugCfg.maxOverlayPauses
@@ -118,6 +143,9 @@ if isfield(cfg, 'debug') && isfield(cfg.debug, 'enable') && cfg.debug.enable
     if debugCfg.logToFile && debugCfg.saveOutputs && ~isempty(outFolder)
         writeDebugLog(debugTable, cfg, debugCfg, outFolder, pauseTp);
     end
+    
+    % --- Console summary ---
+    printStage4DiagnosticSummary(debugRows);
 end
 
 % ====================== Local debug helpers ======================
@@ -400,6 +428,88 @@ xlabel(ax, 'Tp (K)');
 title(ax, 'Fit degeneracy check');
 saveas(fig, fullfile(outFolder, 'summary_fit_degeneracy.png'));
 close(fig);
+end
+
+function printStage4DiagnosticSummary(debugRows)
+if isempty(debugRows)
+    return;
+end
+
+fprintf('\n---- PHASE B AGING DIAGNOSTICS ----\n');
+
+countDipOutside = 0;
+countPlateauFlag = 0;
+
+for i = 1:numel(debugRows)
+    row = debugRows(i);
+    
+    dipOut = 0;
+    if isfield(row, 'flag_dipMinOutsideWindow')
+        dipOut = double(row.flag_dipMinOutsideWindow);
+    end
+    
+    dipNear = 0;
+    if isfield(row, 'flag_dipMinTooCloseToBoundary')
+        dipNear = double(row.flag_dipMinTooCloseToBoundary);
+    end
+    
+    slopeL = 0;
+    if isfield(row, 'plateau_slope_L') && isfinite(row.plateau_slope_L)
+        slopeL = row.plateau_slope_L;
+    end
+    
+    slopeR = 0;
+    if isfield(row, 'plateau_slope_R') && isfinite(row.plateau_slope_R)
+        slopeR = row.plateau_slope_R;
+    end
+    
+    R2L = 0;
+    if isfield(row, 'plateau_R2_L') && isfinite(row.plateau_R2_L)
+        R2L = row.plateau_R2_L;
+    end
+    
+    R2R = 0;
+    if isfield(row, 'plateau_R2_R') && isfinite(row.plateau_R2_R)
+        R2R = row.plateau_R2_R;
+    end
+    
+    N_L = 0;
+    if isfield(row, 'plateau_N_L')
+        N_L = row.plateau_N_L;
+    end
+    
+    N_R = 0;
+    if isfield(row, 'plateau_N_R')
+        N_R = row.plateau_N_R;
+    end
+    
+    stdL = 0;
+    if isfield(row, 'plateau_std_L') && isfinite(row.plateau_std_L)
+        stdL = row.plateau_std_L;
+    end
+    
+    stdR = 0;
+    if isfield(row, 'plateau_std_R') && isfinite(row.plateau_std_R)
+        stdR = row.plateau_std_R;
+    end
+    
+    plateauFlag = 0;
+    if isfield(row, 'flag_plateauSlopeExcessive')
+        plateauFlag = double(row.flag_plateauSlopeExcessive);
+    end
+    
+    Tp_val = row.Tp;
+    
+    fprintf('Tp=%.1f K | DipOutside=%d | DipNearBoundary=%d | SlopeL=%.3e | SlopeR=%.3e | R2L=%.3f | R2R=%.3f | N_L=%d | N_R=%d | stdL=%.3e | stdR=%.3e | PlateauFlag=%d\n', ...
+        Tp_val, dipOut, dipNear, slopeL, slopeR, R2L, R2R, N_L, N_R, stdL, stdR, plateauFlag);
+    
+    countDipOutside = countDipOutside + dipOut;
+    countPlateauFlag = countPlateauFlag + plateauFlag;
+end
+
+fprintf('\nTotal DipOutside count: %d\n', countDipOutside);
+fprintf('Total PlateauFlag count: %d\n', countPlateauFlag);
+fprintf('------------------------------------\n\n');
 end
 
 function writeDebugLog(debugTable, cfg, debugCfg, outFolder, pauseTp)

@@ -184,7 +184,7 @@ cfg.outputFolder = fullfile(cfg.dataDir, 'Results');
 
 % --- Diagnostics / debug (pipeline-gated) ---
 cfg.debug = struct();
-cfg.debug.enable = false;                 % master gate
+cfg.debug.enable = true;                 % master gate
 cfg.debug.saveOutputs = true;             % write files when enabled
 cfg.debug.outputRoot = fullfile(cfg.outputFolder,'Debug');
 cfg.debug.runTag = '';                    % if empty, auto timestamp
@@ -204,6 +204,9 @@ cfg.debug.assertNoTpMixing = true;
 cfg.debug.logToFile = true;
 cfg.debug.overlayShowTc = true;
 cfg.debug.Tc = 32.5;  % plotting/reference only
+cfg.debug.dipMinMarginFraction = 0.10;  % flag if Tmin closer than 10% of window width to boundary
+cfg.debug.plateauMaxSlope = 0.01;       % flag if abs(linear fit slope) exceeds this [units/K]
+cfg.debug.interpOvershootPct = 2.0;     % flag if interpolated range exceeds original Tp by >2%
 
 % --- MATLAB paths ---
 cfg.baseFolder = 'C:\Dev\matlab-functions';

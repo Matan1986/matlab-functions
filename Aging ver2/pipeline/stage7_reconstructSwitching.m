@@ -50,10 +50,14 @@ result = reconstructSwitchingAmplitude( ...
 % --- Get valid Tp from switching reconstruction (optional for diagnostics) ---
 if isfield(result, 'Tp_valid') && ~isempty(result.Tp_valid)
     Tp_fm = result.Tp_valid;
+elseif isfield(state, 'validPauseTp') && ~isempty(state.validPauseTp)
+    Tp_fm = state.validPauseTp;
+elseif isfield(result, 'Tp') && ~isempty(result.Tp)
+    Tp_fm = result.Tp;
 else
     Tp_fm = [];
     if isfield(cfg,'debug') && isfield(cfg.debug,'enable') && cfg.debug.enable
-        warning('Tp_valid not found in result; skipping debug Tp/Tsw audit.');
+        warning('Tp_valid not found in result or state; skipping debug Tp/Tsw audit.');
     end
 end
 
@@ -104,9 +108,95 @@ end
 fprintf('\n=== FM cross-check ===\n');
 fprintf('corr(RMS B(Tp), FM_step_A) = %.3f\n', R_FM);
 
+% Enhanced diagnostics when correlation is NaN
+if isnan(R_FM) && isfield(cfg, 'debug') && isfield(cfg.debug, 'enable') && cfg.debug.enable
+    if exist('FM_fit_f','var') && exist('B_rms_atTp','var')
+        fprintf('  FM_fit_f length: %d, NaNs: %d, std: %.4f\n', ...
+            numel(FM_fit_f), nnz(isnan(FM_fit_f)), std(FM_fit_f, 'omitnan'));
+        fprintf('  B_rms_atTp length: %d, NaNs: %d, std: %.4f\n', ...
+            numel(B_rms_atTp), nnz(isnan(B_rms_atTp)), std(B_rms_atTp, 'omitnan'));
+    else
+        fprintf('  One or both vectors not defined.\n');
+    end
+end
+
+% --- NEW: Interpolation overshoot diagnostic ---
+if isfield(cfg, 'debug') && isfield(cfg.debug, 'enable') && cfg.debug.enable
+    [A_violated, A_rangePct, A_overshootPct, B_violated, B_rangePct, B_overshootPct] = checkInterpolationOvershoot(cfg, result, [state.pauseRuns.waitK]);
+    printStage7DiagnosticSummary(A_violated, A_rangePct, A_overshootPct, B_violated, B_rangePct, B_overshootPct);
+end
+
 end
 
 % ====================== Local debug helpers ======================
+function [A_violated, A_rangePct, A_overshootPct, B_violated, B_rangePct, B_overshootPct] = checkInterpolationOvershoot(cfg, result, Tp)
+% Check that pchip interpolation of A_basis and B_basis does not exceed original Tp range by >threshold%.
+A_violated = 0;
+A_rangePct = 0;
+A_overshootPct = 0;
+B_violated = 0;
+B_rangePct = 0;
+B_overshootPct = 0;
+
+if ~isfield(cfg.debug, 'interpOvershootPct')
+    return;
+end
+
+Tp = Tp(:);
+origRange = max(Tp) - min(Tp);
+
+if origRange == 0
+    return;
+end
+
+thresholdPct = cfg.debug.interpOvershootPct;
+
+% Check A_basis
+if isfield(result, 'A_basis')
+    A = result.A_basis(:);
+    interpRange = max(A) - min(A);
+    
+    A_rangePct = 100 * (interpRange / origRange - 1);
+    A_overshootPct = max(0, A_rangePct);
+    
+    if A_overshootPct > thresholdPct
+        A_violated = 1;
+        warning('Interpolation overshoot: A_basis range exceeds original Tp range by %.2f%% (threshold %.1f%%)', ...
+            A_overshootPct, thresholdPct);
+    end
+end
+
+% Check B_basis
+if isfield(result, 'B_basis')
+    B = result.B_basis(:);
+    interpRange = max(B) - min(B);
+    
+    B_rangePct = 100 * (interpRange / origRange - 1);
+    B_overshootPct = max(0, B_rangePct);
+    
+    if B_overshootPct > thresholdPct
+        B_violated = 1;
+        warning('Interpolation overshoot: B_basis range exceeds original Tp range by %.2f%% (threshold %.1f%%)', ...
+            B_overshootPct, thresholdPct);
+    end
+end
+end
+
+function printStage7DiagnosticSummary(A_violated, A_rangePct, A_overshootPct, B_violated, B_rangePct, B_overshootPct)
+fprintf('\n---- PHASE B INTERPOLATION DIAGNOSTICS ----\n');
+fprintf('A_rangePct = %.2f%%\n', A_rangePct);
+fprintf('A_overshootPct = %.2f%%\n', A_overshootPct);
+fprintf('A_violation = %d\n', A_violated);
+fprintf('B_rangePct = %.2f%%\n', B_rangePct);
+fprintf('B_overshootPct = %.2f%%\n', B_overshootPct);
+fprintf('B_violation = %d\n', B_violated);
+
+if A_violated == 0 && B_violated == 0
+    fprintf('ALL INTERPOLATION CHECKS PASSED\n');
+end
+fprintf('-------------------------------------------\n\n');
+end
+
 function outFolder = resolveDebugOutFolderStage7(cfg)
 outFolder = '';
 if ~isfield(cfg, 'debug') || ~isfield(cfg.debug, 'saveOutputs') || ~cfg.debug.saveOutputs
