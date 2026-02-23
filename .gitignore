@@ -1,3 +1,4 @@
+# --- General temp ---
 tmp_*
 *.pdf
 .vscode/
@@ -10,3 +11,15 @@ tmp_*
 **/plots/
 **/*output*.txt
 **/*log*.txt
+
+# --- Scratch / local tests ---
+simple_test.m
+test_*.m
+verification_log.txt
+DIAGNOSTICS_SCAN_REPORT.md
+
+# --- Aging local verification ---
+Aging ver2/tests/
+
+# --- VSCode local settings ---
+.vscode/settings.json
