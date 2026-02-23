@@ -174,6 +174,12 @@ Dp = Dp(valid);
 Fp = Fp(valid);
 
 fprintf('Number of valid pauses after filtering: %d\n', numel(Tp));
+
+% Store filtered pause vectors for Phase C export (before any interpolation)
+Tp_pause_export = Tp(:);
+Dp_pause_export = Dp(:);
+Fp_pause_export = Fp(:);
+
 D_interp = interp1(Tp, Dp, Tsw, 'pchip', 'extrap');
 F_interp = interp1(Tp, Fp, Tsw, 'pchip', 'extrap');
 
@@ -287,6 +293,12 @@ SS_res = sum((Rhat_use - Ruse).^2);
 R2 = 1 - SS_res/SS_tot;
 
 % ===============================
+% Pause-domain vectors for Phase C export
+% ===============================
+Rsw_pause = interp1(Tsw, Rsw, Tp_pause_export, 'pchip');
+C_pause = interp1(Tsw, best_coexistence, Tp_pause_export, 'pchip');
+
+% ===============================
 % Output
 % ===============================
 result.Rhat    = best_Rhat;
@@ -299,6 +311,18 @@ result.Tsw     = Tsw;
 result.A_basis = best_AFM_basis;
 result.B_basis = best_FM_basis;
 result.C_basis = best_coexistence;
+
+result.Tp_pause  = Tp_pause_export;
+result.Rsw_pause = Rsw_pause(:);
+result.C_pause   = C_pause(:);
+result.A_pause   = Dp_pause_export;
+result.F_pause   = Fp_pause_export;
+
+% Validate pause domain exports have matching lengths
+assert(all([numel(result.Tp_pause), numel(result.A_pause), ...
+            numel(result.F_pause), numel(result.Rsw_pause), ...
+            numel(result.C_pause)] == numel(result.Tp_pause)), ...
+    'Pause-domain export vectors do not have matching lengths.');
 
 % Readable aliases (keep backward compatibility)
 result.AFM_basis = result.A_basis;

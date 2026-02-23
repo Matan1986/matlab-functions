@@ -42,6 +42,10 @@ result = reconstructSwitchingAmplitude( ...
     Tsw, ...
     Rsw);
 
+if cfg.debug.enable && isfield(cfg.debug,'plotSwitching') && cfg.debug.plotSwitching
+    debugPlotSwitchingReconstruction(state, cfg, result);
+end
+
 % =========================================================
 % Correlation between RMS FM background and fitted FM_step_A
 % =========================================================
@@ -125,6 +129,46 @@ if isfield(cfg, 'debug') && isfield(cfg.debug, 'enable') && cfg.debug.enable
     [A_violated, A_rangePct, A_overshootPct, B_violated, B_rangePct, B_overshootPct] = checkInterpolationOvershoot(cfg, result, [state.pauseRuns.waitK]);
     printStage7DiagnosticSummary(A_violated, A_rangePct, A_overshootPct, B_violated, B_rangePct, B_overshootPct);
 end
+
+% ===== Phase C Baseline Snapshot Export =====
+if isfield(result,'Tp_pause')
+    resultsLOO.Tp = result.Tp_pause(:);
+else
+    error('Pause-level Tp not found in result.');
+end
+
+if isfield(result,'Rsw_pause')
+    resultsLOO.Rsw = result.Rsw_pause(:);
+else
+    error('Pause-level Rsw not found in result.');
+end
+
+if isfield(result,'C_pause')
+    resultsLOO.C = result.C_pause(:);
+else
+    error('Pause-level coexistence not found in result.');
+end
+
+if isfield(result,'A_pause')
+    resultsLOO.A = result.A_pause(:);
+else
+    error('Pause-level AFM metric not found in result.');
+end
+
+if isfield(result,'F_pause')
+    resultsLOO.F = result.F_pause(:);
+else
+    error('Pause-level FM metric not found in result.');
+end
+
+outDir = fullfile(pwd,'results');
+if ~exist(outDir,'dir')
+    mkdir(outDir);
+end
+
+save(fullfile(outDir,'baseline_resultsLOO.mat'),'resultsLOO');
+
+fprintf('\nBaseline snapshot saved for Phase C (LOO).\n');
 
 end
 

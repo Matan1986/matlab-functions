@@ -23,3 +23,6 @@ Aging ver2/tests/
 
 # --- VSCode local settings ---
 .vscode/settings.json
+
+# Local machine paths (not version controlled)
+runs/localPaths.m

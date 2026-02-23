@@ -143,6 +143,10 @@ if isfield(cfg, 'debug') && isfield(cfg.debug, 'enable') && cfg.debug.enable
     if debugCfg.logToFile && debugCfg.saveOutputs && ~isempty(outFolder)
         writeDebugLog(debugTable, cfg, debugCfg, outFolder, pauseTp);
     end
+
+    if cfg.debug.enable && isfield(cfg.debug,'plotGeometry') && cfg.debug.plotGeometry
+        debugPlotGeometry(state, cfg);
+    end
     
     % --- Console summary ---
     printStage4DiagnosticSummary(debugRows);

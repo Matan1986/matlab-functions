@@ -1,3 +1,4 @@
+function state = Main_Aging(cfg)
 %% MAIN_AGING_MEMORY — Spin-glass aging memory analysis (modular pipeline)
 % Reads aging-memory .dat files, identifies pause/no-pause runs,
 % computes DeltaM(T), and generates analysis + summary plots.
@@ -30,12 +31,14 @@
 %   Switching reconstruction is fitted ONLY to Rsw(T), never to ΔM(T).
 % ============================================================
 
-clc; clear; close_all_except_ui_figures;
+clc; close_all_except_ui_figures;
 
 % =========================================================
 % Stage 0: Config + paths
 % =========================================================
-cfg = agingConfig();
+if ~exist('cfg','var') || ~isstruct(cfg)
+    cfg = agingConfig();
+end
 fprintf('AGING metric mode: %s\n', cfg.agingMetricMode);
 fprintf('SWITCHING metric mode: %s\n', cfg.switchingMetricMode);
 fprintf('AFM metric type: %s\n', cfg.AFM_metric_main);
@@ -45,6 +48,14 @@ cfg = stage0_setupPaths(cfg);
 % =========================================================
 % Stage 1: Load files
 % =========================================================
+if ~isfield(cfg,'dataDir') || isempty(cfg.dataDir)
+    error('cfg.dataDir must be provided externally.');
+end
+
+if ~isfield(cfg,'outputFolder') || isempty(cfg.outputFolder)
+    cfg.outputFolder = fullfile(cfg.dataDir, 'Results');
+end
+
 state = stage1_loadData(cfg);
 
 % =========================================================
@@ -123,8 +134,9 @@ disp(cfg.switchParams.switchExcludeTp);
 % =========================================================
 % Stage 8: Plotting
 % =========================================================
-stage8_plotting(state, cfg, result);
-
+if isfield(cfg,'doPlotting') && cfg.doPlotting
+    stage8_plotting(state, cfg, result);
+end
 % =========================================================
 % Stage 9: Export
 % =========================================================
@@ -148,4 +160,4 @@ Bohar_units = cfg.Bohar_units;
 params = cfg.switchParams;
 Tsw = cfg.Tsw;
 Rsw = cfg.Rsw;
-
+end

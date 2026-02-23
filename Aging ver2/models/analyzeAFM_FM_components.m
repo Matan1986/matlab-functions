@@ -178,8 +178,29 @@ for i = 1:numel(pauseRuns)
 
         case "area"
             % ----- dip as integrated weight -----
-            y = max(0, -dipVals);
-            pauseRuns(i).AFM_area = trapz(T(maskDip), y);
+            y = max(0, -dM_sharp);
+            xDip = T(maskDip);
+            yDip = y(maskDip);
+
+            if numel(xDip) ~= numel(yDip)
+                error('analyzeAFM_FM_components:AFMAreaLengthMismatch', ...
+                    'AFM area integration length mismatch at Tp=%.6g K: numel(xDip)=%d, numel(yDip)=%d', ...
+                    Tp, numel(xDip), numel(yDip));
+            end
+
+            finiteDip = isfinite(xDip) & isfinite(yDip);
+            xDip = xDip(finiteDip);
+            yDip = yDip(finiteDip);
+
+            if numel(xDip) < 2 || numel(yDip) < 2
+                pauseRuns(i).AFM_area = NaN;
+                warning('analyzeAFM_FM_components:AFMAreaInsufficientPoints', ...
+                    'AFM area set to NaN at Tp=%.6g K due to insufficient dip points (numel(xDip)=%d, numel(yDip)=%d).', ...
+                    Tp, numel(xDip), numel(yDip));
+                continue;
+            end
+
+            pauseRuns(i).AFM_area = trapz(xDip, yDip);
 
             dTloc = median(diff(T(maskDip)));
             sigma_y = std(dipVals);

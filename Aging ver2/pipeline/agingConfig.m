@@ -120,6 +120,7 @@ cfg.debugMode = false;
 cfg.Bohar_units = true;
 cfg.useAutoYScale = true;
 cfg.RobustnessCheck = false;
+cfg.doPlotting = true;   % default
 
 % --- Metric mode selection (explicit) ---
 cfg.agingMetricMode = 'direct';      % 'direct' -> AFM/FM from DeltaM(T); 'model' -> AFM from Dip_area, FM from plateau
@@ -134,7 +135,7 @@ cfg.doFit_MF_Gaussian = true;
 cfg.normalizeAFM_FM = true;
 
 % --- AFM/FM analysis parameters ---
-cfg.dip_window_K = 3.5;
+cfg.dip_window_K = 5;
 cfg.smoothWindow_K = 4 * cfg.dip_window_K;
 
 % --- AFM / FM analysis display control ---
@@ -175,12 +176,9 @@ cfg.alignWindow_K = 2;
 cfg.offsetMode = 'none';
 cfg.offsetValue = 120;
 
-% --- Data dir ---
-cfg.dataDir = "C:\Users\matan\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\MG 119 M2 out of plane Aging no field high res\Analyzed only";
-
 % --- Save options ---
 cfg.saveTableMode = 'none';
-cfg.outputFolder = fullfile(cfg.dataDir, 'Results');
+cfg.outputFolder = '';
 
 % --- Diagnostics / debug (pipeline-gated) ---
 cfg.debug = struct();
@@ -191,6 +189,8 @@ cfg.debug.runTag = '';                    % if empty, auto timestamp
 cfg.debug.makeWindowOverlayPlots = true;
 cfg.debug.makeRawVsFilteredPlots = true;
 cfg.debug.makeSummaryPlots = true;
+cfg.debug.plotGeometry = false;
+cfg.debug.plotSwitching = false;
 cfg.debug.dumpTables = true;
 cfg.debug.maxOverlayPauses = Inf;
 cfg.debug.selectedTp = [];

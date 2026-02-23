@@ -1,20 +1,16 @@
 {
 	"folders": [
 		{
-			"path": "L:/My Drive/Quantum materials lab/Matlab functions"
-		},
-		{
-			"path": "L:/My Drive/Quantum materials lab/Graphs for papers"
+			"path": "."
 		}
 	],
 	"settings": {
 		"chat.tools.terminal.autoApprove": {
 			"matlab": true,
 			"&": true,
-			"ForEach-Object": true,
-			"Group-Object": true,
-			"Get-Command": true,
-			"where.exe": true
-		}
+			"where": true,
+			"Get-Command": true
+		},
+		"chat.agent.maxRequests": 100
 	}
 }

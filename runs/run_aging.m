@@ -1,0 +1,35 @@
+% runs/run_aging.m
+projectRoot = fileparts(fileparts(mfilename('fullpath')));
+
+% Add code to path (core engine)
+addpath(genpath(fullfile(projectRoot, 'Aging ver2')));
+
+% ---- local machine paths (NOT version controlled) ----
+if exist('localPaths.m','file') == 2
+    paths = localPaths();
+else
+    error(['localPaths.m not found. Copy runs/localPaths_example.m to runs/localPaths.m ' ...
+           'and edit paths.dataRoot / paths.outputRoot.']);
+end
+
+% ---- config ----
+cfg = agingConfig;
+cfg.debug.enable = true;
+cfg.debug.plotGeometry = true;
+cfg.debug.plotSwitching = true;
+cfg.doPlotting = false;
+
+% Pick dataset folder under your dataRoot:
+% Example: full path should resolve to the folder that contains the analyzed aging files.
+cfg.dataDir   = fullfile(paths.dataRoot, 'MG 119', 'MG 119 M2 out of plane Aging no field high res', 'Analyzed only');
+cfg.outputDir = paths.outputRoot;
+
+
+disp("DATA DIR:")
+disp(cfg.dataDir)
+
+disp("Does folder exist?")
+disp(isfolder(cfg.dataDir))
+
+% ---- run ----
+state = Main_Aging(cfg);
