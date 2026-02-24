@@ -21,7 +21,6 @@ cfg.doPlotting = false;
 
 % Pick dataset folder under your dataRoot:
 % Example: full path should resolve to the folder that contains the analyzed aging files.
-cfg.dataDir   = fullfile(paths.dataRoot, 'MG 119', 'MG 119 M2 out of plane Aging no field high res', 'Analyzed only');
 cfg.outputDir = paths.outputRoot;
 
 

@@ -112,18 +112,22 @@ function cfg = agingConfig()
 %
 % ============================================================
 % ---------------- User settings ----------------
+cfg.current_mA = 35;   % Allowed values: 15 or 35
+
+cfg.datasetName = 'MG119_shortWait';  % 'MG119_highRes' || 'MG119_shortWait'
+
 cfg.normalizeByMass = true;
 cfg.color_scheme = 'thermal';
 cfg.fontsize = 24;
 cfg.linewidth = 2.2;
-cfg.debugMode = false;
+cfg.debugMode = true;
 cfg.Bohar_units = true;
 cfg.useAutoYScale = true;
 cfg.RobustnessCheck = false;
 cfg.doPlotting = true;   % default
 
 % --- Metric mode selection (explicit) ---
-cfg.agingMetricMode = 'direct';      % 'direct' -> AFM/FM from DeltaM(T); 'model' -> AFM from Dip_area, FM from plateau
+cfg.agingMetricMode = 'model';      % 'direct' -> AFM/FM from DeltaM(T); 'model' -> AFM from Dip_area, FM from plateau
 cfg.switchingMetricMode = 'direct';  % selects metrics used to reconstruct Rsw(T)
 
 % --- MAIN FIGURE summary mode (FIT-based only) ---
@@ -189,7 +193,7 @@ cfg.debug.runTag = '';                    % if empty, auto timestamp
 cfg.debug.makeWindowOverlayPlots = true;
 cfg.debug.makeRawVsFilteredPlots = true;
 cfg.debug.makeSummaryPlots = true;
-cfg.debug.plotGeometry = false;
+cfg.debug.plotGeometry = true;
 cfg.debug.plotSwitching = false;
 cfg.debug.dumpTables = true;
 cfg.debug.maxOverlayPauses = Inf;
@@ -210,13 +214,33 @@ cfg.debug.interpOvershootPct = 2.0;     % flag if interpolated range exceeds ori
 
 % --- MATLAB paths ---
 cfg.baseFolder = 'C:\Dev\matlab-functions';
+paths = localPaths();
+
+switch cfg.datasetName
+    case 'MG119_highRes'
+        cfg.dataDir = fullfile( ...
+            paths.dataRoot, ...
+            'MG 119', ...
+            'MG 119 M2 out of plane Aging no field high res', ...
+            'Analyzed only');
+
+    case 'MG119_shortWait'
+        cfg.dataDir = fullfile( ...
+            paths.dataRoot, ...
+            'MG 119', ...
+            'MG 119 M2 out of plane Aging no field high res waiting shorter time', ...
+            'Analyzed only');
+
+    otherwise
+        error('Unknown datasetName: %s', cfg.datasetName);
+end
 
 % --- Switching reconstruction ---
 % NOTE: Reconstruction is fitted to Rsw(T), not to DeltaM(T).
 
 cfg.Tsw = [4 6 8 10 12.01 14 16 18 20 22 24 26 28 30 32 34];
 
-cfg.Rsw = abs([ ...
+cfg.Rsw_15mA = abs([ ...
 -0.118798584194838
 -0.122264267325776
 -0.118851761632771
@@ -233,6 +257,33 @@ cfg.Rsw = abs([ ...
 -0.0367692256085554
 -0.00532765237477462
 -0.000552867428264816]);
+
+cfg.Rsw_35mA = abs([ ...
+-0.349600045040287
+-0.341950817738385
+-0.311011499245369
+-0.265625424732821
+-0.232986037937288
+-0.192544819951381
+-0.162443432649134
+-0.142095227831458
+-0.118297407736058
+-0.0832202553642621
+-0.0545631856614726
+-0.0318709361078693
+-0.0178054852417963
+-0.00549571126459982
+ 0.00186991866339437
+ 0.00101911609498144]);
+
+switch cfg.current_mA
+    case 15
+        cfg.Rsw = cfg.Rsw_15mA;
+    case 35
+        cfg.Rsw = cfg.Rsw_35mA;
+    otherwise
+        error('Unsupported current value. Use 15 or 35.');
+end
 
 cfg.switchParams = struct();
 cfg.switchParams.dipWindowK = cfg.dip_window_K;
@@ -259,7 +310,7 @@ cfg.switchExcludeTpAbove = [];      % Exclude all Tp > this threshold (e.g., 6 K
 % --- Automatic exclusion of degenerate Gaussian dips (diagnostic) ---
 % If true, automatically exclude Tp where Dip fits are degenerate
 % (sigma stuck at lower bound, or dip area extremely small)
-cfg.autoExcludeDegenerateDip = false;
+cfg.autoExcludeDegenerateDip = true;
 
 % --- Switching reconstruction debug gating ---
 cfg.switchParams.debugSwitching = false;  % if true, print/plot switching debug info

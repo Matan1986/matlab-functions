@@ -184,7 +184,7 @@ set(hY1,'FontSize',cfg.fontsize-2);
 set(ax1,'FontSize',cfg.fontsize-2)
 set(ax1,'XTick',Tp)
 xlim(ax1,[min(Tp)-1 max(Tp)+1])
-ylim(ax1,[0 3])
+ylim(ax1,[0 max(max(Y_AFM*scaleFactor),max(Y_FM * scaleFactor))])
 
 
 % ---------- (b) FM background (FIT-based) ----------
@@ -225,7 +225,8 @@ set(hY2,'FontSize',cfg.fontsize-2);
 set(ax2,'FontSize',cfg.fontsize-2)
 set(ax2,'XTick',Tp)
 xlim(ax2,[min(Tp)-1 max(Tp)+1])
-ylim(ax2,[0 3])
+ylim(ax2,[0 max(max(Y_AFM*scaleFactor),max(Y_FM * scaleFactor))])
+
 
 set(ax1,'XTickLabel',[])
 

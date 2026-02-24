@@ -1,65 +1,125 @@
-%% run_arpes_json.m
-% ARPES JSON loader (Igor export)
-% Fix Igor->MATLAB orientation by single transpose
+%% run_arpes_dual.m
+% Load and display FS and CUT together with consistent aspect ratio
 
-clc; clear;
+clc;
 
-fname = "L:\My Drive\Quantum materials lab\ARPES\Co0.33TaS2_KbMbKb_cut\graph_KbMbKb_second_derivative.json";
+%% ===== FILES =====
+fname_FS  = "L:\My Drive\Quantum materials lab\ARPES\Co0.33TaS2_KbMbKb_cut\graph_FS_MGM.json";
+fname_CUT = "L:\My Drive\Quantum materials lab\ARPES\Co0.33TaS2_KbMbKb_cut\graph_KbMbKb_second_derivative.json";
 
-%% ===== LOAD =====
-S = jsondecode(fileread(fname));
+%% ===== USER CONTROLS =====
+useROI = true;
+Emin_user = -0.12;
+Emax_user =  0.04;
 
-Z = double(S.mes_data);
+useIntensityScaling = false;
+intensityScale = 1e5;
 
-% ---- CRITICAL FIX: Igor orientation ----
-Z = Z.';   % Energy now along columns, Ky along rows
+%% ===== LOAD FS =====
+[Kx, Ky, Z_FS] = load_arpes_json(fname_FS);
 
-scales = S.mes_scales;
+Z_FS = Z_FS - prctile(Z_FS(:),1);
+Z_FS = Z_FS / prctile(Z_FS(:),99);
+Z_FS = max(min(Z_FS,1),0);
 
-% Igor order: {Energy , Ky}
-Energy = double(scales{1});
-Ky     = double(scales{2});
+fs_ratio = range(Ky) / range(Kx);
 
-fprintf('Z = %d x %d\n',size(Z,1),size(Z,2));
-fprintf('Energy: %.4f → %.4f\n',min(Energy),max(Energy));
-fprintf('Ky:     %.4f → %.4f\n',min(Ky),max(Ky));
+%% ===== LOAD CUT =====
+[Energy, Ky_cut, Z_CUT] = load_arpes_json(fname_CUT);
 
-%% ===== Energy ROI =====
-Emin = -0.12;
-Emax =  0.04;
+if useROI
+    maskE = (Energy >= Emin_user) & (Energy <= Emax_user);
+    Energy = Energy(maskE);
+    Z_CUT = Z_CUT(:,maskE);
+end
 
-maskE = (Energy >= Emin) & (Energy <= Emax);
-Energy_zoom = Energy(maskE);
-Z_zoom = Z(:,maskE);
+Z_CUT = Z_CUT - prctile(Z_CUT(:),1);
+Z_CUT = Z_CUT / prctile(Z_CUT(:),99);
+Z_CUT = max(min(Z_CUT,1),0);
 
-%% ===== PLOT =====
-figure('Color','w');
+fprintf('FS: min=%g max=%g\n', min(Z_FS(:)), max(Z_FS(:)))
+fprintf('CUT: min=%g max=%g\n', min(Z_CUT(:)), max(Z_CUT(:)))
+%% ===== COLORMAP =====
+cmap = cmocean('curl',256);
+% Alternative custom colormap:
+% cmap = arpesTerrain(256);
 
-% --- ROTATE: X=Ky, Y=Energy ---
-imagesc(Ky, Energy_zoom, Z_zoom.');   % <-- 90° rotation
+%% ===== PLOT FS =====
+figure('Color','w','Name','ARPES_FS','NumberTitle','off');
+
+imagesc(Kx, Ky, Z_FS.');
+axis tight
+
+dx = range(Kx);
+dy = range(Ky);
+half = min(dx,dy)/2;
+xlim([-half half])
+ylim([-half half])
+
 set(gca,'YDir','normal');
-
-% --- FLIP X axis (whole figure + ticks) ---
-set(gca,'XDir','reverse');
-
-xlabel('Ky','Interpreter','none');
-ylabel('Binding Energy (E - E_f)','Interpreter','none');
-
-% contrast only from ROI
-v = Z_zoom(:);
-caxis(prctile(v,[2 98]));
-
-colormap(arpesTerrain(256));
-colorbar;
-
-xlim([min(Ky) max(Ky)]);
-ylim([Emin Emax]);
-
-title('ARPES second derivative (EF zoom)');
+xlabel('$k_x\ (\mathrm{\AA^{-1}})$','Interpreter','latex');
+ylabel('$k_y\ (\mathrm{\AA^{-1}})$','Interpreter','latex');
 set(gca,'FontSize',14);
+
+apply_colorbar(Z_FS, useIntensityScaling, intensityScale);
+
+colormap(cmap);
+
+%% ===== PLOT CUT =====
+figure('Color','w','Name','ARPES_CUT','NumberTitle','off');
+
+imagesc(Ky_cut, Energy, Z_CUT.');
+ylim([min(Energy) max(Energy)]);
+
+axis tight
+
+set(gca,'YDir','normal');
+xlabel('$k_y\ (\mathrm{\AA^{-1}})$','Interpreter','latex');
+ylabel('$\mathrm{Binding\ Energy}\ \mathrm{(eV)}$','Interpreter','latex');
+set(gca,'FontSize',14);
+
+apply_colorbar(Z_CUT, useIntensityScaling, intensityScale);
+
+colormap(cmap);
 box on;
 
-%% ===== COLORMAP =====
+%% ===== FUNCTIONS =====
+
+function [Axis1, Axis2, Z] = load_arpes_json(fname)
+
+S = jsondecode(fileread(fname));
+Z = double(S.mes_data).';
+scales = S.mes_scales;
+
+Axis1 = double(scales{1});
+Axis2 = double(scales{2});
+
+end
+
+
+function apply_colorbar(Z, useScaling, scale)
+
+v = Z(:);
+if min(v) < 0
+    caxis([-1 1]);
+else
+    caxis([0 1]);
+end
+
+cb = colorbar;
+cb.TickLabelInterpreter = 'latex';
+cb.FontSize = 14;
+
+ax = gca;
+ax.TickLabelInterpreter = 'latex';
+
+cb.Label.String = 'Intensity (arb. units)';
+cb.Label.Interpreter = 'latex';
+cb.Label.FontSize = 14;
+
+end
+
+
 function cmap = arpesTerrain(n)
 if nargin<1, n=256; end
 
