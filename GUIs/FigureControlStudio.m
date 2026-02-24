@@ -3979,7 +3979,31 @@ ddScope = uidropdown(tgtGrid, ...
                     end
                 end
 
+                disp('--- Before export ---');
+                allAxesBeforeExport = findall(fig, 'Type', 'axes');
+                for iAx = 1:numel(allAxesBeforeExport)
+                    disp(sprintf('  Axis %d Position:', iAx));
+                    disp(allAxesBeforeExport(iAx).Position);
+                end
+
+                allAxes = findall(exportFig,'Type','axes');
+                for k = 1:numel(allAxes)
+                    disp(['Axis ' num2str(k)])
+                    disp('Units:')
+                    disp(allAxes(k).Units)
+                    disp('Position:')
+                    disp(allAxes(k).Position)
+                    disp('InnerPosition:')
+                    disp(allAxes(k).InnerPosition)
+                end
+
                 exportgraphics(fig, outFile, 'ContentType', 'vector');
+                disp('--- After export ---');
+                allAxesAfterExport = findall(fig, 'Type', 'axes');
+                for iAx = 1:numel(allAxesAfterExport)
+                    disp(sprintf('  Axis %d Position:', iAx));
+                    disp(allAxesAfterExport(iAx).Position);
+                end
 
                 if exportTempComposedFig && ~isempty(fig) && isgraphics(fig, 'figure')
                     close(fig);
@@ -4181,14 +4205,32 @@ ddScope = uidropdown(tgtGrid, ...
             
             % Create tile and copy axes
             nexttile(tl, k);
+            disp(sprintf('--- After nexttile (tile %d) ---', k));
             if ~isempty(primaryAxes)
                 try
-                    copyobj(primaryAxes, tl);
+                    copiedAxes = copyobj(primaryAxes, tl);
+                    disp('--- After copyobj ---');
+                    % Set units to centimeters and prevent layout-driven resizing
+                    for i = 1:numel(copiedAxes)
+                        if isgraphics(copiedAxes(i), 'axes')
+                            disp(sprintf('  Axis %d Position:', i));
+                            disp(copiedAxes(i).Position);
+                            copiedAxes(i).Units = 'centimeters';
+                            copiedAxes(i).PositionConstraint = 'innerposition';
+                        end
+                    end
                 catch ME
                     % Fallback: copy one by one
+                    disp('--- After copyobj (fallback path) ---');
                     for j = 1:numel(primaryAxes)
                         try
-                            copyobj(primaryAxes(j), tl);
+                            copiedAxes = copyobj(primaryAxes(j), tl);
+                            if isgraphics(copiedAxes, 'axes')
+                                disp(sprintf('  Axis %d Position:', j));
+                                disp(copiedAxes.Position);
+                                copiedAxes.Units = 'centimeters';
+                                copiedAxes.PositionConstraint = 'innerposition';
+                            end
                         catch
                         end
                     end
@@ -4304,6 +4346,15 @@ ddScope = uidropdown(tgtGrid, ...
                            'Renderer', 'painters', ...
                            'Units', 'pixels', ...
                            'Position', [100 100 srcSizePx(1) srcSizePx(2)]);
+
+        % Set fixed physical export size
+        targetWidth  = 8.6;
+        targetHeight = 6.0;
+        exportFig.Units = 'centimeters';
+        exportFig.Position = [0 0 targetWidth targetHeight];
+        exportFig.PaperUnits = 'centimeters';
+        exportFig.PaperPosition = [0 0 targetWidth targetHeight];
+        exportFig.PaperSize = [targetWidth targetHeight];
 
         srcAxes = findall(sourceFig, 'Type', 'axes');
         srcManualLegendAxes = srcAxes(false(size(srcAxes)));
