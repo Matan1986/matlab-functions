@@ -26,3 +26,8 @@ Aging ver2/tests/
 
 # Local machine paths (not version controlled)
 runs/localPaths.m
+
+Debug/
+results/*.mat
+results/*.csv
+results/phaseC/
