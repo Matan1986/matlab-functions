@@ -1,7 +1,8 @@
 %% run_arpes_dual.m
-% Load and display FS and CUT together with consistent aspect ratio
+% FS = true 1:1
+% CUT uses same PlotBoxAspectRatio as FS
 
-clc;
+clc; close all;
 
 %% ===== FILES =====
 fname_FS  = "L:\My Drive\Quantum materials lab\ARPES\Co0.33TaS2_KbMbKb_cut\graph_FS_MGM.json";
@@ -12,8 +13,9 @@ useROI = true;
 Emin_user = -0.12;
 Emax_user =  0.04;
 
-useIntensityScaling = false;
-intensityScale = 1e5;
+%% ===== FIGURE SIZE (cm) =====
+figW = 12;
+figH = 12;
 
 %% ===== LOAD FS =====
 [Kx, Ky, Z_FS] = load_arpes_json(fname_FS);
@@ -21,8 +23,6 @@ intensityScale = 1e5;
 Z_FS = Z_FS - prctile(Z_FS(:),1);
 Z_FS = Z_FS / prctile(Z_FS(:),99);
 Z_FS = max(min(Z_FS,1),0);
-
-fs_ratio = range(Ky) / range(Kx);
 
 %% ===== LOAD CUT =====
 [Energy, Ky_cut, Z_CUT] = load_arpes_json(fname_CUT);
@@ -37,55 +37,60 @@ Z_CUT = Z_CUT - prctile(Z_CUT(:),1);
 Z_CUT = Z_CUT / prctile(Z_CUT(:),99);
 Z_CUT = max(min(Z_CUT,1),0);
 
-fprintf('FS: min=%g max=%g\n', min(Z_FS(:)), max(Z_FS(:)))
-fprintf('CUT: min=%g max=%g\n', min(Z_CUT(:)), max(Z_CUT(:)))
 %% ===== COLORMAP =====
 cmap = cmocean('curl',256);
-% Alternative custom colormap:
-% cmap = arpesTerrain(256);
 
-%% ===== PLOT FS =====
-figure('Color','w','Name','ARPES_FS','NumberTitle','off');
+%% ================= FS =================
+figure('Color','w','Units','centimeters','Position',[5 5 figW figH],'Name','arpes_fermi_surface');
 
-imagesc(Kx, Ky, Z_FS.');
-axis tight
+ax1 = axes;
+
+imagesc(ax1,Kx,Ky,Z_FS.');
+set(ax1,'YDir','normal')
+axis(ax1,'equal')
+axis(ax1,'tight')
+
 
 dx = range(Kx);
 dy = range(Ky);
 half = min(dx,dy)/2;
-xlim([-half half])
-ylim([-half half])
+xlim(ax1,[-half half])
+ylim(ax1,[-half half])
 
-set(gca,'YDir','normal');
-xlabel('$k_x\ (\mathrm{\AA^{-1}})$','Interpreter','latex');
-ylabel('$k_y\ (\mathrm{\AA^{-1}})$','Interpreter','latex');
-set(gca,'FontSize',14);
+xlabel(ax1,'$k_y\ (\mathrm{\AA^{-1}})$','Interpreter','latex');
+ylabel(ax1,'$k_y\ (\mathrm{\AA^{-1}})$','Interpreter','latex');
+set(ax1,'FontSize',14)
 
-apply_colorbar(Z_FS, useIntensityScaling, intensityScale);
+colormap(ax1,cmap)
+cb1 = colorbar(ax1,'northoutside');
+ylabel(cb1,'Intensity (arb. units)','Interpreter','latex');
 
-colormap(cmap);
+% ---- capture FS physical plot box ----
+pb = ax1.PlotBoxAspectRatio;
+posFS = ax1.Position;
+%% ================= CUT =================
+figure('Color','w','Units','centimeters','Position',[20 5 figW figH],'Name','arpes_energy_momentum_cut');
 
-%% ===== PLOT CUT =====
-figure('Color','w','Name','ARPES_CUT','NumberTitle','off');
+ax2 = axes;
 
-imagesc(Ky_cut, Energy, Z_CUT.');
-ylim([min(Energy) max(Energy)]);
+imagesc(ax2,Ky_cut,Energy,Z_CUT.');
+set(ax2,'YDir','normal')
+axis(ax2,'tight')
 
-axis tight
+% ---- enforce same physical height as FS ----
+ax2.PlotBoxAspectRatio = pb;
 
-set(gca,'YDir','normal');
-xlabel('$k_y\ (\mathrm{\AA^{-1}})$','Interpreter','latex');
-ylabel('$\mathrm{Binding\ Energy}\ \mathrm{(eV)}$','Interpreter','latex');
-set(gca,'FontSize',14);
+xlabel(ax2,'$k_y\ (\mathrm{\AA^{-1}})$','Interpreter','latex');
+ylabel(ax2,'$\mathrm{Binding\ Energy}\ \mathrm{(eV)}$','Interpreter','latex');
+set(ax2,'FontSize',14)
 
-apply_colorbar(Z_CUT, useIntensityScaling, intensityScale);
-
-colormap(cmap);
-box on;
-
+colormap(ax2,cmap)
+cb2 = colorbar(ax2,'northoutside');
+ylabel(cb2,'Intensity (arb. units)','Interpreter','latex');
+ax2.Position = posFS;
 %% ===== FUNCTIONS =====
 
-function [Axis1, Axis2, Z] = load_arpes_json(fname)
+function [Axis1,Axis2,Z] = load_arpes_json(fname)
 
 S = jsondecode(fileread(fname));
 Z = double(S.mes_data).';
@@ -95,46 +100,28 @@ Axis1 = double(scales{1});
 Axis2 = double(scales{2});
 
 end
-
-
 function apply_colorbar(Z, useScaling, scale)
 
 v = Z(:);
-if min(v) < 0
-    caxis([-1 1]);
+
+if min(v)<0
+    caxis([-1 1])
 else
-    caxis([0 1]);
+    caxis([0 1])
 end
 
-cb = colorbar;
+cb = colorbar('northoutside');   % <<< למעלה
 cb.TickLabelInterpreter = 'latex';
 cb.FontSize = 14;
 
 ax = gca;
 ax.TickLabelInterpreter = 'latex';
 
-cb.Label.String = 'Intensity (arb. units)';
+cb.Label.String = '\mathrm{Intensity\ (arb.\ units)}';
 cb.Label.Interpreter = 'latex';
 cb.Label.FontSize = 14;
 
-end
+% קצת ריווח מהאיור (אופציונלי)
+cb.Position(2) = cb.Position(2) + 0.02;
 
-
-function cmap = arpesTerrain(n)
-if nargin<1, n=256; end
-
-anchors = [
-    0.00 0.15 0.50
-    0.00 0.55 0.80
-    0.10 0.75 0.45
-    0.80 0.85 0.35
-    0.65 0.45 0.25
-    0.50 0.32 0.25
-    0.98 0.98 0.98
-];
-
-x  = linspace(0,1,size(anchors,1));
-xi = linspace(0,1,n);
-
-cmap = interp1(x,anchors,xi,'pchip');
 end
