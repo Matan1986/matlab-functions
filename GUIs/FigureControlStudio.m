@@ -688,11 +688,11 @@ ddScope = uidropdown(tgtGrid, ...
     tabRootExport.RowHeight = {'fit', 'fit', 'fit', '1x', 'fit'};
     tabRootExport.Padding = [12 12 12 12];
 
-    secExportA = uigridlayout(tabRootExport, [8 2]);
+    secExportA = uigridlayout(tabRootExport, [9 2]);
     secExportA.Layout.Row = 1;
     secExportA.Layout.Column = 1;
     secExportA.ColumnWidth = {140, '1x'};
-    secExportA.RowHeight = {'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit'};
+    secExportA.RowHeight = {'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit', 'fit'};
     secExportA.Padding = [0 0 0 0];
 
     lblExportFormat = uilabel(secExportA, 'Text', 'Format', 'HorizontalAlignment', 'left');
@@ -737,6 +737,11 @@ ddScope = uidropdown(tgtGrid, ...
         'ValueChangedFcn', @onPersistedControlChanged);
     cbExportComposedOnly.Layout.Row = 7;
     cbExportComposedOnly.Layout.Column = [1 2];
+
+    cbNormalizeFontsExport = uicheckbox(secExportA, 'Text', 'Normalize fonts on export', 'Value', false, ...
+        'ValueChangedFcn', @onPersistedControlChanged);
+    cbNormalizeFontsExport.Layout.Row = 8;
+    cbNormalizeFontsExport.Layout.Column = [1 2];
 
     secExportB = uigridlayout(tabRootExport, [2 1]);
     secExportB.Layout.Row = 2;
@@ -3234,15 +3239,70 @@ ddScope = uidropdown(tgtGrid, ...
         annOpts.annColor = string(efAnnColor.Value);
 
         try
-            if hasOverride
-                FCS_applyFontSize(figs, fs, 'AffectLegend', false);
-            else
-                FCS_applyFontSize(figs, fs);
+            % === STRICT UNIFORM FONT ENFORCEMENT ===
+            % Apply uniform FontSize and Interpreter='latex' to all objects
+            for k = 1:numel(figs)
+                fig = figs(k);
+                if ~isgraphics(fig, 'figure')
+                    continue;
+                end
+
+                % 1. Apply to all axes and their components
+                axList = findall(fig, 'Type', 'axes');
+                for a = 1:numel(axList)
+                    ax = axList(a);
+                    if ~isgraphics(ax, 'axes')
+                        continue;
+                    end
+
+                    % Axes FontSize (uniform, no scaling)
+                    ax.FontSize = fs;
+                    ax.TickLabelInterpreter = 'latex';
+
+                    % Title (uniform, no fs+4)
+                    if ~isempty(ax.Title.String)
+                        ax.Title.FontSize = fs;
+                        ax.Title.Interpreter = 'latex';
+                    end
+
+                    % XLabel and YLabel (uniform, no fs+4)
+                    if ~isempty(ax.XLabel.String)
+                        ax.XLabel.FontSize = fs;
+                        ax.XLabel.Interpreter = 'latex';
+                    end
+                    if ~isempty(ax.YLabel.String)
+                        ax.YLabel.FontSize = fs;
+                        ax.YLabel.Interpreter = 'latex';
+                    end
+                end
+
+                % 2. All colorbars in the figure
+                cbList = findall(fig, 'Type', 'colorbar');
+                for cb = cbList(:)'
+                    cb.FontSize = fs;
+                    cb.TickLabelInterpreter = 'latex';
+                end
+
+                % 3. All text() objects in the figure
+                textList = findall(fig, 'Type', 'text');
+                for t = textList(:)'
+                    t.FontSize = fs;
+                    t.Interpreter = 'latex';
+                end
+
+                % 4. All legend objects (apply base first, override applied later)
+                lgList = findall(fig, 'Type', 'legend');
+                for lg = lgList(:)'
+                    lg.FontSize = fs;
+                    lg.Interpreter = 'latex';
+                end
             end
+
+            % Apply axis policy
             FCS_applyAxisPolicy(figs, preset);
 
+            % Apply annotation text styles
             profileName = string(ddTypoProfile.Value);
-
             for k = 1:numel(figs)
                 fig = figs(k);
                 if ~isgraphics(fig, 'figure')
@@ -3260,6 +3320,7 @@ ddScope = uidropdown(tgtGrid, ...
                 end
             end
 
+            % Apply legend font size override (if exists, overrides base FontSize)
             if hasOverride
                 i_applyLegendFontSize(figs, overrideFontSize);
             end
@@ -3574,6 +3635,30 @@ ddScope = uidropdown(tgtGrid, ...
                     ax.Units = 'normalized';
                     ax.Position = newPos;
                     ax.Units = oldUnits;
+
+                    % Apply same transform to associated colorbars
+                    cbList = i_getColorbarsForAxes(fig, ax);
+                    for cb_idx = 1:numel(cbList)
+                        cb = cbList(cb_idx);
+                        if isgraphics(cb, 'colorbar') && isprop(cb, 'Position')
+                            try
+                                cb_oldUnits = cb.Units;
+                                cb.Units = 'normalized';
+                                oldCbPos = double(cb.Position);
+                                
+                                % Transform colorbar position using same scale and translation
+                                newCbPos = [ ...
+                                    figInfo.xmin + (oldCbPos(1) - figInfo.xmin) * sx + dx, ...
+                                    figInfo.ymin + (oldCbPos(2) - figInfo.ymin) * sy + dy, ...
+                                    oldCbPos(3) * sx, ...
+                                    oldCbPos(4) * sy];
+                                
+                                cb.Position = newCbPos;
+                                cb.Units = cb_oldUnits;
+                            catch
+                            end
+                        end
+                    end
                 catch
                 end
             end
@@ -3997,6 +4082,109 @@ ddScope = uidropdown(tgtGrid, ...
                     disp(allAxes(k).InnerPosition)
                 end
 
+                % === FIG DIAGNOSTICS AND FONT ENFORCEMENT (right before exportgraphics) ===
+                debugExport = true;  % Set to true for verbose diagnostics
+                normalizeFontsOnExport = logical(cbNormalizeFontsExport.Value);
+                
+                [exportFontName, exportFontSize] = i_getExportFontSettings(fig);
+
+                if debugExport
+                    disp('=== FIG DIAGNOSTIC (before export) ===');
+                    disp(sprintf('fig class: %s', class(fig)));
+                    disp('fig.Position:'); disp(fig.Position);
+                    disp('fig.PaperSize:'); disp(fig.PaperSize);
+                    disp('fig.PaperPosition:'); disp(fig.PaperPosition);
+                    disp(sprintf('fig.Renderer: %s', fig.Renderer));
+                    fprintf('Export font settings: FontName=%s, FontSize=%.1f\n', exportFontName, exportFontSize);
+                    fprintf('Normalize fonts on export: %d\n', normalizeFontsOnExport);
+                end
+
+                % Normalize fonts on all axes (if enabled)
+                axAll = findall(fig, 'Type', 'axes');
+                if debugExport
+                    fprintf('Axes count: %d\n', numel(axAll));
+                end
+                for k = 1:numel(axAll)
+                    if debugExport
+                        fprintf('\nAXIS %d (before font enforcement)\n', k);
+                        fprintf('  FontName: %s\n', axAll(k).FontName);
+                        fprintf('  FontSize: %.2f\n', axAll(k).FontSize);
+                        fprintf('  TickLabelInterpreter: %s\n', axAll(k).TickLabelInterpreter);
+                        fprintf('  Units: %s\n', axAll(k).Units);
+                        disp('  Position:'); disp(axAll(k).Position);
+                        disp('  InnerPosition:'); disp(axAll(k).InnerPosition);
+                        disp('  TightInset:'); disp(axAll(k).TightInset);
+                    end
+
+                    % Normalize font settings only if enabled
+                    if normalizeFontsOnExport
+                        if isprop(axAll(k), 'FontName')
+                            axAll(k).FontName = exportFontName;
+                        end
+                        if isprop(axAll(k), 'FontSize')
+                            axAll(k).FontSize = exportFontSize;
+                        end
+                    end
+                end
+
+                % Normalize fonts on colorbars (if enabled)
+                cbAll = findall(fig, 'Type', 'colorbar');
+                if debugExport
+                    fprintf('\nColorbar count: %d\n', numel(cbAll));
+                end
+                for k = 1:numel(cbAll)
+                    if debugExport
+                        fprintf('COLORBAR %d\n', k);
+                        if isprop(cbAll(k), 'FontName')
+                            fprintf('  FontName: %s\n', cbAll(k).FontName);
+                        end
+                        if isprop(cbAll(k), 'FontSize')
+                            fprintf('  FontSize: %.2f\n', cbAll(k).FontSize);
+                        end
+                        if isprop(cbAll(k), 'Units')
+                            fprintf('  Units: %s\n', cbAll(k).Units);
+                        end
+                        if isprop(cbAll(k), 'Position')
+                            disp('  Position:'); disp(cbAll(k).Position);
+                        end
+                    end
+                    if normalizeFontsOnExport
+                        if isprop(cbAll(k), 'FontName')
+                            cbAll(k).FontName = exportFontName;
+                        end
+                        if isprop(cbAll(k), 'FontSize')
+                            cbAll(k).FontSize = exportFontSize;
+                        end
+                    end
+                end
+
+                % Normalize fonts on all text objects (if enabled)
+                txAll = findall(fig, 'Type', 'text');
+                if debugExport
+                    fprintf('\nText count: %d\n', numel(txAll));
+                end
+                for k = 1:numel(txAll)
+                    if debugExport
+                        fprintf('TEXT %d (before font enforcement)\n', k);
+                        fprintf('  FontName: %s\n', txAll(k).FontName);
+                        fprintf('  FontSize: %.2f\n', txAll(k).FontSize);
+                        fprintf('  Interpreter: %s\n', txAll(k).Interpreter);
+                    end
+
+                    % Normalize font settings only if enabled
+                    if normalizeFontsOnExport
+                        if isprop(txAll(k), 'FontName')
+                            txAll(k).FontName = exportFontName;
+                        end
+                        if isprop(txAll(k), 'FontSize')
+                            txAll(k).FontSize = exportFontSize;
+                        end
+                    end
+                end
+                if debugExport
+                    fprintf('=== End FIG DIAGNOSTIC ===\n\n');
+                end
+
                 exportgraphics(fig, outFile, 'ContentType', 'vector');
                 disp('--- After export ---');
                 allAxesAfterExport = findall(fig, 'Type', 'axes');
@@ -4023,6 +4211,8 @@ ddScope = uidropdown(tgtGrid, ...
         exportOpts.vectorMode = logical(cbVector.Value);
         exportOpts.filenameFrom = char(ddFilenameFrom.Value);
         exportOpts.sanitize = true;
+        exportOpts.normalizeFontsOnExport = logical(cbNormalizeFontsExport.Value);
+        exportOpts.debugExport = true;  % Set to true for verbose diagnostics
 
         try
             FCS_export(figs, exportOpts);
@@ -4552,6 +4742,33 @@ ddScope = uidropdown(tgtGrid, ...
             heightIn = posPx(4) / screenDpi;
             widthCm = widthIn * 2.54;
             heightCm = heightIn * 2.54;
+        end
+
+        disp('=== EXPORTFIG DIAGNOSTIC ===');
+        disp(class(exportFig));
+        disp(exportFig.Position);
+        disp(exportFig.PaperSize);
+        disp(exportFig.PaperPosition);
+        disp(exportFig.Renderer);
+
+        ax = findall(exportFig,'Type','axes');
+        fprintf('axes count: %d\n', numel(ax));
+        for k=1:numel(ax)
+            fprintf('\nAXIS %d\n',k);
+            fprintf('  FontName: %s\n', ax(k).FontName);
+            fprintf('  FontSize: %.2f\n', ax(k).FontSize);
+            fprintf('  TickLabelInterpreter: %s\n', ax(k).TickLabelInterpreter);
+            fprintf('  Units: %s\n', ax(k).Units);
+            disp('  Position:'); disp(ax(k).Position);
+            disp('  InnerPosition:'); disp(ax(k).InnerPosition);
+            disp('  TightInset:'); disp(ax(k).TightInset);
+        end
+
+        tx = findall(exportFig,'Type','text');
+        fprintf('\ntext count: %d\n', numel(tx));
+        for k=1:numel(tx)
+            fprintf('TEXT %d  FontName=%s  FontSize=%.2f  Interpreter=%s\n', ...
+                k, tx(k).FontName, tx(k).FontSize, tx(k).Interpreter);
         end
 
         fprintf('\n=== Compose Export Status (right before exportgraphics) ===\n');
@@ -6320,6 +6537,54 @@ ddScope = uidropdown(tgtGrid, ...
                 end
             catch
             end
+        end
+    end
+
+    function [fontName, fontSize] = i_getExportFontSettings(fig)
+        % i_getExportFontSettings
+        % Return export font settings with intelligent fallback.
+        % Priority: figure defaults -> first axis -> groot defaults -> Helvetica/8
+        
+        fontName = 'Helvetica';   % final fallback
+        fontSize = 8;              % final fallback
+        
+        % Try to get from figure defaults
+        if isprop(fig, 'DefaultAxesFontName') && ~isempty(fig.DefaultAxesFontName)
+            fontName = fig.DefaultAxesFontName;
+        end
+        if isprop(fig, 'DefaultAxesFontSize') && isfinite(fig.DefaultAxesFontSize) && fig.DefaultAxesFontSize > 0
+            fontSize = fig.DefaultAxesFontSize;
+        end
+        
+        % Try first axis if no figure defaults found
+        axAll = findall(fig, 'Type', 'axes');
+        if ~isempty(axAll)
+            firstAx = axAll(1);
+            if isprop(firstAx, 'FontName') && ~isempty(firstAx.FontName)
+                fontName = firstAx.FontName;
+            end
+            if isprop(firstAx, 'FontSize') && isfinite(firstAx.FontSize) && firstAx.FontSize > 0
+                fontSize = firstAx.FontSize;
+            end
+        end
+        
+        % Fallback to groot defaults if still unset
+        try
+            root = groot;
+            defaultAxesFontName = get(root, 'DefaultAxesFontName');
+            defaultAxesFontSize = get(root, 'DefaultAxesFontSize');
+            if ~isempty(defaultAxesFontName)
+                if strcmp(fontName, 'Helvetica')  % Still at fallback
+                    fontName = defaultAxesFontName;
+                end
+            end
+            if isfinite(defaultAxesFontSize) && defaultAxesFontSize > 0
+                if fontSize == 8  % Still at fallback
+                    fontSize = defaultAxesFontSize;
+                end
+            end
+        catch
+            % If groot fails, use already-set fallback
         end
     end
 end

@@ -153,7 +153,7 @@ for i = 1:numel(pauseRuns)
 
     stepAC = stepWin - mean(stepWin,'omitnan');
 
-    pauseRuns(i).FM_area_abs = trapz(Twin, abs(stepWin));
+    pauseRuns(i).FM_area_abs = trapz(Twin, stepWin);  % Keep raw signed value
     pauseRuns(i).FM_E        = sqrt(mean(stepAC.^2,'omitnan'));
     pauseRuns(i).Dip_E       = sqrt(mean(dipWin.^2,'omitnan'));
 
@@ -180,13 +180,13 @@ for i = 1:numel(pauseRuns)
     pauseRuns(i).fit_chi2_red = chi2_red;
 
     % -------- store --------
-    pauseRuns(i).FM_step_A = 2*abs(Astep);
+    pauseRuns(i).FM_step_A = 2*Astep;  % Keep raw signed value (no abs)
     pauseRuns(i).Dip_A     = Adip;
     pauseRuns(i).Dip_sigma = sigma;
     pauseRuns(i).Dip_T0    = T0;
     pauseRuns(i).fit_curve = fitY;
     % optional component metrics (keep header consistent)
-    pauseRuns(i).FM_A     = 2*abs(Astep);
+    pauseRuns(i).FM_A     = 2*Astep;  % Keep raw signed value (no abs)
     pauseRuns(i).Dip_area = Adip * sqrt(2*pi) * sigma;
     % =========================================================
     % Debug plots

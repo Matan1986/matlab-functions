@@ -36,6 +36,49 @@ function FCS_export(figHandles, exportOpts)
 
             switch fmt
                 case "pdf"
+                    % === PDF EXPORT DIAGNOSTICS AND FONT ENFORCEMENT ===
+                    i_logExportDiagnostics(fig, fmt, opts.debugExport);
+                    
+                    if opts.normalizeFontsOnExport
+                        [exportFontName, exportFontSize] = i_getExportFontSettings(fig);
+                        
+                        % Normalize fonts on axes
+                        axAll = findall(fig, 'Type', 'axes');
+                        for iAx = 1:numel(axAll)
+                            if isprop(axAll(iAx), 'FontName')
+                                axAll(iAx).FontName = exportFontName;
+                            end
+                            if isprop(axAll(iAx), 'FontSize')
+                                axAll(iAx).FontSize = exportFontSize;
+                            end
+                        end
+                        
+                        % Normalize fonts on colorbars
+                        cbAll = findall(fig, 'Type', 'colorbar');
+                        for iCb = 1:numel(cbAll)
+                            if isprop(cbAll(iCb), 'FontName')
+                                cbAll(iCb).FontName = exportFontName;
+                            end
+                            if isprop(cbAll(iCb), 'FontSize')
+                                cbAll(iCb).FontSize = exportFontSize;
+                            end
+                        end
+                        
+                        % Normalize fonts on text objects
+                        txAll = findall(fig, 'Type', 'text');
+                        for iTx = 1:numel(txAll)
+                            if isprop(txAll(iTx), 'FontName')
+                                txAll(iTx).FontName = exportFontName;
+                            end
+                            if isprop(txAll(iTx), 'FontSize')
+                                txAll(iTx).FontSize = exportFontSize;
+                            end
+                        end
+                    end
+                    
+                    % Synchronize PaperSize with figure dimensions
+                    i_syncPaperSize(fig);
+                    
                     if opts.vectorMode
                         try
                             print(fig, outFile, '-dpdf', '-painters');
@@ -47,9 +90,14 @@ function FCS_export(figHandles, exportOpts)
                     end
 
                 case "png"
+                    % === PNG EXPORT ===
+                    i_logExportDiagnostics(fig, fmt, opts.debugExport);
+                    % Synchronize PaperSize with figure dimensions
+                    i_syncPaperSize(fig);
                     exportgraphics(fig, outFile, 'Resolution', 300);
 
                 case "fig"
+                    % === FIG EXPORT DIAGNOSTICS AND FONT ENFORCEMENT ===
                     if iscell(fig)
                         error('FCS_export:InvalidFigureHandleType', 'savefig input fig must not be a cell array.');
                     end
@@ -70,34 +118,49 @@ function FCS_export(figHandles, exportOpts)
                             outFileK = fullfile(pK, sprintf('%s_%d%s', nK, kFig, eK));
                         end
 
-                        fprintf('\n=== FCS FIG EXPORT DIAGNOSTIC ===\n');
-                        fprintf('class(figOne): %s\n', class(figOne));
-                        sFig = size(figOne);
-                        fprintf('size(figOne): [%s]\n', sprintf('%d ', sFig));
-                        fprintf('numel(figOne): %d\n', numel(figOne));
-                        for iFig = 1:numel(figOne)
-                            hFig = figOne(iFig);
-                            fprintf('  element %d handle: %s\n', iFig, num2str(double(hFig)));
-                            if isprop(hFig, 'Name')
-                                try
-                                    fprintf('    Name: %s\n', char(string(hFig.Name)));
-                                catch
-                                    fprintf('    Name: <unprintable>\n');
+                        % Log diagnostics for this figure
+                        i_logExportDiagnostics(figOne, fmt, opts.debugExport);
+                        
+                        % Synchronize PaperSize with figure dimensions
+                        i_syncPaperSize(figOne);
+                        
+                        % Font normalization for FIG export
+                        if opts.normalizeFontsOnExport
+                            [exportFontName, exportFontSize] = i_getExportFontSettings(figOne);
+                            
+                            % Normalize fonts on axes
+                            axAll = findall(figOne, 'Type', 'axes');
+                            for iAx = 1:numel(axAll)
+                                if isprop(axAll(iAx), 'FontName')
+                                    axAll(iAx).FontName = exportFontName;
                                 end
-                            else
-                                fprintf('    Name: <no property>\n');
+                                if isprop(axAll(iAx), 'FontSize')
+                                    axAll(iAx).FontSize = exportFontSize;
+                                end
                             end
-                            if isprop(hFig, 'Tag')
-                                try
-                                    fprintf('    Tag: %s\n', char(string(hFig.Tag)));
-                                catch
-                                    fprintf('    Tag: <unprintable>\n');
+                            
+                            % Normalize fonts on colorbars
+                            cbAll = findall(figOne, 'Type', 'colorbar');
+                            for iCb = 1:numel(cbAll)
+                                if isprop(cbAll(iCb), 'FontName')
+                                    cbAll(iCb).FontName = exportFontName;
                                 end
-                            else
-                                fprintf('    Tag: <no property>\n');
+                                if isprop(cbAll(iCb), 'FontSize')
+                                    cbAll(iCb).FontSize = exportFontSize;
+                                end
+                            end
+                            
+                            % Normalize fonts on text objects
+                            txAll = findall(figOne, 'Type', 'text');
+                            for iTx = 1:numel(txAll)
+                                if isprop(txAll(iTx), 'FontName')
+                                    txAll(iTx).FontName = exportFontName;
+                                end
+                                if isprop(txAll(iTx), 'FontSize')
+                                    txAll(iTx).FontSize = exportFontSize;
+                                end
                             end
                         end
-                        fprintf('root figure count: %d\n', numel(findall(0, 'Type', 'figure')));
 
                         savefig(figOne, outFileK);
                     end
@@ -882,6 +945,8 @@ function opts = i_parseExportOpts(exportOpts)
     opts.filenameFrom = lower(i_getStringField(exportOpts, 'filenameFrom', "Name"));
     opts.sanitize = i_getLogicalField(exportOpts, 'sanitize', true);
     opts.customPrefix = i_getStringField(exportOpts, 'customPrefix', "Figure");
+    opts.normalizeFontsOnExport = i_getLogicalField(exportOpts, 'normalizeFontsOnExport', false);
+    opts.debugExport = i_getLogicalField(exportOpts, 'debugExport', false);
 
     validNameModes = ["name", "number", "customprefix"];
     if ~any(opts.filenameFrom == validNameModes)
@@ -989,5 +1054,168 @@ function out = i_uniqueFilename(pathIn)
     while exist(out, 'file')
         out = fullfile(p, sprintf('%s_%d%s', n, k, e));
         k = k + 1;
+    end
+end
+function i_logExportDiagnostics(fig, outType, debugExport)
+    % Unified export diagnostics for both PDF and FIG formats
+    if nargin < 3 || ~logical(debugExport)
+        return;
+    end
+    
+    fprintf('\n=== FCS EXPORT DIAGNOSTIC (format=%s) ===\n', outType);
+    
+    % Figure diagnostics
+    try
+        fprintf('fig class: %s\n', class(fig));
+        fprintf('fig.Name: %s\n', char(string(fig.Name)));
+        fprintf('fig.Position: [%.1f %.1f %.1f %.1f]\n', fig.Position);
+        if isprop(fig, 'PaperSize')
+            fprintf('fig.PaperSize: [%.2f %.2f]\n', fig.PaperSize);
+        end
+        if isprop(fig, 'PaperPosition')
+            fprintf('fig.PaperPosition: [%.2f %.2f %.2f %.2f]\n', fig.PaperPosition);
+        end
+        if isprop(fig, 'Renderer')
+            fprintf('fig.Renderer: %s\n', fig.Renderer);
+        end
+    catch ME
+        fprintf('Figure diagnostics error: %s\n', ME.message);
+    end
+    
+    % Axes diagnostics
+    allAxes = findall(fig, 'Type', 'axes');
+    fprintf('Axes count: %d\n', numel(allAxes));
+    for k = 1:min(numel(allAxes), 5)  % Limit to first 5 axes
+        fprintf('\n  AXIS %d:\n', k);
+        if isprop(allAxes(k), 'FontName')
+            fprintf('    FontName: %s\n', allAxes(k).FontName);
+        end
+        if isprop(allAxes(k), 'FontSize')
+            fprintf('    FontSize: %.2f\n', allAxes(k).FontSize);
+        end
+        if isprop(allAxes(k), 'Units')
+            fprintf('    Units: %s\n', allAxes(k).Units);
+        end
+        if isprop(allAxes(k), 'Position')
+            fprintf('    Position: [%.4f %.4f %.4f %.4f]\n', allAxes(k).Position);
+        end
+        
+        % Inner position in centimeters (non-destructive measurement)
+        try
+            if isprop(allAxes(k), 'InnerPosition') && isprop(allAxes(k), 'Units')
+                origUnits = allAxes(k).Units;
+                allAxes(k).Units = 'centimeters';
+                innerPosCm = allAxes(k).InnerPosition;
+                allAxes(k).Units = origUnits;  % Restore original units
+                fprintf('    INNER (cm): [%.4f %.4f %.4f %.4f]\n', innerPosCm);
+            end
+        catch
+            % Silent fail if InnerPosition measurement not supported
+        end
+    end
+    
+    % Colorbar diagnostics
+    allColorbars = findall(fig, 'Type', 'colorbar');
+    fprintf('\nColorbar count: %d\n', numel(allColorbars));
+    for k = 1:min(numel(allColorbars), 3)
+        fprintf('  COLORBAR %d:\n', k);
+        if isprop(allColorbars(k), 'FontName')
+            fprintf('    FontName: %s\n', allColorbars(k).FontName);
+        end
+        if isprop(allColorbars(k), 'FontSize')
+            fprintf('    FontSize: %.2f\n', allColorbars(k).FontSize);
+        end
+    end
+    
+    % Text diagnostics
+    allText = findall(fig, 'Type', 'text');
+    fprintf('\nText object count: %d\n', numel(allText));
+    for k = 1:min(numel(allText), 5)
+        fprintf('  TEXT %d:\n', k);
+        if isprop(allText(k), 'FontName')
+            fprintf('    FontName: %s\n', allText(k).FontName);
+        end
+        if isprop(allText(k), 'FontSize')
+            fprintf('    FontSize: %.2f\n', allText(k).FontSize);
+        end
+    end
+    
+    fprintf('=== END EXPORT DIAGNOSTIC ===\n\n');
+end
+
+function [fontName, fontSize] = i_getExportFontSettings(fig)
+    % Intelligent font fallback: figure -> axes -> root -> default
+    fontName = 'Helvetica';
+    fontSize = 8;
+    
+    % Try figure
+    if isprop(fig, 'DefaultAxesFontName')
+        try
+            fn = fig.DefaultAxesFontName;
+            if ~isempty(fn) && ischar(fn)
+                fontName = fn;
+                if isprop(fig, 'DefaultAxesFontSize')
+                    sz = fig.DefaultAxesFontSize;
+                    if isnumeric(sz) && isfinite(sz) && sz > 0
+                        fontSize = sz;
+                    end
+                end
+                return;
+            end
+        catch
+        end
+    end
+    
+    % Try first axis
+    allAxes = findall(fig, 'Type', 'axes');
+    if ~isempty(allAxes)
+        ax = allAxes(1);
+        try
+            if isprop(ax, 'FontName') && ~isempty(ax.FontName)
+                fontName = ax.FontName;
+            end
+            if isprop(ax, 'FontSize') && isnumeric(ax.FontSize) && isfinite(ax.FontSize) && ax.FontSize > 0
+                fontSize = ax.FontSize;
+            end
+            return;
+        catch
+        end
+    end
+    
+    % Try root defaults
+    try
+        rootFontName = get(0, 'DefaultAxesFontName');
+        if ~isempty(rootFontName) && ischar(rootFontName)
+            fontName = rootFontName;
+        end
+        rootFontSize = get(0, 'DefaultAxesFontSize');
+        if isnumeric(rootFontSize) && isfinite(rootFontSize) && rootFontSize > 0
+            fontSize = rootFontSize;
+        end
+    catch
+    end
+end
+function i_syncPaperSize(fig)
+    % Synchronize PaperSize with on-screen figure dimensions
+    % Ensures exported PDF page size matches the MATLAB figure size
+    if ~isgraphics(fig, 'figure')
+        return;
+    end
+    
+    try
+        % Set figure units to centimeters and read position
+        origUnits = fig.Units;
+        fig.Units = 'centimeters';
+        figPos = fig.Position;
+        
+        % Set paper properties to match figure size
+        fig.PaperUnits = 'centimeters';
+        fig.PaperSize = figPos(3:4);        % Width and height from Position
+        fig.PaperPosition = [0 0 figPos(3:4)];
+        
+        % Restore original units
+        fig.Units = origUnits;
+    catch
+        % Silent fail if paper synchronization not supported
     end
 end

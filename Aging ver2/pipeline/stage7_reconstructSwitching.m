@@ -42,6 +42,15 @@ result = reconstructSwitchingAmplitude( ...
     Tsw, ...
     Rsw);
 
+if cfg.debug.enable
+    disp('stage7: result fields =');
+    disp(fieldnames(result));
+    if isfield(result,'C_pause')
+        fprintf('C_pause: N=%d, mean=%.3e, std=%.3e\n', ...
+            numel(result.C_pause), mean(result.C_pause,'omitnan'), std(result.C_pause,'omitnan'));
+    end
+end
+
 if cfg.debug.enable && isfield(cfg.debug,'plotSwitching') && cfg.debug.plotSwitching
     debugPlotSwitchingReconstruction(state, cfg, result);
 end

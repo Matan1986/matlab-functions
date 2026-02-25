@@ -49,8 +49,14 @@ for i = 1:numel(state.pauseRuns)
     dipWindow = [Tp - cfg.dip_window_K, Tp + cfg.dip_window_K];
     plateauL = [Tp - cfg.dip_window_K - cfg.FM_buffer_K - cfg.FM_plateau_K, ...
                 Tp - cfg.dip_window_K - cfg.FM_buffer_K];
-    plateauR = [Tp + cfg.dip_window_K + cfg.FM_buffer_K, ...
-                Tp + cfg.dip_window_K + cfg.FM_buffer_K + cfg.FM_plateau_K];
+    
+    % Right plateau: fixed or relative mode
+    if isfield(cfg, 'FM_rightPlateauMode') && strcmpi(cfg.FM_rightPlateauMode, 'fixed')
+        plateauR = cfg.FM_rightPlateauFixedWindow_K(:).';
+    else
+        plateauR = [Tp + cfg.dip_window_K + cfg.FM_buffer_K, ...
+                    Tp + cfg.dip_window_K + cfg.FM_buffer_K + cfg.FM_plateau_K];
+    end
 
     hDip = patch(ax, [dipWindow(1) dipWindow(2) dipWindow(2) dipWindow(1)], ...
         [yl(1) yl(1) yl(2) yl(2)], [1 0 0], 'FaceAlpha', 0.15, 'EdgeColor', 'none');
@@ -78,6 +84,7 @@ for i = 1:numel(state.pauseRuns)
         {'raw', 'filtered', 'dip window', 'plateau L', 'plateau R', 'Tmin'}, ...
         'Location', 'best');
     grid(ax, 'on');
+    drawnow;
 end
 
 end

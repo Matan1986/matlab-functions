@@ -22,7 +22,7 @@ state.pauseRuns = analyzeAFM_FM_components( ...
     state.pauseRuns, cfg.dip_window_K, cfg.smoothWindow_K, ...
     cfg.excludeLowT_FM, cfg.excludeLowT_K, ...
     cfg.FM_plateau_K, cfg.excludeLowT_mode, cfg.FM_buffer_K, ...
-    cfg.AFM_metric_main);
+    cfg.AFM_metric_main, cfg);
 
 % -------- Debug diagnostics (optional, gated) --------
 if isfield(cfg, 'debug') && isfield(cfg.debug, 'enable') && cfg.debug.enable
@@ -143,13 +143,16 @@ if isfield(cfg, 'debug') && isfield(cfg.debug, 'enable') && cfg.debug.enable
     if debugCfg.logToFile && debugCfg.saveOutputs && ~isempty(outFolder)
         writeDebugLog(debugTable, cfg, debugCfg, outFolder, pauseTp);
     end
-
-    if cfg.debug.enable && isfield(cfg.debug,'plotGeometry') && cfg.debug.plotGeometry
-        debugPlotGeometry(state, cfg);
-    end
     
     % --- Console summary ---
     printStage4DiagnosticSummary(debugRows);
+end
+
+% ====================== Debug geometry plots ======================
+if isfield(cfg, 'doPlotting') && cfg.doPlotting && ...
+        isfield(cfg, 'debug') && isfield(cfg.debug, 'plotGeometry') && cfg.debug.plotGeometry && ...
+        usejava('desktop')
+    debugPlotGeometry(state, cfg);
 end
 
 % ====================== Local debug helpers ======================
@@ -186,7 +189,11 @@ baseR = [Tp + cfg.dip_window_K + cfg.FM_buffer_K, ...
          Tp + cfg.dip_window_K + cfg.FM_buffer_K + cfg.FM_plateau_K];
 
 fmL = baseL;
-fmR = baseR;
+if isfield(cfg, 'FM_rightPlateauMode') && strcmpi(cfg.FM_rightPlateauMode, 'fixed')
+    fmR = cfg.FM_rightPlateauFixedWindow_K(:).';
+else
+    fmR = baseR;
+end
 
 noise = resolveNoiseWindow(T, debugCfg);
 

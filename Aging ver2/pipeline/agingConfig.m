@@ -8,7 +8,8 @@ if nargin < 1
 end
 
 cfg.current_mA = 35;   % Allowed values: 15 or 35
-cfg.datasetName = datasetName;   % 'MG119_60min' | 'MG119_6min' | 'MG119_36sec'
+cfg.datasetName = datasetName;   % 'MG119_60min' | 'MG119_6min' | 'MG119_36sec' | 'MG119_3sec'
+
 
 cfg.normalizeByMass = true;
 cfg.color_scheme = 'thermal';
@@ -21,12 +22,18 @@ cfg.RobustnessCheck = false;
 cfg.doPlotting = true;
 
 % --- Metric mode selection ---
-cfg.agingMetricMode = 'model';
+cfg.agingMetricMode = 'direct';
 cfg.switchingMetricMode = 'direct';
 
 cfg.AFM_metric_main = 'area';
 cfg.doFit_MF_Gaussian = true;
 cfg.normalizeAFM_FM = true;
+cfg.allowSignedFM = true;   % default: legacy magnitude-only
+
+% --- FM metric notes ---
+% FM metrics (FM_step_mag, FM_step_A, FM_E) can be positive or negative.
+% Negative FM indicates inverted ferromagnetism (opposite magnetization step).
+% No filtering is applied based on FM sign; all pauses are retained.
 
 cfg.dip_window_K = 5;
 cfg.smoothWindow_K = 4 * cfg.dip_window_K;
@@ -41,6 +48,10 @@ cfg.excludeLowT_K = 6;
 cfg.FM_plateau_K = 6;
 cfg.FM_buffer_K = 6;
 cfg.excludeLowT_mode = 'pre';
+
+% --- FM right plateau window mode ---
+cfg.FM_rightPlateauMode = 'fixed';  % 'relative' (Tp-dependent) or 'fixed' (absolute temperature)
+cfg.FM_rightPlateauFixedWindow_K = [35 45];  % Used when mode='fixed'
 
 cfg.showAFM_errors = false;
 cfg.colorRange = [0 1];
@@ -71,7 +82,7 @@ cfg.debug.runTag = '';
 cfg.debug.makeWindowOverlayPlots = true;
 cfg.debug.makeRawVsFilteredPlots = true;
 cfg.debug.makeSummaryPlots = true;
-cfg.debug.plotGeometry = true;
+cfg.debug.plotGeometry = false;
 cfg.debug.plotSwitching = false;
 cfg.debug.dumpTables = true;
 cfg.debug.maxOverlayPauses = Inf;
@@ -99,19 +110,24 @@ switch cfg.datasetName
     case 'MG119_60min'
         dataSubDir = join([
             "MG 119 M2 out of plane Aging no field"
-            "high res 60min waiting time"
+            "high res 60min wait"
         ], " ");
 
     case 'MG119_6min'
         dataSubDir = join([
             "MG 119 M2 out of plane Aging no field"
-            "high res 6min waiting time"
+            "high res 6min wait"
         ], " ");
 
     case 'MG119_36sec'
         dataSubDir = join([
             "MG 119 M2 out of plane Aging no field"
-            "high res 36sec waiting time"
+            "high res 36sec wait"
+        ], " ");
+    case 'MG119_3sec'
+        dataSubDir = join([
+            "MG 119 M2 out of plane Aging no field"
+            "high res 3sec wait"
         ], " ");
 
     otherwise
@@ -181,6 +197,7 @@ cfg.switchParams.fitTmin = 10;
 cfg.switchParams.fitTmax = 32;
 cfg.switchParams.FM_plateau_K = cfg.FM_plateau_K;
 cfg.switchParams.FM_buffer_K = cfg.FM_buffer_K;
+cfg.switchParams.allowSignedFM = isfield(cfg, 'allowSignedFM') && cfg.allowSignedFM;
 
 cfg.dipSigmaLowerBound = 0.4;
 cfg.dipAreaLowPercentile = 5;

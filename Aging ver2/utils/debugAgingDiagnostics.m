@@ -54,6 +54,8 @@ rowTemplate.plateau_N_L = 0;
 rowTemplate.plateau_N_R = 0;
 rowTemplate.plateau_std_L = NaN;
 rowTemplate.plateau_std_R = NaN;
+rowTemplate.validDipWindow = false;
+rowTemplate.validPlateauWindow = false;
 rowTemplate.sampleName = '';
 rowTemplate.pauseLabel = '';
 rowTemplate.sourceFile = '';
@@ -76,11 +78,20 @@ else
     Tmax = inf;
 end
 
+% Fix: clamp diagnostic windows to data range for robust counts/flags.
+orig = windows;
+[windows.dip, dipClamped] = clampWindow(windows.dip, Tmin, Tmax);
+[windows.baseL, baseLClamped] = clampWindow(windows.baseL, Tmin, Tmax);
+[windows.baseR, baseRClamped] = clampWindow(windows.baseR, Tmin, Tmax);
+[windows.noise, noiseClamped] = clampWindow(windows.noise, Tmin, Tmax);
+[windows.fmPlateauL, fmLClamped] = clampWindow(windows.fmPlateauL, Tmin, Tmax);
+[windows.fmPlateauR, fmRClamped] = clampWindow(windows.fmPlateauR, Tmin, Tmax);
+anyClamped = dipClamped || baseLClamped || baseRClamped || noiseClamped || fmLClamped || fmRClamped;
+
 flags = struct();
-flags.dipWindowOutOfBounds = ~isWindowInBounds(windows.dip, Tmin, Tmax);
-flags.baselineOutOfBounds = ~isWindowInBounds(windows.baseL, Tmin, Tmax) || ...
-                            ~isWindowInBounds(windows.baseR, Tmin, Tmax);
-flags.noiseWindowOutOfBounds = ~isWindowInBounds(windows.noise, Tmin, Tmax);
+flags.dipWindowOutOfBounds = dipClamped;
+flags.baselineOutOfBounds = baseLClamped || baseRClamped;
+flags.noiseWindowOutOfBounds = noiseClamped;
 
 flags.baselineOverlapsDip = windowsOverlap(windows.baseL, windows.dip) || ...
                             windowsOverlap(windows.baseR, windows.dip);
@@ -127,17 +138,34 @@ flags.suspiciousSpike = detectSpike(T, dM_filt, cfg.debug.noiseWindowHighT, 5);
 [flags.plateauSlopeExcessive, plateau_slope_L, plateau_R2_L, plateau_slope_R, plateau_R2_R, plateau_N_L, plateau_N_R, plateau_std_L, plateau_std_R] = ...
     checkPlateauLinearity(T, dM_filt, windows.fmPlateauL, windows.fmPlateauR, cfg.debug.plateauMaxSlope);
 
+% Fix: explicit window validity flags (no silent failures).
+Nmin = 3;
+dipMask = isfinite(T) & (T >= windows.dip(1)) & (T <= windows.dip(2));
+validDipWindow = (windows.dip(2) > windows.dip(1)) && (nnz(dipMask) >= Nmin);
+validPlateauWindow = (plateau_N_L >= Nmin) && (plateau_N_R >= Nmin);
+plateauInvalid = (windows.fmPlateauL(2) <= windows.fmPlateauL(1)) || (windows.fmPlateauR(2) <= windows.fmPlateauR(1));
+if plateau_N_L == 0 || plateau_N_R == 0
+    flags.plateauSlopeExcessive = false;
+end
+flags.plateauSlopeExcessive = flags.plateauSlopeExcessive && validPlateauWindow;
+
 % Optional warnings (no exceptions)
-if cfg.debug.boundsWarn
-    if flags.dipWindowOutOfBounds || flags.baselineOutOfBounds || flags.noiseWindowOutOfBounds
-        warning('Diagnostics: window out-of-bounds at Tp=%.1f K\nData range: [%.2f, %.2f]\nDip window: [%.2f, %.2f]\nPlateau window: [%.2f, %.2f]\nNum points: %d', ...
-            Tp(1), Tmin, Tmax, windows.dip(1), windows.dip(2), ...
-            windows.fmPlateauL(1), windows.fmPlateauR(2), numel(T));
-    end
+if cfg.debug.boundsWarn && anyClamped
+    warning('Diagnostics: window out-of-bounds at Tp=%.1f K | dip [%.2f %.2f]->[%.2f %.2f] | platL [%.2f %.2f]->[%.2f %.2f] | platR [%.2f %.2f]->[%.2f %.2f] | data [%.2f %.2f]', ...
+        Tp(1), orig.dip(1), orig.dip(2), windows.dip(1), windows.dip(2), ...
+        orig.fmPlateauL(1), orig.fmPlateauL(2), windows.fmPlateauL(1), windows.fmPlateauL(2), ...
+        orig.fmPlateauR(1), orig.fmPlateauR(2), windows.fmPlateauR(1), windows.fmPlateauR(2), ...
+        Tmin, Tmax);
 end
 if cfg.debug.overlapWarn
     if flags.baselineOverlapsDip || flags.fmPlateauOverlapsDip
-        warning('Diagnostics: window overlap at Tp=%.3f K', Tp(1));
+        if flags.fmPlateauOverlapsDip && plateauInvalid && ~flags.baselineOverlapsDip
+            if isfield(cfg.debug, 'enable') && cfg.debug.enable
+                fprintf('Diagnostics: window overlap suppressed (invalid plateau after clamping) at Tp=%.3f K\n', Tp(1));
+            end
+        else
+            warning('Diagnostics: window overlap at Tp=%.3f K', Tp(1));
+        end
     end
 end
 
@@ -194,6 +222,8 @@ row.plateau_N_L = plateau_N_L;
 row.plateau_N_R = plateau_N_R;
 row.plateau_std_L = plateau_std_L;
 row.plateau_std_R = plateau_std_R;
+row.validDipWindow = logical(validDipWindow);
+row.validPlateauWindow = logical(validPlateauWindow);
 
 % Overwrite optional metadata fields if present
 if isfield(meta, 'sampleName')
@@ -403,4 +433,21 @@ end
 
 slopeExcessiveFlag = (isfinite(slope_L) && abs(slope_L) > maxSlope) || ...
                      (isfinite(slope_R) && abs(slope_R) > maxSlope);
+end
+
+function [winOut, changed] = clampWindow(winIn, Tmin, Tmax)
+% Clamp window bounds to data range (robust diagnostics).
+changed = false;
+if isempty(winIn) || numel(winIn) ~= 2 || any(~isfinite(winIn)) || ~isfinite(Tmin) || ~isfinite(Tmax)
+    winOut = winIn;
+    return;
+end
+winOut = winIn;
+lo = max(min(winIn), Tmin);
+hi = min(max(winIn), Tmax);
+if lo ~= winIn(1) || hi ~= winIn(2)
+    changed = true;
+end
+winOut(1) = lo;
+winOut(2) = hi;
 end

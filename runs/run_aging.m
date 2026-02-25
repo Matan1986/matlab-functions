@@ -13,11 +13,11 @@ else
 end
 
 % ---- config ----
-cfg = agingConfig;
+cfg = agingConfig('MG119_6min'); % 'MG119_60min' | 'MG119_6min' | 'MG119_36sec' | 'MG119_3sec'
 cfg.debug.enable = true;
 cfg.debug.plotGeometry = true;
 cfg.debug.plotSwitching = true;
-cfg.doPlotting = false;
+cfg.doPlotting = true;
 
 % Pick dataset folder under your dataRoot:
 % Example: full path should resolve to the folder that contains the analyzed aging files.

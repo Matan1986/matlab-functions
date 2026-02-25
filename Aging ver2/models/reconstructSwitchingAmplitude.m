@@ -154,6 +154,12 @@ Fp = FM_metric;
 fprintf('Dp>0: %d / %d\n', nnz(Dp>0), numel(Dp));
 fprintf('Fp>0: %d / %d\n', nnz(Fp>0 & isfinite(Fp)), numel(Fp));
 disp(table(Tp(:), Dp(:), Fp(:), 'VariableNames',{'Tp','Dp','Fp'}));
+
+% Initialize signed FM flag (default: false to preserve existing behavior)
+if ~isfield(params, 'allowSignedFM')
+    params.allowSignedFM = false;
+end
+fprintf('allowSignedFM = %d\n', params.allowSignedFM);
 epsFp = 1e-15;  % או 1e-14 לפי סדרי הגודל אצלך
 valid = (Dp>0) & isfinite(Fp) & (Fp > epsFp);
 
@@ -180,11 +186,13 @@ Tp_pause_export = Tp(:);
 Dp_pause_export = Dp(:);
 Fp_pause_export = Fp(:);
 
-D_interp = interp1(Tp, Dp, Tsw, 'pchip', 'extrap');
-F_interp = interp1(Tp, Fp, Tsw, 'pchip', 'extrap');
+% --- Interpolate to switching grid (RAW first) ---
+D_interp_raw = interp1(Tp, Dp, Tsw, 'pchip', 'extrap');
+F_interp_raw = interp1(Tp, Fp, Tsw, 'pchip', 'extrap');
 
-D_interp = max(D_interp,0);
-F_interp = max(F_interp,0);
+% --- Legacy pipeline keeps the original behavior (clamp to >=0) ---
+D_interp = max(D_interp_raw, 0);
+F_interp = max(F_interp_raw, 0);
 
 % ===============================
 % Define masks (NO slicing - all vectors remain aligned with Tsw)
@@ -206,6 +214,10 @@ assert(numel(mask_T) == numel(Tsw), 'mask_T size mismatch');
 assert(numel(mask_SNR) == numel(Tsw), 'mask_SNR size mismatch');
 assert(numel(mask) == numel(Tsw), 'mask size mismatch');
 
+if ~isfield(params, 'debug')
+    params.debug = struct();
+end
+
 % --- Debug prints (now mask exists) ---
 fprintf('Tp range %.1f–%.1f\n', min(Tp), max(Tp));
 fprintf('Tsw range %.1f–%.1f\n', min(Tsw), max(Tsw));
@@ -215,16 +227,35 @@ fprintf('corr(F_interp, Rsw) = %.3f\n', corr(F_interp, Rsw, 'rows','complete'));
 fprintf('max D_interp in mask / global = %.3f\n', max(D_interp(mask)) / max(D_interp + eps));
 fprintf('max F_interp in mask / global = %.3f\n', max(F_interp(mask)) / max(F_interp + eps));
 
+% --- Plot gating (safe defaults) ---
+doPlotSwitching = true;
 
-figure;
-plot(Tp, Dp, 'ko-'); hold on;
-plot(Tsw, D_interp, 'r.-');
-legend('Dp at pauses','D_interp on Tsw'); grid on; title('AFM metric interpolation');
+% Prefer explicit params.debug.plotSwitching if exists
+if isfield(params, 'debug') && isstruct(params.debug) && isfield(params.debug, 'plotSwitching')
+    doPlotSwitching = logical(params.debug.plotSwitching);
+end
 
-figure;
-plot(Tp, Fp, 'ko-'); hold on;
-plot(Tsw, F_interp, 'r.-');
-legend('Fp at pauses','F_interp on Tsw'); grid on; title('FM metric interpolation');
+% Also respect a generic params.doPlotting if present
+if isfield(params, 'doPlotting')
+    doPlotSwitching = doPlotSwitching && logical(params.doPlotting);
+end
+
+% In case figures are globally disabled
+if ~usejava('desktop')
+    doPlotSwitching = false;
+end
+
+if doPlotSwitching
+    figure;
+    plot(Tp, Dp, 'ko-'); hold on;
+    plot(Tsw, D_interp, 'r.-');
+    legend('Dp at pauses','D_interp on Tsw'); grid on; title('AFM metric interpolation');
+
+    figure;
+    plot(Tp, Fp, 'ko-'); hold on;
+    plot(Tsw, F_interp, 'r.-');
+    legend('Fp at pauses','F_interp on Tsw'); grid on; title('FM metric interpolation');
+end
 
 
 % --- Normalize to [0,1] using in-mask maxima (recommended) ---
@@ -234,7 +265,44 @@ Dn = min(max(Dn,0),1);
 Fn = min(max(Fn,0),1);
 
 % ===============================
-% Lambda scan
+% Optional: Signed FM coupling model (MUST use RAW)
+% ===============================
+R_signed_model = NaN;
+R2_signed_model = NaN;
+
+if params.allowSignedFM
+
+    % Use RAW FM so sign survives
+    F_scale  = max(abs(F_interp_raw(mask))) + eps;
+    F_signed = F_interp_raw ./ F_scale;          % signed
+    F_mag    = abs(F_interp_raw) ./ F_scale;     % magnitude
+
+    % Use RAW/legacy AFM as you prefer; here: RAW to be consistent
+    A_scale = max(abs(D_interp_raw(mask))) + eps;
+    A_norm  = D_interp_raw ./ A_scale;
+
+    X_signed = [ A_norm(:).*F_mag(:), ...
+                 A_norm(:).*F_signed(:), ...
+                 ones(numel(A_norm),1) ];
+
+    y_model = Rsw(:);
+
+    try
+        p_signed = X_signed(mask,:) \ y_model(mask);
+        R_pred_signed = X_signed * p_signed;
+
+        result.R_signed_pred = R_pred_signed;
+
+        R_signed = corr(R_pred_signed(mask), y_model(mask), 'rows','complete');
+        R_signed_model = R_signed;
+        R2_signed_model = R_signed^2;
+
+        fprintf('Signed FM coupling R = %.3f, R2 = %.3f\n', R_signed_model, R2_signed_model);
+    catch ME
+        warning('Signed FM regression failed: %s', ME.message);
+    end
+end
+
 % ===============================
 lambda_grid = linspace(params.lambdaMin, params.lambdaMax, params.nLambda);
 
@@ -307,6 +375,14 @@ result.a       = best_a;
 result.b       = best_b;
 result.R2      = R2;
 result.Tsw     = Tsw;
+
+% Fix: export valid Tp/Tsw for downstream diagnostics.
+result.Tp_valid = Tp_pause_export;
+result.Tsw_valid = Tsw(mask);
+
+% Store signed FM model results (if enabled)
+result.R_signed_model = R_signed_model;
+result.R2_signed_model = R2_signed_model;
 
 result.A_basis = best_AFM_basis;
 result.B_basis = best_FM_basis;
@@ -428,12 +504,29 @@ for k = 1:nM
 
 end
 
+% ===============================
+% Add signed FM coupling model if enabled
+% ===============================
+if isfield(params, 'allowSignedFM') && params.allowSignedFM ...
+        && isfield(result,'R_signed_pred')
+
+    signedCorr = corr(result.R_signed_pred(mask), ...
+                      Rsw(mask), 'rows','complete');
+
+    models(end+1).name = 'Signed coupling A*(α|F|+βF)+c';
+    models(end).X = result.R_signed_pred(mask);
+
+    R2_list(end+1)   = result.R2_signed_model;
+    Corr_list(end+1) = signedCorr;
+end
+
 DecisionTable = table( ...
     string({models.name})', ...
     Corr_list, ...
     R2_list, ...
     'VariableNames', {'Model','Correlation','R2'});
 DecisionTable = sortrows(DecisionTable, 'R2', 'descend');
+
 disp(' ');
 disp('=== Mechanism decision table ===');
 disp(DecisionTable);
