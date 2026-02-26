@@ -79,15 +79,7 @@ function FCS_export(figHandles, exportOpts)
                     % Synchronize PaperSize with figure dimensions
                     i_syncPaperSize(fig);
                     
-                    if opts.vectorMode
-                        try
-                            print(fig, outFile, '-dpdf', '-painters');
-                        catch
-                            exportgraphics(fig, outFile, 'ContentType', 'vector');
-                        end
-                    else
-                        exportgraphics(fig, outFile, 'ContentType', 'image', 'Resolution', 300);
-                    end
+                    exportgraphics(fig, outFile, 'ContentType', 'vector');
 
                 case "png"
                     % === PNG EXPORT ===

@@ -146,6 +146,7 @@ classdef SmartFigureEngine
             SmartFigureEngine.applyTypography(fig, style);
             SmartFigureEngine.applyLineSystem(fig, style);
             SmartFigureEngine.applyLegendSystem(fig, style);
+            SmartFigureEngine.applyAnnotationStyle(fig, style);
             SmartFigureEngine.finalize(fig, style);
             SmartFigureEngine.enforceReferenceLinesBehindData(fig);
             SmartFigureEngine.recenterYLabelsForFigure(fig);
@@ -723,6 +724,33 @@ classdef SmartFigureEngine
                         if isprop(h,'Interpreter'), h.Interpreter = 'latex'; end
                     catch
                     end
+                end
+            end
+        end
+
+        function applyAnnotationStyle(fig, style)
+            % Apply annotation textbox styling using EXACT same logic as legend FontSize
+            % Uses getSharedLegendTextFont to ensure identical behavior
+            
+            if nargin < 2 || isempty(fig) || ~isvalid(fig) || ~isgraphics(fig,'figure')
+                return;
+            end
+            
+            % Find all annotation textboxes
+            ann = findall(fig, 'Type', 'textboxshape');
+            if isempty(ann)
+                return;
+            end
+            
+            % Use the EXACT same FontSize resolution as legend
+            fs = SmartFigureEngine.getSharedLegendTextFont(style);
+            
+            % Apply FontSize to each textbox
+            for k = 1:numel(ann)
+                try
+                    ann(k).FontSize = fs;
+                catch
+                    % Skip annotation if property setting fails
                 end
             end
         end
