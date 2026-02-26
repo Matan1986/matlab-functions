@@ -7,6 +7,7 @@ baseFolder = 'C:\Dev\matlab-functions';
 addpath(genpath(baseFolder));
 dir = "L:\My Drive\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\FIB5_Switching_old_PPMS\Config3 23\Amp Temp Dep all fix\Temp Dep 25mA 10ms 0T 15sec 10pulses 16";
 dir = "L:\My Drive\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\FIB5_Switching_old_PPMS\Config3 23\Temp Dep 35mA 10ms 0T 15sec 10pulses Fixed 29";
+dir = "L:\My Drive\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\FIB5_Switching_old_PPMS\Config3 23\Width Dep 30mA 4K 0T 15sec 10pulses 20";
 % -------------------------------------------------
 % Amp–Temp Switching Map
 % plotAmpTempSwitchingMap_switchCh(parentDir, metricType, channelMode)
