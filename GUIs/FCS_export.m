@@ -79,7 +79,19 @@ function FCS_export(figHandles, exportOpts)
                     % Synchronize PaperSize with figure dimensions
                     i_syncPaperSize(fig);
                     
-                    exportgraphics(fig, outFile, 'ContentType', 'vector');
+                    switch opts.pdfMode
+                        case 'Vector (exportgraphics)'
+                            exportgraphics(fig, outFile, 'ContentType', 'vector');
+                        
+                        case 'Vector (painters)'
+                            print(fig, outFile, '-dpdf', '-painters');
+                        
+                        case 'Image (300 dpi)'
+                            exportgraphics(fig, outFile, 'ContentType', 'image', 'Resolution', 300);
+                        
+                        otherwise
+                            error('FCS_export:UnknownPdfMode', 'Unknown PDF export mode: %s', opts.pdfMode);
+                    end
 
                 case "png"
                     % === PNG EXPORT ===
@@ -933,7 +945,7 @@ function opts = i_parseExportOpts(exportOpts)
     opts.formats = i_parseFormats(exportOpts);
     opts.outDir = i_getStringField(exportOpts, 'outDir', string(pwd));
     opts.overwrite = i_getLogicalField(exportOpts, 'overwrite', false);
-    opts.vectorMode = i_getLogicalField(exportOpts, 'vectorMode', true);
+    opts.pdfMode = i_getPdfMode(exportOpts);
     opts.filenameFrom = lower(i_getStringField(exportOpts, 'filenameFrom', "Name"));
     opts.sanitize = i_getLogicalField(exportOpts, 'sanitize', true);
     opts.customPrefix = i_getStringField(exportOpts, 'customPrefix', "Figure");
@@ -984,6 +996,38 @@ function value = i_getLogicalField(s, name, defaultValue)
     if isfield(s, name) && ~isempty(s.(name))
         value = logical(s.(name));
     end
+end
+
+function mode = i_getPdfMode(s)
+    % Get PDF export mode with backward compatibility
+    % Priority: pdfMode field > vectorMode field (legacy) > default
+    
+    defaultMode = 'Vector (exportgraphics)';
+    
+    % Check for new pdfMode field
+    if isfield(s, 'pdfMode') && ~isempty(s.pdfMode)
+        mode = char(string(s.pdfMode));
+        % Validate mode
+        validModes = {'Vector (exportgraphics)', 'Vector (painters)', 'Image (300 dpi)'};
+        if ~any(strcmp(mode, validModes))
+            warning('FCS_export:InvalidPdfMode', 'Invalid pdfMode "%s", using default.', mode);
+            mode = defaultMode;
+        end
+        return;
+    end
+    
+    % Backward compatibility: check for old vectorMode field
+    if isfield(s, 'vectorMode') && ~isempty(s.vectorMode)
+        if logical(s.vectorMode)
+            mode = 'Vector (exportgraphics)';
+        else
+            mode = 'Image (300 dpi)';
+        end
+        return;
+    end
+    
+    % Default
+    mode = defaultMode;
 end
 
 function out = i_buildBaseName(fig, idx, opts)

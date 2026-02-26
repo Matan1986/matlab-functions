@@ -718,9 +718,14 @@ ddScope = uidropdown(tgtGrid, ...
     ddExportColumn.Layout.Row = 3;
     ddExportColumn.Layout.Column = 2;
 
-    cbVector = uicheckbox(secExportA, 'Text', 'Vector mode (PDF only)', 'Value', true);
-    cbVector.Layout.Row = 4;
-    cbVector.Layout.Column = [1 2];
+    lblPdfMode = uilabel(secExportA, 'Text', 'PDF Export Mode', 'HorizontalAlignment', 'left');
+    lblPdfMode.Layout.Row = 4;
+    lblPdfMode.Layout.Column = 1;
+    ddPdfMode = uidropdown(secExportA, 'Items', {'Vector (exportgraphics)','Vector (painters)','Image (300 dpi)'}, 'Value', 'Vector (exportgraphics)');
+    ddPdfMode.Layout.Row = 4;
+    ddPdfMode.Layout.Column = 2;
+    ddPdfMode.Tooltip = i_getPdfModeTooltip(ddPdfMode.Value);
+    ddPdfMode.ValueChangedFcn = @(src,evt) i_onPdfModeChanged(src);
 
     cbOverwrite = uicheckbox(secExportA, 'Text', 'Overwrite', 'Value', false);
     cbOverwrite.Layout.Row = 5;
@@ -1301,6 +1306,24 @@ ddScope = uidropdown(tgtGrid, ...
 
     function onPersistedControlChanged(~, ~)
         i_saveUIState();
+    end
+
+    function i_onPdfModeChanged(src)
+        src.Tooltip = i_getPdfModeTooltip(src.Value);
+        onPersistedControlChanged(src);
+    end
+
+    function tip = i_getPdfModeTooltip(mode)
+        switch mode
+            case 'Vector (exportgraphics)'
+                tip = 'Recommended: Modern vector export using exportgraphics(). Best compatibility.';
+            case 'Vector (painters)'
+                tip = 'Legacy vector backend using print -painters. Useful for older workflows.';
+            case 'Image (300 dpi)'
+                tip = 'Rasterized PDF at 300 dpi. Suitable for heavy plots or large datasets.';
+            otherwise
+                tip = '';
+        end
     end
 
     function onTypographyControlChanged(~, ~)
@@ -4208,7 +4231,7 @@ ddScope = uidropdown(tgtGrid, ...
         exportOpts.format = char(ddExportFmt.Value);
         exportOpts.outDir = char(string(efExportDir.Value));
         exportOpts.overwrite = logical(cbOverwrite.Value);
-        exportOpts.vectorMode = logical(cbVector.Value);
+        exportOpts.pdfMode = char(ddPdfMode.Value);
         exportOpts.filenameFrom = char(ddFilenameFrom.Value);
         exportOpts.sanitize = true;
         exportOpts.normalizeFontsOnExport = logical(cbNormalizeFontsExport.Value);
@@ -6126,8 +6149,15 @@ ddScope = uidropdown(tgtGrid, ...
             elseif isfield(uiState, 'prlMode')
                 i_tryAssignDropdownValue(ddExportColumn, uiState.prlMode, 'exportColumn');
             end
-            if isfield(uiState, 'cbVector')
-                cbVector.Value = uiState.cbVector;
+            if isfield(uiState, 'pdfMode')
+                i_tryAssignDropdownValue(ddPdfMode, uiState.pdfMode, 'pdfMode');
+            elseif isfield(uiState, 'cbVector')
+                % Backward compatibility: map old checkbox to new dropdown
+                if logical(uiState.cbVector)
+                    ddPdfMode.Value = 'Vector (exportgraphics)';
+                else
+                    ddPdfMode.Value = 'Image (300 dpi)';
+                end
             end
             if isfield(uiState, 'cbOverwrite')
                 cbOverwrite.Value = uiState.cbOverwrite;
@@ -6260,7 +6290,7 @@ ddScope = uidropdown(tgtGrid, ...
                 'nfWsWidth','nfWsBaseRatio', ...
                 'slAxScaleX','slAxScaleY','slAxOffsetX','slAxOffsetY', ...
                 'ddPanelsPerRow','cbReversePlotOrder', ...
-                'ddExportFmt','exportJournal','exportColumn','cbVector','cbOverwrite','ddFilenameFrom','cbExportComposedOnly','exportOutDir'};
+                'ddExportFmt','exportJournal','exportColumn','pdfMode','cbOverwrite','ddFilenameFrom','cbExportComposedOnly','exportOutDir'};
 
             currentValues = {
                 ddScope.Value, efTag.Value, efNameContains.Value, lbFigures.Value, cbExcludeGUIs.Value, ...
@@ -6274,7 +6304,7 @@ ddScope = uidropdown(tgtGrid, ...
                 nfWsWidth.Value, nfWsBaseRatio.Value, ...
                 slAxScaleX.Value, slAxScaleY.Value, slAxOffsetX.Value, slAxOffsetY.Value, ...
                 ddPanelsPerRow.Value, cbReversePlotOrder.Value, ...
-                ddExportFmt.Value, ddExportJournal.Value, ddExportColumn.Value, cbVector.Value, cbOverwrite.Value, ddFilenameFrom.Value, cbExportComposedOnly.Value, efExportDir.Value};
+                ddExportFmt.Value, ddExportJournal.Value, ddExportColumn.Value, ddPdfMode.Value, cbOverwrite.Value, ddFilenameFrom.Value, cbExportComposedOnly.Value, efExportDir.Value};
 
             diffs = {};
             for iField = 1:numel(fieldNames)
@@ -6475,7 +6505,7 @@ ddScope = uidropdown(tgtGrid, ...
         uiState.ddExportFmt = ddExportFmt.Value;
         uiState.exportJournal = ddExportJournal.Value;
         uiState.exportColumn = ddExportColumn.Value;
-        uiState.cbVector = cbVector.Value;
+        uiState.pdfMode = ddPdfMode.Value;
         uiState.cbOverwrite = cbOverwrite.Value;
         uiState.ddFilenameFrom = ddFilenameFrom.Value;
         uiState.exportComposedOnly = logical(cbExportComposedOnly.Value);
