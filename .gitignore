@@ -31,3 +31,9 @@ Debug/
 results/*.mat
 results/*.csv
 results/phaseC/
+
+# Generated result artifacts
+results/generated/
+
+# External dependency
+General ver2/appearanceControl/altmany-export_fig-3.54.0.0/

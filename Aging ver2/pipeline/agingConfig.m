@@ -22,7 +22,7 @@ cfg.RobustnessCheck = false;
 cfg.doPlotting = true;
 
 % --- Metric mode selection ---
-cfg.agingMetricMode = 'direct';
+cfg.agingMetricMode = 'model';
 cfg.switchingMetricMode = 'direct';
 
 cfg.AFM_metric_main = 'area';
