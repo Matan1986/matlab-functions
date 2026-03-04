@@ -15,10 +15,19 @@ if nargin < 5, debug = false; end
 if nargin < 6, Hthresh = 20; end
 if nargin < 7, fitParams = struct(); end   % ensure struct exists
 
+% Effective fitting debug gate:
+% - debug input (from main debug mode)
+% - optional fitParams.debugFit override
+% This guarantees no debug figures unless one of these is enabled.
+debugFit = logical(debug);
+if isfield(fitParams,'debugFit') && ~isempty(fitParams.debugFit)
+    debugFit = debugFit || logical(fitParams.debugFit);
+end
+
 n = numel(Time_table);
 rows = [];
 
-if debug
+if debugFit
     fprintf('\n=== Performing automatic relaxation fits ===\n');
     fprintf('Window selection: |H| < %.1f Oe (fallback: dM/dt minimum)\n\n', Hthresh);
 end
@@ -46,7 +55,7 @@ for i = 1:n
     end
 
     % === Window selection ===
-    [t_fit, M_fit, info] = pickRelaxWindow(t, M, Field_table{i}, debug, Hthresh);
+    [t_fit, M_fit, info] = pickRelaxWindow(t, M, Field_table{i}, debugFit, Hthresh);
     if isempty(t_fit) || numel(t_fit) < 15, continue; end
 
     %% === User-controlled fit window after H-threshold ===
@@ -116,7 +125,7 @@ for i = 1:n
         reason = info.reason;
     end
 
-    if debug
+    if debugFit
         fprintf('Run %2d: %.2f K — start @ %.1f min  [%s]\n', ...
             i, Tnom, t_fit(1)/60, reason);
     end
@@ -159,7 +168,7 @@ for i = 1:n
     %% ===========================================
     %      Perform stretched-exponential fit
     % ===========================================
-    [fitParamsOut, R2] = fitStretchedExp(t_fit, M_fit, Tnom, debug, fitParams);
+    [fitParamsOut, R2] = fitStretchedExp(t_fit, M_fit, Tnom, debugFit, fitParams);
 
     %% --- Extract fitted values safely ---
     Minf_safe = scalarOrNaN(fitParamsOut.Minf);
@@ -202,7 +211,7 @@ else
 end
 
 %% --- Summary ---
-if debug
+if debugFit
     if isempty(allFits)
         warning('No valid relaxation fits found.');
     else
