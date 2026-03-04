@@ -34,6 +34,13 @@ plots.debug = false;
 - Core collapse plot is `plotRelaxationCollapse`.
 - Advanced collapse/physics figures from `analyzeRelaxationAdvanced` are disabled in `main_relaxation.m` for core mode.
 
+## TRM/IRM compare detection and display trimming notes
+
+- `main_relaxation.m` now auto-detects TRM/IRM comparison from `fileList` content (case-insensitive filename tokens), not from the folder name.
+- Auto-enable notice is printed only when comparison mode is turned on by this detection.
+- `Plots_relaxation.m` and `overlayRelaxationFits.m` both use `t >= 0` as the default display mask so raw and overlay figures show a consistent displayed time range.
+- `trimToFitWindow` in `overlayRelaxationFits.m` remains an optional extra display trim and does not change fitting windows or fit calculations.
+
 ## Self-check (manual, MATLAB)
 
 ```matlab
