@@ -150,6 +150,26 @@ if showFits
         offsetDisplayMode, offsetValue);
 end
 
+
+
+%% ============================================================
+%     ADVANCED ANALYSIS (NON-BREAKING, OPTIONAL)
+% ============================================================
+advancedMode = false;
+
+if advancedMode && showFits
+    advCfg = struct();
+    advCfg.useMultiStart    = true;
+    advCfg.enableLogModel   = true;
+    advCfg.modelCriterion   = 'AIC';
+    advCfg.makePerCurvePlots = true;
+    advCfg.debugResidualPlot = debugMode;
+    advCfg.makeSummaryPlot  = true;
+    advCfg.makeCollapsePlot = true;
+
+    adv = analyzeRelaxationAdvanced(allFits, Time_table, Moment_table, Temp_table, advCfg); %#ok<NASGU>
+end
+
 %% ============================================================
 %     FINAL FORMATTING
 % ============================================================
