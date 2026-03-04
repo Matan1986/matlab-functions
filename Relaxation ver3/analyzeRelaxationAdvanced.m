@@ -403,30 +403,28 @@ title(sprintf('Residuals — T=%.2f K, model=%s', row.Temp_K, row.model_choice))
 end
 
 function fig = localPlotSummary(T, cfg)
-fig = figure('Color','w','Name','Relaxation summary','Visible',cfg.figureVisible);
+fig = figure('Color','w','Name','AIC model comparison','Visible',cfg.figureVisible);
 ax = axes(fig); hold(ax,'on'); box(ax,'on'); grid(ax,'on');
 
-ok = isfinite(T.tau) & isfinite(T.Temp_K);
+ok = isfinite(T.Temp_K);
 if ~any(ok)
-    text(0.2,0.5,'No finite tau values for summary plot','Units','normalized');
+    text(0.2,0.5,'No finite temperatures for AIC comparison','Units','normalized');
     return;
 end
 
-statusCats = unique(T.fit_status);
-mk = {'o','s','d','^','v','p','h','x','+'};
-for k = 1:numel(statusCats)
-    m = ok & T.fit_status == statusCats(k);
-    if ~any(m), continue; end
-    scatter(ax, T.Temp_K(m), T.tau(m), 60, T.beta(m), mk{1+mod(k-1,numel(mk))}, ...
-        'filled', 'DisplayName', char(statusCats(k)));
+plot(ax, T.Temp_K, T.AIC_base, 'o-', 'LineWidth',1.4, 'DisplayName','AIC baseline');
+if any(isfinite(T.AIC_stretched))
+    plot(ax, T.Temp_K, T.AIC_stretched, 's-', 'LineWidth',1.4, 'DisplayName','AIC stretched-multistart');
 end
-set(ax,'YScale','log');
-colormap(ax, turbo); cb = colorbar(ax); cb.Label.String = '\beta';
-xlabel(ax,'Temperature [K]'); ylabel(ax,'\tau [s]');
-title(ax,'\tau vs Temperature (color=\beta, marker=status)');
-legend(ax,'Location','eastoutside');
+if any(isfinite(T.AIC_log))
+    plot(ax, T.Temp_K, T.AIC_log, 'd-', 'LineWidth',1.4, 'DisplayName','AIC log-model');
 end
 
+xlabel(ax,'Temperature [K]');
+ylabel(ax,'AIC');
+title(ax,'AIC model comparison');
+legend(ax,'Location','eastoutside');
+end
 function fig = localPlotCollapse(Tadv, Time_table, Moment_table, Tfits, cfg)
 fig = figure('Color','w','Name','Collapse test','Visible',cfg.figureVisible);
 ax = axes(fig); hold(ax,'on'); box(ax,'on'); grid(ax,'on');
