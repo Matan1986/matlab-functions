@@ -37,3 +37,9 @@ results/generated/
 
 # External dependency
 General ver2/appearanceControl/altmany-export_fig-3.54.0.0/
+
+*.p
+*.asv
+output.txt
+diagnostic_output.txt
+verification_test_output.txt
