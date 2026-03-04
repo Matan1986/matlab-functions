@@ -3,7 +3,17 @@
         "matlab": true,
         "&": true,
         "where": true,
-        "Get-Command": true
+        "Get-Command": true,
+        "Tee-Object": true,
+        "\\\"": true,
+        "type": true,
+        "prun_mlint.exe": true,
+        "Out-File": true,
+        "timeout": true,
+        "Move-Item": true,
+        "Get-Item": true,
+        "ren": true,
+        "xcopy": true
     },
     "chat.agent.maxRequests": 100
 }

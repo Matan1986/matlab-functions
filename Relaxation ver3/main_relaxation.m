@@ -17,7 +17,7 @@ fitParams.debugFit       = false;
 % ============================================================
 Bohar_units       = true;
 showFits          = true;
-debugMode         = false;
+debugMode         = true;
 formatFigures     = true;
 color_scheme      = 'parula';
 normalizeByMass   = true;
@@ -59,7 +59,7 @@ containsIRM_folder = contains(folderLower,"irm");
 %% ============================================================
 %        ADD PATHS
 % ============================================================
-baseFolder = 'C:\Users\matan\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Matlab functions';
+baseFolder = 'C:\Dev\matlab-functions';
 addpath(genpath(baseFolder));
 
 %% ============================================================
@@ -155,17 +155,28 @@ end
 %% ============================================================
 %     ADVANCED ANALYSIS (NON-BREAKING, OPTIONAL)
 % ============================================================
-advancedMode = false;
+advancedMode = true;
 
 if advancedMode && showFits
     advCfg = struct();
+
     advCfg.useMultiStart    = true;
     advCfg.enableLogModel   = true;
     advCfg.modelCriterion   = 'AIC';
+
     advCfg.makePerCurvePlots = true;
     advCfg.debugResidualPlot = debugMode;
+
     advCfg.makeSummaryPlot  = true;
     advCfg.makeCollapsePlot = true;
+
+    % -------- NEW DEBUG FLAGS --------
+    advCfg.debug     = true;     % prints diagnostics for each fit
+    advCfg.advanced  = true;     % enables advanced summary
+
+    advCfg.makePhysicsPlots       = true;   % tau(T) and beta(T)
+    advCfg.makeResidualDiagnostics = true;  % residual vs log(t)
+    advCfg.makeTauDistribution     = true;  % optional g(tau)
 
     adv = analyzeRelaxationAdvanced(allFits, Time_table, Moment_table, Temp_table, advCfg); %#ok<NASGU>
 end
@@ -173,7 +184,9 @@ end
 %% ============================================================
 %     FINAL FORMATTING
 % ============================================================
+%{
 if formatFigures && exist('formatAllFigures','file')
     formatAllFigures('pos',[0.1,0.1,0.75,0.7], ...
         'clearTitles',false,'showLegend',true,'showGrid',true);
 end
+%}

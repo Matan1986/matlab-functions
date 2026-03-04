@@ -34,10 +34,10 @@ reproduce past figures and avoid accidental regressions.
 
 ## 2) Folder/module map
 
-### Aging ver2
-- Purpose: aging-memory analysis and AFM/FM decomposition helpers.
+### Aging
+- Purpose: aging-memory analysis, AFM/FM decomposition, and current-dependent coexistence model.
 - Typical entry: `Main_Aging.m`.
-- Use when comparing pause vs no-pause runs and ΔM(T)-type outputs.
+- Use when comparing pause vs no-pause runs, ΔM(T) analysis, and switching amplitude reconstruction.
 
 ### HC ver1
 - Purpose: heat-capacity data import, cleaning, and plotting.
@@ -187,7 +187,7 @@ Example:
 
 ```matlab
 cd('/workspace/matlab-functions')
-run(fullfile('Aging ver2','Main_Aging.m'))
+run(fullfile('Aging','Main_Aging.m'))
 ```
 
 Use this when checking pause/no-pause memory behavior and ΔM(T) comparisons.

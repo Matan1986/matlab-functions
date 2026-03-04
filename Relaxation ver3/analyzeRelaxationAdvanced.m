@@ -200,6 +200,7 @@ end
 
 adv.results = struct2table(rows);
 adv.results = sortrows(adv.results, {'Temp_K','data_idx'});
+plotArrhenius(adv.results);
 
 if cfg.makeSummaryPlot
     adv.figures.summary = localPlotSummary(adv.results, cfg);

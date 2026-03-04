@@ -19,7 +19,7 @@ verification_log.txt
 DIAGNOSTICS_SCAN_REPORT.md
 
 # --- Aging local verification ---
-Aging ver2/tests/
+Aging/tests/
 
 # --- VSCode local settings ---
 .vscode/settings.json

@@ -2,7 +2,7 @@
 projectRoot = fileparts(fileparts(mfilename('fullpath')));
 
 % Add code to path (core engine)
-addpath(genpath(fullfile(projectRoot, 'Aging ver2')));
+addpath(genpath(fullfile(projectRoot, 'Aging')));
 
 % ---- local machine paths (NOT version controlled) ----
 if exist('localPaths.m','file') == 2
@@ -13,7 +13,7 @@ else
 end
 
 % ---- config ----
-cfg = agingConfig('MG119_36sec'); % 'MG119_60min' | 'MG119_6min' | 'MG119_36sec' | 'MG119_3sec'
+cfg = agingConfig('MG119_6min'); % 'MG119_60min' | 'MG119_6min' | 'MG119_36sec' | 'MG119_3sec'
 cfg.debug.enable = true;
 cfg.debug.plotGeometry = true;
 cfg.debug.plotSwitching = true;

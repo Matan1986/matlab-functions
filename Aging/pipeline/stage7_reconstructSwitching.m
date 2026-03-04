@@ -90,9 +90,26 @@ if isfield(cfg, 'debug') && isfield(cfg.debug, 'enable') && cfg.debug.enable
     end
 end
 
-% Extract FM_step_A for all pauses, then slice to valid Tp only
-FM_fit_all = [state.pauseRuns.FM_step_A]';
+% Robust FM extraction (no crash if FM field missing)
+fmCandidates = {'FM_step_A','FM_step','FM_stepA','FM_A','FM'};
+fmField = '';
+
+for k = 1:numel(fmCandidates)
+    if isfield(state.pauseRuns, fmCandidates{k})
+        fmField = fmCandidates{k};
+        break;
+    end
+end
+
 Tp_all = [state.pauseRuns.waitK]';
+
+if isempty(fmField)
+    FM_fit_all = nan(numel(Tp_all),1);
+else
+    tmp = {state.pauseRuns.(fmField)};
+    FM_fit_all = cellfun(@double, tmp(:));
+end
+
 FM_fit_f = FM_fit_all(ismember(Tp_all, Tp_fm));
 
 % Debug gating + validation
@@ -100,10 +117,12 @@ if isfield(params,'debugSwitching') && params.debugSwitching
     fprintf('\nFM cross-check (synchronized with switching Tp)\n');
     fprintf('FM cross-check N = %d\n', numel(Tp_fm));
     fprintf('FM cross-check Tp = %s\n', mat2str(Tp_fm(:).'));
-    
+
     % Assert Tp vector sizes match
-    assert(isequal(numel(Tp_fm), numel(FM_fit_f)), ...
-        'FM cross-check: Tp count mismatch with FM_step_A');
+    if ~all(isnan(FM_fit_f))
+        assert(isequal(numel(Tp_fm), numel(FM_fit_f)), ...
+            'FM cross-check: Tp count mismatch with FM data');
+    end
 end
 
 B_loc = result.B_basis(:);   % RMS FM on Tsw grid
@@ -208,10 +227,10 @@ thresholdPct = cfg.debug.interpOvershootPct;
 if isfield(result, 'A_basis')
     A = result.A_basis(:);
     interpRange = max(A) - min(A);
-    
+
     A_rangePct = 100 * (interpRange / origRange - 1);
     A_overshootPct = max(0, A_rangePct);
-    
+
     if A_overshootPct > thresholdPct
         A_violated = 1;
         warning('Interpolation overshoot: A_basis range exceeds original Tp range by %.2f%% (threshold %.1f%%)', ...
@@ -223,10 +242,10 @@ end
 if isfield(result, 'B_basis')
     B = result.B_basis(:);
     interpRange = max(B) - min(B);
-    
+
     B_rangePct = 100 * (interpRange / origRange - 1);
     B_overshootPct = max(0, B_rangePct);
-    
+
     if B_overshootPct > thresholdPct
         B_violated = 1;
         warning('Interpolation overshoot: B_basis range exceeds original Tp range by %.2f%% (threshold %.1f%%)', ...

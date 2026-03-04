@@ -1,8 +1,8 @@
 # Copilot instructions for Matlab functions repo
 
 ## Big-picture structure
-- This repo is a collection of MATLAB analysis pipelines, grouped by experiment type and versioned folders (e.g. `Aging ver2/`, `FieldSweep ver3/`, `AC HC MagLab ver8/`).
-- Each module is typically driven by a top-level script named `*_main.m` or `Main_*.m` (e.g. `Aging ver2/Main_Aging.m`, `FieldSweep ver3/FieldSweep_main.m`, `AC HC MagLab ver8/ACHC_main.m`). These scripts set user options, choose data paths, call import helpers, then plot/fit.
+- This repo is a collection of MATLAB analysis pipelines, grouped by experiment type and versioned folders (e.g. `Aging/`, `FieldSweep ver3/`, `AC HC MagLab ver8/`).
+- Each module is typically driven by a top-level script named `*_main.m` or `Main_*.m` (e.g. `Aging/Main_Aging.m`, `FieldSweep ver3/FieldSweep_main.m`, `AC HC MagLab ver8/ACHC_main.m`). These scripts set user options, choose data paths, call import helpers, then plot/fit.
 - Shared utilities live in `General ver2/` and `Tools ver1/`; module-specific helpers stay in the module folder (e.g. `importFilesACHC.m`, `getFileList_aging.m`).
 
 ## Data flow and patterns (MATLAB)
@@ -13,7 +13,7 @@
 
 ## Key integration points
 - Channel building and filtering for transport workflows use `build_channels` and `apply_median_and_smooth_per_sweep` (see `FieldSweep ver3/FieldSweep_main.m`).
-- Aging-memory analysis relies on `computeDeltaM`, `analyzeAFM_FM_components`, and fit helpers like `fitFMstep_plus_GaussianDip` (see `Aging ver2/Main_Aging.m`).
+- Aging-memory analysis relies on `computeDeltaM`, `analyzeAFM_FM_components`, and fit helpers like `fitFMstep_plus_GaussianDip` (see `Aging/Main_Aging.m`).
 - Colormap utilities are vendored under `github_repo/cmocean` and can be added to the MATLAB path when needed.
 
 ## Developer workflow (verified from repo)

@@ -32,6 +32,31 @@ Rsw = Rsw(:);
 assert(isfield(pauseRuns, 'DeltaM'), 'pauseRuns missing DeltaM');
 
 % ===============================
+% Feature toggle: J-dependent extension
+% ===============================
+if ~isfield(params, 'enableJModel')
+    params.enableJModel = false;
+end
+
+if ~isfield(params, 'Jmodel')
+    params.Jmodel = struct();
+end
+
+% Defaults for J-dependent shift/gating (backward compatible)
+if ~isfield(params, 'alpha')
+    params.alpha = 0;
+end
+if ~isfield(params, 'J0')
+    params.J0 = 0;
+end
+if ~isfield(params, 'Jc')
+    params.Jc = 0;
+end
+if ~isfield(params, 'dJ') || params.dJ == 0
+    params.dJ = 1;
+end
+
+% ===============================
 % Extract aging metrics
 % ===============================
 nPauses = numel(pauseRuns);
@@ -310,6 +335,17 @@ best_sse = Inf;
 if ~isfield(params,'trivialThr'); params.trivialThr = 0.10; end
 if ~isfield(params,'useTrivialSuppression'); params.useTrivialSuppression = true; end
 
+J = 0;
+if isfield(params, 'J')
+    J = params.J;
+elseif isfield(params, 'current_mA')
+    J = params.current_mA;
+end
+
+best_wA = 1;
+best_wB = 1;
+best_c = 0;
+
 for lambda = lambda_grid
 
     Deff = 1 - exp(-Dn/lambda);
@@ -330,19 +366,42 @@ for lambda = lambda_grid
         coexistence(idx0) = coexistence(idx0) .* (sumAB(idx0)/thr);
     end
 
-    X = [coexistence, ones(size(coexistence))];
+    if params.enableJModel
+        delta = params.alpha * (J - params.J0);
+        wB = 1 ./ (1 + exp(-(J - params.Jc)./params.dJ));
+        wA = 1 - wB;
 
-    % fit only in the chosen window
-    beta = X(mask,:) \ Rsw(mask);
-    Rhat = X * beta;
+        A_shifted = interp1(Tsw, AFM_basis, Tsw - delta, 'pchip', 'extrap');
+        model_base = wA .* A_shifted + wB .* FM_basis;
+
+        X = ones(size(model_base));
+        beta = lsqnonneg(X(mask,:), Rsw(mask) - model_base(mask));
+        c = beta(1);
+        Rhat = model_base + c;
+    else
+        X = [coexistence, ones(size(coexistence))];
+
+        % fit only in the chosen window
+        beta = lsqnonneg(X(mask,:), Rsw(mask));
+        fprintf('beta1=%.4g, beta2=%.4g\n', beta(1), beta(2));
+        Rhat = X * beta;
+    end
 
     sse = sum((Rhat(mask) - Rsw(mask)).^2);
 
     if sse < best_sse
         best_sse = sse;
         best_lambda = lambda;
-        best_a = beta(1);
-        best_b = beta(2);
+        if params.enableJModel
+            best_a = wA;
+            best_b = c;
+            best_wA = wA;
+            best_wB = wB;
+            best_c = c;
+        else
+            best_a = beta(1);
+            best_b = beta(2);
+        end
         best_Rhat = Rhat;
         best_AFM_basis = AFM_basis;
         best_FM_basis = FM_basis;
@@ -359,6 +418,19 @@ Rhat_use  = best_Rhat(mask);
 SS_tot = sum((Ruse - mean(Ruse)).^2);
 SS_res = sum((Rhat_use - Ruse).^2);
 R2 = 1 - SS_res/SS_tot;
+
+if params.enableJModel
+    [~, idx_exp] = max(abs(Ruse));
+    [~, idx_model] = max(abs(Rhat_use));
+    delta_T = Tsw(mask);
+    peak_shift = delta_T(idx_model) - delta_T(idx_exp);
+    R_corr = corr(Rhat_use, Ruse, 'rows','complete');
+
+    fprintf('J-model alpha = %.6g\n', params.alpha);
+    fprintf('J-model Jc = %.6g\n', params.Jc);
+    fprintf('Mean correlation across currents: %.6g\n', R_corr);
+    fprintf('Max |Delta T| (K): %.6g\n', abs(peak_shift));
+end
 
 % ===============================
 % Pause-domain vectors for Phase C export
@@ -387,6 +459,19 @@ result.R2_signed_model = R2_signed_model;
 result.A_basis = best_AFM_basis;
 result.B_basis = best_FM_basis;
 result.C_basis = best_coexistence;
+
+% Expose J-dependent channel weights for validation
+if params.enableJModel
+    result.wA = best_wA;
+    result.wB = best_wB;
+    result.suppressionS = 1;
+    result.wB_over_wA = best_wB / (best_wA + eps);
+else
+    result.wA = 1;
+    result.wB = 1;
+    result.suppressionS = 1;
+    result.wB_over_wA = 1;
+end
 
 result.Tp_pause  = Tp_pause_export;
 result.Rsw_pause = Rsw_pause(:);
@@ -560,4 +645,159 @@ fprintf('Tp range: %.1f–%.1f K\n', min(Tp_valid), max(Tp_valid));
 fprintf('Tsw range: %.1f–%.1f K\n', min(Tsw), max(Tsw));
 % attach for later use
 result.corrAB = R_AB;
+end
+
+%% =========================================================
+%  J-dependent ΔR(T) model (optional extension)
+% ==========================================================
+
+function dR = compute_dR(T, J, params)
+%COMPUTE_DR Compute ΔR(T) with optional J-dependent extension
+%
+% SYNTAX:
+%   dR = compute_dR(T, J, params)
+%
+% INPUT:
+%   T        - Temperature (K)
+%   J        - Exchange coupling parameter (optional, default=0)
+%   params   - Parameter struct with dR0, alpha, and optional Jmodel
+%
+% OUTPUT:
+%   dR       - Resistance change in appropriate units
+%
+% FEATURE: Toggleable J-dependent extension via params.enableJModel
+
+% ===============================
+% Backward compatibility
+% ===============================
+if nargin < 2 || isempty(J)
+    J = 0;
+end
+
+if nargin < 3
+    error('params struct must be provided');
+end
+
+% Default parameters if missing
+if ~isfield(params, 'dR0')
+    params.dR0 = 0;
+end
+if ~isfield(params, 'alpha')
+    params.alpha = 1;
+end
+if ~isfield(params, 'enableJModel')
+    params.enableJModel = false;
+end
+if ~isfield(params, 'Jmodel')
+    params.Jmodel = struct();
+end
+
+% ===============================
+% Compute intrinsic channels
+% ===============================
+A_val = 1;  % Placeholder for A(T); user should define this function
+B_val = 1;  % Placeholder for B(T); user should define this function
+
+% ===============================
+% CASE 1: Feature disabled (DEFAULT)
+% ===============================
+if ~params.enableJModel
+    dR = params.dR0 + params.alpha * (1 - abs(A_val - B_val));
+    return;
+end
+
+% ===============================
+% CASE 2: Feature enabled
+% ===============================
+if params.enableJModel
+    % Get J-dependent weights
+    [wA, wB, S] = compute_channel_weights(J, params);
+    
+    % Compute effective channels
+    A_eff = wA .* A_val;
+    B_eff = wB .* B_val;
+    
+    % Extended balance functional
+    dR = params.dR0 + params.alpha * (1 - abs(A_eff - B_eff));
+    
+    % Apply optional suppression factor
+    dR = S .* dR;
+end
+end
+
+% =========================================================
+%  Channel weight computation (J-dependent)
+% =========================================================
+
+function [wA, wB, S] = compute_channel_weights(J, params)
+%COMPUTE_CHANNEL_WEIGHTS Compute J-dependent channel weights
+%
+% SYNTAX:
+%   [wA, wB, S] = compute_channel_weights(J, params)
+%
+% INPUT:
+%   J        - Exchange coupling parameter
+%   params   - Parameter struct with Jmodel configuration
+%
+% OUTPUT:
+%   wA       - AFM channel weight
+%   wB       - FM channel weight
+%   S        - Global suppression factor
+%
+% NOTE: Returns defaults (1, 1, 1) if Jmodel.type is missing.
+
+% Default values
+wA = 1;
+wB = 1;
+S  = 1;
+
+% If no model type specified, return defaults
+if ~isfield(params, 'Jmodel') || ~isfield(params.Jmodel, 'type')
+    return;
+end
+
+model_type = params.Jmodel.type;
+
+% ===============================
+% EXPONENTIAL MODEL
+% ===============================
+if strcmp(model_type, 'exp')
+    if ~isfield(params.Jmodel, 'gamma')
+        error('gamma must be defined for exp model');
+    end
+    
+    wA = 1;
+    wB = exp(params.Jmodel.gamma * J);
+    
+% ===============================
+% LOGISTIC MODEL
+% ===============================
+elseif strcmp(model_type, 'logistic')
+    if ~isfield(params.Jmodel, 'J0') || ~isfield(params.Jmodel, 'deltaJ')
+        error('J0 and deltaJ required for logistic model');
+    end
+    
+    ratio = 1 ./ (1 + exp(-(J - params.Jmodel.J0) / params.Jmodel.deltaJ));
+    
+    wA = 1;
+    wB = ratio;
+    
+% ===============================
+% LINEAR MODEL
+% ===============================
+elseif strcmp(model_type, 'linear')
+    if ~isfield(params.Jmodel, 'c0') || ~isfield(params.Jmodel, 'c1')
+        error('c0 and c1 required for linear model');
+    end
+    
+    wA = 1;
+    wB = params.Jmodel.c0 + params.Jmodel.c1 * J;
+end
+
+% ===============================
+% Optional global suppression
+% ===============================
+if isfield(params.Jmodel, 'suppressionGamma')
+    S = exp(-params.Jmodel.suppressionGamma * J.^2);
+end
 end
