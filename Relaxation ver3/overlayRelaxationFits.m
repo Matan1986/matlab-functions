@@ -11,7 +11,7 @@ if nargin < 11, containsTRM_folder = false; end
 if nargin < 10, sample_name        = "";    end
 if nargin < 9,  compareMode        = false; end
 if nargin < 7,  trimToFitWindow    = false; end
-if nargin < 6,  debugMode          = false; end
+if nargin < 6,  debugMode          = false; end %#ok<NASGU>
 
 n = numel(Time_table);
 
@@ -143,12 +143,22 @@ for i = 1:n
     M = Moment_table{i};
     if isempty(t), continue; end
 
-    % Trim
+    % Display mask: keep plotted time range consistent with Plots_relaxation
+    mask_disp = t >= 0;
+
+    % Optional fit-window display trimming (kept for backward compatibility)
     if trimToFitWindow
-        mask = t >= 0;
-        t = t(mask);
-        M = M(mask);
+        idxFit = find(allFits.data_idx == i, 1, 'first');
+        if ~isempty(idxFit)
+            t0_disp = allFits.t_start(idxFit);
+            t1_disp = allFits.t_end(idxFit);
+            mask_disp = mask_disp & (t >= t0_disp) & (t <= t1_disp);
+        end
     end
+
+    if ~any(mask_disp), continue; end
+    t = t(mask_disp);
+    M = M(mask_disp);
 
     % Determine what to plot
     if offsetDisplayMode

@@ -32,6 +32,7 @@ color_scheme      = 'parula';
 normalizeByMass   = true;
 fontsize          = 18;
 compareMode       = false;
+compareModeLocked = false;    % set true to force manual compareMode choice
 alignByDrop       = true;
 Hthresh_align     = 0.5;
 trimToFitWindow   = true;
@@ -54,15 +55,6 @@ offsetValue        = 5E-5;     % vertical separation between curves
 dir = "C:\Users\matan\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\MG 119 M2 out of plane susep relax aging\Relaxation TRM";
 
 %% ============================================================
-%        DETECT TYPE FROM FOLDER NAME
-% ============================================================
-[~, folderName] = fileparts(dir);
-folderLower = lower(folderName);
-
-containsTRM_folder = contains(folderLower,"trm");
-containsIRM_folder = contains(folderLower,"irm");
-
-%% ============================================================
 %        ADD PATHS
 % ============================================================
 baseFolder = 'C:\Users\matan\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Matlab functions';
@@ -74,9 +66,24 @@ addpath(genpath(baseFolder));
 [fileList, temps, fields, types, colors, mass] = ... %#ok<ASGLU>
     getFileList_relaxation(dir, color_scheme);
 
-% Auto-detect TRM vs IRM compare mode
-if containsTRM_folder && containsIRM_folder
-    compareMode = true;
+% Detect TRM/IRM content from actual files (not folder name)
+fileListLower = lower(string(fileList));
+containsTRM_data = any(contains(fileListLower, "trm"));
+containsIRM_data = any(contains(fileListLower, "irm"));
+
+containsTRM_folder = containsTRM_data;
+containsIRM_folder = containsIRM_data;
+
+% Auto-detect TRM vs IRM compare mode unless explicitly locked by user
+if ~compareModeLocked
+    compareModeAuto = containsTRM_data && containsIRM_data;
+    autoEnabledCompare = ~compareMode && compareModeAuto;
+    compareMode = compareModeAuto;
+else
+    autoEnabledCompare = false;
+end
+
+if autoEnabledCompare
     fprintf("\n=== Auto-detected TRM vs IRM comparison ===\n");
 end
 
