@@ -21,7 +21,8 @@ cfg = localDefaults(cfg);
 
 adv = struct();
 adv.cfg = cfg;
-adv.figures = struct('perCurve', gobjects(0), 'summary', gobjects(0), 'collapse', gobjects(0));
+adv.figures = struct('perCurve', gobjects(0), 'summary', gobjects(0), 'collapse', gobjects(0), ...
+    'tauVsTemp', gobjects(0), 'betaVsTemp', gobjects(0), 'residuals', gobjects(0), 'tauDistribution', gobjects(0));
 
 if isempty(allFits)
     warning('analyzeRelaxationAdvanced:NoFits', 'allFits is empty. Nothing to analyze.');
@@ -88,6 +89,11 @@ for i = 1:nRows
     if cfg.enableLogModel
         logm = localFitLogModel(tFit, mFit, cfg);
     end
+
+    rows(i).AIC_stretched = stretch.AIC;
+    rows(i).BIC_stretched = stretch.BIC;
+    rows(i).AIC_log = logm.AIC;
+    rows(i).BIC_log = logm.BIC;
 
     % Model selection
     choice = "baseline";
@@ -186,6 +192,10 @@ for i = 1:nRows
     if cfg.debugResidualPlot && cfg.makePerCurvePlots
         localPlotResidualDebug(i, tFit, mFit - selectedFit, rows(i));
     end
+
+    if cfg.debug
+        localPrintDebugDiagnostics(rows(i), cfg);
+    end
 end
 
 adv.results = struct2table(rows);
@@ -196,6 +206,18 @@ if cfg.makeSummaryPlot
 end
 if cfg.makeCollapsePlot
     adv.figures.collapse = localPlotCollapse(adv.results, Time_table, Moment_table, Tfits, cfg);
+end
+if cfg.makePhysicsPlots
+    [adv.figures.tauVsTemp, adv.figures.betaVsTemp] = localPlotPhysicsParams(adv.results, cfg);
+end
+if cfg.makeResidualDiagnostics
+    adv.figures.residuals = localPlotResidualDiagnostics(adv.results, Time_table, Moment_table, Tfits, cfg);
+end
+if cfg.makeTauDistribution
+    adv.figures.tauDistribution = localPlotTauDistribution(adv.results, cfg);
+end
+if cfg.advanced && cfg.debug
+    localPrintAdvancedSummary(adv.results);
 end
 
 end
@@ -213,6 +235,12 @@ cfg = setDef(cfg,'makePerCurvePlots',false);
 cfg = setDef(cfg,'makeSummaryPlot',true);
 cfg = setDef(cfg,'makeCollapsePlot',true);
 cfg = setDef(cfg,'debugResidualPlot',false);
+cfg = setDef(cfg,'advanced',false);
+cfg = setDef(cfg,'debug',false);
+cfg = setDef(cfg,'makePhysicsPlots',false);
+cfg = setDef(cfg,'makeResidualDiagnostics',false);
+cfg = setDef(cfg,'makeTauDistribution',false);
+cfg = setDef(cfg,'tauDistBins',60);
 cfg = setDef(cfg,'figureVisible','on');
 end
 
@@ -223,7 +251,8 @@ end
 function row = localEmptyRow()
 row = struct('data_idx',NaN,'Temp_K',NaN,'Npts',0,'fit_ok',false,'fit_status',"", ...
     'model_choice',"baseline",'exitflag',NaN,'R2',NaN,'R2_base',NaN,'RMSE',NaN,'RMSE_base',NaN, ...
-    'AIC',NaN,'BIC',NaN,'AIC_base',NaN,'BIC_base',NaN,'tau',NaN,'beta',NaN,'Minf',NaN,'dM',NaN, ...
+    'AIC',NaN,'BIC',NaN,'AIC_base',NaN,'BIC_base',NaN,'AIC_stretched',NaN,'BIC_stretched',NaN, ...
+    'AIC_log',NaN,'BIC_log',NaN,'tau',NaN,'beta',NaN,'Minf',NaN,'dM',NaN, ...
     'tau_unresolved',false);
 end
 
@@ -426,4 +455,99 @@ set(ax,'XScale','log');
 xlabel(ax,'(t/\tau)^\beta');
 ylabel(ax,'(M-M_\infty)/\Delta M');
 title(ax,'Stretched-exponential collapse test');
+end
+
+function [figTau, figBeta] = localPlotPhysicsParams(T, cfg)
+figTau = figure('Color','w','Name','tau(T)','Visible',cfg.figureVisible);
+ax1 = axes(figTau); hold(ax1,'on'); box(ax1,'on'); grid(ax1,'on');
+mTau = isfinite(T.Temp_K) & isfinite(T.tau) & T.model_choice ~= "log_model";
+plot(ax1, T.Temp_K(mTau), T.tau(mTau), 'o-','LineWidth',1.6,'MarkerSize',6);
+set(ax1,'YScale','log');
+xlabel(ax1,'Temperature [K]'); ylabel(ax1,'\tau [s]');
+title(ax1,'Characteristic relaxation time \tau(T)');
+
+figBeta = figure('Color','w','Name','beta(T)','Visible',cfg.figureVisible);
+ax2 = axes(figBeta); hold(ax2,'on'); box(ax2,'on'); grid(ax2,'on');
+mBeta = isfinite(T.Temp_K) & isfinite(T.beta) & T.model_choice ~= "log_model";
+plot(ax2, T.Temp_K(mBeta), T.beta(mBeta), 's-','LineWidth',1.6,'MarkerSize',6);
+xlabel(ax2,'Temperature [K]'); ylabel(ax2,'\beta');
+title(ax2,'Stretched exponent \beta(T)');
+ylim(ax2,[0 1.2]);
+end
+
+function fig = localPlotResidualDiagnostics(Tadv, Time_table, Moment_table, Tfits, cfg)
+fig = figure('Color','w','Name','Residual diagnostics','Visible',cfg.figureVisible);
+ax = axes(fig); hold(ax,'on'); box(ax,'on'); grid(ax,'on');
+for i = 1:height(Tadv)
+    idx = Tadv.data_idx(i);
+    if idx < 1 || idx > numel(Time_table), continue; end
+    if ~isfinite(Tadv.Minf(i)) || ~isfinite(Tadv.dM(i)) || ~isfinite(Tadv.tau(i)) || ~isfinite(Tadv.beta(i)), continue; end
+    t = Time_table{idx}; m = Moment_table{idx};
+    if isempty(t) || isempty(m), continue; end
+    msk = t >= Tfits.t_start(i) & t <= Tfits.t_end(i);
+    t = t(msk); m = m(msk);
+    if numel(t) < 3, continue; end
+    mfit = localEvalStretchModel(t, Tadv.Minf(i), Tadv.dM(i), Tadv.tau(i), Tadv.beta(i), min(t));
+    semilogx(ax, max(t-min(t),eps), m-mfit, '.', 'DisplayName', sprintf('T=%.1fK', Tadv.Temp_K(i)));
+end
+xlabel(ax,'Elapsed time [s] (log scale)');
+ylabel(ax,'Residual M_{data}-M_{fit}');
+title(ax,'Residual diagnostics vs log(t)');
+end
+
+function fig = localPlotTauDistribution(T, cfg)
+fig = figure('Color','w','Name','Relaxation-time distribution g(\tau)','Visible',cfg.figureVisible);
+ax = axes(fig); hold(ax,'on'); box(ax,'on'); grid(ax,'on');
+
+mask = isfinite(T.tau) & T.tau > 0 & isfinite(T.beta) & T.beta > 0 & T.model_choice ~= "log_model";
+if ~any(mask)
+    text(ax,0.1,0.5,'No valid stretched-exponential fits for g(\tau)','Units','normalized');
+    return;
+end
+
+u = linspace(-3, 3, cfg.tauDistBins); % log-space offset from ln(tau_c)
+for i = find(mask(:))'
+    tauC = T.tau(i);
+    beta = T.beta(i);
+    tauGrid = tauC .* exp(u);
+    width = max(0.08, 1.2*(1-beta));
+    g = exp(-0.5*(u/width).^2) ./ (sqrt(2*pi)*width);
+    g = g / trapz(log(tauGrid), g);
+    plot(ax, tauGrid, g, 'LineWidth',1.0, 'DisplayName', sprintf('T=%.1fK, \\beta=%.2f', T.Temp_K(i), beta));
+end
+set(ax,'XScale','log');
+xlabel(ax,'\tau [s]');
+ylabel(ax,'g(\tau) (normalized)');
+title(ax,'Approximate implied relaxation-time distributions');
+end
+
+function localPrintAdvancedSummary(T)
+fprintf('\n=== Advanced Relaxation Summary ===\n\n');
+fprintf('%-7s %-10s %-7s %-20s %-10s %-7s\n', 'T(K)', 'tau(s)', 'beta', 'model', 'RMSE', 'R2');
+fprintf('%s\n', repmat('-',1,67));
+for i = 1:height(T)
+    fprintf('%-7.2f %-10.4g %-7.3f %-20s %-10.4g %-7.3f\n', ...
+        T.Temp_K(i), T.tau(i), T.beta(i), string(T.model_choice(i)), T.RMSE(i), T.R2(i));
+end
+fprintf('\n');
+end
+
+function localPrintDebugDiagnostics(row, cfg)
+fprintf('--- Fit diagnostics ---\n');
+fprintf('T = %.3g K\n', row.Temp_K);
+fprintf('Npts = %d\n', row.Npts);
+fprintf('Model: %s\n', row.model_choice);
+fprintf('AIC(baseline)  = %.6g\n', row.AIC_base);
+if cfg.useMultiStart
+    fprintf('AIC(stretched) = %.6g\n', row.AIC_stretched);
+end
+if cfg.enableLogModel
+    fprintf('AIC(log)       = %.6g\n', row.AIC_log);
+end
+fprintf('Chosen model   = %s\n', row.model_choice);
+fprintf('fit_status     = %s\n', row.fit_status);
+fprintf('exitflag       = %.0f\n', row.exitflag);
+fprintf('tau_unresolved = %d\n', row.tau_unresolved);
+fprintf('tau = %.6g s\n', row.tau);
+fprintf('beta = %.6g\n\n', row.beta);
 end
