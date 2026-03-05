@@ -32,11 +32,23 @@ state.pauseRuns = analyzeAFM_FM_components( ...
 for i = 1:numel(state.pauseRuns)
     run = state.pauseRuns(i);
 
+    % Persist AFM dip metric mode for downstream plotting/diagnostics.
+    if isfield(cfg, 'AFM_metric_main') && ~isempty(cfg.AFM_metric_main)
+        run.dipMetric = char(lower(string(cfg.AFM_metric_main)));
+    end
+
+    % Keep direct (stage4) dip area explicitly, independent of fit-based fields.
+    if isfield(run, 'AFM_area') && ~isempty(run.AFM_area) && isfinite(run.AFM_area)
+        run.Dip_area_direct = run.AFM_area;
+    else
+        run.Dip_area_direct = NaN;
+    end
+
     % Ensure required diagnostics fields exist
     if ~isfield(run, 'Dip_area') || isempty(run.Dip_area)
-        % Use AFM_area from analyzer (dip metric based on AFM_metric_main setting)
-        if isfield(run, 'AFM_area') && ~isempty(run.AFM_area) && isfinite(run.AFM_area)
-            run.Dip_area = run.AFM_area;
+        % Legacy compatibility: prefer explicit direct area when Dip_area is missing.
+        if isfield(run, 'Dip_area_direct') && ~isempty(run.Dip_area_direct) && isfinite(run.Dip_area_direct)
+            run.Dip_area = run.Dip_area_direct;
         else
             run.Dip_area = NaN;
         end
