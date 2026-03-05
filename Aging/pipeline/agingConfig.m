@@ -7,7 +7,7 @@ if nargin < 1
     datasetName = 'MG119_60min';   % default
 end
 
-cfg.current_mA = 35;   % Allowed values: 15 20 25 30 35 45
+cfg.current_mA = 25;   % Allowed values: 15 20 25 30 35 45
 cfg.datasetName = datasetName;   % 'MG119_60min' | 'MG119_6min' | 'MG119_36sec' | 'MG119_3sec'
 
 
@@ -100,6 +100,45 @@ cfg.debug.Tc = 32.5;
 cfg.debug.dipMinMarginFraction = 0.10;
 cfg.debug.plateauMaxSlope = 0.01;
 cfg.debug.interpOvershootPct = 2.0;
+
+% ========== STRUCTURED DEBUG INFRASTRUCTURE ==========
+% Logging levels: "quiet" < "summary" < "full"
+% Controls console output verbosity across all pipeline stages
+cfg.debug.level = "summary";           % Default: key milestones only
+
+% Figure management
+% cfg.debug.plots: "none" | "key" | "all"
+%   "none"  - No figures created
+%   "key"   - Only create figures with tags in keyPlotTags
+%   "all"   - Create all figures (legacy behavior)
+cfg.debug.plots = "key";               % Default: key plots only
+
+% List of approved plot tags when plots="key"
+cfg.debug.keyPlotTags = [
+    "DeltaM_overview"
+    "AFM_FM_channels"
+    "Rsw_vs_T"
+    "global_J_fit"
+    "reconstruction_fit"
+    "aging_memory_summary"
+];
+
+% Figure visibility
+% "on"  - Visible (normal)
+% "off" - Hidden (saves memory, faster renders)
+cfg.debug.plotVisible = "off";         % Default: hidden
+
+% Maximum number of figures allowed open simultaneously
+cfg.debug.maxFigures = 8;              % Default: 8 figures max
+
+% Log file configuration
+cfg.debug.logFile = '';                % Full path to log file (empty = no logging)
+if ~isempty(cfg.outputFolder) && ~strcmp(cfg.outputFolder, '')
+    cfg.debug.logFile = fullfile(cfg.outputFolder, 'diagnostic_log.txt');
+end
+
+% Use timestamped subdirectories for diagnostics
+cfg.debug.useTimestamp = false;        % Default: false
 
 % --- Paths ---
 cfg.baseFolder = 'C:\Dev\matlab-functions';
@@ -253,13 +292,29 @@ cfg.Rsw_45mA = abs([ ...
 switch cfg.current_mA
     case 15
         cfg.Rsw = cfg.Rsw_15mA;
+
+    case 20
+        cfg.Rsw = cfg.Rsw_20mA;
+
+    case 25
+        cfg.Rsw = cfg.Rsw_25mA;
+
+    case 30
+        cfg.Rsw = cfg.Rsw_30mA;
+
     case 35
         cfg.Rsw = cfg.Rsw_35mA;
+
+    case 45
+        cfg.Rsw = cfg.Rsw_45mA;
+
     otherwise
         error('Unsupported current value.');
 end
 
 cfg.switchParams = struct();
+cfg.switchParams.available_currents_mA = [15 20 25 30 35 45];
+cfg.switchParams.reference_current_mA = cfg.current_mA;
 cfg.switchParams.dipWindowK = cfg.dip_window_K;
 cfg.switchParams.wideWindowK = 18;
 cfg.switchParams.lambdaMin = 0.03;

@@ -4,10 +4,11 @@ function [result, state] = stage7_reconstructSwitching(state, cfg)
 %
 % PURPOSE:
 %   Reconstruct switching amplitude from AFM/FM metrics.
+%   Uses controlled debug logging for production pipelines.
 %
 % INPUTS:
 %   state - struct with pauseRuns and pauseRuns_raw
-%   cfg   - configuration struct
+%   cfg   - configuration struct with debug settings
 %
 % OUTPUTS:
 %   result - reconstruction output struct
@@ -16,6 +17,9 @@ function [result, state] = stage7_reconstructSwitching(state, cfg)
 % Physics meaning:
 %   AFM = low-manifold dip metric
 %   FM  = high-manifold background metric
+%
+% DEBUG INFRASTRUCTURE:
+%   Uses dbg() for logging at appropriate verbosity levels
 %
 % =========================================================
 
@@ -28,6 +32,8 @@ Tsw = cfg.Tsw;
 Rsw = cfg.Rsw;
 
 params = cfg.switchParams;
+
+dbg(cfg, "summary", "Switching reconstruction: mode=%s", mode);
 
 % --- Wire optional Tp exclusion from config ---
 params.switchExcludeTp = cfg.switchExcludeTp;
@@ -43,10 +49,9 @@ result = reconstructSwitchingAmplitude( ...
     Rsw);
 
 if cfg.debug.enable
-    disp('stage7: result fields =');
-    disp(fieldnames(result));
+    dbg(cfg, "full", "Reconstruction result fields: %s", strjoin(fieldnames(result), ', '));
     if isfield(result,'C_pause')
-        fprintf('C_pause: N=%d, mean=%.3e, std=%.3e\n', ...
+        dbg(cfg, "full", "C_pause: N=%d, mean=%.3e, std=%.3e", ...
             numel(result.C_pause), mean(result.C_pause,'omitnan'), std(result.C_pause,'omitnan'));
     end
 end
@@ -114,9 +119,9 @@ FM_fit_f = FM_fit_all(ismember(Tp_all, Tp_fm));
 
 % Debug gating + validation
 if isfield(params,'debugSwitching') && params.debugSwitching
-    fprintf('\nFM cross-check (synchronized with switching Tp)\n');
-    fprintf('FM cross-check N = %d\n', numel(Tp_fm));
-    fprintf('FM cross-check Tp = %s\n', mat2str(Tp_fm(:).'));
+    dbg(cfg, "summary", "FM cross-check (synchronized with switching Tp)");
+    dbg(cfg, "summary", "FM cross-check N = %d", numel(Tp_fm));
+    dbg(cfg, "summary", "FM cross-check Tp = %s", mat2str(Tp_fm(:).'));
 
     % Assert Tp vector sizes match
     if ~all(isnan(FM_fit_f))
@@ -137,25 +142,24 @@ else
     R_FM = NaN;
 end
 
-fprintf('\n=== FM cross-check ===\n');
-fprintf('corr(RMS B(Tp), FM_step_A) = %.3f\n', R_FM);
+dbg(cfg, "summary", "FM cross-check: corr(RMS B(Tp), FM_step_A) = %.3f", R_FM);
 
 % Enhanced diagnostics when correlation is NaN
 if isnan(R_FM) && isfield(cfg, 'debug') && isfield(cfg.debug, 'enable') && cfg.debug.enable
     if exist('FM_fit_f','var') && exist('B_rms_atTp','var')
-        fprintf('  FM_fit_f length: %d, NaNs: %d, std: %.4f\n', ...
+        dbg(cfg, "full", "  FM_fit_f: length=%d, NaNs=%d, std=%.4f", ...
             numel(FM_fit_f), nnz(isnan(FM_fit_f)), std(FM_fit_f, 'omitnan'));
-        fprintf('  B_rms_atTp length: %d, NaNs: %d, std: %.4f\n', ...
+        dbg(cfg, "full", "  B_rms_atTp: length=%d, NaNs=%d, std=%.4f", ...
             numel(B_rms_atTp), nnz(isnan(B_rms_atTp)), std(B_rms_atTp, 'omitnan'));
     else
-        fprintf('  One or both vectors not defined.\n');
+        dbg(cfg, "full", "  One or both vectors not defined.");
     end
 end
 
 % --- NEW: Interpolation overshoot diagnostic ---
 if isfield(cfg, 'debug') && isfield(cfg.debug, 'enable') && cfg.debug.enable
     [A_violated, A_rangePct, A_overshootPct, B_violated, B_rangePct, B_overshootPct] = checkInterpolationOvershoot(cfg, result, [state.pauseRuns.waitK]);
-    printStage7DiagnosticSummary(A_violated, A_rangePct, A_overshootPct, B_violated, B_rangePct, B_overshootPct);
+    printStage7DiagnosticSummary(cfg, A_violated, A_rangePct, A_overshootPct, B_violated, B_rangePct, B_overshootPct);
 end
 
 % ===== Phase C Baseline Snapshot Export =====
@@ -196,8 +200,21 @@ end
 
 save(fullfile(outDir,'baseline_resultsLOO.mat'),'resultsLOO');
 
-fprintf('\nBaseline snapshot saved for Phase C (LOO).\n');
+dbg(cfg, "summary", "Baseline snapshot saved for Phase C (LOO)");
 
+state.stage7 = result;
+%{
+T = state.stage7.T;
+R = state.stage7.R_measured;
+A = state.stage7.A_basis;
+B = state.stage7.B_basis;
+
+[rA,pA] = partialcorr(R,A,T);
+[rB,pB] = partialcorr(R,B,T);
+
+fprintf('partialcorr(R,A|T) = %.3f (p=%.3g)\n',rA,pA);
+fprintf('partialcorr(R,B|T) = %.3f (p=%.3g)\n',rB,pB);
+%}
 end
 
 % ====================== Local debug helpers ======================
@@ -254,19 +271,19 @@ if isfield(result, 'B_basis')
 end
 end
 
-function printStage7DiagnosticSummary(A_violated, A_rangePct, A_overshootPct, B_violated, B_rangePct, B_overshootPct)
-fprintf('\n---- PHASE B INTERPOLATION DIAGNOSTICS ----\n');
-fprintf('A_rangePct = %.2f%%\n', A_rangePct);
-fprintf('A_overshootPct = %.2f%%\n', A_overshootPct);
-fprintf('A_violation = %d\n', A_violated);
-fprintf('B_rangePct = %.2f%%\n', B_rangePct);
-fprintf('B_overshootPct = %.2f%%\n', B_overshootPct);
-fprintf('B_violation = %d\n', B_violated);
+function printStage7DiagnosticSummary(cfg, A_violated, A_rangePct, A_overshootPct, B_violated, B_rangePct, B_overshootPct)
+dbg(cfg, "summary", "---- PHASE B INTERPOLATION DIAGNOSTICS ----");
+dbg(cfg, "summary", "A_rangePct = %.2f%%", A_rangePct);
+dbg(cfg, "summary", "A_overshootPct = %.2f%%", A_overshootPct);
+dbg(cfg, "summary", "A_violation = %d", A_violated);
+dbg(cfg, "summary", "B_rangePct = %.2f%%", B_rangePct);
+dbg(cfg, "summary", "B_overshootPct = %.2f%%", B_overshootPct);
+dbg(cfg, "summary", "B_violation = %d", B_violated);
 
 if A_violated == 0 && B_violated == 0
-    fprintf('ALL INTERPOLATION CHECKS PASSED\n');
+    dbg(cfg, "summary", "ALL INTERPOLATION CHECKS PASSED");
 end
-fprintf('-------------------------------------------\n\n');
+dbg(cfg, "summary", "--------------------------------------------");
 end
 
 function outFolder = resolveDebugOutFolderStage7(cfg)
