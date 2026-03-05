@@ -39,11 +39,18 @@ clc; close_all_except_ui_figures;
 if ~exist('cfg','var') || ~isstruct(cfg)
     cfg = agingConfig();
 end
-fprintf('AGING metric mode: %s\n', cfg.agingMetricMode);
-fprintf('SWITCHING metric mode: %s\n', cfg.switchingMetricMode);
-fprintf('AFM metric type: %s\n', cfg.AFM_metric_main);
-fprintf('FM metric: plateau step magnitude from ΔM(T)\n');
-fprintf('Switch fit window: %.2f–%.2f K\n', cfg.switchParams.fitTmin, cfg.switchParams.fitTmax);
+
+% ========== DEBUG INFRASTRUCTURE INIT ==========
+dbgInitDiagnostics(cfg);
+
+dbg(cfg, "summary", "AGING metric mode: %s", cfg.agingMetricMode);
+dbg(cfg, "summary", "SWITCHING metric mode: %s", cfg.switchingMetricMode);
+dbg(cfg, "summary", "AFM metric type: %s", cfg.AFM_metric_main);
+dbg(cfg, "summary", "FM metric: plateau step magnitude from ΔM(T)");
+dbg(cfg, "summary", "Switch fit window: %.2f–%.2f K", cfg.switchParams.fitTmin, cfg.switchParams.fitTmax);
+dbg(cfg, "full", "Debug level: %s | Plots: %s | Max figures: %d", ...
+    cfg.debug.level, cfg.debug.plots, cfg.debug.maxFigures);
+
 cfg = stage0_setupPaths(cfg);
 % =========================================================
 % Stage 1: Load files
@@ -56,7 +63,9 @@ if ~isfield(cfg,'outputFolder') || isempty(cfg.outputFolder)
     cfg.outputFolder = fullfile(cfg.dataDir, 'Results');
 end
 
+dbg(cfg, "summary", "Loading data from: %s", cfg.dataDir);
 state = stage1_loadData(cfg);
+dbg(cfg, "summary", "Loaded %d pause runs + 1 no-pause reference", numel(state.pauseRuns));
 
 % =========================================================
 % Stage 2: Preprocess + unit conversion
@@ -123,13 +132,16 @@ else
     cfg.switchParams.debugSwitching = false;
 end
 
-disp("=== switchExcludeTp debug (after mapping) ===");
-disp(cfg.switchParams.switchExcludeTp);
+dbg(cfg, "full", "switchExcludeTp config: %s", mat2str(cfg.switchParams.switchExcludeTp));
 
 % =========================================================
 % Stage 7: Switching reconstruction
 % =========================================================
 [result, state] = stage7_reconstructSwitching(state, cfg);
+
+% ========== EXTRACT PHYSICS CONTEXT ==========
+% Build comprehensive metadata for physicists
+physicsContext = dbgExtractPhysicsContext(cfg, result, state);
 
 % =========================================================
 % Stage 8: Plotting
@@ -141,6 +153,47 @@ end
 % Stage 9: Export
 % =========================================================
 stage9_export(state, cfg);
+
+% ========== DIAGNOSTIC SUMMARY ==========
+dbg(cfg, "summary", "Pipeline completed successfully");
+
+% Save detailed physics context
+dbgSummaryPhysics(cfg, physicsContext, result, state);
+
+% Compile metrics summary
+nPause = numel(state.pauseRuns);
+nFigs = length(findobj('Type', 'figure'));
+
+% Build comprehensive summary with physics context
+dbgSummaryTable(cfg, ...
+    '=== SAMPLE & DATASET ===', '', ...
+    'sample_name', physicsContext.sample_name, ...
+    'dataset_name', physicsContext.dataset_name, ...
+    '', '', ...
+    '=== EXPERIMENTAL SETUP ===', '', ...
+    'reference_current_mA', physicsContext.reference_current_mA, ...
+    'available_currents_mA', mat2str(physicsContext.available_currents_mA), ...
+    'n_pause_runs', physicsContext.n_pause_runs, ...
+    '', '', ...
+    '=== TEMPERATURE GRID ===', '', ...
+    'temperature_min_K', physicsContext.temperature_min_K, ...
+    'temperature_max_K', physicsContext.temperature_max_K, ...
+    'temperature_range_K', physicsContext.temperature_range_K, ...
+    'n_temperature_points', physicsContext.n_temperature_points, ...
+    'fit_window_min_K', physicsContext.fit_window_min_K, ...
+    'fit_window_max_K', physicsContext.fit_window_max_K, ...
+    '', '', ...
+    '=== RECONSTRUCTION RESULTS ===', '', ...
+    'reconstruction_mode', physicsContext.reconstruction_mode, ...
+    'coexistence_parameter_lambda', physicsContext.coexistence_parameter_lambda, ...
+    'reconstruction_coeff_a', physicsContext.reconstruction_coeff_a, ...
+    'reconstruction_coeff_b', physicsContext.reconstruction_coeff_b, ...
+    'fit_quality_R2', physicsContext.fit_quality_R2, ...
+    '', '', ...
+    '=== PIPELINE EXECUTION ===', '', ...
+    'pause_runs', nPause, ...
+    'figures_created', nFigs, ...
+    'output_folder', cfg.outputFolder);
 
 % =========================================================
 % Workspace compatibility (preserve key variables)

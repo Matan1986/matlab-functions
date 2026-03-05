@@ -62,8 +62,8 @@ state.stage8.Tmask = mask;
 nValid = nnz(mask);
 
 % Load model bases from stage7 outputs
-A_basis = firstField(state, cfg, {'stage7.A_basis','result.A_basis','A_basis'});
-B_basis = firstField(state, cfg, {'stage7.B_basis','result.B_basis','B_basis'});
+A_basis = firstField(state, cfg, {'stage7.A_basis','stage7.result.A_basis','result.A_basis','A_basis'});
+B_basis = firstField(state, cfg, {'stage7.B_basis','stage7.result.B_basis','result.B_basis','B_basis'});
 if isempty(A_basis) || isempty(B_basis)
     error('stage8: Could not find A_basis/B_basis in stage7/result/state');
 end
