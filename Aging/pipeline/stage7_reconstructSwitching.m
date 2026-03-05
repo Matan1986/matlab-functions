@@ -12,7 +12,7 @@ function [result, state] = stage7_reconstructSwitching(state, cfg)
 %
 % OUTPUTS:
 %   result - reconstruction output struct
-%   state  - unchanged data struct
+%   state  - updated state struct (stores result in state.stage7)
 %
 % Physics meaning:
 %   AFM = low-manifold dip metric
@@ -32,6 +32,12 @@ Tsw = cfg.Tsw;
 Rsw = cfg.Rsw;
 
 params = cfg.switchParams;
+if ~isfield(params, 'FM_source') || isempty(params.FM_source)
+    params.FM_source = 'stage7_recompute';
+end
+if isfield(cfg, 'FM_source') && ~isempty(cfg.FM_source)
+    params.FM_source = cfg.FM_source;
+end
 
 dbg(cfg, "summary", "Switching reconstruction: mode=%s", mode);
 
@@ -158,7 +164,7 @@ end
 
 % --- NEW: Interpolation overshoot diagnostic ---
 if isfield(cfg, 'debug') && isfield(cfg.debug, 'enable') && cfg.debug.enable
-    [A_violated, A_rangePct, A_overshootPct, B_violated, B_rangePct, B_overshootPct] = checkInterpolationOvershoot(cfg, result, [state.pauseRuns.waitK]);
+    [A_violated, A_rangePct, A_overshootPct, B_violated, B_rangePct, B_overshootPct] = checkInterpolationOvershoot(cfg, result, [getPauseRuns(state).waitK]);
     printStage7DiagnosticSummary(cfg, A_violated, A_rangePct, A_overshootPct, B_violated, B_rangePct, B_overshootPct);
 end
 
@@ -219,7 +225,7 @@ end
 
 % ====================== Local debug helpers ======================
 function [A_violated, A_rangePct, A_overshootPct, B_violated, B_rangePct, B_overshootPct] = checkInterpolationOvershoot(cfg, result, Tp)
-% Check that pchip interpolation of A_basis and B_basis does not exceed original Tp range by >threshold%.
+% Check interpolation range inflation in basis amplitude units (dimensionally consistent).
 A_violated = 0;
 A_rangePct = 0;
 A_overshootPct = 0;
@@ -230,43 +236,55 @@ B_overshootPct = 0;
 if ~isfield(cfg.debug, 'interpOvershootPct')
     return;
 end
-
-Tp = Tp(:);
-origRange = max(Tp) - min(Tp);
-
-if origRange == 0
+if ~isfield(result, 'Tsw') || isempty(result.Tsw)
     return;
 end
 
+Tp = Tp(:);
+Tsw_loc = result.Tsw(:);
 thresholdPct = cfg.debug.interpOvershootPct;
 
-% Check A_basis
+% Check A_basis (compare interpolated full-range vs pause-sampled range in same units)
 if isfield(result, 'A_basis')
     A = result.A_basis(:);
-    interpRange = max(A) - min(A);
+    A_atTp = interp1(Tsw_loc, A, Tp, 'pchip', NaN);
+    A_atTp = A_atTp(isfinite(A_atTp));
 
-    A_rangePct = 100 * (interpRange / origRange - 1);
-    A_overshootPct = max(0, A_rangePct);
+    if numel(A_atTp) >= 2
+        baseRange = max(A_atTp) - min(A_atTp);
+        interpRange = max(A) - min(A);
+        if baseRange > 0
+            A_rangePct = 100 * (interpRange / baseRange - 1);
+            A_overshootPct = max(0, A_rangePct);
+        end
 
-    if A_overshootPct > thresholdPct
-        A_violated = 1;
-        warning('Interpolation overshoot: A_basis range exceeds original Tp range by %.2f%% (threshold %.1f%%)', ...
-            A_overshootPct, thresholdPct);
+        if A_overshootPct > thresholdPct
+            A_violated = 1;
+            warning('Interpolation overshoot: A_basis range exceeds pause-sampled A range by %.2f%% (threshold %.1f%%)', ...
+                A_overshootPct, thresholdPct);
+        end
     end
 end
 
-% Check B_basis
+% Check B_basis (same units as A)
 if isfield(result, 'B_basis')
     B = result.B_basis(:);
-    interpRange = max(B) - min(B);
+    B_atTp = interp1(Tsw_loc, B, Tp, 'pchip', NaN);
+    B_atTp = B_atTp(isfinite(B_atTp));
 
-    B_rangePct = 100 * (interpRange / origRange - 1);
-    B_overshootPct = max(0, B_rangePct);
+    if numel(B_atTp) >= 2
+        baseRange = max(B_atTp) - min(B_atTp);
+        interpRange = max(B) - min(B);
+        if baseRange > 0
+            B_rangePct = 100 * (interpRange / baseRange - 1);
+            B_overshootPct = max(0, B_rangePct);
+        end
 
-    if B_overshootPct > thresholdPct
-        B_violated = 1;
-        warning('Interpolation overshoot: B_basis range exceeds original Tp range by %.2f%% (threshold %.1f%%)', ...
-            B_overshootPct, thresholdPct);
+        if B_overshootPct > thresholdPct
+            B_violated = 1;
+            warning('Interpolation overshoot: B_basis range exceeds pause-sampled B range by %.2f%% (threshold %.1f%%)', ...
+                B_overshootPct, thresholdPct);
+        end
     end
 end
 end

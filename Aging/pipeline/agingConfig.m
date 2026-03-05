@@ -327,6 +327,7 @@ cfg.switchParams.fitTmax = 32;
 cfg.switchParams.FM_plateau_K = cfg.FM_plateau_K;
 cfg.switchParams.FM_buffer_K = cfg.FM_buffer_K;
 cfg.switchParams.allowSignedFM = isfield(cfg, 'allowSignedFM') && cfg.allowSignedFM;
+cfg.switchParams.FM_source = 'stage7_recompute';  % default preserves historical stage7 FM extraction
 
 % SNR masking: control noise floor filtering
 cfg.switchParams.snr = struct();
