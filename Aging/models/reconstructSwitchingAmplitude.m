@@ -61,7 +61,13 @@ end
 % ===============================
 nPauses = numel(pauseRuns);
 AFM_metric = zeros(nPauses,1);
-FM_metric = zeros(nPauses,1);
+FM_metric_signed = NaN(nPauses,1);
+FM_metric_mag = NaN(nPauses,1);
+
+if ~isfield(params, 'FM_source') || isempty(params.FM_source)
+    params.FM_source = 'stage7_recompute';  % default: preserve legacy behavior
+end
+FM_source = lower(string(params.FM_source));
 
 switch lower(mode)
 
@@ -102,22 +108,36 @@ switch lower(mode)
             AFM_metric(i) = NaN;
         end
 
+                % ===============================
+        % 2) FM metric
         % ===============================
-        % 2) FM metric — STEP-like
-        % ===============================
-        wide_mask = abs(T - Tp_i) <= params.wideWindowK & ~dip_mask;
-
-        sig = DeltaM - baseline;
-        Twide = T(wide_mask);
-        sigwide = sig(wide_mask);
-
-        low  = sigwide(Twide < Tp_i);
-        high = sigwide(Twide > Tp_i);
-
-        if numel(low) > 2 && numel(high) > 2
-            FM_metric(i) = abs(mean(high,'omitnan') - mean(low,'omitnan'));
+        if FM_source == "stage4"
+            if isfield(pr, 'FM_step_mag') && ~isempty(pr.FM_step_mag) && isfinite(pr.FM_step_mag)
+                F_raw_signed = double(pr.FM_step_mag);
+                FM_metric_signed(i) = F_raw_signed;
+                FM_metric_mag(i) = abs(F_raw_signed);
+            else
+                FM_metric_signed(i) = NaN;
+                FM_metric_mag(i) = NaN;
+            end
         else
-            FM_metric(i) = NaN;
+            wide_mask = abs(T - Tp_i) <= params.wideWindowK & ~dip_mask;
+
+            sig = DeltaM - baseline;
+            Twide = T(wide_mask);
+            sigwide = sig(wide_mask);
+
+            low  = sigwide(Twide < Tp_i);
+            high = sigwide(Twide > Tp_i);
+
+            if numel(low) > 2 && numel(high) > 2
+                F_raw_signed = mean(high,'omitnan') - mean(low,'omitnan');
+                FM_metric_signed(i) = F_raw_signed;
+                FM_metric_mag(i) = abs(F_raw_signed);
+            else
+                FM_metric_signed(i) = NaN;
+                FM_metric_mag(i) = NaN;
+            end
         end
 
     end
@@ -131,41 +151,55 @@ switch lower(mode)
         % ===============================
         AFM_metric(i) = pauseRuns(i).Dip_area;
 
+                % ===============================
+        % 2) FM metric source
         % ===============================
-        % 2) FM metric (STEP-like) from RAW
-        % ===============================
-        pr = pauseRuns_raw(i);
-
-        T = pr.T_common(:);
-        DeltaM = pr.DeltaM(:);
-        Tp_i = Tp(i);
-
-        dip_mask = abs(T - Tp_i) <= params.dipWindowK;
-
-        % baseline excluding dip
-        T_base = T(~dip_mask);
-        M_base = DeltaM(~dip_mask);
-
-        if numel(T_base) > 2
-            p = polyfit(T_base, M_base, 1);
-            baseline = polyval(p, T);
+        if FM_source == "stage4"
+            if isfield(pauseRuns(i), 'FM_step_mag') && ~isempty(pauseRuns(i).FM_step_mag) && isfinite(pauseRuns(i).FM_step_mag)
+                F_raw_signed = double(pauseRuns(i).FM_step_mag);
+                FM_metric_signed(i) = F_raw_signed;
+                FM_metric_mag(i) = abs(F_raw_signed);
+            else
+                FM_metric_signed(i) = NaN;
+                FM_metric_mag(i) = NaN;
+            end
         else
-            baseline = mean(DeltaM);
-        end
+            pr = pauseRuns_raw(i);
 
-        wide_mask = abs(T - Tp_i) <= params.wideWindowK & ~dip_mask;
+            T = pr.T_common(:);
+            DeltaM = pr.DeltaM(:);
+            Tp_i = Tp(i);
 
-        sig = DeltaM - baseline;
-        Twide = T(wide_mask);
-        sigwide = sig(wide_mask);
+            dip_mask = abs(T - Tp_i) <= params.dipWindowK;
 
-        low  = sigwide(Twide < Tp_i);
-        high = sigwide(Twide > Tp_i);
+            % baseline excluding dip
+            T_base = T(~dip_mask);
+            M_base = DeltaM(~dip_mask);
 
-        if numel(low) > 2 && numel(high) > 2
-            FM_metric(i) = abs(mean(high,'omitnan') - mean(low,'omitnan'));
-        else
-            FM_metric(i) = NaN;
+            if numel(T_base) > 2
+                p = polyfit(T_base, M_base, 1);
+                baseline = polyval(p, T);
+            else
+                baseline = mean(DeltaM);
+            end
+
+            wide_mask = abs(T - Tp_i) <= params.wideWindowK & ~dip_mask;
+
+            sig = DeltaM - baseline;
+            Twide = T(wide_mask);
+            sigwide = sig(wide_mask);
+
+            low  = sigwide(Twide < Tp_i);
+            high = sigwide(Twide > Tp_i);
+
+            if numel(low) > 2 && numel(high) > 2
+                F_raw_signed = mean(high,'omitnan') - mean(low,'omitnan');
+                FM_metric_signed(i) = F_raw_signed;
+                FM_metric_mag(i) = abs(F_raw_signed);
+            else
+                FM_metric_signed(i) = NaN;
+                FM_metric_mag(i) = NaN;
+            end
         end
 
     end
@@ -175,18 +209,46 @@ end
 % Interpolate to switching grid
 % ===============================
 Dp = AFM_metric;
-Fp = FM_metric;
-fprintf('Dp>0: %d / %d\n', nnz(Dp>0), numel(Dp));
-fprintf('Fp>0: %d / %d\n', nnz(Fp>0 & isfinite(Fp)), numel(Fp));
-disp(table(Tp(:), Dp(:), Fp(:), 'VariableNames',{'Tp','Dp','Fp'}));
+Fp_signed = FM_metric_signed;
+Fp_mag = FM_metric_mag;
 
 % Initialize signed FM flag (default: false to preserve existing behavior)
 if ~isfield(params, 'allowSignedFM')
     params.allowSignedFM = false;
 end
+
+if params.allowSignedFM
+    Fp = Fp_signed;
+else
+    Fp = Fp_mag;
+end
+
+fprintf('Dp>0: %d / %d\n', nnz(Dp>0), numel(Dp));
+fprintf('Fp>0: %d / %d\n', nnz(Fp_mag>0 & isfinite(Fp_mag)), numel(Fp_mag));
+disp(table(Tp(:), Dp(:), Fp(:), 'VariableNames',{'Tp','Dp','Fp'}));
 fprintf('allowSignedFM = %d\n', params.allowSignedFM);
+fprintf('FM_source = %s\n', params.FM_source);
+
+% Interpolation mode configuration (PR7)
+if ~isfield(params, 'interp')
+    params.interp = struct();
+end
+if ~isfield(params.interp, 'mode')
+    params.interp.mode = 'pchip';  % default: pchip
+end
+if ~isfield(params.interp, 'allowExtrap')
+    params.interp.allowExtrap = true;  % default: allow extrapolation
+end
 epsFp = 1e-15;  % או 1e-14 לפי סדרי הגודל אצלך
-valid = (Dp>0) & isfinite(Fp) & (Fp > epsFp);
+valid = (Dp>0) & isfinite(Fp_mag) & (Fp_mag > epsFp);
+% Initialize clamp counters before any debug diagnostics may reference them.
+nClampLow_Dn = 0;
+nClampHigh_Dn = 0;
+nClampLow_Fn = 0;
+nClampHigh_Fn = 0;
+nClampLow_coex = 0;
+nClampHigh_coex = 0;
+
 
 % --- Optional pause-temperature exclusion (diagnostic sensitivity analysis) ---
 if isfield(params, 'switchExcludeTp') && ~isempty(params.switchExcludeTp)
@@ -203,6 +265,8 @@ end
 Tp = Tp(valid);
 Dp = Dp(valid);
 Fp = Fp(valid);
+Fp_signed = Fp_signed(valid);
+Fp_mag = Fp_mag(valid);
 
 fprintf('Number of valid pauses after filtering: %d\n', numel(Tp));
 
