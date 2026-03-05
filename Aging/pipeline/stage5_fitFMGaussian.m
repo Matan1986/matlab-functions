@@ -42,12 +42,43 @@ for i = 1:numel(state.pauseRuns)
     state.pauseRuns(i).FM_area_abs = pauseRuns_fit(i).FM_area_abs;
 end
 
-% --- derived memory strength (integrated dip weight) ---
+% --- Dip area semantics (single assignment point) ---
+% Keep legacy default output: Dip_area follows fit-derived area unless configured otherwise.
+if isfield(cfg, 'dipAreaSource') && ~isempty(cfg.dipAreaSource)
+    dipAreaSource = lower(string(cfg.dipAreaSource));
+else
+    dipAreaSource = "legacy_fit";
+end
+
 for i = 1:numel(state.pauseRuns)
-    state.pauseRuns(i).Dip_area = ...
+    state.pauseRuns(i).Dip_area_fit = ...
         state.pauseRuns(i).Dip_A * sqrt(2*pi) * state.pauseRuns(i).Dip_sigma;
+
+    if ~isfield(state.pauseRuns(i), 'Dip_area_direct') || isempty(state.pauseRuns(i).Dip_area_direct)
+        state.pauseRuns(i).Dip_area_direct = NaN;
+    end
+
+    switch dipAreaSource
+        case "direct"
+            selectedDipArea = state.pauseRuns(i).Dip_area_direct;
+        case "mode"
+            if isfield(cfg, 'switchingMetricMode') && strcmpi(cfg.switchingMetricMode, 'direct')
+                selectedDipArea = state.pauseRuns(i).Dip_area_direct;
+            else
+                selectedDipArea = state.pauseRuns(i).Dip_area_fit;
+            end
+        otherwise
+            selectedDipArea = state.pauseRuns(i).Dip_area_fit;
+    end
+
+    if ~isfinite(selectedDipArea)
+        selectedDipArea = state.pauseRuns(i).Dip_area_fit;
+    end
+
+    state.pauseRuns(i).Dip_area = selectedDipArea;
 end
 
 state.pauseRuns_fit = pauseRuns_fit;
 
 end
+

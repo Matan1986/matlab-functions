@@ -30,6 +30,7 @@ cfg.AFM_metric_main = 'area';
 cfg.doFit_MF_Gaussian = true;
 cfg.normalizeAFM_FM = true;
 cfg.allowSignedFM = true;   % default: legacy magnitude-only
+cfg.dipAreaSource = 'legacy_fit';  % legacy default: Dip_area tracks fit-derived area
 
 % --- FM metric notes ---
 % FM metrics (FM_step_mag, FM_step_A, FM_E) can be positive or negative.
