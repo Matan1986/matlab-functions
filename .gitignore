@@ -11,6 +11,10 @@ tmp_*
 **/plots/
 **/*output*.txt
 **/*log*.txt
+*.log
+matlab_debug*.log
+matlab_final_verify.log
+test_verify_run.log
 
 # --- Scratch / local tests ---
 simple_test.m

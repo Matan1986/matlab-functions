@@ -20,6 +20,7 @@ cfg.Bohar_units = true;
 cfg.useAutoYScale = true;
 cfg.RobustnessCheck = false;
 cfg.doPlotting = true;
+cfg.diagnosticsVerbose = false;
 
 % --- Metric mode selection ---
 cfg.agingMetricMode = 'direct';
@@ -325,6 +326,11 @@ cfg.switchParams.fitTmax = 32;
 cfg.switchParams.FM_plateau_K = cfg.FM_plateau_K;
 cfg.switchParams.FM_buffer_K = cfg.FM_buffer_K;
 cfg.switchParams.allowSignedFM = isfield(cfg, 'allowSignedFM') && cfg.allowSignedFM;
+
+% SNR masking: control noise floor filtering
+cfg.switchParams.snr = struct();
+cfg.switchParams.snr.mode = 'relative';  % 'off', 'relative', or 'absolute'
+cfg.switchParams.snr.threshold = 0.02;   % If relative: fraction of max(Rsw). If absolute: value in Rsw units.
 
 cfg.dipSigmaLowerBound = 0.4;
 cfg.dipAreaLowPercentile = 5;
