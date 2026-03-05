@@ -217,103 +217,167 @@ for i = 1:numel(pauseRuns)
 
 
     %% =====================================================
-    % 4) FM plateau step + error
+    % 4) FM plateau step + error (robust baseline estimation)
     %% =====================================================
-    % Check for fixed right plateau mode
-    useFixedRightPlateau = false;
-    if nargin >= 10 && isstruct(cfg)
-        if isfield(cfg, 'FM_rightPlateauMode') && strcmpi(cfg.FM_rightPlateauMode, 'fixed')
-            useFixedRightPlateau = true;
-        elseif isfield(cfg, 'fmMetric') && isfield(cfg.fmMetric, 'rightWindow') && ~isempty(cfg.fmMetric.rightWindow)
-            useFixedRightPlateau = true;
-        end
-    end
-
-    % Fix: clamp plateau windows to data range and track validity.
-    finiteT = T(isfinite(T));
-    if isempty(finiteT)
-        Tmin_data = -inf;
-        Tmax_data = inf;
-    else
-        Tmin_data = min(finiteT);
-        Tmax_data = max(finiteT);
-    end
-    Nmin = 3;
     
-    if useFixedRightPlateau
-        % Fixed high-temperature FM background window
-        if isfield(cfg, 'FM_rightPlateauFixedWindow_K') && ~isempty(cfg.FM_rightPlateauFixedWindow_K)
-            highWin = cfg.FM_rightPlateauFixedWindow_K(:).';
-        elseif isfield(cfg, 'fmMetric') && isfield(cfg.fmMetric, 'rightWindow')
-            highWin = cfg.fmMetric.rightWindow(:).';
+    % --- Try robust baseline estimation first ---
+    useRobustBaseline = false;
+    if nargin >= 10 && isstruct(cfg)
+        if isfield(cfg, 'useRobustBaseline')
+            useRobustBaseline = cfg.useRobustBaseline;
+        end
+    end
+    
+    if useRobustBaseline
+        % Set up baseline config with defaults
+        cfg_baseline = struct();
+        cfg_baseline.dip_halfwidth_K = dip_window_K;
+        
+        if isfield(cfg, 'dip_margin_K')
+            cfg_baseline.dip_margin_K = cfg.dip_margin_K;
         else
-            error('Fixed right plateau mode enabled but no window defined');
-        end
-        [highWin, ~] = clampWindow(highWin, Tmin_data, Tmax_data);
-        idx_bg = T >= highWin(1) & T <= highWin(2);
-        
-        % Safety check for too-small window
-        if nnz(idx_bg) < 5
-            error('FM background window too small or outside data range.');
+            cfg_baseline.dip_margin_K = 2;  % default margin
         end
         
-        % Use fixed window as high-T reference
-        maskHigh = isfinite(T) & idx_bg;
-        lowWin = [Tp - dip_window_K - FM_buffer_K - FM_plateau_K, ...
-                  Tp - dip_window_K - FM_buffer_K];
-        [lowWin, ~] = clampWindow(lowWin, Tmin_data, Tmax_data);
-        maskLow = isfinite(T) & (T > lowWin(1)) & (T < lowWin(2));
+        if isfield(cfg, 'plateau_nPoints')
+            cfg_baseline.plateau_nPoints = cfg.plateau_nPoints;
+        else
+            cfg_baseline.plateau_nPoints = 6;  % default
+        end
+        
+        % Call robust baseline estimator
+        baselineOut = estimateRobustBaseline(T, dM, Tp, cfg_baseline);
+        
+        if strcmp(baselineOut.status, 'ok')
+            pauseRuns(i).FM_step_raw = baselineOut.baseR - baselineOut.baseL;
+            pauseRuns(i).FM_step_mag = pauseRuns(i).FM_step_raw;
+            pauseRuns(i).FM_step_err = NaN;  % Not computed in robust version
+            pauseRuns(i).FM_plateau_valid = true;
+            pauseRuns(i).FM_plateau_reason = '';
+            pauseRuns(i).baseline_TL = baselineOut.TL;
+            pauseRuns(i).baseline_TR = baselineOut.TR;
+            pauseRuns(i).baseline_slope = baselineOut.slope;
+            pauseRuns(i).baseline_status = baselineOut.status;
+            
+            % Verbose diagnostics
+            if isfield(cfg, 'debug') && isfield(cfg.debug, 'verbose') && cfg.debug.verbose
+                fprintf('  Dip baseline [Tp=%.4g K]:\n', Tp);
+                fprintf('    Tmin=%.4g, dip_window=[%.4g,%.4g]\n', ...
+                    Tp, Tp-dip_window_K, Tp+dip_window_K);
+                fprintf('    plateau_L: T=[%.4g,%.4g], n=%d\n', ...
+                    min(T(baselineOut.idxL)), max(T(baselineOut.idxL)), numel(baselineOut.idxL));
+                fprintf('    plateau_R: T=[%.4g,%.4g], n=%d\n', ...
+                    min(T(baselineOut.idxR)), max(T(baselineOut.idxR)), numel(baselineOut.idxR));
+                fprintf('    baseL=%.6g, baseR=%.6g, slope=%.6g\n', ...
+                    baselineOut.baseL, baselineOut.baseR, baselineOut.slope);
+            end
+        else
+            % Robust baseline failed, fall back to old method
+            pauseRuns(i).FM_step_raw = NaN;
+            pauseRuns(i).FM_step_mag = NaN;
+            pauseRuns(i).FM_step_err = NaN;
+            pauseRuns(i).FM_plateau_valid = false;
+            pauseRuns(i).FM_plateau_reason = sprintf('robust_baseline_failed: %s', baselineOut.status);
+            continue;
+        end
     else
-        % Default Tp-dependent plateau window logic
-        lowWin = [Tp - dip_window_K - FM_buffer_K - FM_plateau_K, ...
-                  Tp - dip_window_K - FM_buffer_K];
-        highWin = [Tp + dip_window_K + FM_buffer_K, ...
-                   Tp + dip_window_K + FM_buffer_K + FM_plateau_K];
-        [lowWin, ~] = clampWindow(lowWin, Tmin_data, Tmax_data);
-        [highWin, ~] = clampWindow(highWin, Tmin_data, Tmax_data);
+        % --- Original plateau window logic ---
+        % Check for fixed right plateau mode
+        useFixedRightPlateau = false;
+        if nargin >= 10 && isstruct(cfg)
+            if isfield(cfg, 'FM_rightPlateauMode') && strcmpi(cfg.FM_rightPlateauMode, 'fixed')
+                useFixedRightPlateau = true;
+            elseif isfield(cfg, 'fmMetric') && isfield(cfg.fmMetric, 'rightWindow') && ~isempty(cfg.fmMetric.rightWindow)
+                useFixedRightPlateau = true;
+            end
+        end
+
+        % Fix: clamp plateau windows to data range and track validity.
+        finiteT = T(isfinite(T));
+        if isempty(finiteT)
+            Tmin_data = -inf;
+            Tmax_data = inf;
+        else
+            Tmin_data = min(finiteT);
+            Tmax_data = max(finiteT);
+        end
+        Nmin = 3;
         
-        maskLow = isfinite(T) & (T > lowWin(1)) & (T < lowWin(2));
-        maskHigh = isfinite(T) & (T > highWin(1)) & (T < highWin(2));
-    end
-
-    plateauWinInvalid = (lowWin(2) <= lowWin(1)) || (highWin(2) <= highWin(1));
-    validPlateau = ~plateauWinInvalid && (nnz(maskLow) >= Nmin) && (nnz(maskHigh) >= Nmin);
-    if ~validPlateau
-        pauseRuns(i).FM_step_raw = NaN;
-        pauseRuns(i).FM_step_mag = NaN;
-        pauseRuns(i).FM_step_err = NaN;
-        if isfield(pauseRuns(i), 'FM_step_A')
-            pauseRuns(i).FM_step_A = NaN;
+        if useFixedRightPlateau
+            % Fixed high-temperature FM background window
+            if isfield(cfg, 'FM_rightPlateauFixedWindow_K') && ~isempty(cfg.FM_rightPlateauFixedWindow_K)
+                highWin = cfg.FM_rightPlateauFixedWindow_K(:).';
+            elseif isfield(cfg, 'fmMetric') && isfield(cfg.fmMetric, 'rightWindow')
+                highWin = cfg.fmMetric.rightWindow(:).';
+            else
+                error('Fixed right plateau mode enabled but no window defined');
+            end
+            [highWin, ~] = clampWindow(highWin, Tmin_data, Tmax_data);
+            idx_bg = T >= highWin(1) & T <= highWin(2);
+            
+            % Safety check for too-small window
+            if nnz(idx_bg) < 5
+                error('FM background window too small or outside data range.');
+            end
+            
+            % Use fixed window as high-T reference
+            maskHigh = isfinite(T) & idx_bg;
+            lowWin = [Tp - dip_window_K - FM_buffer_K - FM_plateau_K, ...
+                      Tp - dip_window_K - FM_buffer_K];
+            [lowWin, ~] = clampWindow(lowWin, Tmin_data, Tmax_data);
+            maskLow = isfinite(T) & (T > lowWin(1)) & (T < lowWin(2));
+        else
+            % Default Tp-dependent plateau window logic
+            lowWin = [Tp - dip_window_K - FM_buffer_K - FM_plateau_K, ...
+                      Tp - dip_window_K - FM_buffer_K];
+            highWin = [Tp + dip_window_K + FM_buffer_K, ...
+                       Tp + dip_window_K + FM_buffer_K + FM_plateau_K];
+            [lowWin, ~] = clampWindow(lowWin, Tmin_data, Tmax_data);
+            [highWin, ~] = clampWindow(highWin, Tmin_data, Tmax_data);
+            
+            maskLow = isfinite(T) & (T > lowWin(1)) & (T < lowWin(2));
+            maskHigh = isfinite(T) & (T > highWin(1)) & (T < highWin(2));
         end
-        if isfield(pauseRuns(i), 'FM_A')
-            pauseRuns(i).FM_A = NaN;
+
+        plateauWinInvalid = (lowWin(2) <= lowWin(1)) || (highWin(2) <= highWin(1));
+        validPlateau = ~plateauWinInvalid && (nnz(maskLow) >= Nmin) && (nnz(maskHigh) >= Nmin);
+        if ~validPlateau
+            pauseRuns(i).FM_step_raw = NaN;
+            pauseRuns(i).FM_step_mag = NaN;
+            pauseRuns(i).FM_step_err = NaN;
+            if isfield(pauseRuns(i), 'FM_step_A')
+                pauseRuns(i).FM_step_A = NaN;
+            end
+            if isfield(pauseRuns(i), 'FM_A')
+                pauseRuns(i).FM_A = NaN;
+            end
+            if isfield(pauseRuns(i), 'FM_area_abs')
+                pauseRuns(i).FM_area_abs = NaN;
+            end
+            pauseRuns(i).FM_plateau_valid = false;
+            pauseRuns(i).FM_plateau_reason = 'plateau_invalid_or_insufficient';
+            continue;
         end
-        if isfield(pauseRuns(i), 'FM_area_abs')
-            pauseRuns(i).FM_area_abs = NaN;
+
+        pauseRuns(i).FM_plateau_valid = true;
+        pauseRuns(i).FM_plateau_reason = '';
+
+        if nnz(maskLow)>=3 && nnz(maskHigh)>=3
+            lowVals  = dM_smooth(maskLow);
+            highVals = dM_smooth(maskHigh);
+
+            FM_low  = mean(lowVals,'omitnan');
+            FM_high = mean(highVals,'omitnan');
+
+            pauseRuns(i).FM_step_raw = FM_high - FM_low;
+            pauseRuns(i).FM_step_mag = pauseRuns(i).FM_step_raw;  % Keep raw signed value
+
+            semL = std(lowVals,'omitnan') / sqrt(nnz(isfinite(lowVals)));
+            semH = std(highVals,'omitnan') / sqrt(nnz(isfinite(highVals)));
+
+            pauseRuns(i).FM_step_err = sqrt(semL^2 + semH^2);
         end
-        pauseRuns(i).FM_plateau_valid = false;
-        pauseRuns(i).FM_plateau_reason = 'plateau_invalid_or_insufficient';
-        continue;
-    end
-
-    pauseRuns(i).FM_plateau_valid = true;
-    pauseRuns(i).FM_plateau_reason = '';
-
-    if nnz(maskLow)>=3 && nnz(maskHigh)>=3
-        lowVals  = dM_smooth(maskLow);
-        highVals = dM_smooth(maskHigh);
-
-        FM_low  = mean(lowVals,'omitnan');
-        FM_high = mean(highVals,'omitnan');
-
-        pauseRuns(i).FM_step_raw = FM_high - FM_low;
-        pauseRuns(i).FM_step_mag = pauseRuns(i).FM_step_raw;  % Keep raw signed value
-
-        semL = std(lowVals,'omitnan') / sqrt(nnz(isfinite(lowVals)));
-        semH = std(highVals,'omitnan') / sqrt(nnz(isfinite(highVals)));
-
-        pauseRuns(i).FM_step_err = sqrt(semL^2 + semH^2);
-    end
+    end  % end of old method else
 
 end
 end

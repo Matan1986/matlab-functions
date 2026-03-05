@@ -95,7 +95,7 @@ switch lower(mode)
         end
 
         % ===============================
-        % 1) AFM metric — dip area
+        % 1) AFM metric ÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â dip area
         % ===============================
         dip_signal = DeltaM(dip_mask) - baseline(dip_mask);
         dip_mag = abs(dip_signal);
@@ -239,15 +239,8 @@ end
 if ~isfield(params.interp, 'allowExtrap')
     params.interp.allowExtrap = true;  % default: allow extrapolation
 end
-epsFp = 1e-15;  % או 1e-14 לפי סדרי הגודל אצלך
+epsFp = 1e-15;  % Ãƒâ€”Ã‚ÂÃƒâ€”Ã¢â‚¬Â¢ 1e-14 Ãƒâ€”Ã…â€œÃƒâ€”Ã‚Â¤Ãƒâ€”Ã¢â€žÂ¢ Ãƒâ€”Ã‚Â¡Ãƒâ€”Ã¢â‚¬Å“Ãƒâ€”Ã‚Â¨Ãƒâ€”Ã¢â€žÂ¢ Ãƒâ€”Ã¢â‚¬ÂÃƒâ€”Ã¢â‚¬â„¢Ãƒâ€”Ã¢â‚¬Â¢Ãƒâ€”Ã¢â‚¬Å“Ãƒâ€”Ã…â€œ Ãƒâ€”Ã‚ÂÃƒâ€”Ã‚Â¦Ãƒâ€”Ã…â€œÃƒâ€”Ã…Â¡
 valid = (Dp>0) & isfinite(Fp_mag) & (Fp_mag > epsFp);
-% Initialize clamp counters before any debug diagnostics may reference them.
-nClampLow_Dn = 0;
-nClampHigh_Dn = 0;
-nClampLow_Fn = 0;
-nClampHigh_Fn = 0;
-nClampLow_coex = 0;
-nClampHigh_coex = 0;
 
 
 % --- Optional pause-temperature exclusion (diagnostic sensitivity analysis) ---
@@ -276,12 +269,76 @@ Dp_pause_export = Dp(:);
 Fp_pause_export = Fp(:);
 
 % --- Interpolate to switching grid (RAW first) ---
-D_interp_raw = interp1(Tp, Dp, Tsw, 'pchip', 'extrap');
-F_interp_raw = interp1(Tp, Fp, Tsw, 'pchip', 'extrap');
+switch params.interp.mode
+    case 'pchip'
+        if params.interp.allowExtrap
+            D_interp_raw = interp1(Tp, Dp, Tsw, 'pchip', 'extrap');
+            F_interp_raw_signed = interp1(Tp, Fp_signed, Tsw, 'pchip', 'extrap');
+            F_interp_raw_mag = interp1(Tp, Fp_mag, Tsw, 'pchip', 'extrap');
+        else
+            D_interp_raw = interp1(Tp, Dp, Tsw, 'pchip', NaN);
+            F_interp_raw_signed = interp1(Tp, Fp_signed, Tsw, 'pchip', NaN);
+            F_interp_raw_mag = interp1(Tp, Fp_mag, Tsw, 'pchip', NaN);
+        end
+    case 'linear'
+        if params.interp.allowExtrap
+            D_interp_raw = interp1(Tp, Dp, Tsw, 'linear', 'extrap');
+            F_interp_raw_signed = interp1(Tp, Fp_signed, Tsw, 'linear', 'extrap');
+            F_interp_raw_mag = interp1(Tp, Fp_mag, Tsw, 'linear', 'extrap');
+        else
+            D_interp_raw = interp1(Tp, Dp, Tsw, 'linear', NaN);
+            F_interp_raw_signed = interp1(Tp, Fp_signed, Tsw, 'linear', NaN);
+            F_interp_raw_mag = interp1(Tp, Fp_mag, Tsw, 'linear', NaN);
+        end
+    case 'nearest'
+        % nearest doesn't support extrapolation argument
+        D_interp_raw = interp1(Tp, Dp, Tsw, 'nearest');
+        F_interp_raw_signed = interp1(Tp, Fp_signed, Tsw, 'nearest');
+        F_interp_raw_mag = interp1(Tp, Fp_mag, Tsw, 'nearest');
+    otherwise
+        error('Invalid interp.mode: %s (must be pchip, linear, or nearest)', params.interp.mode);
+end
+
+if params.allowSignedFM
+    F_interp_raw = F_interp_raw_signed;
+else
+    F_interp_raw = F_interp_raw_mag;
+end
+
+% --- Interpolation artifact diagnostics ---
+if isfield(params, 'debug') && isstruct(params.debug) && isfield(params.debug, 'verbose') && params.debug.verbose
+    overshoot_D = max(D_interp_raw) - max(Dp);
+    undershoot_D = min(D_interp_raw);
+    overshoot_F = max(F_interp_raw) - max(Fp);
+    undershoot_F = min(F_interp_raw);
+    
+    Tmin = min(Tp);
+    Tmax = max(Tp);
+    extrap_low = sum(Tsw < Tmin);
+    extrap_high = sum(Tsw > Tmax);
+    
+    fprintf('Interpolation diagnostics:\n');
+    fprintf('  D overshoot = %.4g\n', overshoot_D);
+    fprintf('  D undershoot = %.4g\n', undershoot_D);
+    fprintf('  F overshoot = %.4g\n', overshoot_F);
+    fprintf('  F undershoot = %.4g\n', undershoot_F);
+    fprintf('  Extrapolation points: low=%d, high=%d (out of %d total)\n', extrap_low, extrap_high, numel(Tsw));
+end
 
 % --- Legacy pipeline keeps the original behavior (clamp to >=0) ---
+% Count clamps before applying them (PR?ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Clamp diagnostics)
+nClampLow_D = nnz(D_interp_raw < 0);
+nClampLow_F = nnz(F_interp_raw_mag < 0);
 D_interp = max(D_interp_raw, 0);
-F_interp = max(F_interp_raw, 0);
+F_interp = max(F_interp_raw_mag, 0);
+
+% Initialize all clamp counters before any debug prints
+nClampLow_Dn = 0;
+nClampHigh_Dn = 0;
+nClampLow_Fn = 0;
+nClampHigh_Fn = 0;
+nClampLow_coex = 0;
+nClampHigh_coex = 0;
 
 % ===============================
 % Define masks (NO slicing - all vectors remain aligned with Tsw)
@@ -289,32 +346,159 @@ F_interp = max(F_interp_raw, 0);
 % mask_T: physics window defined by temperature bounds (e.g., fitTmin=3, fitTmax=32)
 mask_T = (Tsw >= params.fitTmin) & (Tsw <= params.fitTmax);
 
-% noiseFloor: compute from Rsw within physics window
-noiseFloor = 0.02 * max(Rsw(mask_T));
+% mask_SNR: applies SNR/noise floor filtering (configurable)
+if ~isfield(params, 'snr') || isempty(params.snr)
+    % Default: match historical behavior
+    params.snr = struct('mode', 'relative', 'threshold', 0.02);
+end
 
-% mask_SNR: points above noise floor (entire Tsw range)
-mask_SNR = Rsw > noiseFloor;
+snr_mode = params.snr.mode;
+snr_threshold = params.snr.threshold;
 
-% mask: final fitting window = physics window AND above noise
-mask = mask_T & mask_SNR;
+switch snr_mode
+    case 'off'
+        % No SNR masking
+        mask_SNR = true(size(Rsw));
+        nPoints_kept = numel(Rsw);
+    case 'relative'
+        % Relative to max of Rsw in physics window
+        if ~any(mask_T)
+            % Empty physics window: no SNR filtering possible, keep all points
+            mask_SNR = true(size(Rsw));
+        else
+            noiseFloor = snr_threshold * max(Rsw(mask_T));
+            mask_SNR = Rsw > noiseFloor;
+        end
+        nPoints_kept = nnz(mask_SNR);
+    case 'absolute'
+        % Absolute threshold
+        mask_SNR = Rsw > snr_threshold;
+        nPoints_kept = nnz(mask_SNR);
+    otherwise
+        error('Unknown SNR mode: %s. Use ''off'', ''relative'', or ''absolute''.', snr_mode);
+end
+
+% mask_fit: final fitting window = physics window AND above noise
+mask_fit = mask_T & mask_SNR;
+
+% mask_diag: diagnostic mask = all points (no restrictions)
+mask_diag = true(size(Rsw));
 
 % Verify all masks are same size as Tsw
 assert(numel(mask_T) == numel(Tsw), 'mask_T size mismatch');
 assert(numel(mask_SNR) == numel(Tsw), 'mask_SNR size mismatch');
-assert(numel(mask) == numel(Tsw), 'mask size mismatch');
+assert(numel(mask_fit) == numel(Tsw), 'mask_fit size mismatch');
+assert(numel(mask_diag) == numel(Tsw), 'mask_diag size mismatch');
+
+% Debug output: SNR masking configuration
+if isfield(params, 'debug') && isstruct(params.debug) && isfield(params.debug, 'verbose') && params.debug.verbose
+    nPoints_total = numel(mask_T);
+    nPoints_physics = nnz(mask_T);
+    nPoints_snr = nnz(mask_SNR);
+    nPoints_final = nnz(mask_fit);
+    fprintf('SNR mask mode: %s\n', snr_mode);
+    fprintf('SNR threshold: %.6g\n', snr_threshold);
+    fprintf('Points: total=%d, physics_window=%d, above_snr=%d, final=%d / %d\n', ...
+        nPoints_total, nPoints_physics, nPoints_snr, nPoints_final, nPoints_total);
+    fprintf('Fit points: %d / %d\n', nnz(mask_fit), numel(mask_fit));
+    fprintf('Diagnostic points: %d / %d\n', nnz(mask_diag), numel(mask_diag));
+    
+    % Coexistence suppression status
+    if params.coexistence.suppressLowAB
+        fprintf('Coexistence suppression: ON\n');
+    else
+        fprintf('Coexistence suppression: OFF\n');
+    end
+    
+    % Interpolation mode and extrapolation
+    fprintf('Interpolation mode: %s\n', params.interp.mode);
+    if params.interp.allowExtrap
+        fprintf('Extrapolation: ON\n');
+    else
+        fprintf('Extrapolation: OFF\n');
+    end
+    
+    % Clamp diagnostics
+    nClampLow_total = nClampLow_D + nClampLow_F + nClampLow_Dn + nClampLow_Fn + nClampLow_coex;
+    nClampHigh_total = nClampHigh_Dn + nClampHigh_Fn + nClampHigh_coex;
+    fprintf('\nClamp diagnostics:\n');
+    fprintf('  Negative clamps: D=%d, F=%d, Dn=%d, Fn=%d, coex=%d (total=%d)\n', ...
+        nClampLow_D, nClampLow_F, nClampLow_Dn, nClampLow_Fn, nClampLow_coex, nClampLow_total);
+    fprintf('  Upper clamps: Dn=%d, Fn=%d, coex=%d (total=%d)\n', ...
+        nClampHigh_Dn, nClampHigh_Fn, nClampHigh_coex, nClampHigh_total);
+    
+    % Report temperature locations of clamps (diagnostic)
+    if nClampLow_total > 0 || nClampHigh_total > 0
+        fprintf('  Temperature locations of clamps (first 5 each):\n');
+        max_report = 5;
+        
+        % D_interp_raw < 0
+        if nClampLow_D > 0
+            idx_D = find(D_interp_raw < 0);
+            idx_D_report = idx_D(1:min(max_report, numel(idx_D)));
+            fprintf('    D_interp_raw < 0: Tsw = [');
+            fprintf('%.2f ', Tsw(idx_D_report));
+            fprintf('] K\n');
+        end
+        
+        % Dn > 1
+        if nClampHigh_Dn > 0
+            idx_Dn = find(Dn > 1);
+            idx_Dn_report = idx_Dn(1:min(max_report, numel(idx_Dn)));
+            fprintf('    Dn > 1: Tsw = [');
+            fprintf('%.2f ', Tsw(idx_Dn_report));
+            fprintf('] K\n');
+        end
+        
+        % Fn > 1
+        if nClampHigh_Fn > 0
+            idx_Fn = find(Fn > 1);
+            idx_Fn_report = idx_Fn(1:min(max_report, numel(idx_Fn)));
+            fprintf('    Fn > 1: Tsw = [');
+            fprintf('%.2f ', Tsw(idx_Fn_report));
+            fprintf('] K\n');
+        end
+        
+        % coexistence < 0
+        if nClampLow_coex > 0
+            idx_coex_low = find(coexistence < 0);
+            idx_coex_low_report = idx_coex_low(1:min(max_report, numel(idx_coex_low)));
+            fprintf('    coexistence < 0: Tsw = [');
+            fprintf('%.2f ', Tsw(idx_coex_low_report));
+            fprintf('] K\n');
+        end
+        
+        % coexistence > 1
+        if nClampHigh_coex > 0
+            idx_coex_high = find(coexistence > 1);
+            idx_coex_high_report = idx_coex_high(1:min(max_report, numel(idx_coex_high)));
+            fprintf('    coexistence > 1: Tsw = [');
+            fprintf('%.2f ', Tsw(idx_coex_high_report));
+            fprintf('] K\n');
+        end
+    end
+end
 
 if ~isfield(params, 'debug')
     params.debug = struct();
 end
 
-% --- Debug prints (now mask exists) ---
-fprintf('Tp range %.1f–%.1f\n', min(Tp), max(Tp));
-fprintf('Tsw range %.1f–%.1f\n', min(Tsw), max(Tsw));
+% --- Debug prints (now mask_fit exists) ---
+fprintf('Tp range %.1fÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“%.1f\n', min(Tp), max(Tp));
+fprintf('Tsw range %.1fÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“%.1f\n', min(Tsw), max(Tsw));
 fprintf('Any NaN D_interp? %d, F_interp? %d\n', any(isnan(D_interp)), any(isnan(F_interp)));
-fprintf('corr(D_interp, Rsw) = %.3f\n', corr(D_interp, Rsw, 'rows','complete'));
-fprintf('corr(F_interp, Rsw) = %.3f\n', corr(F_interp, Rsw, 'rows','complete'));
-fprintf('max D_interp in mask / global = %.3f\n', max(D_interp(mask)) / max(D_interp + eps));
-fprintf('max F_interp in mask / global = %.3f\n', max(F_interp(mask)) / max(F_interp + eps));
+[r_D, status_D, n_D] = safeCorr(D_interp, Rsw);
+[r_F, status_F, n_F] = safeCorr(F_interp, Rsw);
+if status_D ~= "ok"
+    fprintf('  [safeCorr D_interp/Rsw: status=%s, n=%d]\n', status_D, n_D);
+end
+if status_F ~= "ok"
+    fprintf('  [safeCorr F_interp/Rsw: status=%s, n=%d]\n', status_F, n_F);
+end
+fprintf('corr(D_interp, Rsw) = %.3f\n', r_D);
+fprintf('corr(F_interp, Rsw) = %.3f\n', r_F);
+fprintf('max D_interp in mask_fit / global = %.3f\n', max(D_interp(mask_fit)) / max(D_interp + eps));
+fprintf('max F_interp in mask_fit / global = %.3f\n', max(F_interp(mask_fit)) / max(F_interp + eps));
 
 % --- Plot gating (safe defaults) ---
 doPlotSwitching = true;
@@ -347,11 +531,51 @@ if doPlotSwitching
 end
 
 
-% --- Normalize to [0,1] using in-mask maxima (recommended) ---
-Dn = D_interp ./ (max(D_interp(mask)) + eps);
-Fn = F_interp ./ (max(F_interp(mask)) + eps);
+% --- Normalize to [0,1] using global maxima (consistent scaling) ---
+Dn = D_interp ./ (max(D_interp) + eps);
+Fn = F_interp ./ (max(F_interp) + eps);
+
+% Count clamps before applying them (Clamp diagnostics)
+nClampLow_Dn = nnz(Dn < 0);
+nClampHigh_Dn = nnz(Dn > 1);
+nClampLow_Fn = nnz(Fn < 0);
+nClampHigh_Fn = nnz(Fn > 1);
 Dn = min(max(Dn,0),1);
 Fn = min(max(Fn,0),1);
+
+% Normalization diagnostic (check consistency after global normalization)
+if isfield(params, 'debug') && isstruct(params.debug) && isfield(params.debug, 'verbose') && params.debug.verbose
+    max_D_global = max(D_interp);
+    max_D_masked = max(D_interp(mask_fit));
+    max_F_global = max(F_interp);
+    max_F_masked = max(F_interp(mask_fit));
+    
+    ratio_D = max_D_masked / (max_D_global + eps);
+    ratio_F = max_F_masked / (max_F_global + eps);
+    
+    fprintf('\nNormalization diagnostic:\n');
+    fprintf('  D_interp: global=%.6g, mask_fit=%.6g, ratio=%.4f\n', max_D_global, max_D_masked, ratio_D);
+    fprintf('  F_interp: global=%.6g, mask_fit=%.6g, ratio=%.4f\n', max_F_global, max_F_masked, ratio_F);
+    
+    % Alert if ratios differ significantly from global norm (ratio < 0.95 indicates masked max is much lower)
+    if ratio_D < 0.95 || ratio_F < 0.95
+        fprintf('  Warning: Masked data max significantly lower than global max\n');
+        
+        % Report temperature location of global maxima
+        if ratio_D < 0.95
+            [~, idx_max_D] = max(D_interp);
+            T_max_D = Tsw(idx_max_D);
+            in_mask = mask_fit(idx_max_D);
+            fprintf('    D_interp global max at Tsw=%.2f K (in mask_fit: %d)\n', T_max_D, in_mask);
+        end
+        if ratio_F < 0.95
+            [~, idx_max_F] = max(F_interp);
+            T_max_F = Tsw(idx_max_F);
+            in_mask = mask_fit(idx_max_F);
+            fprintf('    F_interp global max at Tsw=%.2f K (in mask_fit: %d)\n', T_max_F, in_mask);
+        end
+    end
+end
 
 % ===============================
 % Optional: Signed FM coupling model (MUST use RAW)
@@ -362,12 +586,12 @@ R2_signed_model = NaN;
 if params.allowSignedFM
 
     % Use RAW FM so sign survives
-    F_scale  = max(abs(F_interp_raw(mask))) + eps;
+    F_scale  = max(abs(F_interp_raw)) + eps;
     F_signed = F_interp_raw ./ F_scale;          % signed
     F_mag    = abs(F_interp_raw) ./ F_scale;     % magnitude
 
     % Use RAW/legacy AFM as you prefer; here: RAW to be consistent
-    A_scale = max(abs(D_interp_raw(mask))) + eps;
+    A_scale = max(abs(D_interp_raw)) + eps;
     A_norm  = D_interp_raw ./ A_scale;
 
     X_signed = [ A_norm(:).*F_mag(:), ...
@@ -377,12 +601,15 @@ if params.allowSignedFM
     y_model = Rsw(:);
 
     try
-        p_signed = X_signed(mask,:) \ y_model(mask);
+        p_signed = X_signed(mask_fit,:) \ y_model(mask_fit);
         R_pred_signed = X_signed * p_signed;
 
         result.R_signed_pred = R_pred_signed;
 
-        R_signed = corr(R_pred_signed(mask), y_model(mask), 'rows','complete');
+        [R_signed, status_signed, n_signed] = safeCorr(R_pred_signed(mask_fit), y_model(mask_fit));
+        if status_signed ~= "ok"
+            fprintf('  [safeCorr signed/ymodel: status=%s, n=%d]\n', status_signed, n_signed);
+        end
         R_signed_model = R_signed;
         R2_signed_model = R_signed^2;
 
@@ -398,6 +625,14 @@ lambda_grid = linspace(params.lambdaMin, params.lambdaMax, params.nLambda);
 best_sse = Inf;
 if ~isfield(params,'trivialThr'); params.trivialThr = 0.10; end
 if ~isfield(params,'useTrivialSuppression'); params.useTrivialSuppression = true; end
+
+% Coexistence suppression configuration (PR6)
+if ~isfield(params, 'coexistence')
+    params.coexistence = struct();
+end
+if ~isfield(params.coexistence, 'suppressLowAB')
+    params.coexistence.suppressLowAB = true;  % default: enable suppression
+end
 
 J = 0;
 if isfield(params, 'J')
@@ -418,16 +653,33 @@ for lambda = lambda_grid
     AFM_basis = Deff / max(Deff + eps);   % AFM basis: saturated dip contribution
     FM_basis  = Fn   / max(Fn   + eps);   % FM basis: normalized background contribution
 
+    % --- Basis stability diagnostics (PR8) ---
+    if isfield(params, 'debug') && isstruct(params.debug) && isfield(params.debug, 'verbose') && params.debug.verbose
+        dA = gradient(AFM_basis);
+        dB = gradient(FM_basis);
+        roughness_A = max(abs(dA));
+        roughness_B = max(abs(dB));
+        fprintf('Basis roughness:\n');
+        fprintf('  AFM: %.4g\n', roughness_A);
+        fprintf('  FM : %.4g\n', roughness_B);
+    end
+
     % coexistence functional (A/B overlap proxy)
     coexistence = 1 - abs(AFM_basis - FM_basis);
+    
+    % Count clamps before applying them (Clamp diagnostics)
+    nClampLow_coex = nnz(coexistence < 0);
+    nClampHigh_coex = nnz(coexistence > 1);
     coexistence = max(min(coexistence,1),0);
 
     % ---- trivial-zero suppression (SAFE: only where switching is below SNR within physics window) ----
-    if params.useTrivialSuppression
-        sumAB = AFM_basis + FM_basis;
-        thr   = params.trivialThr;
-        idx0  = (sumAB < thr) & ~mask_SNR & mask_T;   % Apply suppression only within physics window
-        coexistence(idx0) = coexistence(idx0) .* (sumAB(idx0)/thr);
+    if params.coexistence.suppressLowAB
+        if isfield(params,'useTrivialSuppression') && params.useTrivialSuppression
+            sumAB = AFM_basis + FM_basis;
+            thr   = params.trivialThr;
+            idx0  = (sumAB < thr) & ~mask_SNR & mask_T;   % Apply suppression only within physics window
+            coexistence(idx0) = coexistence(idx0) .* (sumAB(idx0)/thr);
+        end
     end
 
     if params.enableJModel
@@ -435,23 +687,40 @@ for lambda = lambda_grid
         wB = 1 ./ (1 + exp(-(J - params.Jc)./params.dJ));
         wA = 1 - wB;
 
-        A_shifted = interp1(Tsw, AFM_basis, Tsw - delta, 'pchip', 'extrap');
+        switch params.interp.mode
+            case 'pchip'
+                if params.interp.allowExtrap
+                    A_shifted = interp1(Tsw, AFM_basis, Tsw - delta, 'pchip', 'extrap');
+                else
+                    A_shifted = interp1(Tsw, AFM_basis, Tsw - delta, 'pchip', NaN);
+                end
+            case 'linear'
+                if params.interp.allowExtrap
+                    A_shifted = interp1(Tsw, AFM_basis, Tsw - delta, 'linear', 'extrap');
+                else
+                    A_shifted = interp1(Tsw, AFM_basis, Tsw - delta, 'linear', NaN);
+                end
+            case 'nearest'
+                A_shifted = interp1(Tsw, AFM_basis, Tsw - delta, 'nearest');
+            otherwise
+                error('Invalid interp.mode: %s', params.interp.mode);
+        end
         model_base = wA .* A_shifted + wB .* FM_basis;
 
         X = ones(size(model_base));
-        beta = lsqnonneg(X(mask,:), Rsw(mask) - model_base(mask));
+        beta = lsqnonneg(X(mask_fit,:), Rsw(mask_fit) - model_base(mask_fit));
         c = beta(1);
         Rhat = model_base + c;
     else
         X = [coexistence, ones(size(coexistence))];
 
         % fit only in the chosen window
-        beta = lsqnonneg(X(mask,:), Rsw(mask));
+        beta = lsqnonneg(X(mask_fit,:), Rsw(mask_fit));
         fprintf('beta1=%.4g, beta2=%.4g\n', beta(1), beta(2));
         Rhat = X * beta;
     end
 
-    sse = sum((Rhat(mask) - Rsw(mask)).^2);
+    sse = sum((Rhat(mask_fit) - Rsw(mask_fit)).^2);
 
     if sse < best_sse
         best_sse = sse;
@@ -474,10 +743,10 @@ for lambda = lambda_grid
 end
 
 % ===============================
-% R² (same window)
+% RÃƒâ€šÃ‚Â² (same window)
 % ===============================
-Ruse      = Rsw(mask);
-Rhat_use  = best_Rhat(mask);
+Ruse      = Rsw(mask_fit);
+Rhat_use  = best_Rhat(mask_fit);
 
 SS_tot = sum((Ruse - mean(Ruse)).^2);
 SS_res = sum((Rhat_use - Ruse).^2);
@@ -486,9 +755,12 @@ R2 = 1 - SS_res/SS_tot;
 if params.enableJModel
     [~, idx_exp] = max(abs(Ruse));
     [~, idx_model] = max(abs(Rhat_use));
-    delta_T = Tsw(mask);
+    delta_T = Tsw(mask_fit);
     peak_shift = delta_T(idx_model) - delta_T(idx_exp);
-    R_corr = corr(Rhat_use, Ruse, 'rows','complete');
+    [R_corr, status_corr, n_corr] = safeCorr(Rhat_use, Ruse);
+    if status_corr ~= "ok"
+        fprintf('  [safeCorr Rhat/Ruse: status=%s, n=%d]\n', status_corr, n_corr);
+    end
 
     fprintf('J-model alpha = %.6g\n', params.alpha);
     fprintf('J-model Jc = %.6g\n', params.Jc);
@@ -499,8 +771,29 @@ end
 % ===============================
 % Pause-domain vectors for Phase C export
 % ===============================
-Rsw_pause = interp1(Tsw, Rsw, Tp_pause_export, 'pchip');
-C_pause = interp1(Tsw, best_coexistence, Tp_pause_export, 'pchip');
+switch params.interp.mode
+    case 'pchip'
+        if params.interp.allowExtrap
+            Rsw_pause = interp1(Tsw, Rsw, Tp_pause_export, 'pchip', 'extrap');
+            C_pause = interp1(Tsw, best_coexistence, Tp_pause_export, 'pchip', 'extrap');
+        else
+            Rsw_pause = interp1(Tsw, Rsw, Tp_pause_export, 'pchip', NaN);
+            C_pause = interp1(Tsw, best_coexistence, Tp_pause_export, 'pchip', NaN);
+        end
+    case 'linear'
+        if params.interp.allowExtrap
+            Rsw_pause = interp1(Tsw, Rsw, Tp_pause_export, 'linear', 'extrap');
+            C_pause = interp1(Tsw, best_coexistence, Tp_pause_export, 'linear', 'extrap');
+        else
+            Rsw_pause = interp1(Tsw, Rsw, Tp_pause_export, 'linear', NaN);
+            C_pause = interp1(Tsw, best_coexistence, Tp_pause_export, 'linear', NaN);
+        end
+    case 'nearest'
+        Rsw_pause = interp1(Tsw, Rsw, Tp_pause_export, 'nearest');
+        C_pause = interp1(Tsw, best_coexistence, Tp_pause_export, 'nearest');
+    otherwise
+        error('Invalid interp.mode: %s', params.interp.mode);
+end
 
 % ===============================
 % Output
@@ -514,7 +807,7 @@ result.Tsw     = Tsw;
 
 % Fix: export valid Tp/Tsw for downstream diagnostics.
 result.Tp_valid = Tp_pause_export;
-result.Tsw_valid = Tsw(mask);
+result.Tsw_valid = Tsw(mask_fit);
 
 % Store signed FM model results (if enabled)
 result.R_signed_model = R_signed_model;
@@ -560,16 +853,25 @@ result.F_basis = result.B_basis;
 % ===============================
 % Mechanism correlations (same window)
 % ===============================
-AFM_basis = best_AFM_basis(mask);
-FM_basis  = best_FM_basis(mask);
-coexistence = best_coexistence(mask);
+AFM_basis = best_AFM_basis(mask_fit);
+FM_basis  = best_FM_basis(mask_fit);
+coexistence = best_coexistence(mask_fit);
 R = Ruse;
 
-R_dom = corr(R, 1-AFM_basis, 'rows','complete');
-R_co  = corr(R, coexistence,   'rows','complete');
-dA = gradient(AFM_basis, Tsw(mask));
-dB = gradient(FM_basis, Tsw(mask));
-R_inst = corr(R, abs(dA) + abs(dB), 'rows','complete');
+[R_dom, status_dom, n_dom] = safeCorr(R, 1-AFM_basis);
+if status_dom ~= "ok"
+    fprintf('  [safeCorr R/dominance: status=%s, n=%d]\n', status_dom, n_dom);
+end
+[R_co, status_co, n_co] = safeCorr(R, coexistence);
+if status_co ~= "ok"
+    fprintf('  [safeCorr R/coexistence: status=%s, n=%d]\n', status_co, n_co);
+end
+dA = gradient(AFM_basis, Tsw(mask_fit));
+dB = gradient(FM_basis, Tsw(mask_fit));
+[R_inst, status_inst, n_inst] = safeCorr(R, abs(dA) + abs(dB));
+if status_inst ~= "ok"
+    fprintf('  [safeCorr R/instability: status=%s, n=%d]\n', status_inst, n_inst);
+end
 
 fprintf('\nMechanism correlations:\n');
 fprintf('Dominance:   %.3f\n', R_dom);
@@ -582,9 +884,9 @@ fprintf('Instability: %.3f\n', R_inst);
 
 
 % Physics window (already defined earlier, reuse it)
-A_fit = best_AFM_basis(mask);
-B_fit = best_FM_basis(mask);
-R_fit = Rsw(mask);
+A_fit = best_AFM_basis(mask_fit);
+B_fit = best_FM_basis(mask_fit);
+R_fit = Rsw(mask_fit);
 
 % Keep original variable names for downstream diagnostics
 A = A_fit;
@@ -602,8 +904,8 @@ C3 = 2*A.*B ./ (A + B + eps);      % harmonic-type overlap (requires both finite
 % --- Dominance + Instability ---
 Dom = 1 - A;
 
-dA = gradient(A, Tsw(mask));
-dB = gradient(B, Tsw(mask));
+dA = gradient(A, Tsw(mask_fit));
+dB = gradient(B, Tsw(mask_fit));
 Inst = abs(dA) + abs(dB);
 
 % --- Balanced overlap (rewards similarity without requiring both large) ---
@@ -649,7 +951,10 @@ for k = 1:nM
     SS_res = sum((Rhat_k - R).^2);
 
     R2_list(k) = 1 - SS_res/SS_tot;
-    Corr_list(k) = corr(R, Xk, 'rows','complete');
+    [Corr_list(k), status_k, n_k] = safeCorr(R, Xk);
+    if status_k ~= "ok"
+        fprintf('  [safeCorr model %d: status=%s, n=%d]\n', k, status_k, n_k);
+    end
 
 end
 
@@ -659,11 +964,11 @@ end
 if isfield(params, 'allowSignedFM') && params.allowSignedFM ...
         && isfield(result,'R_signed_pred')
 
-    signedCorr = corr(result.R_signed_pred(mask), ...
-                      Rsw(mask), 'rows','complete');
-
-    models(end+1).name = 'Signed coupling A*(α|F|+βF)+c';
-    models(end).X = result.R_signed_pred(mask);
+    [signedCorr, status_sgn, n_sgn] = safeCorr(result.R_signed_pred(mask_fit), ...
+                                                Rsw(mask_fit));
+    if status_sgn ~= "ok"
+        fprintf('  [safeCorr signed FM: status=%s, n=%d]\n', status_sgn, n_sgn);
+    end
 
     R2_list(end+1)   = result.R2_signed_model;
     Corr_list(end+1) = signedCorr;
@@ -688,9 +993,9 @@ result.DecisionTable = DecisionTable;
 % =========================================================
 figure('Color','w','Name','A vs B scatter','NumberTitle','off');
 
-A_sc = best_AFM_basis(mask);
-B_sc = best_FM_basis(mask);
-T_sc = Tsw(mask);
+A_sc = best_AFM_basis(mask_diag);
+B_sc = best_FM_basis(mask_diag);
+T_sc = Tsw(mask_diag);
 
 scatter(A_sc, B_sc, 80, T_sc, 'filled');
 xlabel('A (Deff normalized)','Interpreter','none');
@@ -698,170 +1003,43 @@ ylabel('B (FM normalized)','Interpreter','none');
 title('A vs B (colored by T)','Interpreter','none');
 colorbar; grid on;
 
-R_AB = corr(A_sc, B_sc, 'rows','complete');
+[R_AB, status_AB, n_AB] = safeCorr(A_sc, B_sc);
+if status_AB ~= "ok"
+    fprintf('  [safeCorr A/B: status=%s, n=%d]\n', status_AB, n_AB);
+end
 fprintf('corr(A,B) = %.3f\n', R_AB);
-fprintf('corr(R,T) = %.3f\n', corr(Ruse, Tsw(mask), 'rows','complete'));
-fprintf('corr(A*B,T) = %.3f\n', corr((A.*B), Tsw(mask), 'rows','complete'));
-fprintf('corr(C1,T) = %.3f\n', corr((1-abs(A-B)), Tsw(mask), 'rows','complete'));
+[r_RT, status_RT, n_RT] = safeCorr(Ruse, Tsw(mask_fit));
+if status_RT ~= "ok"
+    fprintf('  [safeCorr R/T: status=%s, n=%d]\n', status_RT, n_RT);
+end
+fprintf('corr(R,T) = %.3f\n', r_RT);
+[r_ABT, status_ABT, n_ABT] = safeCorr((A.*B), Tsw(mask_fit));
+if status_ABT ~= "ok"
+    fprintf('  [safeCorr A*B/T: status=%s, n=%d]\n', status_ABT, n_ABT);
+end
+fprintf('corr(A*B,T) = %.3f\n', r_ABT);
+[r_C1T, status_C1T, n_C1T] = safeCorr((1-abs(A-B)), Tsw(mask_fit));
+if status_C1T ~= "ok"
+    fprintf('  [safeCorr C1/T: status=%s, n=%d]\n', status_C1T, n_C1T);
+end
+fprintf('corr(C1,T) = %.3f\n', r_C1T);
 
 Tp_valid = Tp(Dp>0 & Fp>0);
-fprintf('Tp range: %.1f–%.1f K\n', min(Tp_valid), max(Tp_valid));
-fprintf('Tsw range: %.1f–%.1f K\n', min(Tsw), max(Tsw));
+fprintf('Tp range: %.1fÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“%.1f K\n', min(Tp_valid), max(Tp_valid));
+fprintf('Tsw range: %.1fÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“%.1f K\n', min(Tsw), max(Tsw));
 % attach for later use
 result.corrAB = R_AB;
 end
 
-%% =========================================================
-%  J-dependent ΔR(T) model (optional extension)
-% ==========================================================
+% NOTE: Placeholder functions compute_dR() and compute_channel_weights() removed
+% (were unused and contained non-physical placeholder values A_val=1, B_val=1).
+% See version control for historical reference if needed.
 
-function dR = compute_dR(T, J, params)
-%COMPUTE_DR Compute ΔR(T) with optional J-dependent extension
-%
-% SYNTAX:
-%   dR = compute_dR(T, J, params)
-%
-% INPUT:
-%   T        - Temperature (K)
-%   J        - Exchange coupling parameter (optional, default=0)
-%   params   - Parameter struct with dR0, alpha, and optional Jmodel
-%
-% OUTPUT:
-%   dR       - Resistance change in appropriate units
-%
-% FEATURE: Toggleable J-dependent extension via params.enableJModel
 
-% ===============================
-% Backward compatibility
-% ===============================
-if nargin < 2 || isempty(J)
-    J = 0;
-end
 
-if nargin < 3
-    error('params struct must be provided');
-end
 
-% Default parameters if missing
-if ~isfield(params, 'dR0')
-    params.dR0 = 0;
-end
-if ~isfield(params, 'alpha')
-    params.alpha = 1;
-end
-if ~isfield(params, 'enableJModel')
-    params.enableJModel = false;
-end
-if ~isfield(params, 'Jmodel')
-    params.Jmodel = struct();
-end
 
-% ===============================
-% Compute intrinsic channels
-% ===============================
-A_val = 1;  % Placeholder for A(T); user should define this function
-B_val = 1;  % Placeholder for B(T); user should define this function
 
-% ===============================
-% CASE 1: Feature disabled (DEFAULT)
-% ===============================
-if ~params.enableJModel
-    dR = params.dR0 + params.alpha * (1 - abs(A_val - B_val));
-    return;
-end
 
-% ===============================
-% CASE 2: Feature enabled
-% ===============================
-if params.enableJModel
-    % Get J-dependent weights
-    [wA, wB, S] = compute_channel_weights(J, params);
-    
-    % Compute effective channels
-    A_eff = wA .* A_val;
-    B_eff = wB .* B_val;
-    
-    % Extended balance functional
-    dR = params.dR0 + params.alpha * (1 - abs(A_eff - B_eff));
-    
-    % Apply optional suppression factor
-    dR = S .* dR;
-end
-end
 
-% =========================================================
-%  Channel weight computation (J-dependent)
-% =========================================================
 
-function [wA, wB, S] = compute_channel_weights(J, params)
-%COMPUTE_CHANNEL_WEIGHTS Compute J-dependent channel weights
-%
-% SYNTAX:
-%   [wA, wB, S] = compute_channel_weights(J, params)
-%
-% INPUT:
-%   J        - Exchange coupling parameter
-%   params   - Parameter struct with Jmodel configuration
-%
-% OUTPUT:
-%   wA       - AFM channel weight
-%   wB       - FM channel weight
-%   S        - Global suppression factor
-%
-% NOTE: Returns defaults (1, 1, 1) if Jmodel.type is missing.
-
-% Default values
-wA = 1;
-wB = 1;
-S  = 1;
-
-% If no model type specified, return defaults
-if ~isfield(params, 'Jmodel') || ~isfield(params.Jmodel, 'type')
-    return;
-end
-
-model_type = params.Jmodel.type;
-
-% ===============================
-% EXPONENTIAL MODEL
-% ===============================
-if strcmp(model_type, 'exp')
-    if ~isfield(params.Jmodel, 'gamma')
-        error('gamma must be defined for exp model');
-    end
-    
-    wA = 1;
-    wB = exp(params.Jmodel.gamma * J);
-    
-% ===============================
-% LOGISTIC MODEL
-% ===============================
-elseif strcmp(model_type, 'logistic')
-    if ~isfield(params.Jmodel, 'J0') || ~isfield(params.Jmodel, 'deltaJ')
-        error('J0 and deltaJ required for logistic model');
-    end
-    
-    ratio = 1 ./ (1 + exp(-(J - params.Jmodel.J0) / params.Jmodel.deltaJ));
-    
-    wA = 1;
-    wB = ratio;
-    
-% ===============================
-% LINEAR MODEL
-% ===============================
-elseif strcmp(model_type, 'linear')
-    if ~isfield(params.Jmodel, 'c0') || ~isfield(params.Jmodel, 'c1')
-        error('c0 and c1 required for linear model');
-    end
-    
-    wA = 1;
-    wB = params.Jmodel.c0 + params.Jmodel.c1 * J;
-end
-
-% ===============================
-% Optional global suppression
-% ===============================
-if isfield(params.Jmodel, 'suppressionGamma')
-    S = exp(-params.Jmodel.suppressionGamma * J.^2);
-end
-end

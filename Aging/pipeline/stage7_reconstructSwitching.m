@@ -47,10 +47,10 @@ params.switchExcludeTpAbove = cfg.switchExcludeTpAbove;
 
 result = reconstructSwitchingAmplitude( ...
     mode, ...
-    state.pauseRuns, ...
+    getPauseRuns(state), ...
     state.pauseRuns_raw, ...
     params, ...
-    [state.pauseRuns.waitK], ...
+    [getPauseRuns(state).waitK], ...
     Tsw, ...
     Rsw);
 
@@ -89,7 +89,7 @@ end
 % Debug: guard against Tp/Tsw mixing
 if isfield(cfg, 'debug') && isfield(cfg.debug, 'enable') && cfg.debug.enable
     if isfield(cfg.debug, 'assertNoTpMixing') && cfg.debug.assertNoTpMixing
-        pauseTpList = [state.pauseRuns.waitK];
+        pauseTpList = [getPauseRuns(state).waitK];
         outFolder = resolveDebugOutFolderStage7(cfg);
         if cfg.debug.logToFile && cfg.debug.saveOutputs && ~isempty(outFolder)
             appendDebugLogStage7(outFolder, pauseTpList, cfg.Tsw, Tp_fm);
@@ -104,20 +104,21 @@ end
 % Robust FM extraction (no crash if FM field missing)
 fmCandidates = {'FM_step_A','FM_step','FM_stepA','FM_A','FM'};
 fmField = '';
+pauseRuns_loc = getPauseRuns(state);  % Get once to avoid multiple calls
 
 for k = 1:numel(fmCandidates)
-    if isfield(state.pauseRuns, fmCandidates{k})
+    if isfield(pauseRuns_loc, fmCandidates{k})
         fmField = fmCandidates{k};
         break;
     end
 end
 
-Tp_all = [state.pauseRuns.waitK]';
+Tp_all = [pauseRuns_loc.waitK]';
 
 if isempty(fmField)
     FM_fit_all = nan(numel(Tp_all),1);
 else
-    tmp = {state.pauseRuns.(fmField)};
+    tmp = {pauseRuns_loc.(fmField)};
     FM_fit_all = cellfun(@double, tmp(:));
 end
 
@@ -143,12 +144,68 @@ B_rms_atTp = interp1(Tsw_loc, B_loc, Tp_fm, 'pchip');
 
 if exist('FM_fit_f','var') && exist('B_rms_atTp','var') ...
         && ~isempty(FM_fit_f) && ~isempty(B_rms_atTp)
-    R_FM = corr(FM_fit_f(:), B_rms_atTp(:), 'rows','complete');
+    [R_FM, status_FM, n_FM] = safeCorr(FM_fit_f(:), B_rms_atTp(:));
+    if status_FM ~= "ok"
+        dbg(cfg, "full", "FM cross-check: safeCorr status=%s, n=%d", status_FM, n_FM);
+    end
 else
     R_FM = NaN;
+    status_FM = "undefined";
 end
 
 dbg(cfg, "summary", "FM cross-check: corr(RMS B(Tp), FM_step_A) = %.3f", R_FM);
+
+% =========================================================
+% Channel correlation diagnostics (diagnostics-only)
+% Tests AFM/FM association with switching beyond pure temperature trend
+% =========================================================
+if isfield(result, 'A_basis') && isfield(result, 'B_basis')
+    A = result.A_basis(:);
+    B = result.B_basis(:);
+    Rsw_loc = Rsw(:);
+    Tsw_corr = Tsw(:);
+
+    dA = gradient(A, Tsw_corr);
+    dB = gradient(B, Tsw_corr);
+
+    [c_RA, status_RA, n_RA] = safeCorr(Rsw_loc, A);
+    [c_RB, status_RB, n_RB] = safeCorr(Rsw_loc, B);
+    [c_RdA, status_RdA, n_RdA] = safeCorr(Rsw_loc, abs(dA));
+    [c_RdB, status_RdB, n_RdB] = safeCorr(Rsw_loc, abs(dB));
+
+    if status_RA ~= "ok"
+        dbg(cfg, "full", "Channel corr R,A: status=%s, n=%d", status_RA, n_RA);
+    end
+    if status_RB ~= "ok"
+        dbg(cfg, "full", "Channel corr R,B: status=%s, n=%d", status_RB, n_RB);
+    end
+    if status_RdA ~= "ok"
+        dbg(cfg, "full", "Channel corr R,|dA/dT|: status=%s, n=%d", status_RdA, n_RdA);
+    end
+    if status_RdB ~= "ok"
+        dbg(cfg, "full", "Channel corr R,|dB/dT|: status=%s, n=%d", status_RdB, n_RdB);
+    end
+
+    pc_RA_T = partialcorr(Rsw_loc, A, Tsw_corr, 'rows','complete');
+    pc_RB_T = partialcorr(Rsw_loc, B, Tsw_corr, 'rows','complete');
+
+    % Store in result for diagnostics summary
+    result.corr_R_A = c_RA;
+    result.corr_R_B = c_RB;
+    result.corr_R_dAdT = c_RdA;
+    result.corr_R_dBdT = c_RdB;
+    result.partialcorr_R_A_given_T = pc_RA_T;
+    result.partialcorr_R_B_given_T = pc_RB_T;
+
+    fprintf('\n=== CHANNEL CORRELATION DIAGNOSTICS ===\n');
+    fprintf('corr(R,A) = %.3f\n', c_RA);
+    fprintf('corr(R,B) = %.3f\n', c_RB);
+    fprintf('corr(R,|dA/dT|) = %.3f\n', c_RdA);
+    fprintf('corr(R,|dB/dT|) = %.3f\n', c_RdB);
+    fprintf('partialcorr(R,A | T) = %.3f\n', pc_RA_T);
+    fprintf('partialcorr(R,B | T) = %.3f\n', pc_RB_T);
+    fprintf('=======================================\n');
+end
 
 % Enhanced diagnostics when correlation is NaN
 if isnan(R_FM) && isfield(cfg, 'debug') && isfield(cfg.debug, 'enable') && cfg.debug.enable
@@ -339,3 +396,5 @@ fprintf(fid, 'cfg.Tsw: %s\n', mat2str(Tsw(:)'));
 fprintf(fid, 'validSwitchTp: %s\n', mat2str(Tp_valid(:)'));
 fclose(fid);
 end
+
+
