@@ -20,12 +20,38 @@ function state = stage4_analyzeAFM_FM(state, cfg)
 % =========================================================
 
 % ====================== Core Analysis ======================
-% Compute AFM/FM decomposition (models/analyzeAFM_FM_components.m)
-state.pauseRuns = analyzeAFM_FM_components( ...
-    state.pauseRuns, cfg.dip_window_K, cfg.smoothWindow_K, ...
-    cfg.excludeLowT_FM, cfg.excludeLowT_K, ...
-    cfg.FM_plateau_K, cfg.excludeLowT_mode, cfg.FM_buffer_K, ...
-    cfg.AFM_metric_main, cfg);
+% Compute AFM/FM decomposition
+if ~isfield(cfg, 'agingMetricMode') || isempty(cfg.agingMetricMode)
+    cfg.agingMetricMode = 'direct';
+end
+agingMode = lower(string(cfg.agingMetricMode));
+
+switch agingMode
+    case {'direct', 'model', 'fit'}
+        state.pauseRuns = analyzeAFM_FM_components( ...
+            state.pauseRuns, cfg.dip_window_K, cfg.smoothWindow_K, ...
+            cfg.excludeLowT_FM, cfg.excludeLowT_K, ...
+            cfg.FM_plateau_K, cfg.excludeLowT_mode, cfg.FM_buffer_K, ...
+            cfg.AFM_metric_main, cfg);
+
+    case 'derivative'
+        for i = 1:numel(state.pauseRuns)
+            run = state.pauseRuns(i);
+            if ~isfield(run, 'T_common') || ~isfield(run, 'DeltaM') || ~isfield(run, 'waitK')
+                continue;
+            end
+
+            result = analyzeAFM_FM_derivative(run.T_common, run.DeltaM, run.waitK, cfg);
+            f = fieldnames(result);
+            for j = 1:numel(f)
+                run.(f{j}) = result.(f{j});
+            end
+            state.pauseRuns = assignRunFields(state.pauseRuns, i, run);
+        end
+
+    otherwise
+        error('Unknown agingMetricMode: %s', cfg.agingMetricMode);
+end
 
 % ====================== Stage4 Dip Diagnostics ======================
 % Keep dip-analysis diagnostics in pauseRuns without altering AFM/FM logic.
@@ -198,3 +224,5 @@ for j = 1:numel(fields)
     pauseRuns(idx).(fields{j}) = run.(fields{j});
 end
 end
+
+

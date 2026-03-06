@@ -23,7 +23,7 @@ cfg.doPlotting = true;
 cfg.diagnosticsVerbose = false;
 
 % --- Metric mode selection ---
-cfg.agingMetricMode = 'direct';
+cfg.agingMetricMode = 'derivative';
 cfg.switchingMetricMode = 'direct';
 
 cfg.AFM_metric_main = 'area';

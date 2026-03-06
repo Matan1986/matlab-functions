@@ -1,55 +1,81 @@
-# --- General temp ---
-tmp_*
-*.pdf
+# =========================================================
+# IDE / Local settings
+# =========================================================
 .vscode/
+.vscode/settings.json
+.matlab_prefs/
 
-# MATLAB temp files
+# =========================================================
+# MATLAB temporary files
+# =========================================================
 *.asv
 *.m~
+*.p
 
-# Outputs
-**/plots/
-**/*output*.txt
-**/*log*.txt
+# =========================================================
+# Logs
+# =========================================================
 *.log
 matlab_debug*.log
 matlab_final_verify.log
 test_verify_run.log
 
-# --- Scratch / local tests ---
+# =========================================================
+# Temporary / output text
+# =========================================================
+**/*output*.txt
+**/*log*.txt
+verification_test_output.txt
+diagnostic_output.txt
+output.txt
+
+# =========================================================
+# Generated plots
+# =========================================================
+**/plots/
+
+# =========================================================
+# Results / generated artifacts
+# =========================================================
+results/*.mat
+results/*.csv
+results/generated/
+results/phaseC/
+
+# =========================================================
+# Diagnostics and results folders
+# =========================================================
+**/Results/
+**/diagnostics/
+
+# =========================================================
+# Local testing files
+# =========================================================
 simple_test.m
 test_*.m
 verification_log.txt
 DIAGNOSTICS_SCAN_REPORT.md
 
-# --- Aging local verification ---
+# =========================================================
+# Aging local experiments
+# =========================================================
 Aging/tests/
-
-# --- VSCode local settings ---
-.vscode/settings.json
-
-# Local machine paths (not version controlled)
-runs/localPaths.m
-
-Debug/
-results/*.mat
-results/*.csv
-results/phaseC/
-
-# Generated result artifacts
-results/generated/
-
-# External dependency
-General ver2/appearanceControl/altmany-export_fig-3.54.0.0/
-
-*.p
-*.asv
-output.txt
-diagnostic_output.txt
-verification_test_output.txt
-
 Aging old/
 Aging/analysis/
-**/Results/
-**/diagnostics/
-*.asv
+
+# =========================================================
+# Local configuration
+# =========================================================
+runs/localPaths.m
+
+# =========================================================
+# External dependency
+# =========================================================
+General ver2/appearanceControl/altmany-export_fig-3.54.0.0/
+
+# =========================================================
+# Misc
+# =========================================================
+tmp_*
+*.pdf
+Debug/
