@@ -87,6 +87,7 @@ for i = 1:numel(pauseRuns)
     pauseRuns(i).FM_plateau_left_clipped = false;
     pauseRuns(i).FM_plateau_n_left = 0;
     pauseRuns(i).FM_plateau_n_right = 0;
+    pauseRuns(i).FM_plateau_geometry_source = "stage4";
 
     if ~isfield(pauseRuns(i),'T_common') || ~isfield(pauseRuns(i),'DeltaM')
         continue;
@@ -253,6 +254,16 @@ for i = 1:numel(pauseRuns)
         
         % Call robust baseline estimator
         baselineOut = estimateRobustBaseline(T, dM, Tp, cfg_baseline);
+        if isfield(baselineOut, 'idxL') && ~isempty(baselineOut.idxL)
+            pauseRuns(i).FM_plateau_left_window_raw = [min(T(baselineOut.idxL)), max(T(baselineOut.idxL))];
+            pauseRuns(i).FM_plateau_left_window = pauseRuns(i).FM_plateau_left_window_raw;
+            pauseRuns(i).FM_plateau_n_left = numel(baselineOut.idxL);
+        end
+        if isfield(baselineOut, 'idxR') && ~isempty(baselineOut.idxR)
+            pauseRuns(i).FM_plateau_right_window = [min(T(baselineOut.idxR)), max(T(baselineOut.idxR))];
+            pauseRuns(i).FM_plateau_n_right = numel(baselineOut.idxR);
+        end
+        pauseRuns(i).FM_plateau_left_clipped = false;
         
         if strcmp(baselineOut.status, 'ok')
             pauseRuns(i).FM_step_raw = baselineOut.baseR - baselineOut.baseL;
@@ -377,6 +388,7 @@ for i = 1:numel(pauseRuns)
         pauseRuns(i).FM_plateau_left_clipped = logical(lowWin_clipped_by_lowT || lowWin_clamped_data);
         pauseRuns(i).FM_plateau_n_left = nnz(maskLow);
         pauseRuns(i).FM_plateau_n_right = nnz(maskHigh);
+        pauseRuns(i).FM_plateau_geometry_source = "stage4";
 
         if nargin >= 10 && isstruct(cfg) && isfield(cfg, 'debug') && isfield(cfg.debug, 'enable') && cfg.debug.enable
             fprintf(['FM plateau geometry [Tp=%.4g K]: left=[%.4g, %.4g], right=[%.4g, %.4g], ' ...
