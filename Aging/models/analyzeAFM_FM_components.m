@@ -81,6 +81,12 @@ for i = 1:numel(pauseRuns)
     pauseRuns(i).FM_step_err   = NaN;
     pauseRuns(i).FM_plateau_valid = false;
     pauseRuns(i).FM_plateau_reason = '';
+    pauseRuns(i).FM_plateau_left_window_raw = [NaN NaN];
+    pauseRuns(i).FM_plateau_left_window = [NaN NaN];
+    pauseRuns(i).FM_plateau_right_window = [NaN NaN];
+    pauseRuns(i).FM_plateau_left_clipped = false;
+    pauseRuns(i).FM_plateau_n_left = 0;
+    pauseRuns(i).FM_plateau_n_right = 0;
 
     if ~isfield(pauseRuns(i),'T_common') || ~isfield(pauseRuns(i),'DeltaM')
         continue;
@@ -258,6 +264,16 @@ for i = 1:numel(pauseRuns)
             pauseRuns(i).baseline_TR = baselineOut.TR;
             pauseRuns(i).baseline_slope = baselineOut.slope;
             pauseRuns(i).baseline_status = baselineOut.status;
+            if isfield(baselineOut, 'idxL') && ~isempty(baselineOut.idxL)
+                pauseRuns(i).FM_plateau_left_window_raw = [min(T(baselineOut.idxL)), max(T(baselineOut.idxL))];
+                pauseRuns(i).FM_plateau_left_window = pauseRuns(i).FM_plateau_left_window_raw;
+                pauseRuns(i).FM_plateau_n_left = numel(baselineOut.idxL);
+            end
+            if isfield(baselineOut, 'idxR') && ~isempty(baselineOut.idxR)
+                pauseRuns(i).FM_plateau_right_window = [min(T(baselineOut.idxR)), max(T(baselineOut.idxR))];
+                pauseRuns(i).FM_plateau_n_right = numel(baselineOut.idxR);
+            end
+            pauseRuns(i).FM_plateau_left_clipped = false;
             
             % Verbose diagnostics
             if isfield(cfg, 'debug') && isfield(cfg.debug, 'verbose') && cfg.debug.verbose
@@ -287,7 +303,7 @@ for i = 1:numel(pauseRuns)
         if nargin >= 10 && isstruct(cfg)
             if isfield(cfg, 'FM_rightPlateauMode') && strcmpi(cfg.FM_rightPlateauMode, 'fixed')
                 useFixedRightPlateau = true;
-            elseif isfield(cfg, 'fmMetric') && isfield(cfg.fmMetric, 'rightWindow') && ~isempty(cfg.fmMetric.rightWindow)
+            elseif isfield(cfg, 'fmMetric') && isfield(cfg.fmMetric, 'rightWindow')
                 useFixedRightPlateau = true;
             end
         end
@@ -304,6 +320,16 @@ for i = 1:numel(pauseRuns)
         Nmin = 3;
         
         if useFixedRightPlateau
+            lowWin_raw = [Tp - dip_window_K - FM_buffer_K - FM_plateau_K, ...
+                          Tp - dip_window_K - FM_buffer_K];
+            lowWin_req = lowWin_raw;
+            lowWin_clipped_by_lowT = false;
+            if excludeLowT_FM && isfinite(excludeLowT_K)
+                lowWin_req = [max(excludeLowT_K, lowWin_raw(1)), ...
+                              max(excludeLowT_K, lowWin_raw(2))];
+                lowWin_clipped_by_lowT = any(lowWin_req ~= lowWin_raw);
+            end
+
             % Fixed high-temperature FM background window
             if isfield(cfg, 'FM_rightPlateauFixedWindow_K') && ~isempty(cfg.FM_rightPlateauFixedWindow_K)
                 highWin = cfg.FM_rightPlateauFixedWindow_K(:).';
@@ -314,29 +340,49 @@ for i = 1:numel(pauseRuns)
             end
             [highWin, ~] = clampWindow(highWin, Tmin_data, Tmax_data);
             idx_bg = T >= highWin(1) & T <= highWin(2);
-            
+
             % Safety check for too-small window
             if nnz(idx_bg) < 5
                 error('FM background window too small or outside data range.');
             end
-            
+
             % Use fixed window as high-T reference
             maskHigh = isfinite(T) & idx_bg;
-            lowWin = [Tp - dip_window_K - FM_buffer_K - FM_plateau_K, ...
-                      Tp - dip_window_K - FM_buffer_K];
-            [lowWin, ~] = clampWindow(lowWin, Tmin_data, Tmax_data);
+            [lowWin, lowWin_clamped_data] = clampWindow(lowWin_req, Tmin_data, Tmax_data);
             maskLow = isfinite(T) & (T > lowWin(1)) & (T < lowWin(2));
         else
             % Default Tp-dependent plateau window logic
-            lowWin = [Tp - dip_window_K - FM_buffer_K - FM_plateau_K, ...
-                      Tp - dip_window_K - FM_buffer_K];
+            lowWin_raw = [Tp - dip_window_K - FM_buffer_K - FM_plateau_K, ...
+                          Tp - dip_window_K - FM_buffer_K];
+            lowWin_req = lowWin_raw;
+            lowWin_clipped_by_lowT = false;
+            if excludeLowT_FM && isfinite(excludeLowT_K)
+                lowWin_req = [max(excludeLowT_K, lowWin_raw(1)), ...
+                              max(excludeLowT_K, lowWin_raw(2))];
+                lowWin_clipped_by_lowT = any(lowWin_req ~= lowWin_raw);
+            end
+
             highWin = [Tp + dip_window_K + FM_buffer_K, ...
                        Tp + dip_window_K + FM_buffer_K + FM_plateau_K];
-            [lowWin, ~] = clampWindow(lowWin, Tmin_data, Tmax_data);
+            [lowWin, lowWin_clamped_data] = clampWindow(lowWin_req, Tmin_data, Tmax_data);
             [highWin, ~] = clampWindow(highWin, Tmin_data, Tmax_data);
-            
+
             maskLow = isfinite(T) & (T > lowWin(1)) & (T < lowWin(2));
             maskHigh = isfinite(T) & (T > highWin(1)) & (T < highWin(2));
+        end
+
+        pauseRuns(i).FM_plateau_left_window_raw = lowWin_raw;
+        pauseRuns(i).FM_plateau_left_window = lowWin;
+        pauseRuns(i).FM_plateau_right_window = highWin;
+        pauseRuns(i).FM_plateau_left_clipped = logical(lowWin_clipped_by_lowT || lowWin_clamped_data);
+        pauseRuns(i).FM_plateau_n_left = nnz(maskLow);
+        pauseRuns(i).FM_plateau_n_right = nnz(maskHigh);
+
+        if nargin >= 10 && isstruct(cfg) && isfield(cfg, 'debug') && isfield(cfg.debug, 'enable') && cfg.debug.enable
+            fprintf(['FM plateau geometry [Tp=%.4g K]: left=[%.4g, %.4g], right=[%.4g, %.4g], ' ...
+                     'clipped=%d, nL=%d, nR=%d\n'], ...
+                Tp, lowWin(1), lowWin(2), highWin(1), highWin(2), ...
+                pauseRuns(i).FM_plateau_left_clipped, pauseRuns(i).FM_plateau_n_left, pauseRuns(i).FM_plateau_n_right);
         end
 
         plateauWinInvalid = (lowWin(2) <= lowWin(1)) || (highWin(2) <= highWin(1));
