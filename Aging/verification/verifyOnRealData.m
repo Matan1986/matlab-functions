@@ -1,17 +1,18 @@
 function verifyOnRealData
-% VERIFYONREALDATA - Real-data verification (Aging dip analysis only, Stage1-4)
+% VERIFYONREALDATA - Real-data verification (Aging dip analysis only, Stage1-5)
 %
 % Runs only:
 %   Stage1 load
 %   Stage2 preprocess
 %   Stage3 DeltaM
 %   Stage4 AFM/FM decomposition
+%   Stage5 FM-step + Gaussian-dip fit
 %
 % Does NOT run switching reconstruction stages.
 
     fprintf('\n');
     fprintf('╔════════════════════════════════════════════════════════════════╗\n');
-    fprintf('║  REAL MG 119 VERIFICATION (AGING STAGE1-4 ONLY)              ║\n');
+    fprintf('║  REAL MG 119 VERIFICATION (AGING STAGE1-5 ONLY)              ║\n');
     fprintf('╚════════════════════════════════════════════════════════════════╝\n\n');
 
     baseFolder = fileparts(fileparts(fileparts(mfilename('fullpath'))));
@@ -88,7 +89,7 @@ function verifyOnRealData
         cfgTemplate.recomputePlateauGeometryInVerify = false;
     end
 
-    fprintf('Running Stage1-4 only per folder:\n\n');
+    fprintf('Running Stage1-5 only per folder:\n\n');
 
     for i = 1:numel(waitTimeFolders)
         fprintf('[Folder %d/%d]\n', i, numel(waitTimeFolders));
@@ -110,6 +111,7 @@ function verifyOnRealData
             state = stage2_preprocess(state, cfg);
             state = stage3_computeDeltaM(state, cfg);
             state = stage4_analyzeAFM_FM(state, cfg);
+            state = stage5_fitFMGaussian(state, cfg);
 
             N = numel(state.pauseRuns);
             fprintf('pauseRuns detected: %d\n', N);
@@ -138,7 +140,7 @@ function verifyOnRealData
             allWaitSec = [allWaitSec; waitBlock(:)];
 
         catch ME
-            fprintf('✗ Stage1-4 failed for folder: %s\n', waitTimeFolders{i});
+            fprintf('✗ Stage1-5 failed for folder: %s\n', waitTimeFolders{i});
             fprintf('  Error: %s\n', ME.message);
             disp(ME.getReport());
         end
@@ -147,7 +149,7 @@ function verifyOnRealData
     end
 
     if isempty(allPauseRuns)
-        fprintf('✗ No pauseRuns collected from Stage1-4.\n');
+        fprintf('✗ No pauseRuns collected from Stage1-5.\n');
         return;
     end
 
@@ -182,6 +184,7 @@ function verifyOnRealData
     end
 
     diagTable = buildUnifiedTable(allPauseRuns, allWaitSec, cfgTemplate, fmMetricCandidates);
+    diagTable = addNormalizedFMMetrics(diagTable);
 
     fprintf('Unified diagnostics table:\n');
     fmCols = diagTable.Properties.VariableNames(startsWith(diagTable.Properties.VariableNames, 'FM_'));
@@ -584,6 +587,43 @@ function diagTable = buildUnifiedTable(pauseRuns, waitSecVec, cfg, fmMetricNames
     end
 end
 
+function diagTable = addNormalizedFMMetrics(diagTable)
+    N = height(diagTable);
+
+    if ismember('Dip_area', diagTable.Properties.VariableNames)
+        denom = double(diagTable.Dip_area);
+    else
+        denom = NaN(N,1);
+    end
+
+    if ismember('FM_abs', diagTable.Properties.VariableNames)
+        num = double(diagTable.FM_abs);
+    else
+        num = NaN(N,1);
+    end
+    diagTable.FM_abs_over_AFM = safeDivide(num, denom);
+
+    if ismember('FM_E', diagTable.Properties.VariableNames)
+        num = double(diagTable.FM_E);
+    else
+        num = NaN(N,1);
+    end
+    diagTable.FM_E_over_AFM = safeDivide(num, denom);
+
+    if ismember('FM_step_A', diagTable.Properties.VariableNames)
+        num = double(diagTable.FM_step_A);
+    else
+        num = NaN(N,1);
+    end
+    diagTable.FM_stepA_over_AFM = safeDivide(num, denom);
+end
+
+function out = safeDivide(num, den)
+    out = NaN(size(num));
+    valid = isfinite(num) & isfinite(den) & (den ~= 0);
+    out(valid) = num(valid) ./ den(valid);
+end
+
 function fmMetricsFromCode = discoverFMMetricsInCode(baseFolder)
     targetDirs = {fullfile(baseFolder, 'Aging', 'models'), fullfile(baseFolder, 'Aging', 'pipeline')};
     names = strings(0,1);
@@ -773,11 +813,24 @@ function printFMMetricStabilityAudit(diagTable)
 
     stabilityTable = table(summaryMetric, summaryMeanSNR, summaryMedianSNR, ...
         'VariableNames', {'Metric','mean_SNR','median_SNR'});
-    stabilityTable = sortrows(stabilityTable, {'mean_SNR','median_SNR'}, {'descend','descend'});
+
+    requiredMetrics = string({ ...
+        'FM_step_mag','FM_step_raw','FM_signed','FM_abs', ...
+        'FM_step_A','FM_E','FM_area_abs', ...
+        'FM_abs_over_AFM','FM_E_over_AFM','FM_stepA_over_AFM'});
+
+    for k = 1:numel(requiredMetrics)
+        m = requiredMetrics(k);
+        if ~any(stabilityTable.Metric == m)
+            stabilityTable = [stabilityTable; {m, NaN, NaN}]; %#ok<AGROW>
+        end
+    end
+
+    stabilityTable = sortrows(stabilityTable, {'median_SNR','mean_SNR'}, {'descend','descend'});
     stabilityTable.stability_rank = (1:height(stabilityTable))';
     stabilityTable = movevars(stabilityTable, 'stability_rank', 'Before', 'Metric');
 
-    fprintf('Global FM stability summary (sorted):\n');
+    fprintf('Global FM stability summary (sorted by median SNR):\n');
     disp(stabilityTable(:, {'Metric','mean_SNR','median_SNR','stability_rank'}));
     fprintf('\n');
 end
