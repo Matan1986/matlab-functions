@@ -151,10 +151,44 @@ function verifyOnRealData
         return;
     end
 
-    diagTable = buildUnifiedTable(allPauseRuns, allWaitSec, cfgTemplate);
+    fmMetricsFromCode = discoverFMMetricsInCode(baseFolder);
+    [fmMetricsScalarFromRuns, fmMetricsNonScalarFromRuns] = discoverFMMetricsInRuns(allPauseRuns);
+    fmMetricCandidates = unique([fmMetricsFromCode; fmMetricsScalarFromRuns], 'stable');
+
+    fprintf('FM metrics discovered in code (models/pipeline):\n');
+    for k = 1:numel(fmMetricsFromCode)
+        fprintf('%d. %s\n', k, char(fmMetricsFromCode(k)));
+    end
+    if isempty(fmMetricsFromCode)
+        fprintf('(none)\n');
+    end
+    fprintf('\n');
+
+    fprintf('FM scalar metrics available in pauseRuns:\n');
+    for k = 1:numel(fmMetricsScalarFromRuns)
+        fprintf('%d. %s\n', k, char(fmMetricsScalarFromRuns(k)));
+    end
+    if isempty(fmMetricsScalarFromRuns)
+        fprintf('(none)\n');
+    end
+    fprintf('\n');
+
+    if ~isempty(fmMetricsNonScalarFromRuns)
+        fprintf('FM non-scalar fields in pauseRuns (not ranked):\n');
+        for k = 1:numel(fmMetricsNonScalarFromRuns)
+            fprintf('%d. %s\n', k, char(fmMetricsNonScalarFromRuns(k)));
+        end
+        fprintf('\n');
+    end
+
+    diagTable = buildUnifiedTable(allPauseRuns, allWaitSec, cfgTemplate, fmMetricCandidates);
 
     fprintf('Unified diagnostics table:\n');
-    tblOut = diagTable(:, {'Tp','wait_time_seconds','Tmin','Dip_area','Dip_depth','FM_step_mag','baseline_slope','baseline_status'});
+    fmCols = diagTable.Properties.VariableNames(startsWith(diagTable.Properties.VariableNames, 'FM_'));
+    baseCols = {'Tp','wait_time_seconds','Tmin','Dip_area','Dip_depth','baseline_slope','baseline_status'};
+    outCols = [baseCols, fmCols];
+    outCols = outCols(ismember(outCols, diagTable.Properties.VariableNames));
+    tblOut = diagTable(:, outCols);
     disp(tblOut);
 
     fprintf('Physics checks per Tp:\n');
@@ -378,9 +412,11 @@ function verifyOnRealData
             diagTable.plateau_R_min(i), diagTable.plateau_R_max(i), diagTable.n_plateau_R(i), char(diagTable.plateau_geometry_source(i)));
     end
     fprintf('\n');
+
+    printFMMetricStabilityAudit(diagTable);
 end
 
-function diagTable = buildUnifiedTable(pauseRuns, waitSecVec, cfg)
+function diagTable = buildUnifiedTable(pauseRuns, waitSecVec, cfg, fmMetricNames)
     N = numel(pauseRuns);
 
     runId = (1:N)';
@@ -403,6 +439,9 @@ function diagTable = buildUnifiedTable(pauseRuns, waitSecVec, cfg)
     nR = NaN(N,1);
     plateauSource = strings(N,1);
     forceRobustGeom = isfield(cfg, 'recomputePlateauGeometryInVerify') && logical(cfg.recomputePlateauGeometryInVerify);
+    if nargin < 4 || isempty(fmMetricNames)
+        fmMetricNames = strings(0,1);
+    end
 
     for i = 1:N
         r = pauseRuns(i);
@@ -522,6 +561,225 @@ function diagTable = buildUnifiedTable(pauseRuns, waitSecVec, cfg)
                                         'FM_step_mag','baseline_slope','baseline_status','dip_lo','dip_hi', ...
                                         'plateau_L_min','plateau_L_max','plateau_R_min','plateau_R_max', ...
                                         'n_plateau_L','n_plateau_R','plateau_geometry_source'});
+
+    fixedVars = diagTable.Properties.VariableNames;
+    for k = 1:numel(fmMetricNames)
+        mName = char(fmMetricNames(k));
+        if isempty(mName) || ~isvarname(mName) || ismember(mName, fixedVars)
+            continue;
+        end
+
+        col = NaN(N,1);
+        for i = 1:N
+            if isfield(pauseRuns(i), mName)
+                v = pauseRuns(i).(mName);
+                if isnumeric(v) || islogical(v)
+                    if isscalar(v)
+                        col(i) = double(v);
+                    end
+                end
+            end
+        end
+        diagTable.(mName) = col;
+    end
+end
+
+function fmMetricsFromCode = discoverFMMetricsInCode(baseFolder)
+    targetDirs = {fullfile(baseFolder, 'Aging', 'models'), fullfile(baseFolder, 'Aging', 'pipeline')};
+    names = strings(0,1);
+
+    for d = 1:numel(targetDirs)
+        if ~exist(targetDirs{d}, 'dir')
+            continue;
+        end
+        files = dir(fullfile(targetDirs{d}, '**', '*.m'));
+        for f = 1:numel(files)
+            fp = fullfile(files(f).folder, files(f).name);
+            txt = fileread(fp);
+
+            tok1 = regexp(txt, 'pauseRuns\([^\)]*\)\.(FM_[A-Za-z0-9_]+)', 'tokens');
+            tok2 = regexp(txt, '\brun\.(FM_[A-Za-z0-9_]+)', 'tokens');
+            tok3 = regexp(txt, '\bresult\.(FM_[A-Za-z0-9_]+)', 'tokens');
+
+            if ~isempty(tok1)
+                names = [names; string([tok1{:}])']; %#ok<AGROW>
+            end
+            if ~isempty(tok2)
+                names = [names; string([tok2{:}])']; %#ok<AGROW>
+            end
+            if ~isempty(tok3)
+                names = [names; string([tok3{:}])']; %#ok<AGROW>
+            end
+        end
+    end
+
+    fmMetricsFromCode = unique(names, 'stable');
+end
+
+function [fmScalar, fmNonScalar] = discoverFMMetricsInRuns(pauseRuns)
+    allFmFields = strings(0,1);
+    for i = 1:numel(pauseRuns)
+        fn = fieldnames(pauseRuns(i));
+        fmMask = startsWith(string(fn), 'FM_');
+        allFmFields = [allFmFields; string(fn(fmMask))]; %#ok<AGROW>
+    end
+    allFmFields = unique(allFmFields, 'stable');
+
+    fmScalar = strings(0,1);
+    fmNonScalar = strings(0,1);
+
+    for k = 1:numel(allFmFields)
+        fld = char(allFmFields(k));
+        hasScalarNumeric = false;
+        hasNonScalar = false;
+        for i = 1:numel(pauseRuns)
+            if ~isfield(pauseRuns(i), fld)
+                continue;
+            end
+            v = pauseRuns(i).(fld);
+            if isnumeric(v) || islogical(v)
+                if isscalar(v)
+                    hasScalarNumeric = true;
+                elseif ~isempty(v)
+                    hasNonScalar = true;
+                end
+            elseif ischar(v) || isstring(v)
+                if ~isempty(v)
+                    hasNonScalar = true;
+                end
+            elseif ~isempty(v)
+                hasNonScalar = true;
+            end
+        end
+
+        if hasScalarNumeric
+            fmScalar(end+1,1) = string(fld); %#ok<AGROW>
+        end
+        if hasNonScalar
+            fmNonScalar(end+1,1) = string(fld); %#ok<AGROW>
+        end
+    end
+
+    fmScalar = unique(fmScalar, 'stable');
+    fmNonScalar = unique(fmNonScalar, 'stable');
+end
+
+function printFMMetricStabilityAudit(diagTable)
+    fmVars = diagTable.Properties.VariableNames(startsWith(diagTable.Properties.VariableNames, 'FM_'));
+    if isempty(fmVars)
+        fprintf('FM metric stability audit: no FM_* columns found in unified table.\n\n');
+        return;
+    end
+
+    fprintf('FM metric stability audit:\n');
+    uniqueTp = unique(diagTable.Tp);
+    uniqueTp = uniqueTp(isfinite(uniqueTp));
+
+    summaryMetric = strings(0,1);
+    summaryMeanSNR = [];
+    summaryMedianSNR = [];
+
+    for m = 1:numel(fmVars)
+        metricName = fmVars{m};
+        metricVec = diagTable.(metricName);
+        if ~(isnumeric(metricVec) || islogical(metricVec))
+            continue;
+        end
+
+        metricVec = double(metricVec);
+        if all(~isfinite(metricVec))
+            fprintf('%s stability: all values NaN/Inf, skipped.\n\n', metricName);
+            continue;
+        end
+
+        fprintf('%s stability:\n', metricName);
+        snrVals = NaN(numel(uniqueTp),1);
+
+        for t = 1:numel(uniqueTp)
+            tp = uniqueTp(t);
+            mask = diagTable.Tp == tp;
+
+            wt = diagTable.wait_time_seconds(mask);
+            x = metricVec(mask);
+            dip_area = diagTable.Dip_area(mask);
+            dip_depth = diagTable.Dip_depth(mask);
+            bsl_stat = diagTable.baseline_status(mask);
+            tmin = diagTable.Tmin(mask);
+            dip_lo = diagTable.dip_lo(mask);
+            dip_hi = diagTable.dip_hi(mask);
+            n_plateau_L = diagTable.n_plateau_L(mask);
+            n_plateau_R = diagTable.n_plateau_R(mask);
+
+            validBase = buildQualityMask(wt, dip_area, dip_depth, bsl_stat, tmin, dip_lo, dip_hi, n_plateau_L, n_plateau_R);
+            valid = validBase & isfinite(x);
+            xv = x(valid);
+
+            if isempty(xv)
+                mu = NaN; sd = NaN; snr = NaN;
+            else
+                mu = mean(xv, 'omitnan');
+                sd = std(xv, 'omitnan');
+                if isfinite(sd) && sd > 0
+                    snr = abs(mu) / sd;
+                elseif isfinite(sd) && sd == 0
+                    snr = Inf;
+                else
+                    snr = NaN;
+                end
+            end
+            snrVals(t) = snr;
+
+            fprintf('  Tp=%.1f K | mean=%.6g | std=%.6g | SNR=%.6g\n', tp, mu, sd, snr);
+
+            if nnz(valid) >= 3
+                [wt_s, ord] = sort(wt(valid));
+                xv_s = xv(ord);
+                [rho, p] = corr(wt_s, xv_s, 'type', 'Spearman');
+                fprintf('    Spearman(wait_time_seconds, %s)=%.4f (p=%.4g, n=%d)\n', metricName, rho, p, nnz(valid));
+            else
+                fprintf('    Spearman(wait_time_seconds, %s)=insufficient points (n=%d)\n', metricName, nnz(valid));
+            end
+        end
+
+        globalValidArea = isfinite(metricVec) & isfinite(diagTable.Dip_area);
+        if nnz(globalValidArea) >= 3
+            [rhoA, pA] = corr(diagTable.Dip_area(globalValidArea), metricVec(globalValidArea), 'type', 'Spearman');
+            fprintf('  Spearman(%s, Dip_area)=%.4f (p=%.4g, n=%d)\n', metricName, rhoA, pA, nnz(globalValidArea));
+        end
+
+        globalValidDepth = isfinite(metricVec) & isfinite(diagTable.Dip_depth);
+        if nnz(globalValidDepth) >= 3
+            [rhoD, pD] = corr(diagTable.Dip_depth(globalValidDepth), metricVec(globalValidDepth), 'type', 'Spearman');
+            fprintf('  Spearman(%s, Dip_depth)=%.4f (p=%.4g, n=%d)\n', metricName, rhoD, pD, nnz(globalValidDepth));
+        end
+
+        finiteSNR = snrVals(isfinite(snrVals));
+        summaryMetric(end+1,1) = string(metricName); %#ok<AGROW>
+        if isempty(finiteSNR)
+            summaryMeanSNR(end+1,1) = NaN; %#ok<AGROW>
+            summaryMedianSNR(end+1,1) = NaN; %#ok<AGROW>
+        else
+            summaryMeanSNR(end+1,1) = mean(finiteSNR, 'omitnan'); %#ok<AGROW>
+            summaryMedianSNR(end+1,1) = median(finiteSNR, 'omitnan'); %#ok<AGROW>
+        end
+
+        fprintf('\n');
+    end
+
+    if isempty(summaryMetric)
+        fprintf('Global FM stability summary: no numeric FM metrics with finite values.\n\n');
+        return;
+    end
+
+    stabilityTable = table(summaryMetric, summaryMeanSNR, summaryMedianSNR, ...
+        'VariableNames', {'Metric','mean_SNR','median_SNR'});
+    stabilityTable = sortrows(stabilityTable, {'mean_SNR','median_SNR'}, {'descend','descend'});
+    stabilityTable.stability_rank = (1:height(stabilityTable))';
+    stabilityTable = movevars(stabilityTable, 'stability_rank', 'Before', 'Metric');
+
+    fprintf('Global FM stability summary (sorted):\n');
+    disp(stabilityTable(:, {'Metric','mean_SNR','median_SNR','stability_rank'}));
+    fprintf('\n');
 end
 
 function valid = buildQualityMask(wt, dip_area, dip_depth, baseline_status, tmin, dip_lo, dip_hi, n_plateau_L, n_plateau_R)
