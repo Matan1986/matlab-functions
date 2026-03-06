@@ -84,6 +84,9 @@ function verifyOnRealData
     cfgTemplate.debug.verbose = cfgTemplate.diagnosticsVerbose;
 
     diagnosticsVerbose = isfield(cfgTemplate, 'diagnosticsVerbose') && cfgTemplate.diagnosticsVerbose;
+    if ~isfield(cfgTemplate, 'recomputePlateauGeometryInVerify')
+        cfgTemplate.recomputePlateauGeometryInVerify = false;
+    end
 
     fprintf('Running Stage1-4 only per folder:\n\n');
 
@@ -365,12 +368,14 @@ function verifyOnRealData
     end
     fprintf('\n');
 
-    fprintf('Plateau diagnostics per run:\n');
+    fprintf('Plateau diagnostics per run (Stage4 geometry):\n');
+    fprintf('  Windows correspond to FM plateau geometry used by Stage4 extraction.\n');
+    fprintf('  Robust-baseline recomputation is only used when Stage4 geometry is missing or forced by config.\n');
     for i = 1:height(diagTable)
-        fprintf('Run %d | Tp=%.3g K | wait=%g s | plateau_L=[%.4g, %.4g] K (n=%g) | plateau_R=[%.4g, %.4g] K (n=%g)\n', ...
+        fprintf('Run %d | Tp=%.3g K | wait=%g s | plateau_L=[%.4g, %.4g] K (n=%g) | plateau_R=[%.4g, %.4g] K (n=%g) | source=%s\n', ...
             diagTable.RunID(i), diagTable.Tp(i), diagTable.wait_time_seconds(i), ...
             diagTable.plateau_L_min(i), diagTable.plateau_L_max(i), diagTable.n_plateau_L(i), ...
-            diagTable.plateau_R_min(i), diagTable.plateau_R_max(i), diagTable.n_plateau_R(i));
+            diagTable.plateau_R_min(i), diagTable.plateau_R_max(i), diagTable.n_plateau_R(i), char(diagTable.plateau_geometry_source(i)));
     end
     fprintf('\n');
 end
@@ -396,6 +401,8 @@ function diagTable = buildUnifiedTable(pauseRuns, waitSecVec, cfg)
     prMax = NaN(N,1);
     nL = NaN(N,1);
     nR = NaN(N,1);
+    plateauSource = strings(N,1);
+    forceRobustGeom = isfield(cfg, 'recomputePlateauGeometryInVerify') && logical(cfg.recomputePlateauGeometryInVerify);
 
     for i = 1:N
         r = pauseRuns(i);
@@ -445,7 +452,32 @@ function diagTable = buildUnifiedTable(pauseRuns, waitSecVec, cfg)
         end
 
         [T, dM] = getCurve(r);
-        if ~isempty(T) && ~isempty(dM) && isfinite(tp(i))
+        hasStage4Geom = false;
+
+        if ~forceRobustGeom
+            wL = getval(r, 'FM_plateau_left_window');
+            wR = getval(r, 'FM_plateau_right_window');
+            nL_run = getval(r, 'FM_plateau_n_left');
+            nR_run = getval(r, 'FM_plateau_n_right');
+
+            hasWinL = isnumeric(wL) && numel(wL) >= 2 && all(isfinite(wL(1:2)));
+            hasWinR = isnumeric(wR) && numel(wR) >= 2 && all(isfinite(wR(1:2)));
+            hasNL = isnumeric(nL_run) && isfinite(nL_run);
+            hasNR = isnumeric(nR_run) && isfinite(nR_run);
+
+            if hasWinL && hasWinR && hasNL && hasNR
+                plMin(i) = wL(1);
+                plMax(i) = wL(2);
+                prMin(i) = wR(1);
+                prMax(i) = wR(2);
+                nL(i) = nL_run;
+                nR(i) = nR_run;
+                hasStage4Geom = true;
+                plateauSource(i) = "stage4";
+            end
+        end
+
+        if ~hasStage4Geom && ~isempty(T) && ~isempty(dM) && isfinite(tp(i))
             cfgB = struct('dip_halfwidth_K', cfg.dip_window_K, ...
                           'dip_margin_K', cfg.dip_margin_K, ...
                           'plateau_nPoints', cfg.plateau_nPoints, ...
@@ -462,6 +494,18 @@ function diagTable = buildUnifiedTable(pauseRuns, waitSecVec, cfg)
                 prMax(i) = max(T(bout.idxR));
                 nR(i) = numel(bout.idxR);
             end
+
+            if isfinite(plMin(i)) && isfinite(plMax(i)) && isfinite(prMin(i)) && isfinite(prMax(i))
+                if forceRobustGeom
+                    plateauSource(i) = "robust_recompute_forced";
+                else
+                    plateauSource(i) = "robust_recompute_fallback";
+                end
+            else
+                plateauSource(i) = "missing";
+            end
+        elseif ~hasStage4Geom
+            plateauSource(i) = "missing";
         end
 
         if ~isfinite(tmin(i)) && ~isempty(T) && ~isempty(dM)
@@ -473,11 +517,11 @@ function diagTable = buildUnifiedTable(pauseRuns, waitSecVec, cfg)
     end
 
     diagTable = table(runId, tp, wt, tmin, dipArea, dipDepth, fm, bsl, stat, dipLo, dipHi, ...
-                      plMin, plMax, prMin, prMax, nL, nR, ...
+                      plMin, plMax, prMin, prMax, nL, nR, plateauSource, ...
                       'VariableNames', {'RunID','Tp','wait_time_seconds','Tmin','Dip_area','Dip_depth', ...
                                         'FM_step_mag','baseline_slope','baseline_status','dip_lo','dip_hi', ...
                                         'plateau_L_min','plateau_L_max','plateau_R_min','plateau_R_max', ...
-                                        'n_plateau_L','n_plateau_R'});
+                                        'n_plateau_L','n_plateau_R','plateau_geometry_source'});
 end
 
 function valid = buildQualityMask(wt, dip_area, dip_depth, baseline_status, tmin, dip_lo, dip_hi, n_plateau_L, n_plateau_R)
