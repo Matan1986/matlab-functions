@@ -79,3 +79,9 @@ General ver2/appearanceControl/altmany-export_fig-3.54.0.0/
 tmp_*
 *.pdf
 Debug/
+
+which_baseline.txt
+Aging/which_baseline.txt
+SAFECORR_PR_DIFF.md
+verification_results.txt
+Aging/verification/probe.txt
