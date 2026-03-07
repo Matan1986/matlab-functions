@@ -20,19 +20,41 @@ This repository separates code, run entry points, tests, and generated artifacts
 
 ## Results structure
 
-- `results/aging/` - outputs from Aging analyses.
-  - `decomposition/`
-  - `svd_pca/`
-  - `baseline_tests/`
-  - `separability/`
-  - `diagnostics_misc/`
-  - `debug_runs/`
-- `results/relaxation/` - outputs from Relaxation analyses.
-- `results/switching/` - outputs from Switching analyses.
-  - `test_logs/`
-- `results/cross_analysis/` - cross-module outputs.
-  - `aging_vs_switching/`
-  - `aging_vs_relaxation/`
+When a run context is active (initialized in `Aging/pipeline/stage0_setupPaths.m`), outputs are isolated per run:
+
+- `results/<experiment>/runs/run_<timestamp>_<label>/<analysis>/...`
+
+Run naming:
+
+- Preferred: `run_<timestamp>_<label>` (for example `run_2026_03_07_184500_MG119_AF_decomp_test`)
+- Fallback: `run_<timestamp>` when no label is provided
+
+Label sources (first non-empty, sanitized):
+
+- `cfg.runLabel`
+- `cfg.analysisLabel`
+- `cfg.dataset`
+- `cfg.datasetName`
+
+Run reproducibility files are created at the run root:
+
+- `run_manifest.json` (includes `run_id`, `timestamp`, `experiment`, `label`, `git_commit`, `matlab_version`, `host`, `user`)
+- `config_snapshot.m` (configuration snapshot at run start)
+- `log.txt`
+- `run_notes.txt` (researcher notes template; created empty if missing)
+
+Without an active run context, legacy output behavior is preserved:
+
+- `results/<experiment>/<analysis>/...`
+
+## Aging outputs (analysis folders)
+
+- `decomposition/`
+- `svd_pca/`
+- `baseline_tests/`
+- `separability/`
+- `diagnostics_misc/`
+- `debug_runs/`
 
 ## Diagnostics placement
 
@@ -45,3 +67,8 @@ They should write outputs under `results/` via module utilities (for Aging: `Agi
 ## Current template status
 
 Aging is currently the first fully organized module and serves as the template for refactoring other modules to the same structure.
+
+## Developer tools
+
+- `tools/list_runs.m` - Read-only utility to list runs and manifest metadata from `results/<experiment>/runs/`.
+- `tools/load_run_manifest.m` - Helper to read a run's `run_manifest.json` by path.

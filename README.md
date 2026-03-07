@@ -20,46 +20,84 @@ run(fullfile('Relaxation ver3','main_relexation.m'))
 
 ### Repository Structure
 
-```
+```text
 matlab-functions/
-├── Aging/                      % AFM/FM coexistence and aging analysis
-├── Switching/                  % Switching experiments and current-dependent effects
-├── Relaxation/                 % Magnetic relaxation analysis
-├── FieldSweep/                 % Field-sweep transport workflows
-├── AC HC MagLab/               % High-field MagLab measurements
-├── General/                    % Shared utility functions
-├── Tools/                      % Common analysis tools
-├── runs/                       % Pipeline entry points
-├── github_repo/                % Vendored external code
-└── [other modules]             % Additional analysis pipelines
+|-- Aging/                      % AFM/FM coexistence and aging analysis
+|-- Switching/                  % Switching experiments and current-dependent effects
+|-- Relaxation/                 % Magnetic relaxation analysis
+|-- FieldSweep/                 % Field-sweep transport workflows
+|-- AC HC MagLab/               % High-field MagLab measurements
+|-- General/                    % Shared utility functions
+|-- Tools/                      % Common analysis tools
+|-- runs/                       % Pipeline entry points
+|-- github_repo/                % Vendored external code
+`-- [other modules]             % Additional analysis pipelines
 ```
 
 ### Active Modules (Main Entry Points)
 
-- `Aging/Main_Aging.m` — AFM/FM decomposition and aging-memory workflows with current-dependent coexistence model.
-- `HC ver1/HC_main.m` — heat-capacity processing.
-- `MT ver2/MT_main.m` — magnetization vs temperature workflows.
-- `MH ver1/MH_main.m` — M(H) loops and related analysis.
-- `PS ver4/PS_main.m` — planar Hall / angle-sweep transport analysis.
-- `Relaxation ver3/main_relexation.m` — TRM/IRM relaxation fitting.
-- `Resistivity ver6/Resistivity_main.m` — resistivity vs temperature.
-- `Susceptibility ver1/main_Susceptibility.m` — AC susceptibility workflows.
-- `zfAMR ver11/main/zfAMR_main.m` — zero-field AMR processing.
-- `FieldSweep ver3/FieldSweep_main.m` — field-sweep transport workflow.
-- `AC HC MagLab ver8/ACHC_main.m` — MagLab AC/HC high-field measurements.
+- `Aging/Main_Aging.m` - AFM/FM decomposition and aging-memory workflows with current-dependent coexistence model.
+- `HC ver1/HC_main.m` - heat-capacity processing.
+- `MT ver2/MT_main.m` - magnetization vs temperature workflows.
+- `MH ver1/MH_main.m` - M(H) loops and related analysis.
+- `PS ver4/PS_main.m` - planar Hall / angle-sweep transport analysis.
+- `Relaxation ver3/main_relexation.m` - TRM/IRM relaxation fitting.
+- `Resistivity ver6/Resistivity_main.m` - resistivity vs temperature.
+- `Susceptibility ver1/main_Susceptibility.m` - AC susceptibility workflows.
+- `zfAMR ver11/main/zfAMR_main.m` - zero-field AMR processing.
+- `FieldSweep ver3/FieldSweep_main.m` - field-sweep transport workflow.
+- `AC HC MagLab ver8/ACHC_main.m` - MagLab AC/HC high-field measurements.
 
 ### Module Documentation
 
 Each module maintains its own documentation:
 
-- [Aging](./Aging/README.md) — AFM/FM coexistence model and global J-dependent fitting
+- [Aging](./Aging/README.md) - AFM/FM coexistence model and global J-dependent fitting
 
 For repository-level notes, conventions, and workflow documentation, see [DOCUMENTATION.md](./DOCUMENTATION.md).
 
 ## Canonical Documentation
 
 - [Repository structure](./docs/repository_structure.md)
+- [Run system](./docs/run_system.md)
 - [Contributing guide](./CONTRIBUTING.md)
 - [Relaxation module README](./Relaxation ver3/README.md)
 - [Switching module README](./Switching ver12/README.md)
 
+## Run Isolation
+
+Aging supports lightweight run tracking. When run context is initialized, outputs are written under:
+
+`results/<experiment>/runs/run_<timestamp>_<label>/<analysis>/`
+
+Run IDs use timestamp-first naming for sortability:
+
+- Preferred: `run_<timestamp>_<label>` (label sanitized for filesystem safety; max 40 chars)
+- Fallback: `run_<timestamp>` when no label is provided
+
+Run reproducibility files are created at the run root:
+
+- `run_manifest.json` (`run_id`, `timestamp`, `experiment`, `label`, `git_commit`, `matlab_version`, `host`, `user`)
+- `config_snapshot.m` (configuration snapshot at run start)
+- `log.txt`
+- `run_notes.txt` (empty notes template for manual annotations)
+
+Run index and pointer files:
+
+- `results/<experiment>/run_index.csv`
+- `results/<experiment>/latest_run.txt`
+
+You can set a custom label before running:
+
+```matlab
+cfg.runLabel = 'MG119_AF_decomp_test';
+```
+
+See [Repository structure](./docs/repository_structure.md) and [Run system](./docs/run_system.md) for details.
+
+## Developer Tools
+
+- `tools/list_runs.m` - Lists run folders and key metadata (`run_id`, `timestamp`, `label`, `dataset`, `git_commit`) from `results/<experiment>/runs/`.
+- `tools/load_run_manifest.m` - Helper to load and parse `run_manifest.json` for a specific run directory.
+- `tools/getLatestRun.m` - Returns latest run ID from `results/<experiment>/latest_run.txt`.
+- `tools/openLatestRun.m` - Opens the latest run folder (Windows) or prints the folder path (non-Windows).
