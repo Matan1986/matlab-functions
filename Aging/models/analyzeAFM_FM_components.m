@@ -88,6 +88,12 @@ for i = 1:numel(pauseRuns)
     pauseRuns(i).FM_plateau_n_left = 0;
     pauseRuns(i).FM_plateau_n_right = 0;
     pauseRuns(i).FM_plateau_geometry_source = "stage4";
+    pauseRuns(i).FM_plateau_left_width_K = NaN;
+    pauseRuns(i).FM_plateau_right_width_K = NaN;
+    pauseRuns(i).FM_plateau_left_slope = NaN;
+    pauseRuns(i).FM_plateau_right_slope = NaN;
+    pauseRuns(i).FM_plateau_meets_minCriteria = false;
+    pauseRuns(i).FM_plateau_narrow_fallback = false;
 
     if ~isfield(pauseRuns(i),'T_common') || ~isfield(pauseRuns(i),'DeltaM')
         continue;
@@ -251,6 +257,18 @@ for i = 1:numel(pauseRuns)
         else
             cfg_baseline.plateau_nPoints = 6;  % default
         end
+        if isfield(cfg, 'FM_plateau_minWidth_K')
+            cfg_baseline.plateau_minWidth_K = cfg.FM_plateau_minWidth_K;
+        end
+        if isfield(cfg, 'FM_plateau_minPoints')
+            cfg_baseline.plateau_minPoints = cfg.FM_plateau_minPoints;
+        end
+        if isfield(cfg, 'FM_plateau_maxAllowedSlope')
+            cfg_baseline.plateau_maxAllowedSlope = cfg.FM_plateau_maxAllowedSlope;
+        end
+        if isfield(cfg, 'FM_plateau_allowNarrowFallback')
+            cfg_baseline.plateau_allowNarrowFallback = cfg.FM_plateau_allowNarrowFallback;
+        end
         
         % Call robust baseline estimator
         baselineOut = estimateRobustBaseline(T, dM, Tp, cfg_baseline);
@@ -271,10 +289,34 @@ for i = 1:numel(pauseRuns)
             pauseRuns(i).FM_step_err = NaN;  % Not computed in robust version
             pauseRuns(i).FM_plateau_valid = true;
             pauseRuns(i).FM_plateau_reason = '';
+            if pauseRuns(i).FM_plateau_narrow_fallback
+                pauseRuns(i).FM_plateau_reason = 'narrow_fallback';
+            end
             pauseRuns(i).baseline_TL = baselineOut.TL;
             pauseRuns(i).baseline_TR = baselineOut.TR;
             pauseRuns(i).baseline_slope = baselineOut.slope;
             pauseRuns(i).baseline_status = baselineOut.status;
+            if isfield(baselineOut, 'plateauL_width_K')
+                pauseRuns(i).FM_plateau_left_width_K = baselineOut.plateauL_width_K;
+            end
+            if isfield(baselineOut, 'plateauR_width_K')
+                pauseRuns(i).FM_plateau_right_width_K = baselineOut.plateauR_width_K;
+            end
+            if isfield(baselineOut, 'plateauL_slope')
+                pauseRuns(i).FM_plateau_left_slope = baselineOut.plateauL_slope;
+            end
+            if isfield(baselineOut, 'plateauR_slope')
+                pauseRuns(i).FM_plateau_right_slope = baselineOut.plateauR_slope;
+            end
+            if isfield(baselineOut, 'plateauCriteriaSatisfied')
+                pauseRuns(i).FM_plateau_meets_minCriteria = logical(baselineOut.plateauCriteriaSatisfied);
+            end
+            if isfield(baselineOut, 'narrowFallback')
+                pauseRuns(i).FM_plateau_narrow_fallback = logical(baselineOut.narrowFallback);
+            end
+            if pauseRuns(i).FM_plateau_narrow_fallback && isempty(pauseRuns(i).FM_plateau_reason)
+                pauseRuns(i).FM_plateau_reason = 'narrow_fallback';
+            end
             if isfield(baselineOut, 'idxL') && ~isempty(baselineOut.idxL)
                 pauseRuns(i).FM_plateau_left_window_raw = [min(T(baselineOut.idxL)), max(T(baselineOut.idxL))];
                 pauseRuns(i).FM_plateau_left_window = pauseRuns(i).FM_plateau_left_window_raw;
@@ -297,6 +339,10 @@ for i = 1:numel(pauseRuns)
                     min(T(baselineOut.idxR)), max(T(baselineOut.idxR)), numel(baselineOut.idxR));
                 fprintf('    baseL=%.6g, baseR=%.6g, slope=%.6g\n', ...
                     baselineOut.baseL, baselineOut.baseR, baselineOut.slope);
+                fprintf('    plateau width/slope: L=[%.4g K, %.6g], R=[%.4g K, %.6g], criteria=%d, narrowFallback=%d\n', ...
+                    pauseRuns(i).FM_plateau_left_width_K, pauseRuns(i).FM_plateau_left_slope, ...
+                    pauseRuns(i).FM_plateau_right_width_K, pauseRuns(i).FM_plateau_right_slope, ...
+                    pauseRuns(i).FM_plateau_meets_minCriteria, pauseRuns(i).FM_plateau_narrow_fallback);
             end
         else
             % Robust baseline failed, fall back to old method
@@ -389,12 +435,46 @@ for i = 1:numel(pauseRuns)
         pauseRuns(i).FM_plateau_n_left = nnz(maskLow);
         pauseRuns(i).FM_plateau_n_right = nnz(maskHigh);
         pauseRuns(i).FM_plateau_geometry_source = "stage4";
+        [leftWidthK, leftSlopeK] = computeMaskWidthSlope(T, dM_smooth, maskLow);
+        [rightWidthK, rightSlopeK] = computeMaskWidthSlope(T, dM_smooth, maskHigh);
+        pauseRuns(i).FM_plateau_left_width_K = leftWidthK;
+        pauseRuns(i).FM_plateau_right_width_K = rightWidthK;
+        pauseRuns(i).FM_plateau_left_slope = leftSlopeK;
+        pauseRuns(i).FM_plateau_right_slope = rightSlopeK;
+        minWidthReq = 0;
+        if nargin >= 10 && isstruct(cfg) && isfield(cfg, 'FM_plateau_minWidth_K')
+            minWidthReq = cfg.FM_plateau_minWidth_K;
+        end
+        minPointsReq = Nmin;
+        if nargin >= 10 && isstruct(cfg) && isfield(cfg, 'FM_plateau_minPoints')
+            minPointsReq = max(Nmin, cfg.FM_plateau_minPoints);
+        end
+        maxSlopeReq = inf;
+        if nargin >= 10 && isstruct(cfg) && isfield(cfg, 'FM_plateau_maxAllowedSlope')
+            maxSlopeReq = abs(cfg.FM_plateau_maxAllowedSlope);
+        end
+        if ~isfinite(maxSlopeReq) || maxSlopeReq <= 0
+            maxSlopeReq = inf;
+        end
+        meetsCriteria = ...
+            (pauseRuns(i).FM_plateau_n_left >= minPointsReq) && ...
+            (pauseRuns(i).FM_plateau_n_right >= minPointsReq) && ...
+            isfinite(leftWidthK) && isfinite(rightWidthK) && ...
+            (leftWidthK >= minWidthReq) && (rightWidthK >= minWidthReq) && ...
+            isfinite(leftSlopeK) && isfinite(rightSlopeK) && ...
+            (abs(leftSlopeK) <= maxSlopeReq) && (abs(rightSlopeK) <= maxSlopeReq);
+        pauseRuns(i).FM_plateau_meets_minCriteria = logical(meetsCriteria);
+        pauseRuns(i).FM_plateau_narrow_fallback = ~pauseRuns(i).FM_plateau_meets_minCriteria;
 
         if nargin >= 10 && isstruct(cfg) && isfield(cfg, 'debug') && isfield(cfg.debug, 'enable') && cfg.debug.enable
             fprintf(['FM plateau geometry [Tp=%.4g K]: left=[%.4g, %.4g], right=[%.4g, %.4g], ' ...
-                     'clipped=%d, nL=%d, nR=%d\n'], ...
+                     'clipped=%d, nL=%d, nR=%d, widthL=%.4g K, widthR=%.4g K, ' ...
+                     'slopeL=%.6g, slopeR=%.6g, meetsCriteria=%d, narrowFallback=%d\n'], ...
                 Tp, lowWin(1), lowWin(2), highWin(1), highWin(2), ...
-                pauseRuns(i).FM_plateau_left_clipped, pauseRuns(i).FM_plateau_n_left, pauseRuns(i).FM_plateau_n_right);
+                pauseRuns(i).FM_plateau_left_clipped, pauseRuns(i).FM_plateau_n_left, pauseRuns(i).FM_plateau_n_right, ...
+                pauseRuns(i).FM_plateau_left_width_K, pauseRuns(i).FM_plateau_right_width_K, ...
+                pauseRuns(i).FM_plateau_left_slope, pauseRuns(i).FM_plateau_right_slope, ...
+                pauseRuns(i).FM_plateau_meets_minCriteria, pauseRuns(i).FM_plateau_narrow_fallback);
         end
 
         plateauWinInvalid = (lowWin(2) <= lowWin(1)) || (highWin(2) <= highWin(1));
@@ -419,6 +499,9 @@ for i = 1:numel(pauseRuns)
 
         pauseRuns(i).FM_plateau_valid = true;
         pauseRuns(i).FM_plateau_reason = '';
+        if pauseRuns(i).FM_plateau_narrow_fallback
+            pauseRuns(i).FM_plateau_reason = 'narrow_fallback';
+        end
 
         if nnz(maskLow)>=3 && nnz(maskHigh)>=3
             lowVals  = dM_smooth(maskLow);
@@ -455,4 +538,39 @@ if lo ~= winIn(1) || hi ~= winIn(2)
 end
 winOut(1) = lo;
 winOut(2) = hi;
+end
+function [widthK, slopeK] = computeMaskWidthSlope(T, Y, mask)
+widthK = NaN;
+slopeK = NaN;
+
+if isempty(mask) || ~any(mask)
+    return;
+end
+
+idx = find(mask);
+Tseg = T(idx);
+Yseg = Y(idx);
+valid = isfinite(Tseg) & isfinite(Yseg);
+Tseg = Tseg(valid);
+Yseg = Yseg(valid);
+
+if numel(Tseg) < 2
+    return;
+end
+
+widthK = max(Tseg) - min(Tseg);
+if ~isfinite(widthK)
+    widthK = NaN;
+end
+
+if numel(unique(Tseg)) >= 2
+    p = polyfit(Tseg, Yseg, 1);
+    slopeK = p(1);
+else
+    slopeK = 0;
+end
+
+if ~isfinite(slopeK)
+    slopeK = NaN;
+end
 end

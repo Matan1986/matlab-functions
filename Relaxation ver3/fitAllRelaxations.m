@@ -1,19 +1,21 @@
 function allFits = fitAllRelaxations(Time_table, Moment_table, Temp_table, Field_table, ...
     debug, Hthresh, fitParams, ...
-    fitWindow_extraStart_percent, fitWindow_extraEnd_percent,absThreshold,slopeThreshold)
+    fitWindow_extraStart_percent, fitWindow_extraEnd_percent,absThreshold,slopeThreshold, fileList, relaxationModel)
 % fitAllRelaxations — automatic relaxation analysis and fitting
 %
 % Performs:
 %   1) window selection
-%   2) stretched-exponential fit (using fitStretchedExp)
+%   2) model fit via fitRelaxationModel (log/kww/compare)
 %
 % Returns a table with:
-%   Temp_K | Field_Oe | Minf | dM | M0 | tau | n | R2 | t_start | t_end | data_idx
+%   Temp_K | Field_Oe | Minf | dM | M0 | tau | n | R2 | S | model_type | t_start | t_end | data_idx
 
 %% --- Handle missing arguments ---
 if nargin < 5, debug = false; end
 if nargin < 6, Hthresh = 20; end
 if nargin < 7, fitParams = struct(); end   % ensure struct exists
+if nargin < 12 || isempty(fileList), fileList = {}; end
+if nargin < 13 || isempty(relaxationModel), relaxationModel = 'log'; end
 
 % Effective fitting debug gate:
 % - debug input (from main debug mode)
@@ -97,15 +99,12 @@ for i = 1:n
     % ===========================================
     Tnom = NaN;
 
-    % Option 1: extract from filename in base workspace
-    if evalin('base','exist("fileList","var")')
-        flist = evalin('base','fileList');
-        if i <= numel(flist)
-            fname = string(flist{i});
-            Tmatch = regexp(fname, '([0-9]+\.?[0-9]*)\s*[Kk]', 'tokens', 'once');
-            if ~isempty(Tmatch)
-                Tnom = str2double(Tmatch{1});
-            end
+    % Option 1: extract from filename passed via input argument
+    if i <= numel(fileList)
+        fname = string(fileList{i});
+        Tmatch = regexp(fname, '([0-9]+\.?[0-9]*)\s*[Kk]', 'tokens', 'once');
+        if ~isempty(Tmatch)
+            Tnom = str2double(Tmatch{1});
         end
     end
 
@@ -143,9 +142,11 @@ for i = 1:n
         tau_safe  = Inf;
         n_safe    = 1;
         R2_safe   = 1;
+        S_safe    = NaN;
+        modelTypeSafe = "fallback";
 
-        tStart = scalarOrNaN(info.t_start);
-        tEnd   = scalarOrNaN(info.t_end);
+        tStart = scalarOrNaN(t0_new);
+        tEnd   = scalarOrNaN(t1_new);
 
         if isempty(H)
             Fnom = NaN;
@@ -155,10 +156,10 @@ for i = 1:n
 
         row = table( ...
             round(Tnom,2), round(Fnom,1),  ...
-            Minf_safe, dM_safe, M0_safe, tau_safe, n_safe, R2_safe, ...
+            Minf_safe, dM_safe, M0_safe, tau_safe, n_safe, R2_safe, S_safe, modelTypeSafe, ...
             tStart, tEnd, i, ...
             'VariableNames', ...
-            {'Temp_K','Field_Oe','Minf','dM','M0','tau','n','R2','t_start','t_end','data_idx'} ...
+            {'Temp_K','Field_Oe','Minf','dM','M0','tau','n','R2','S','model_type','t_start','t_end','data_idx'} ...
             );
 
         rows = [rows; row];
@@ -166,9 +167,9 @@ for i = 1:n
     end
 
     %% ===========================================
-    %      Perform stretched-exponential fit
+    %      Perform configurable model fit
     % ===========================================
-    [fitParamsOut, R2] = fitStretchedExp(t_fit, M_fit, Tnom, debugFit, fitParams);
+    [fitParamsOut, R2, ~, modelType] = fitRelaxationModel(t_fit, M_fit, Tnom, debugFit, fitParams, relaxationModel);
 
     %% --- Extract fitted values safely ---
     Minf_safe = scalarOrNaN(fitParamsOut.Minf);
@@ -177,9 +178,11 @@ for i = 1:n
     tau_safe  = scalarOrNaN(fitParamsOut.tau);
     n_safe    = scalarOrNaN(fitParamsOut.n);
     R2_safe   = scalarOrNaN(R2);
+    S_safe    = scalarOrNaN(fitParamsOut.S);
+    modelTypeSafe = string(modelType);
 
-    tStart = scalarOrNaN(info.t_start);
-    tEnd   = scalarOrNaN(info.t_end);
+    tStart = scalarOrNaN(t0_new);
+    tEnd   = scalarOrNaN(t1_new);
 
     %% --- Mean field value (or NaN if not available) ---
     if isempty(H)
@@ -192,10 +195,10 @@ for i = 1:n
     row = table( ...
         round(Tnom,2), ...
         round(Fnom,1), ...
-        Minf_safe, dM_safe, M0_safe, tau_safe, n_safe, R2_safe, ...
+        Minf_safe, dM_safe, M0_safe, tau_safe, n_safe, R2_safe, S_safe, modelTypeSafe, ...
         tStart, tEnd, i, ...
         'VariableNames', ...
-        {'Temp_K','Field_Oe','Minf','dM','M0','tau','n','R2','t_start','t_end','data_idx'} ...
+        {'Temp_K','Field_Oe','Minf','dM','M0','tau','n','R2','S','model_type','t_start','t_end','data_idx'} ...
         );
 
     rows = [rows; row];

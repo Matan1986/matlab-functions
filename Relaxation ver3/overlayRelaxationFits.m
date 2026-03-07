@@ -1,7 +1,15 @@
 function overlayRelaxationFits(allFits, Time_table, Moment_table, ...
     color_scheme, fileList, debugMode, trimToFitWindow, compareMode, ...
     sample_name, fields_nominal, containsTRM_folder, containsIRM_folder, ...
-    offsetDisplayMode, offsetValue)
+    offsetDisplayMode, offsetValue, plotLevel)
+
+%% Handle plotLevel parameter (gating for plotting)
+if nargin < 15 || isempty(plotLevel)
+    plotLevel = 'summary';
+end
+if strcmpi(plotLevel, 'none')
+    return;
+end
 
 %% Defaults
 if nargin < 14, offsetValue       = 0.2;   end
@@ -204,10 +212,33 @@ for j = 1:height(allFits)
     beta = allFits.n(j);
     t0   = allFits.t_start(j);
     t1   = allFits.t_end(j);
+    if ismember('M0', allFits.Properties.VariableNames)
+        M0 = allFits.M0(j);
+    else
+        M0 = NaN;
+    end
+    if ismember('S', allFits.Properties.VariableNames)
+        S = allFits.S(j);
+    else
+        S = NaN;
+    end
+    if ismember('model_type', allFits.Properties.VariableNames)
+        modelType = lower(string(allFits.model_type(j)));
+    else
+        modelType = "kww";
+    end
 
     tfit = linspace(max(0,t0), t1, 400);
-    z = max(0,(tfit - t0) / max(tau,1e-6));
-    Mfit = Minf + dM .* exp(-(z.^beta));
+    switch modelType
+        case "log"
+            tLog = max(tfit, 1e-6);
+            Mfit = M0 - S .* log(tLog);
+        case "fallback"
+            Mfit = mean(MData, 'omitnan') .* ones(size(tfit));
+        otherwise
+            z = max(0,(tfit - t0) / max(tau,1e-6));
+            Mfit = Minf + dM .* exp(-(z.^beta));
+    end
 
     % Offset & centering logic
     if offsetDisplayMode

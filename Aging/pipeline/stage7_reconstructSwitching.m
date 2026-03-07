@@ -376,7 +376,7 @@ if isempty(runTag)
 end
 outputRoot = cfg.debug.outputRoot;
 if isempty(outputRoot)
-    outputRoot = fullfile(cfg.outputFolder, 'Debug');
+    outputRoot = getResultsDir('aging', 'debug_runs');
 end
 outFolder = fullfile(outputRoot, runTag);
 if ~exist(outFolder, 'dir')
@@ -396,5 +396,6 @@ fprintf(fid, 'cfg.Tsw: %s\n', mat2str(Tsw(:)'));
 fprintf(fid, 'validSwitchTp: %s\n', mat2str(Tp_valid(:)'));
 fclose(fid);
 end
+
 
 

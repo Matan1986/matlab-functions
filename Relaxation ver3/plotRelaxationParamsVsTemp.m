@@ -1,4 +1,12 @@
-function plotRelaxationParamsVsTemp(fitResults, sample_name, minR2)
+function plotRelaxationParamsVsTemp(fitResults, sample_name, minR2, plotLevel)
+
+%% Handle plotLevel parameter (gating for plotting)
+if nargin < 4 || isempty(plotLevel)
+    plotLevel = 'summary';
+end
+if strcmpi(plotLevel, 'none')
+    return;
+end
 % plotRelaxationParamsVsTemp
 % Draws core physics parameters: tau, n vs Temperature.
 % Filters by minimum R² before plotting.
@@ -26,8 +34,15 @@ end
 goodIdx = T.R2 >= minR2;
 Tgood = T(goodIdx,:);
 
+% If mixed-model table is provided, keep only KWW rows for tau/beta physics plots
+if ismember('model_type', Tgood.Properties.VariableNames)
+    modelType = lower(string(Tgood.model_type));
+    isKww = modelType == "kww";
+    Tgood = Tgood(isKww,:);
+end
+
 if isempty(Tgood)
-    warning('No curves with R² >= %.2f. Nothing to plot.', minR2);
+    warning('No KWW curves with R² >= %.2f. Nothing to plot in tau/beta panel.', minR2);
     return;
 end
 

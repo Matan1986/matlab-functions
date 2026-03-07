@@ -39,9 +39,10 @@ if isfield(cfg, 'debug') && isfield(cfg.debug, 'enable') && cfg.debug.enable
         cfg.debug.runTag = datestr(now, 'yyyymmdd_HHMMSS');
     end
     if ~isfield(cfg.debug, 'outputRoot') || isempty(cfg.debug.outputRoot)
-        cfg.debug.outputRoot = fullfile(cfg.outputFolder, 'Debug');
+        cfg.debug.outputRoot = getResultsDir('aging', 'debug_runs');
     end
     cfg.debug.outFolder = fullfile(cfg.debug.outputRoot, cfg.debug.runTag);
 end
 
 end
+

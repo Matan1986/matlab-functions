@@ -74,6 +74,19 @@ function verifyOnRealData
     cfgTemplate.dip_margin_K = 2;
     cfgTemplate.plateau_nPoints = 6;
     cfgTemplate.dropLowestN = 1;
+    cfgTemplate.agingMetricMode = 'direct';  % Force Stage4 direct AFM/FM decomposition for plateau geometry audit
+    if ~isfield(cfgTemplate, 'FM_plateau_minWidth_K')
+        cfgTemplate.FM_plateau_minWidth_K = 1.0;
+    end
+    if ~isfield(cfgTemplate, 'FM_plateau_minPoints')
+        cfgTemplate.FM_plateau_minPoints = 12;
+    end
+    if ~isfield(cfgTemplate, 'FM_plateau_maxAllowedSlope')
+        cfgTemplate.FM_plateau_maxAllowedSlope = 0.02;
+    end
+    if ~isfield(cfgTemplate, 'FM_plateau_allowNarrowFallback')
+        cfgTemplate.FM_plateau_allowNarrowFallback = true;
+    end
     cfgTemplate.debug.verbose = true;
     cfgTemplate.debug.enable = false;
     cfgTemplate.doPlotting = false;
@@ -409,11 +422,24 @@ function verifyOnRealData
     fprintf('  Windows correspond to FM plateau geometry used by Stage4 extraction.\n');
     fprintf('  Robust-baseline recomputation is only used when Stage4 geometry is missing or forced by config.\n');
     for i = 1:height(diagTable)
-        fprintf('Run %d | Tp=%.3g K | wait=%g s | plateau_L=[%.4g, %.4g] K (n=%g) | plateau_R=[%.4g, %.4g] K (n=%g) | source=%s\n', ...
+        fprintf(['Run %d | Tp=%.3g K | wait=%g s | plateau_L=[%.4g, %.4g] K (n=%g, width=%.4g K, slope=%.6g) ' ...
+                 '| plateau_R=[%.4g, %.4g] K (n=%g, width=%.4g K, slope=%.6g) | meetsMin=%.0f | narrowFallback=%.0f | source=%s\n'], ...
             diagTable.RunID(i), diagTable.Tp(i), diagTable.wait_time_seconds(i), ...
-            diagTable.plateau_L_min(i), diagTable.plateau_L_max(i), diagTable.n_plateau_L(i), ...
-            diagTable.plateau_R_min(i), diagTable.plateau_R_max(i), diagTable.n_plateau_R(i), char(diagTable.plateau_geometry_source(i)));
+            diagTable.plateau_L_min(i), diagTable.plateau_L_max(i), diagTable.n_plateau_L(i), diagTable.plateau_L_width_K(i), diagTable.plateau_L_slope(i), ...
+            diagTable.plateau_R_min(i), diagTable.plateau_R_max(i), diagTable.n_plateau_R(i), diagTable.plateau_R_width_K(i), diagTable.plateau_R_slope(i), ...
+            diagTable.plateau_meets_minCriteria(i), diagTable.plateau_narrow_fallback(i), char(diagTable.plateau_geometry_source(i)));
     end
+    widthL_valid = diagTable.plateau_L_width_K(isfinite(diagTable.plateau_L_width_K));
+    widthR_valid = diagTable.plateau_R_width_K(isfinite(diagTable.plateau_R_width_K));
+    nL_valid = diagTable.n_plateau_L(isfinite(diagTable.n_plateau_L));
+    nR_valid = diagTable.n_plateau_R(isfinite(diagTable.n_plateau_R));
+    narrow_valid = diagTable.plateau_narrow_fallback(isfinite(diagTable.plateau_narrow_fallback));
+    fprintf('Plateau geometry summary:\n');
+    fprintf('  median left plateau width = %.4g K\n', medianOrNaN(widthL_valid));
+    fprintf('  median right plateau width = %.4g K\n', medianOrNaN(widthR_valid));
+    fprintf('  median n_left = %.4g\n', medianOrNaN(nL_valid));
+    fprintf('  median n_right = %.4g\n', medianOrNaN(nR_valid));
+    fprintf('  fraction narrow fallback = %.4g\n', meanOrNaN(double(narrow_valid ~= 0)));
     fprintf('\n');
 
     printFMMetricStabilityAudit(diagTable);
@@ -440,6 +466,12 @@ function diagTable = buildUnifiedTable(pauseRuns, waitSecVec, cfg, fmMetricNames
     prMax = NaN(N,1);
     nL = NaN(N,1);
     nR = NaN(N,1);
+    widthL = NaN(N,1);
+    widthR = NaN(N,1);
+    slopeL = NaN(N,1);
+    slopeR = NaN(N,1);
+    criteriaMet = NaN(N,1);
+    narrowFallback = NaN(N,1);
     plateauSource = strings(N,1);
     forceRobustGeom = isfield(cfg, 'recomputePlateauGeometryInVerify') && logical(cfg.recomputePlateauGeometryInVerify);
     if nargin < 4 || isempty(fmMetricNames)
@@ -502,10 +534,10 @@ function diagTable = buildUnifiedTable(pauseRuns, waitSecVec, cfg, fmMetricNames
             nL_run = getval(r, 'FM_plateau_n_left');
             nR_run = getval(r, 'FM_plateau_n_right');
 
-            hasWinL = isnumeric(wL) && numel(wL) >= 2 && all(isfinite(wL(1:2)));
-            hasWinR = isnumeric(wR) && numel(wR) >= 2 && all(isfinite(wR(1:2)));
-            hasNL = isnumeric(nL_run) && isfinite(nL_run);
-            hasNR = isnumeric(nR_run) && isfinite(nR_run);
+            hasWinL = isnumeric(wL) && numel(wL) >= 2;
+            hasWinR = isnumeric(wR) && numel(wR) >= 2;
+            hasNL = isfield(r, 'FM_plateau_n_left') && isnumeric(nL_run) && isscalar(nL_run);
+            hasNR = isfield(r, 'FM_plateau_n_right') && isnumeric(nR_run) && isscalar(nR_run);
 
             if hasWinL && hasWinR && hasNL && hasNR
                 plMin(i) = wL(1);
@@ -514,6 +546,12 @@ function diagTable = buildUnifiedTable(pauseRuns, waitSecVec, cfg, fmMetricNames
                 prMax(i) = wR(2);
                 nL(i) = nL_run;
                 nR(i) = nR_run;
+                widthL(i) = getval(r, 'FM_plateau_left_width_K');
+                widthR(i) = getval(r, 'FM_plateau_right_width_K');
+                slopeL(i) = getval(r, 'FM_plateau_left_slope');
+                slopeR(i) = getval(r, 'FM_plateau_right_slope');
+                criteriaMet(i) = getval(r, 'FM_plateau_meets_minCriteria');
+                narrowFallback(i) = getval(r, 'FM_plateau_narrow_fallback');
                 hasStage4Geom = true;
                 plateauSource(i) = "stage4";
             end
@@ -524,7 +562,11 @@ function diagTable = buildUnifiedTable(pauseRuns, waitSecVec, cfg, fmMetricNames
                           'dip_margin_K', cfg.dip_margin_K, ...
                           'plateau_nPoints', cfg.plateau_nPoints, ...
                           'dropLowestN', cfg.dropLowestN, ...
-                          'dropHighestN', 0);
+                          'dropHighestN', 0, ...
+                          'plateau_minWidth_K', getCfg(cfg, 'FM_plateau_minWidth_K', 0), ...
+                          'plateau_minPoints', getCfg(cfg, 'FM_plateau_minPoints', cfg.plateau_nPoints), ...
+                          'plateau_maxAllowedSlope', getCfg(cfg, 'FM_plateau_maxAllowedSlope', inf), ...
+                          'plateau_allowNarrowFallback', getCfg(cfg, 'FM_plateau_allowNarrowFallback', true));
             bout = estimateRobustBaseline(T, dM, tp(i), cfgB);
             if isfield(bout, 'idxL') && ~isempty(bout.idxL)
                 plMin(i) = min(T(bout.idxL));
@@ -536,6 +578,12 @@ function diagTable = buildUnifiedTable(pauseRuns, waitSecVec, cfg, fmMetricNames
                 prMax(i) = max(T(bout.idxR));
                 nR(i) = numel(bout.idxR);
             end
+            widthL(i) = getval(bout, 'plateauL_width_K');
+            widthR(i) = getval(bout, 'plateauR_width_K');
+            slopeL(i) = getval(bout, 'plateauL_slope');
+            slopeR(i) = getval(bout, 'plateauR_slope');
+            criteriaMet(i) = getval(bout, 'plateauCriteriaSatisfied');
+            narrowFallback(i) = getval(bout, 'narrowFallback');
 
             if isfinite(plMin(i)) && isfinite(plMax(i)) && isfinite(prMin(i)) && isfinite(prMax(i))
                 if forceRobustGeom
@@ -559,11 +607,13 @@ function diagTable = buildUnifiedTable(pauseRuns, waitSecVec, cfg, fmMetricNames
     end
 
     diagTable = table(runId, tp, wt, tmin, dipArea, dipDepth, fm, bsl, stat, dipLo, dipHi, ...
-                      plMin, plMax, prMin, prMax, nL, nR, plateauSource, ...
+                      plMin, plMax, prMin, prMax, nL, nR, widthL, widthR, slopeL, slopeR, criteriaMet, narrowFallback, plateauSource, ...
                       'VariableNames', {'RunID','Tp','wait_time_seconds','Tmin','Dip_area','Dip_depth', ...
                                         'FM_step_mag','baseline_slope','baseline_status','dip_lo','dip_hi', ...
                                         'plateau_L_min','plateau_L_max','plateau_R_min','plateau_R_max', ...
-                                        'n_plateau_L','n_plateau_R','plateau_geometry_source'});
+                                        'n_plateau_L','n_plateau_R','plateau_L_width_K','plateau_R_width_K', ...
+                                        'plateau_L_slope','plateau_R_slope','plateau_meets_minCriteria','plateau_narrow_fallback', ...
+                                        'plateau_geometry_source'});
 
     fixedVars = diagTable.Properties.VariableNames;
     for k = 1:numel(fmMetricNames)
@@ -830,6 +880,17 @@ function printFMMetricStabilityAudit(diagTable)
     stabilityTable.stability_rank = (1:height(stabilityTable))';
     stabilityTable = movevars(stabilityTable, 'stability_rank', 'Before', 'Metric');
 
+    preferredMain = ["FM_E","FM_abs","FM_area_abs"];
+    prefMask = ismember(stabilityTable.Metric, preferredMain);
+    if any(prefMask)
+        prefTable = stabilityTable(prefMask, {'Metric','mean_SNR','median_SNR'});
+        [~, ordPref] = ismember(prefTable.Metric, preferredMain);
+        [~, ordSort] = sort(ordPref);
+        prefTable = prefTable(ordSort, :);
+        fprintf('Primary aging FM observables (ratios are diagnostics only):\n');
+        disp(prefTable);
+    end
+
     fprintf('Global FM stability summary (sorted by median SNR):\n');
     disp(stabilityTable(:, {'Metric','mean_SNR','median_SNR','stability_rank'}));
     fprintf('\n');
@@ -908,4 +969,27 @@ function val = getval_str(s, fieldName, dflt)
     else
         val = dflt;
     end
+end
+function v = medianOrNaN(x)
+if isempty(x)
+    v = NaN;
+else
+    v = median(x, 'omitnan');
+end
+end
+
+function v = meanOrNaN(x)
+if isempty(x)
+    v = NaN;
+else
+    v = mean(x, 'omitnan');
+end
+end
+
+function v = getCfg(cfg, fieldName, defaultValue)
+if isstruct(cfg) && isfield(cfg, fieldName)
+    v = cfg.(fieldName);
+else
+    v = defaultValue;
+end
 end

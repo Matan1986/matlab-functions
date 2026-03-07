@@ -112,10 +112,24 @@ switch lower(mode)
         % 2) FM metric
         % ===============================
         if FM_source == "stage4"
-            if isfield(pr, 'FM_step_mag') && ~isempty(pr.FM_step_mag) && isfinite(pr.FM_step_mag)
+            if isfield(pr, 'FM_signed') && ~isempty(pr.FM_signed) && isfinite(pr.FM_signed)
+                F_raw_signed = double(pr.FM_signed);
+            elseif isfield(pr, 'FM_step_raw') && ~isempty(pr.FM_step_raw) && isfinite(pr.FM_step_raw)
+                F_raw_signed = double(pr.FM_step_raw);
+            elseif isfield(pr, 'FM_step_mag') && ~isempty(pr.FM_step_mag) && isfinite(pr.FM_step_mag)
                 F_raw_signed = double(pr.FM_step_mag);
+            else
+                F_raw_signed = NaN;
+            end
+
+            if isfinite(F_raw_signed)
                 FM_metric_signed(i) = F_raw_signed;
-                FM_metric_mag(i) = abs(F_raw_signed);
+                if isfield(pr, 'FM_abs') && ~isempty(pr.FM_abs) && isfinite(pr.FM_abs)
+                    FM_metric_mag(i) = double(pr.FM_abs);
+                else
+                    F_raw_mag = abs(F_raw_signed);
+                    FM_metric_mag(i) = F_raw_mag;
+                end
             else
                 FM_metric_signed(i) = NaN;
                 FM_metric_mag(i) = NaN;
@@ -133,7 +147,8 @@ switch lower(mode)
             if numel(low) > 2 && numel(high) > 2
                 F_raw_signed = mean(high,'omitnan') - mean(low,'omitnan');
                 FM_metric_signed(i) = F_raw_signed;
-                FM_metric_mag(i) = abs(F_raw_signed);
+                F_raw_mag = abs(F_raw_signed);
+                FM_metric_mag(i) = F_raw_mag;
             else
                 FM_metric_signed(i) = NaN;
                 FM_metric_mag(i) = NaN;
@@ -155,10 +170,24 @@ switch lower(mode)
         % 2) FM metric source
         % ===============================
         if FM_source == "stage4"
-            if isfield(pauseRuns(i), 'FM_step_mag') && ~isempty(pauseRuns(i).FM_step_mag) && isfinite(pauseRuns(i).FM_step_mag)
+            if isfield(pauseRuns(i), 'FM_signed') && ~isempty(pauseRuns(i).FM_signed) && isfinite(pauseRuns(i).FM_signed)
+                F_raw_signed = double(pauseRuns(i).FM_signed);
+            elseif isfield(pauseRuns(i), 'FM_step_raw') && ~isempty(pauseRuns(i).FM_step_raw) && isfinite(pauseRuns(i).FM_step_raw)
+                F_raw_signed = double(pauseRuns(i).FM_step_raw);
+            elseif isfield(pauseRuns(i), 'FM_step_mag') && ~isempty(pauseRuns(i).FM_step_mag) && isfinite(pauseRuns(i).FM_step_mag)
                 F_raw_signed = double(pauseRuns(i).FM_step_mag);
+            else
+                F_raw_signed = NaN;
+            end
+
+            if isfinite(F_raw_signed)
                 FM_metric_signed(i) = F_raw_signed;
-                FM_metric_mag(i) = abs(F_raw_signed);
+                if isfield(pauseRuns(i), 'FM_abs') && ~isempty(pauseRuns(i).FM_abs) && isfinite(pauseRuns(i).FM_abs)
+                    FM_metric_mag(i) = double(pauseRuns(i).FM_abs);
+                else
+                    F_raw_mag = abs(F_raw_signed);
+                    FM_metric_mag(i) = F_raw_mag;
+                end
             else
                 FM_metric_signed(i) = NaN;
                 FM_metric_mag(i) = NaN;
@@ -195,7 +224,8 @@ switch lower(mode)
             if numel(low) > 2 && numel(high) > 2
                 F_raw_signed = mean(high,'omitnan') - mean(low,'omitnan');
                 FM_metric_signed(i) = F_raw_signed;
-                FM_metric_mag(i) = abs(F_raw_signed);
+                F_raw_mag = abs(F_raw_signed);
+                FM_metric_mag(i) = F_raw_mag;
             else
                 FM_metric_signed(i) = NaN;
                 FM_metric_mag(i) = NaN;
@@ -267,6 +297,8 @@ fprintf('Number of valid pauses after filtering: %d\n', numel(Tp));
 Tp_pause_export = Tp(:);
 Dp_pause_export = Dp(:);
 Fp_pause_export = Fp(:);
+Fp_pause_signed_export = Fp_signed(:);
+Fp_pause_abs_export = Fp_mag(:);
 
 % --- Interpolate to switching grid (RAW first) ---
 switch params.interp.mode
@@ -301,8 +333,10 @@ end
 
 if params.allowSignedFM
     F_interp_raw = F_interp_raw_signed;
+    F_interp_for_basis = abs(F_interp_raw_signed);
 else
     F_interp_raw = F_interp_raw_mag;
+    F_interp_for_basis = F_interp_raw_mag;
 end
 
 % --- Interpolation artifact diagnostics ---
@@ -328,9 +362,9 @@ end
 % --- Legacy pipeline keeps the original behavior (clamp to >=0) ---
 % Count clamps before applying them (PR?ÃƒÂ¢Ã¢â€šÂ¬Ã‚ÂÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Â Clamp diagnostics)
 nClampLow_D = nnz(D_interp_raw < 0);
-nClampLow_F = nnz(F_interp_raw_mag < 0);
+nClampLow_F = nnz(F_interp_for_basis < 0);
 D_interp = max(D_interp_raw, 0);
-F_interp = max(F_interp_raw_mag, 0);
+F_interp = max(F_interp_for_basis, 0);
 
 % Initialize all clamp counters before any debug prints
 nClampLow_Dn = 0;
@@ -835,11 +869,15 @@ result.Rsw_pause = Rsw_pause(:);
 result.C_pause   = C_pause(:);
 result.A_pause   = Dp_pause_export;
 result.F_pause   = Fp_pause_export;
+result.F_pause_signed = Fp_pause_signed_export;
+result.F_pause_abs = Fp_pause_abs_export;
+result.F_pause_metric = result.F_pause;
 
 % Validate pause domain exports have matching lengths
 assert(all([numel(result.Tp_pause), numel(result.A_pause), ...
             numel(result.F_pause), numel(result.Rsw_pause), ...
-            numel(result.C_pause)] == numel(result.Tp_pause)), ...
+            numel(result.C_pause), numel(result.F_pause_signed), ...
+            numel(result.F_pause_abs)] == numel(result.Tp_pause)), ...
     'Pause-domain export vectors do not have matching lengths.');
 
 % Readable aliases (keep backward compatibility)
@@ -1024,7 +1062,7 @@ if status_C1T ~= "ok"
 end
 fprintf('corr(C1,T) = %.3f\n', r_C1T);
 
-Tp_valid = Tp(Dp>0 & Fp>0);
+Tp_valid = Tp(Dp>0 & Fp_mag>0);
 fprintf('Tp range: %.1fÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“%.1f K\n', min(Tp_valid), max(Tp_valid));
 fprintf('Tsw range: %.1fÃƒÂ¢Ã¢â€šÂ¬Ã¢â‚¬Å“%.1f K\n', min(Tsw), max(Tsw));
 % attach for later use

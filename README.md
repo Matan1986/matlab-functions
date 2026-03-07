@@ -55,3 +55,11 @@ Each module maintains its own documentation:
 - [Aging](./Aging/README.md) — AFM/FM coexistence model and global J-dependent fitting
 
 For repository-level notes, conventions, and workflow documentation, see [DOCUMENTATION.md](./DOCUMENTATION.md).
+
+## Canonical Documentation
+
+- [Repository structure](./docs/repository_structure.md)
+- [Contributing guide](./CONTRIBUTING.md)
+- [Relaxation module README](./Relaxation ver3/README.md)
+- [Switching module README](./Switching ver12/README.md)
+

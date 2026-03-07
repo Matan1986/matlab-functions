@@ -50,6 +50,10 @@ cfg.excludeLowT_K = 6;
 cfg.FM_plateau_K = 6;
 cfg.FM_buffer_K = 6;
 cfg.excludeLowT_mode = 'pre';
+cfg.FM_plateau_minWidth_K = 1.0;      % Minimum accepted plateau width (K) in robust Stage4 baseline geometry
+cfg.FM_plateau_minPoints = 12;         % Minimum accepted plateau points per side in robust Stage4 baseline geometry
+cfg.FM_plateau_maxAllowedSlope = 0.02; % Maximum |d(DeltaM)/dT| allowed in plateau windows
+cfg.FM_plateau_allowNarrowFallback = true;  % Keep legacy narrow geometry if criteria cannot be met
 
 % --- FM right plateau window mode ---
 cfg.FM_rightPlateauMode = 'fixed';  % 'relative' (Tp-dependent) or 'fixed' (absolute temperature)
@@ -79,7 +83,7 @@ cfg.outputFolder = '';
 cfg.debug = struct();
 cfg.debug.enable = true;
 cfg.debug.saveOutputs = true;
-cfg.debug.outputRoot = fullfile(cfg.outputFolder,'Debug');
+cfg.debug.outputRoot = resolveDefaultDebugOutputRoot();
 cfg.debug.runTag = '';
 cfg.debug.makeWindowOverlayPlots = true;
 cfg.debug.makeRawVsFilteredPlots = true;
@@ -347,4 +351,22 @@ cfg.switchParams.debugSwitching = false;
 cfg.switchParams.dipSigmaLowerBound = cfg.dipSigmaLowerBound;
 cfg.switchParams.dipAreaLowPercentile = cfg.dipAreaLowPercentile;
 
+end
+
+function debugRoot = resolveDefaultDebugOutputRoot()
+% Resolve default debug output root inside the standardized results tree.
+if exist('getResultsDir', 'file') == 2
+    debugRoot = getResultsDir('aging', 'debug_runs');
+    return;
+end
+
+% Fallback: resolve relative to repository root when utility is unavailable.
+thisFile = mfilename('fullpath');
+pipelineDir = fileparts(thisFile);
+agingDir = fileparts(pipelineDir);
+repoRoot = fileparts(agingDir);
+debugRoot = fullfile(repoRoot, 'results', 'aging', 'debug_runs');
+if ~exist(debugRoot, 'dir')
+    mkdir(debugRoot);
+end
 end

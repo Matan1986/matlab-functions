@@ -41,6 +41,19 @@ fitWindow_extraStart_percent = 0.00; % cut the initial start
 absThreshold = 3e-5;
 slopeThreshold = 1e-8;
 
+% Relaxation model selection:
+%   'log'     - logarithmic relaxation (default)
+%   'kww'     - stretched exponential
+%   'compare' - fit both and pick lower AIC
+cfg = struct();
+cfg.relaxationModel = 'log';  % options: 'log' | 'kww' | 'compare'
+
+% Plotting control:
+%   'none'    - no plots
+%   'summary' - core plots only (overlay, params, collapse)
+%   'full'    - all diagnostics + core plots
+cfg.plotLevel = 'summary';  % options: 'none' | 'summary' | 'full'
+
 exportFitTableToExcel      = false;
 showInFitTableFigure       = true;
 showRelaxationParamPlots   = true;
@@ -139,7 +152,7 @@ if showFits
 
     allFits = fitAllRelaxations(Time_table, Moment_table, ...
         Temp_table, Field_table, debugMode, Hthresh_align, fitParams, ...
-        fitWindow_extraStart_percent, fitWindow_extraEnd_percent, absThreshold, slopeThreshold);
+        fitWindow_extraStart_percent, fitWindow_extraEnd_percent, absThreshold, slopeThreshold, fileList, cfg.relaxationModel);
 
     showRelaxationFitTable(allFits, exportFitTableToExcel, ...
         showInFitTableFigure, dir);
@@ -154,13 +167,13 @@ if plots.core && showFits && ~isempty(allFits)
         color_scheme, fileList, debugMode, trimToFitWindow, ...
         compareMode, sample_name, fields, ...
         containsTRM_folder, containsIRM_folder, ...
-        offsetDisplayMode, offsetValue);
+        offsetDisplayMode, offsetValue, cfg.plotLevel);
 
     % Physical parameters
-    plotRelaxationParamsVsTemp(allFits, sample_name, minR2_for_paramPlots);
+    plotRelaxationParamsVsTemp(allFits, sample_name, minR2_for_paramPlots, cfg.plotLevel);
 
     % Collapse plot (stretched-exponential scaling)
-    plotRelaxationCollapse(allFits, Time_table, Moment_table, sample_name, fileList);
+    plotRelaxationCollapse(allFits, Time_table, Moment_table, sample_name, fileList, cfg.plotLevel);
 end
 
 %% ===============================

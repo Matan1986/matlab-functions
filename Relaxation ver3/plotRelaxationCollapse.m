@@ -1,4 +1,12 @@
-function plotRelaxationCollapse(allFits, Time_table, Moment_table, sample_name, fileList)
+function plotRelaxationCollapse(allFits, Time_table, Moment_table, sample_name, fileList, plotLevel)
+
+%% Handle plotLevel parameter (gating for plotting)
+if nargin < 6 || isempty(plotLevel)
+    plotLevel = 'summary';
+end
+if strcmpi(plotLevel, 'none')
+    return;
+end
 % plotRelaxationCollapse
 % Core physics plot: stretched-exponential scaling collapse
 %
@@ -20,7 +28,23 @@ colors = parula(max(nCurves,1));
 figName = sprintf('%s - Relaxation collapse', sample_name);
 figure('Name', figName, 'Color', 'w'); hold on;
 
+if ismember('model_type', allFits.Properties.VariableNames)
+    allModels = lower(string(allFits.model_type));
+    hasAnyKww = any(allModels == "kww");
+    if ~hasAnyKww
+        warning('plotRelaxationCollapse:NoKWW', 'No KWW fits available for collapse plot.');
+        return;
+    end
+end
+
 for i = 1:nCurves
+    if ismember('model_type', allFits.Properties.VariableNames)
+        modelType = lower(string(allFits.model_type(i)));
+        if modelType ~= "kww"
+            continue;
+        end
+    end
+
     idx = allFits.data_idx(i);
     if idx < 1 || idx > numel(Time_table)
         continue;

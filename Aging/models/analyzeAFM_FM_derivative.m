@@ -216,7 +216,7 @@ thisFile = mfilename('fullpath');
 modelsDir = fileparts(thisFile);
 agingRoot = fileparts(modelsDir);
 repoRoot = fileparts(agingRoot);
-outDir = fullfile(repoRoot, 'results', 'diagnostics', 'derivative_shapes');
+outDir = getResultsDir('aging', 'decomposition', 'derivative_shapes');
 if ~exist(outDir, 'dir')
     mkdir(outDir);
 end
@@ -306,3 +306,4 @@ else
     tpTag = strrep(tpTag, '.', 'p');
 end
 end
+

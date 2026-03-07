@@ -90,6 +90,18 @@ for i = 1:numel(state.pauseRuns)
     if ~isfield(run, 'FM_step_mag') || isempty(run.FM_step_mag)
         run.FM_step_mag = NaN;
     end
+    if isfield(run, 'FM_step_raw') && ~isempty(run.FM_step_raw) && isfinite(run.FM_step_raw)
+        run.FM_signed = run.FM_step_raw;
+    elseif isfield(run, 'FM_step_mag') && ~isempty(run.FM_step_mag) && isfinite(run.FM_step_mag)
+        run.FM_signed = run.FM_step_mag;
+    else
+        run.FM_signed = NaN;
+    end
+    if isfinite(run.FM_signed)
+        run.FM_abs = abs(run.FM_signed);
+    else
+        run.FM_abs = NaN;
+    end
     if ~isfield(run, 'baseline_slope') || isempty(run.baseline_slope)
         run.baseline_slope = NaN;
     end
