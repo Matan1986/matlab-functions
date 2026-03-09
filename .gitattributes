@@ -1,0 +1,29 @@
+* text=auto
+
+# MATLAB source
+*.m text eol=lf
+
+# Documentation
+*.md text eol=lf
+*.txt text eol=lf
+
+# Configuration / structured text
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.csv text eol=lf
+
+# Shell scripts
+*.sh text eol=lf
+
+# Windows scripts
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary files (never modify line endings)
+*.mat binary
+*.png binary
+*.jpg binary
+*.pdf binary
+*.zip binary
+*.fig binary
