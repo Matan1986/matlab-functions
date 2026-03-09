@@ -13,6 +13,7 @@ addpath(genpath(legacyRoot));
 
 % Optional: reuse results helper if available.
 addpath(genpath(fullfile(repoRoot, 'Aging')));
+addpath(fullfile(repoRoot, 'tools'));
 
 if ~exist('metricType', 'var') || isempty(metricType)
     metricType = "P2P_percent";  % "P2P_percent" | "meanP2P" | "medianAbs"
@@ -61,7 +62,7 @@ assert(isfolder(parentDir), [ ...
     'Set parentDir before running, for example:\n' ...
     'parentDir = ''L:\\...\\Amp Temp Dep all'';'], parentDir);
 
-outDir = resolveOutputDir(repoRoot);
+[outDir, switchingRun] = init_run_output_dir(repoRoot, 'switching', 'alignment_audit', parentDir); %#ok<NASGU>
 if ~exist(outDir, 'dir')
     mkdir(outDir);
 end
@@ -192,6 +193,7 @@ close(figTempCleanup);
 Ipeak = NaN(size(temps));
 S_peak = NaN(size(temps));
 width_I = NaN(size(temps));
+halfwidth_diff_norm = NaN(size(temps));
 for it = 1:numel(temps)
     row = Smap(it,:);
     valid = isfinite(row);
@@ -214,9 +216,20 @@ for it = 1:numel(temps)
     half = 0.5 * smax;
     halfMask = rowValid >= half;
     if nnz(halfMask) >= 2
-        width_I(it) = max(currValid(halfMask)) - min(currValid(halfMask));
+        iLeft = min(currValid(halfMask));
+        iRight = max(currValid(halfMask));
+        wL = Ipeak(it) - iLeft;
+        wR = iRight - Ipeak(it);
+        width_I(it) = wL + wR;
+        denom = wL + wR;
+        if isfinite(denom) && denom > eps
+            halfwidth_diff_norm(it) = (wR - wL) / denom;
+        else
+            halfwidth_diff_norm(it) = NaN;
+        end
     else
         width_I(it) = NaN;
+        halfwidth_diff_norm(it) = NaN;
     end
 end
 
@@ -319,12 +332,30 @@ coeffI_mode2 = NaN(size(currents));
 coeffI_mode3 = NaN(size(currents));
 
 % Export compact observables-vs-temperature table for downstream analysis.
-obsTbl = table(temps, Ipeak, S_peak, width_I, Ichi, chiPeak, chiWidth, chiArea, asym, ...
+obsTbl = table(temps, Ipeak, S_peak, halfwidth_diff_norm, width_I, Ichi, chiPeak, chiWidth, chiArea, asym, ...
     mode1_T, mode2_T, coeff_mode1, coeff_mode2, coeff_mode3, mode_ratio, mode_ratio_smooth, ...
-    'VariableNames', {'T_K','Ipeak','S_peak','width_I','Ichi','chiPeak','chiWidth','chiArea','asym', ...
+    'VariableNames', {'T_K','Ipeak','S_peak','halfwidth_diff_norm','width_I','Ichi','chiPeak','chiWidth','chiArea','asym', ...
     'mode1_T','mode2_T','coeff_mode1','coeff_mode2','coeff_mode3','mode_ratio','mode_ratio_smooth'});
 obsCsvOut = fullfile(outDir, 'switching_alignment_observables_vs_T.csv');
 writetable(obsTbl, obsCsvOut);
+
+% Export switching observables to run-scoped observable-layer CSV.
+obsRunCsvOut = "";
+if exist('export_observables', 'file') == 2
+    try
+        if ~exist('switchingRunDir', 'var') || isempty(switchingRunDir)
+            switchingRunDir = createSwitchingObservableRunDir(repoRoot, "switching_alignment_audit", parentDir, metricType);
+        end
+        sampleName = deriveSwitchingSampleName(parentDir, metricType);
+        obsLongTbl = buildSwitchingObservableLongTable( ...
+            temps, S_peak, Ipeak, halfwidth_diff_norm, width_I, asym, sampleName);
+        obsRunCsvOut = export_observables('switching', switchingRunDir, obsLongTbl);
+    catch ME
+        warning('Switching observable export failed: %s', ME.message);
+    end
+else
+    warning('export_observables.m not found on path; skipping run-scoped observable export.');
+end
 
 % Decomposition outputs.
 svdTOut = "";
@@ -339,6 +370,7 @@ svdRec3Out = "";
 nmfRec3Out = "";
 svdScreeOut = "";
 svdExplainedOut = "";
+svdSingValsOut = "";
 svdModeAmpOut = "";
 svdModeRatioOut = "";
 svdModeRatioSmoothOut = "";
@@ -346,6 +378,7 @@ svdCurrentModesOut = "";
 svdModeReconOut = "";
 svdModeScatterOut = "";
 svdModeObsCorrOut = "";
+svdModeObsCorrCsvOut = "";
 modeObsOut = "";
 nmfStabilityOut = "";
 ridgeCurveOut = "";
@@ -414,6 +447,12 @@ if runSVD
     end
     disp('Normalized singular values:')
     disp(singvals')
+
+    svdSingValsTbl = table((1:numel(svals_raw))', svals_raw(:), singvals(:), ...
+        cumsum(svals_raw(:).^2) ./ sum(svals_raw(:).^2), ...
+        'VariableNames', {'mode','singular_value','normalized_singular_value','cumulative_energy'});
+    svdSingValsOut = fullfile(outDir, 'switching_alignment_svd_singular_values.csv');
+    writetable(svdSingValsTbl, svdSingValsOut);
 
     figSvdScree = figure('Color','w','Visible','off', 'Position', [100 100 900 600]);
     axSvdScree = axes(figSvdScree);
@@ -763,6 +802,16 @@ if ranSVD
         svdModeObsCorrOut = fullfile(outDir, 'switching_alignment_mode_observable_correlations.png');
         saveas(figModeObsCorr, svdModeObsCorrOut);
         close(figModeObsCorr);
+
+        modeObsCorrTbl = table( ...
+            string({'mode1_T_vs_S_peak';'mode2_T_vs_S_peak';'mode1_T_vs_I_peak';'mode2_T_vs_I_peak'}), ...
+            [safeCorr(mode1_T, S_peak); safeCorr(mode2_T, S_peak); safeCorr(mode1_T, Ipeak); safeCorr(mode2_T, Ipeak)], ...
+            [nnz(isfinite(mode1_T) & isfinite(S_peak)); nnz(isfinite(mode2_T) & isfinite(S_peak)); ...
+             nnz(isfinite(mode1_T) & isfinite(Ipeak)); nnz(isfinite(mode2_T) & isfinite(Ipeak))], ...
+            'VariableNames', {'comparison','correlation_r','n_points'});
+        svdModeObsCorrCsvOut = fullfile(outDir, 'switching_alignment_mode_observable_correlations.csv');
+        writetable(modeObsCorrTbl, svdModeObsCorrCsvOut);
+
 
         obsTbl.mode1_T = mode1_T;
         obsTbl.mode2_T = mode2_T;
@@ -1962,8 +2011,33 @@ currOut = fullfile(outDir, 'switching_alignment_current_cuts.png');
 saveas(figCurr, currOut);
 close(figCurr);
 
+% Mirror key SVD/observable-SVD outputs into the run-scoped folder when available.
+if strlength(obsRunCsvOut) > 0
+    runObsDir = fileparts(char(obsRunCsvOut));
+    copyFileIfExists(svdSingValsOut, fullfile(runObsDir, 'switching_alignment_svd_singular_values.csv'));
+    copyFileIfExists(svdScreeOut, fullfile(runObsDir, 'switching_alignment_svd_scree.png'));
+    copyFileIfExists(svdExplainedOut, fullfile(runObsDir, 'switching_alignment_svd_explained_variance.png'));
+    copyFileIfExists(svdTOut, fullfile(runObsDir, 'switching_alignment_svd_T.png'));
+    copyFileIfExists(svdIOut, fullfile(runObsDir, 'switching_alignment_svd_I.png'));
+    copyFileIfExists(svdModeObsCorrOut, fullfile(runObsDir, 'switching_alignment_mode_observable_correlations.png'));
+    copyFileIfExists(svdModeObsCorrCsvOut, fullfile(runObsDir, 'switching_alignment_mode_observable_correlations.csv'));
+    copyFileIfExists(modeObsOut, fullfile(runObsDir, 'switching_alignment_mode_observables.png'));
+
+    coreDataPath = fullfile(runObsDir, 'switching_alignment_core_data.mat');
+    save(coreDataPath, 'temps', 'currents', 'Smap', 'rawTbl', 'metricType', 'channelMode', 'tempMatchTol_K', 'parentDir');
+
+    if ranSVD && exist('U','var') == 1 && exist('S','var') == 1 && exist('V','var') == 1
+        svdDataPath = fullfile(runObsDir, 'switching_alignment_svd_data.mat');
+        save(svdDataPath, 'U', 'S', 'V', 'svals_raw', 'singvals', 'mode1_T', 'mode2_T', ...
+            'coeff_mode1', 'coeff_mode2', 'coeff_mode3', 'err_svd_1', 'err_svd_2', 'err_svd_3');
+    end
+end
+
 fprintf('Saved switching alignment raw table: %s\n', rawCsv);
 fprintf('Saved observables CSV: %s\n', obsCsvOut);
+if strlength(obsRunCsvOut) > 0
+    fprintf('Saved run-scoped observable-layer CSV: %s\n', obsRunCsvOut);
+end
 fprintf('Saved temperature-cleanup figure: %s\n', tempCleanupOut);
 fprintf('Temperature cleanup: original points = %d, cleaned bins = %d\n', numTempsOriginal, numTempsCleaned);
 fprintf('Final temperature grid (K): %s\n', mat2str(temps(:)'));
@@ -2040,6 +2114,9 @@ if ranSVD
     if strlength(svdModeObsCorrOut) > 0
         fprintf('Saved SVD mode-observable correlations figure: %s\n', svdModeObsCorrOut);
     end
+    if strlength(svdModeObsCorrCsvOut) > 0
+        fprintf('Saved SVD mode-observable correlations CSV: %s\n', svdModeObsCorrCsvOut);
+    end
     if strlength(modeObsOut) > 0
         fprintf('Saved mode observables figure: %s\n', modeObsOut);
     end
@@ -2048,6 +2125,9 @@ if ranSVD
     end
     if strlength(svdExplainedOut) > 0
         fprintf('Saved SVD explained variance plot: %s\n', svdExplainedOut);
+    end
+    if strlength(svdSingValsOut) > 0
+        fprintf('Saved SVD singular values CSV: %s\n', svdSingValsOut);
     end
     if strlength(svdRec2Out) > 0
         fprintf('Saved SVD rank-2 reconstruction heatmap: %s\n', svdRec2Out);
@@ -2121,6 +2201,117 @@ else
     fprintf('NMF audit summary: insufficient data for rank-3 sufficiency decision.\n');
 end
 
+function copyFileIfExists(srcPath, dstPath)
+if strlength(string(srcPath)) == 0
+    return
+end
+if exist(char(string(srcPath)), 'file') ~= 2
+    return
+end
+copyfile(char(string(srcPath)), char(string(dstPath)));
+end
+
+function r = safeCorr(x, y)
+v = isfinite(x) & isfinite(y);
+r = NaN;
+if nnz(v) >= 2
+    r = corr(x(v), y(v), 'rows', 'complete');
+end
+end
+
+function obsTblLong = buildSwitchingObservableLongTable(temps, S_peak, Ipeak, halfwidth_diff_norm, width_I, asym, sampleName)
+obsNames = ["S_peak", "I_peak", "halfwidth_diff_norm", "width_I", "asym"];
+obsRoles = ["coordinate", "coordinate", "coordinate", "observable", "observable"];
+obsUnits = ["percent", "mA", "unitless", "mA", "unitless"];
+obsValues = [S_peak(:), Ipeak(:), halfwidth_diff_norm(:), width_I(:), asym(:)];
+
+nT = numel(temps);
+nObs = numel(obsNames);
+nRows = nT * nObs;
+
+experiment = repmat("switching", nRows, 1);
+sample = repmat(string(sampleName), nRows, 1);
+temperature = NaN(nRows,1);
+observable = strings(nRows,1);
+value = NaN(nRows,1);
+units = strings(nRows,1);
+role = strings(nRows,1);
+
+idx = 0;
+for it = 1:nT
+    for io = 1:nObs
+        idx = idx + 1;
+        temperature(idx) = temps(it);
+        observable(idx) = obsNames(io);
+        value(idx) = obsValues(it, io);
+        units(idx) = obsUnits(io);
+        role(idx) = obsRoles(io);
+    end
+end
+
+obsTblLong = table(experiment, sample, temperature, observable, value, units, role);
+end
+
+function sampleName = deriveSwitchingSampleName(parentDir, metricType)
+[~, baseName] = fileparts(char(string(parentDir)));
+if strlength(string(baseName)) == 0
+    baseName = 'switching_sample';
+end
+sampleName = string(baseName) + "_" + string(metricType);
+end
+
+function runDir = createSwitchingObservableRunDir(repoRoot, label, parentDir, metricType)
+if nargin < 3
+    parentDir = "";
+end
+if nargin < 4
+    metricType = "";
+end
+if isappdata(0, 'runContext')
+    activeRun = getappdata(0, 'runContext');
+    if isstruct(activeRun) && isfield(activeRun, 'experiment') && strcmpi(string(activeRun.experiment), "switching") ...
+            && isfield(activeRun, 'run_dir') && strlength(string(activeRun.run_dir)) > 0
+        runDir = char(string(activeRun.run_dir));
+        return;
+    end
+end
+
+if exist('createRunContext', 'file') == 2
+    cfgRun = struct();
+    cfgRun.runLabel = char(string(label));
+    cfgRun.dataset = char(string(parentDir));
+    cfgRun.metricType = char(string(metricType));
+    run = createRunContext('switching', cfgRun);
+    runDir = run.run_dir;
+    return;
+end
+
+runsRoot = fullfile(repoRoot, 'results', 'switching', 'runs');
+if exist(runsRoot, 'dir') ~= 7
+    mkdir(runsRoot);
+end
+
+label = lower(char(string(label)));
+label = regexprep(label, '[^a-zA-Z0-9_]+', '_');
+label = regexprep(label, '_+', '_');
+label = regexprep(label, '^_|_$', '');
+if isempty(label)
+    label = 'switching_observables';
+end
+
+runId = ['run_' datestr(now, 'yyyy_mm_dd_HHMMSS') '_' label];
+runDir = fullfile(runsRoot, runId);
+if exist(runDir, 'dir') ~= 7
+    mkdir(runDir);
+end
+
+latestPtr = fullfile(repoRoot, 'results', 'switching', 'latest_run.txt');
+fid = fopen(latestPtr, 'w');
+if fid >= 0
+    fprintf(fid, '%s', runId);
+    fclose(fid);
+end
+end
 function row = initRow()
 row = struct();
 row.current_mA = NaN;
@@ -2427,6 +2618,14 @@ catch
     colormap(ax, cmap);
 end
 end
+
+
+
+
+
+
+
+
 
 
 

@@ -1,74 +1,157 @@
 # Repository Structure
 
-This repository separates code, run entry points, tests, and generated artifacts.
+Last updated: March 9, 2026
 
-## Top-level directories
+This document defines the repository layout standard for `matlab-functions`. It also records the current transitional state so contributors and agents can tell the difference between the current filesystem and the target organization.
 
-- `Aging/` - Aging analysis module (pipeline, models, diagnostics, utils, verification).
-- `Relaxation ver3/` - Relaxation analysis module.
-- `Switching ver12/` - Switching analysis module.
-- `runs/` - launch scripts and local path adapters for running pipelines.
-- `tests/` - test code and test harnesses (not generated outputs).
-- `results/` - all generated outputs (figures, tables, diagnostics, logs).
+## Current repository zones
 
-## Repository philosophy
+### Active experiment modules
 
-- Modules contain analysis code.
-- `runs/` contains execution entry points and local environment wrappers.
-- `tests/` contains testing code only.
-- `results/` contains runtime outputs only.
+- `Aging/`
+- `Relaxation ver3/`
+- `Switching/`
 
-## Results structure
+### Legacy or overlapping experiment folders
 
-When a run context is active (initialized in `Aging/pipeline/stage0_setupPaths.m`), outputs are isolated per run:
+- `Aging old/`
+- `Switching ver12/`
 
-- `results/<experiment>/runs/run_<timestamp>_<label>/<analysis>/...`
+### Shared repository layers
 
-Run naming:
+- `analysis/` for cross-experiment analyses
+- `results/` for generated outputs
+- `runs/` for launch wrappers and local path adapters
+- `tests/` for repository-level tests
+- `tools/` for shared utilities
+- `docs/` for repository-wide documentation
 
-- Preferred: `run_<timestamp>_<label>` (for example `run_2026_03_07_184500_MG119_AF_decomp_test`)
-- Fallback: `run_<timestamp>` when no label is provided
+### Historical root-level MATLAB packages
 
-Label sources (first non-empty, sanitized):
+The root also contains older versioned MATLAB folders such as `AC HC MagLab ver8/`, `FieldSweep ver3/`, `General ver2/`, and `zfAMR ver11/`. They are not part of the Aging/Relaxation/Switching standard, but they remain in the repository and should not be treated as target examples for new organization.
 
-- `cfg.runLabel`
-- `cfg.analysisLabel`
-- `cfg.dataset`
-- `cfg.datasetName`
+## Current module map
 
-Run reproducibility files are created at the run root:
+| Area | What lives there now |
+| --- | --- |
+| `Aging/analysis/` | Aging analysis and visualization scripts |
+| `Aging/diagnostics/` | Aging diagnostics and audit scripts |
+| `Aging/pipeline/` | Aging staged pipeline |
+| `Aging/models/` | Aging model-fitting code |
+| `Aging/plots/` | Aging plotting helpers |
+| `Aging/utils/` | Aging utilities including the run helper |
+| `Aging/tests/` | Aging tests |
+| `Relaxation ver3/` | Main Relaxation scripts live directly in the module root |
+| `Relaxation ver3/diagnostics/` | Relaxation diagnostics |
+| `Switching/analysis/` | New Switching analyses and diagnostic-style scripts |
+| `Switching ver12/` | Legacy Switching pipeline and legacy debug output |
+| `analysis/` | Cross-experiment analyses |
+| `results/` | Shared output root |
+| `runs/` | Entry points such as `run_aging.m` and local path setup |
+| `tests/` | Repository-level test area, currently sparse |
+| `tools/` | Run inspection and observable utilities |
 
-- `run_manifest.json` (includes `run_id`, `timestamp`, `experiment`, `label`, `git_commit`, `matlab_version`, `host`, `user`)
-- `config_snapshot.m` (configuration snapshot at run start)
-- `log.txt`
-- `run_notes.txt` (researcher notes template; created empty if missing)
+## Target standard
 
-Without an active run context, legacy output behavior is preserved:
+New work should follow this structure.
 
-- `results/<experiment>/<analysis>/...`
+```text
+<repo root>/
+    modules/
+        Aging/
+            analysis/
+            diagnostics/
+            pipeline/
+            models/
+            plots/
+            utils/
+            tests/
+            docs/
+        Relaxation/
+            analysis/
+            diagnostics/
+            pipeline/
+            models/
+            plots/
+            utils/
+            tests/
+            docs/
+        Switching/
+            analysis/
+            diagnostics/
+            pipeline/
+            models/
+            plots/
+            utils/
+            tests/
+            docs/
+    analysis/
+        cross_experiment/
+    results/
+        aging/
+            runs/
+        relaxation/
+            runs/
+        switching/
+            runs/
+        cross_experiment/
+            runs/
+        repository_audit/
+    runs/
+    tests/
+    tools/
+    docs/
+```
 
-## Aging outputs (analysis folders)
+## Directory roles
 
-- `decomposition/`
-- `svd_pca/`
-- `baseline_tests/`
-- `separability/`
-- `diagnostics_misc/`
-- `debug_runs/`
+| Path | Role |
+| --- | --- |
+| `modules/<Experiment>/analysis/` | Production analysis scripts that generate scientific outputs |
+| `modules/<Experiment>/diagnostics/` | Validation, debug, interpretability, and audit scripts |
+| `modules/<Experiment>/pipeline/` | Full workflows and staged execution logic |
+| `modules/<Experiment>/models/` | Model-fitting and decomposition logic |
+| `modules/<Experiment>/plots/` | Plotting helpers and layout utilities |
+| `modules/<Experiment>/utils/` | Shared internal helpers, run creation, and path utilities |
+| `modules/<Experiment>/tests/` | Experiment-specific tests and smoke tests |
+| `analysis/cross_experiment/` | Analyses that intentionally consume outputs from more than one experiment |
+| `results/<experiment>/runs/` | Canonical result storage for experiment runs |
+| `results/cross_experiment/runs/` | Canonical storage for cross-experiment analysis runs |
+| `runs/` | Human-facing launchers and local environment setup |
+| `tests/` | Repository-level integration and harness tests |
+| `tools/` | Shared utilities such as run listing, manifest loading, and observable export |
+| `docs/` | Repository standards, conventions, and high-level documentation |
 
-## Diagnostics placement
+## Current exceptions to clean up over time
 
-Diagnostics scripts live inside each module, for example:
+These locations exist today but are not part of the target standard for new outputs:
 
-- `Aging/diagnostics/`
+- `Aging/results/`
+- `Aging/diagnostics/results/`
+- `Aging/tests/switching_stability/results/`
+- `Switching ver12/main/Debug/`
+- flat output folders like `results/relaxation/derivative_smoothing/` and `results/switching/alignment_audit/`
 
-They should write outputs under `results/` via module utilities (for Aging: `Aging/utils/getResultsDir.m`).
+## Placement rules
 
-## Current template status
+1. Analysis scripts belong in the experiment module's `analysis/` folder.
+2. Diagnostic and validation scripts belong in the experiment module's `diagnostics/` folder.
+3. Launch wrappers belong in `runs/`.
+4. Shared helpers belong in `tools/` or in the experiment module's `utils/` folder.
+5. Tests belong in either `modules/<Experiment>/tests/` or top-level `tests/`, but not in ad hoc locations.
+6. Generated outputs belong under `results/`, never inside source folders.
+7. New cross-experiment outputs belong under `results/cross_experiment/runs/`.
 
-Aging is currently the first fully organized module and serves as the template for refactoring other modules to the same structure.
+## Canonical experiment names for results paths
 
-## Developer tools
+Use lowercase experiment names in `results/`:
 
-- `tools/list_runs.m` - Read-only utility to list runs and manifest metadata from `results/<experiment>/runs/`.
-- `tools/load_run_manifest.m` - Helper to read a run's `run_manifest.json` by path.
+- `aging`
+- `relaxation`
+- `switching`
+- `cross_experiment`
+
+## Related documents
+
+- `docs/results_system.md`
+- `docs/repository_organization_audit.md`

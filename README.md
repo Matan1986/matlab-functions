@@ -59,16 +59,16 @@ For repository-level notes, conventions, and workflow documentation, see [DOCUME
 ## Canonical Documentation
 
 - [Repository structure](./docs/repository_structure.md)
-- [Run system](./docs/run_system.md)
+- [Results system](./docs/results_system.md)
 - [Contributing guide](./CONTRIBUTING.md)
 - [Relaxation module README](./Relaxation ver3/README.md)
 - [Switching module README](./Switching ver12/README.md)
 
 ## Run Isolation
 
-Aging supports lightweight run tracking. When run context is initialized, outputs are written under:
+The repository uses a run-based local results system. Analysis and diagnostic outputs belong under:
 
-`results/<experiment>/runs/run_<timestamp>_<label>/<analysis>/`
+`results/<experiment>/runs/run_<timestamp>_<label>/`
 
 Run IDs use timestamp-first naming for sortability:
 
@@ -87,13 +87,15 @@ Run index and pointer files:
 - `results/<experiment>/run_index.csv`
 - `results/<experiment>/latest_run.txt`
 
+Generated run outputs are local working artifacts. Figures, CSV exports, reports, archives, and other run products should remain under `results/` and should not be committed to git.
+
 You can set a custom label before running:
 
 ```matlab
 cfg.runLabel = 'MG119_AF_decomp_test';
 ```
 
-See [Repository structure](./docs/repository_structure.md) and [Run system](./docs/run_system.md) for details.
+See [Repository structure](./docs/repository_structure.md) and [Results system](./docs/results_system.md) for details.
 
 ## Developer Tools
 

@@ -30,23 +30,22 @@ diagnostic_output.txt
 output.txt
 
 # =========================================================
-# Generated plots
-# =========================================================
-**/plots/
-
-# =========================================================
 # Results / generated artifacts
 # =========================================================
-results/*.mat
-results/*.csv
-results/generated/
-results/phaseC/
+results/**
+!results/
+!results/README.md
 
-# =========================================================
-# Diagnostics and results folders
-# =========================================================
-**/Results/
-**/diagnostics/
+Aging/results/
+Aging/diagnostics/results/
+Aging/tests/**/results/
+Switching ver12/main/Debug/
+
+*.png
+*.pdf
+*.fig
+*.mat
+*.zip
 
 # =========================================================
 # Local testing files
@@ -59,9 +58,7 @@ DIAGNOSTICS_SCAN_REPORT.md
 # =========================================================
 # Aging local experiments
 # =========================================================
-Aging/tests/
 Aging old/
-Aging/analysis/
 
 # =========================================================
 # Local configuration
@@ -77,7 +74,6 @@ General ver2/appearanceControl/altmany-export_fig-3.54.0.0/
 # Misc
 # =========================================================
 tmp_*
-*.pdf
 Debug/
 
 which_baseline.txt

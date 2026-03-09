@@ -60,7 +60,11 @@ if ~isfield(cfg,'dataDir') || isempty(cfg.dataDir)
 end
 
 if ~isfield(cfg,'outputFolder') || isempty(cfg.outputFolder)
-    cfg.outputFolder = fullfile(cfg.dataDir, 'Results');
+    if isfield(cfg,'run') && isstruct(cfg.run) && isfield(cfg.run,'run_dir') && ~isempty(cfg.run.run_dir)
+        cfg.outputFolder = cfg.run.run_dir;
+    else
+        cfg.outputFolder = fullfile(cfg.dataDir, 'Results');
+    end
 end
 
 dbg(cfg, "summary", "Loading data from: %s", cfg.dataDir);
@@ -222,3 +226,4 @@ params = cfg.switchParams;
 Tsw = cfg.Tsw;
 Rsw = cfg.Rsw;
 end
+

@@ -1,5 +1,5 @@
 function [t_fit, M_fit, info] = pickRelaxWindow(t, M, H, debug, Hthresh)
-% pickRelaxWindow — automatic detection of relaxation fitting window
+% pickRelaxWindow - automatic detection of relaxation fitting window
 %
 % Usage:
 %   [t_fit, M_fit, info] = pickRelaxWindow(t, M, H, debug, Hthresh)
@@ -27,7 +27,15 @@ end
 
 % --- Optional smoothing of field to avoid flicker near 0 Oe ---
 if ~isempty(H)
-    Hsmooth = smooth(H, 11, 'moving');
+    smoothSpan = min(11, numel(H));
+    if mod(smoothSpan, 2) == 0
+        smoothSpan = smoothSpan - 1;
+    end
+    if smoothSpan >= 3
+        Hsmooth = smooth(H, smoothSpan, 'moving');
+    else
+        Hsmooth = H;
+    end
 else
     Hsmooth = H;
 end
@@ -37,12 +45,12 @@ mask = abs(Hsmooth) < Hthresh;
 t_fit = []; M_fit = [];
 
 if any(mask)
-    % --- נזהה את כל המעברים של השדה דרך הסף ---
+    % Detect threshold crossings for the low-field region.
     below = abs(Hsmooth) < Hthresh;
-    cross_idx = find(diff(below) == 1);  % נקודות שבהן נכנס מתחת לסף
-    leave_idx = find(diff(below) == -1); % נקודות שבהן יצא מהסף
+    cross_idx = find(diff(below) == 1);   % enters below threshold
+    leave_idx = find(diff(below) == -1);  % exits below threshold
 
-    % --- אם השדה נשאר מתחת לסף בסוף המדידה, נשתמש בכניסה האחרונה ---
+    % If the field stays low until end-of-run, use the latest entry point.
     if isempty(cross_idx)
         idx_start = find(below, 1, 'first');
     else
@@ -57,7 +65,7 @@ if any(mask)
         end
     end
 
-    % --- נוודא שהחלון באמת נשאר מתחת לסף ---
+    % Validate selected window remains below threshold.
     if all(abs(Hsmooth(idx_start:idx_end)) < Hthresh)
         t_start = t(idx_start);
         t_end   = t(idx_end);
@@ -75,8 +83,17 @@ end
 % --- Fallback: if no field info or failed ---
 if isempty(t_fit)
     % use derivative minimum
-    dMdt = gradient(M) ./ gradient(t);
-    [~, idx_min] = min(dMdt);
+    dt = gradient(t);
+    dM = gradient(M);
+    dMdt = dM ./ dt;
+    dMdt(~isfinite(dMdt)) = NaN;
+    if all(isnan(dMdt))
+        idx_min = 1;
+    else
+        tmpSlope = dMdt;
+        tmpSlope(isnan(tmpSlope)) = inf;
+        [~, idx_min] = min(tmpSlope);
+    end
     t_start = t(idx_min);
     t_end = t_start + 0.2 * (t(end) - t(1));
     info.t_start = t_start;

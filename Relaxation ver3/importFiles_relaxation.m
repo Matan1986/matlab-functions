@@ -1,6 +1,6 @@
 function [Time_table, Temp_table, Field_table, Moment_table, mass] = ...
     importFiles_relaxation(directory, fileList, normalizeByMass, debugMode)
-% importFiles_relaxation — Import MPMS/MPMS3 relaxation .dat files
+% importFiles_relaxation - Import MPMS/MPMS3 relaxation .dat files
 %
 % Inputs:
 %   directory        - folder containing .dat files
@@ -62,24 +62,49 @@ for i = 1:length(fileList)
         error('Could not find required columns in %s', fileList{i});
     end
 
-    % --- Extract numeric vectors ---
-    t = tbl{:, iTime};
+        % --- Extract numeric vectors ---
+    tRaw = tbl{:, iTime};
     T = tbl{:, iTemp};
     H = tbl{:, iField};
     M = tbl{:, iMoment};
 
-    % --- Fix and scale time ---
-    t = t - t(1);
-    dt = median(diff(t), 'omitnan');
-    total = max(t) - min(t);
-
-    if mean(t) > 1e6
-        t = t - t(1);          % epoch seconds
-        total = max(t) - min(t);
-    elseif dt > 1e3
-        t = t / 1000;          % convert ms → s
-        total = max(t) - min(t);
+    % --- Keep only finite rows and sort by time ---
+    ok = isfinite(tRaw) & isfinite(T) & isfinite(H) & isfinite(M);
+    tRaw = tRaw(ok);
+    T = T(ok);
+    H = H(ok);
+    M = M(ok);
+    if isempty(tRaw)
+        if debugMode
+            warning('importFiles_relaxation:NoFiniteRows', ...
+                'No finite data rows in %s', fileList{i});
+        end
+        continue;
     end
+
+    [tRaw, ord] = sort(tRaw, 'ascend');
+    T = T(ord);
+    H = H(ord);
+    M = M(ord);
+
+    % Remove duplicate timestamps to keep derivatives stable downstream.
+    [tRaw, iu] = unique(tRaw, 'stable');
+    T = T(iu);
+    H = H(iu);
+    M = M(iu);
+
+    % --- Fix and scale time ---
+    idx0 = find(isfinite(tRaw), 1, 'first');
+    t0 = tRaw(idx0);
+    dtRaw = median(diff(tRaw), 'omitnan');
+    meanRaw = mean(tRaw, 'omitnan');
+
+    if meanRaw > 1e11 || dtRaw >= 1000
+        t = (tRaw - t0) / 1000;   % epoch-ms or relative-ms -> seconds
+    else
+        t = tRaw - t0;            % epoch-seconds or already-seconds
+    end
+    total = max(t) - min(t);
 
     % --- Normalize by mass (emu/g) ---
     if normalizeByMass && ~isnan(mass)

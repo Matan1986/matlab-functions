@@ -172,10 +172,15 @@ resultsTable = table( ...
     nTminOutsideWindow, ...
     'VariableNames', varNames);
 
-outDir = fullfile(pwd, 'results');
-if ~exist(outDir, 'dir')
-    mkdir(outDir);
+if exist('getResultsDir', 'file') == 2
+    outDir = getResultsDir('aging', 'diagnostics_misc');
+else
+    outDir = fullfile(pwd, 'results');
+    if ~exist(outDir, 'dir')
+        mkdir(outDir);
+    end
 end
+
 
 save(fullfile(outDir, 'C2_dipWindowSweep.mat'), 'resultsTable');
 writetable(resultsTable, fullfile(outDir, 'C2_dipWindowSweep.csv'));

@@ -56,6 +56,11 @@ if isempty(p) || ~all(isfield(p, {'Minf','dM','tau','n'}))
     return;
 end
 
+if ~isfinite(p.tau) || p.tau <= 0 || ~isfinite(p.n) || p.n <= 0
+    yFit = nan(size(t));
+    return;
+end
+
 tSafe = max(t(:), 0);
 yFitCol = p.Minf + p.dM .* exp(-(tSafe ./ p.tau) .^ p.n);
 yFit = reshape(yFitCol, size(t));

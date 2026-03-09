@@ -1,7 +1,7 @@
 function allFits = fitAllRelaxations(Time_table, Moment_table, Temp_table, Field_table, ...
     debug, Hthresh, fitParams, ...
     fitWindow_extraStart_percent, fitWindow_extraEnd_percent,absThreshold,slopeThreshold, fileList, relaxationModel)
-% fitAllRelaxations — automatic relaxation analysis and fitting
+% fitAllRelaxations - automatic relaxation analysis and fitting
 %
 % Performs:
 %   1) window selection
@@ -43,52 +43,70 @@ for i = 1:n
     M = Moment_table{i};
     if isempty(t) || isempty(M), continue; end
 
-    % --- Clean NaN / Inf ---
-    t = t(:); M = M(:);
-    ok = isfinite(t) & isfinite(M);
-    t = t(ok); M = M(ok);
-    if numel(t) < 30, continue; end
-
-    % --- Extract field (if available) ---
+    % --- Extract field (if available) and keep vectors aligned ---
     if i <= numel(Field_table) && ~isempty(Field_table{i})
-        H = Field_table{i};
+        H = Field_table{i}(:);
     else
         H = [];
     end
 
+    % --- Clean NaN / Inf and enforce monotonic time ---
+    t = t(:); M = M(:);
+    if ~isempty(H)
+        m = min([numel(t), numel(M), numel(H)]);
+        t = t(1:m); M = M(1:m); H = H(1:m);
+    else
+        m = min(numel(t), numel(M));
+        t = t(1:m); M = M(1:m);
+    end
+
+    ok = isfinite(t) & isfinite(M);
+    t = t(ok); M = M(ok);
+    if ~isempty(H), H = H(ok); end
+    if isempty(t), continue; end
+
+    [t, ord] = sort(t, 'ascend');
+    M = M(ord);
+    if ~isempty(H), H = H(ord); end
+
+    [t, iu] = unique(t, 'stable');
+    M = M(iu);
+    if ~isempty(H), H = H(iu); end
+    if numel(t) < 30, continue; end
+
     % === Window selection ===
-    [t_fit, M_fit, info] = pickRelaxWindow(t, M, Field_table{i}, debugFit, Hthresh);
+    [t_fit, M_fit, info] = pickRelaxWindow(t, M, H, debugFit, Hthresh);
     if isempty(t_fit) || numel(t_fit) < 15, continue; end
 
     %% === User-controlled fit window after H-threshold ===
 
-    % בסיס: חלון אוטומטי מהאלגוריתם
+    % window-control step
     t0_auto = info.t_start;
     t1_auto = info.t_end;
 
-    % משך הרלקסציה שנבחר ע"י המנגנון האוטומטי
+    % window-control step
     t_total = t1_auto - t0_auto;
     if t_total <= 0
         continue;
     end
 
-    % זמן התחלה חדש
+    % window-control step
     t0_new = t0_auto + fitWindow_extraStart_percent * t_total;
 
-    % זמן סיום חדש
+    % window-control step
     t1_new = t1_auto - fitWindow_extraEnd_percent * t_total;
 
-    % הגנה: שהחלון לא יתהפך
+    % window-control step
     if t1_new <= t0_new
         continue;
     end
 
-    % בחירת הנקודות
+    % window-control step
     valid = (t >= t0_new) & (t <= t1_new);
     t_fit = t(valid);
     M_fit = M(valid);
 
-    % הגנה – חייבים מינימום נקודות
+    % window-control step
     if numel(t_fit) < 15
         continue;
     end
@@ -125,23 +143,28 @@ for i = 1:n
     end
 
     if debugFit
-        fprintf('Run %2d: %.2f K — start @ %.1f min  [%s]\n', ...
+        fprintf('Run %2d: %.2f K - start @ %.1f min  [%s]\n', ...
             i, Tnom, t_fit(1)/60, reason);
     end
 
     %% --- Detect no-relaxation (temperature-blind) ---
     deltaM = max(M_fit) - min(M_fit);
-    dMdt   = abs( gradient(M_fit) ./ gradient(t_fit) );
-    meanSlope = mean(dMdt);
+    dMdtRaw = gradient(M_fit) ./ gradient(t_fit);
+    dMdt = abs(dMdtRaw(isfinite(dMdtRaw)));
+    if isempty(dMdt)
+        meanSlope = NaN;
+    else
+        meanSlope = mean(dMdt, 'omitnan');
+    end
 
-    if deltaM < absThreshold || meanSlope < slopeThreshold
+    if deltaM < absThreshold || (~isnan(meanSlope) && meanSlope < slopeThreshold)
 
         Minf_safe = mean(M_fit);
         dM_safe   = 0;
         M0_safe   = Minf_safe;
         tau_safe  = Inf;
         n_safe    = 1;
-        R2_safe   = 1;
+        R2_safe   = NaN;
         S_safe    = NaN;
         modelTypeSafe = "fallback";
 
@@ -172,13 +195,37 @@ for i = 1:n
     [fitParamsOut, R2, ~, modelType] = fitRelaxationModel(t_fit, M_fit, Tnom, debugFit, fitParams, relaxationModel);
 
     %% --- Extract fitted values safely ---
-    Minf_safe = scalarOrNaN(fitParamsOut.Minf);
-    dM_safe   = scalarOrNaN(fitParamsOut.dM);
-    M0_safe   = scalarOrNaN(fitParamsOut.M0);
-    tau_safe  = scalarOrNaN(fitParamsOut.tau);
-    n_safe    = scalarOrNaN(fitParamsOut.n);
+    if isstruct(fitParamsOut) && isfield(fitParamsOut,'Minf')
+        Minf_safe = scalarOrNaN(fitParamsOut.Minf);
+    else
+        Minf_safe = NaN;
+    end
+    if isstruct(fitParamsOut) && isfield(fitParamsOut,'dM')
+        dM_safe = scalarOrNaN(fitParamsOut.dM);
+    else
+        dM_safe = NaN;
+    end
+    if isstruct(fitParamsOut) && isfield(fitParamsOut,'M0')
+        M0_safe = scalarOrNaN(fitParamsOut.M0);
+    else
+        M0_safe = NaN;
+    end
+    if isstruct(fitParamsOut) && isfield(fitParamsOut,'tau')
+        tau_safe = scalarOrNaN(fitParamsOut.tau);
+    else
+        tau_safe = NaN;
+    end
+    if isstruct(fitParamsOut) && isfield(fitParamsOut,'n')
+        n_safe = scalarOrNaN(fitParamsOut.n);
+    else
+        n_safe = NaN;
+    end
     R2_safe   = scalarOrNaN(R2);
-    S_safe    = scalarOrNaN(fitParamsOut.S);
+    if isstruct(fitParamsOut) && isfield(fitParamsOut,'S')
+        S_safe = scalarOrNaN(fitParamsOut.S);
+    else
+        S_safe = NaN;
+    end
     modelTypeSafe = string(modelType);
 
     tStart = scalarOrNaN(t0_new);
@@ -223,3 +270,4 @@ if debugFit
 end
 
 end
+

@@ -2,7 +2,11 @@ function runPhaseC_leaveOneOut()
 
     %% -------- USER EDIT: path to baseline MAT --------
     % Put here the path to your baseline saved resultsLOO struct.
-    baselineMatPath = fullfile(pwd, 'results', 'baseline_resultsLOO.mat'); % <-- EDIT ME
+    if exist('getResultsDir', 'file') == 2
+        baselineMatPath = fullfile(getResultsDir('aging', 'diagnostics_misc'), 'baseline_resultsLOO.mat'); % <-- EDIT ME
+    else
+        baselineMatPath = fullfile(pwd, 'results', 'baseline_resultsLOO.mat'); % <-- EDIT ME
+    end
     assert(isfile(baselineMatPath), "Baseline MAT not found: %s", baselineMatPath);
 
     S = load(baselineMatPath);
@@ -100,7 +104,11 @@ function runPhaseC_leaveOneOut()
 
     %% Save outputs
     stamp = datestr(now, 'yyyymmdd_HHMMSS');
-    outDir = fullfile(pwd, 'results', 'phaseC', ['leaveOneOut_' stamp]);
+    if exist('getResultsDir', 'file') == 2
+        outDir = getResultsDir('aging', 'diagnostics_misc', 'phaseC', ['leaveOneOut_' stamp]);
+    else
+        outDir = fullfile(pwd, 'results', 'phaseC', ['leaveOneOut_' stamp]);
+    end
     if ~exist(outDir,'dir'); mkdir(outDir); end
 
     save(fullfile(outDir,'leaveOneOut_results.mat'), 'LOO', 'baseline', 'baselineMatPath');

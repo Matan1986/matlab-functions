@@ -256,10 +256,15 @@ else
     error('Pause-level FM metric not found in result.');
 end
 
-outDir = fullfile(pwd,'results');
-if ~exist(outDir,'dir')
-    mkdir(outDir);
+if exist('getResultsDir', 'file') == 2
+    outDir = getResultsDir('aging', 'diagnostics_misc');
+else
+    outDir = fullfile(pwd,'results');
+    if ~exist(outDir,'dir')
+        mkdir(outDir);
+    end
 end
+
 
 save(fullfile(outDir,'baseline_resultsLOO.mat'),'resultsLOO');
 
