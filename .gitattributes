@@ -1,4 +1,5 @@
 * text=auto
+.gitattributes text eol=lf
 
 # MATLAB source
 *.m text eol=lf
