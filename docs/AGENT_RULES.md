@@ -6,6 +6,32 @@ Use these rules for all analysis and diagnostic work in this repository.
 - Never commit figures, ZIP archives, or other generated run artifacts.
 - Never write outputs inside module directories such as `Aging/`, `Relaxation ver3/`, or `Switching/`.
 - Always generate a ZIP archive for sharing results from a completed run.
+- Before generating figures, read docs/visualization_rules.md and follow its standards.
+- Before writing run artifacts, read docs/output_artifacts.md and use only its required artifact directories.
+- Analysis scripts must not manage artifact paths directly. All artifact generation must use the repository helpers: save_run_figure, save_run_table, save_run_report.
+
+## Documentation Precedence
+
+When repository documents overlap, use this precedence order:
+
+1. docs/AGENT_RULES.md for agent behavior and repository safety limits.
+2. docs/results_system.md for output locations and run artifact layout.
+3. docs/run_system.md for run creation and run-context invariants.
+4. docs/repository_structure.md for code placement and repository layout.
+5. docs/output_artifacts.md for artifact subfolder usage within a run.
+
+## Architecture Alignment Policy
+
+Not all modules in the repository are fully aligned with the current
+architecture (pipeline / analysis / utils / run-based results).
+
+Modules may gradually be aligned with the new architecture when they are
+actively modified. Agents must not perform repository-wide refactors
+to enforce architectural alignment.
+
+Agents must not rename, relocate, normalize, or reorganize unrelated
+modules, legacy folders, or directory trees unless the task explicitly
+requires it.
 
 ## Agent Output Template
 
@@ -29,3 +55,7 @@ Verification
 - checks performed such as `git status`, path verification, or run-folder validation
 
 Agents should keep reports concise and avoid repeating repository context that is already documented in repository_structure.md or results_system.md.
+
+
+
+

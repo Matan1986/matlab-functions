@@ -55,6 +55,11 @@ The root also contains older versioned MATLAB folders such as `AC HC MagLab ver8
 
 New work should follow this structure.
 
+This `modules/` layout is the target reference model for gradual
+alignment. Agents must not create a new top-level `modules/` directory
+or migrate existing experiment folders into it unless explicitly
+requested.
+
 ```text
 <repo root>/
     modules/
@@ -142,6 +147,10 @@ These locations exist today but are not part of the target standard for new outp
 6. Generated outputs belong under `results/`, never inside source folders.
 7. New cross-experiment outputs belong under `results/cross_experiment/runs/`.
 
+Use `tools/` for helpers shared across multiple experiments or
+repository-wide workflows. Use module `utils/` for experiment-specific
+helpers that are not intended for cross-module reuse.
+
 ## Canonical experiment names for results paths
 
 Use lowercase experiment names in `results/`:
@@ -155,3 +164,73 @@ Use lowercase experiment names in `results/`:
 
 - `docs/results_system.md`
 - `docs/repository_organization_audit.md`
+
+## Run artifact helpers
+
+Use the shared helpers in `tools/` to save run artifacts into the canonical directories instead of writing directly into the run root.
+
+### Active run directory helper
+
+Scripts can use `getRunOutputDir()` to access the active run directory.
+
+The helper:
+
+- returns the current run root directory
+- reads the active `runContext` from MATLAB root appdata
+- is useful when a script already runs inside an initialized run context and needs the run root before calling artifact helpers
+
+Example:
+
+```matlab
+run_output_dir = getRunOutputDir()
+```
+
+### Figure helper
+
+Use `tools/save_run_figure.m` to save figures into `figures/`.
+
+The helper:
+
+- creates `figures/` under the run directory if needed
+- saves a 300 dpi PNG export
+- saves an editable FIG copy with the same base name
+
+Example:
+
+```matlab
+save_run_figure(gcf, 'aging_map_heatmap', run_output_dir)
+```
+
+### Table helper
+
+Use `tools/save_run_table.m` to save tables into `tables/`.
+
+The helper:
+
+- creates `tables/` under the run directory if needed
+- writes `.csv` or `.tsv` table files
+- defaults to `.csv` when no extension is provided
+
+Example:
+
+```matlab
+save_run_table(T, 'observables.csv', run_output_dir)
+```
+
+### Report helper
+
+Use `tools/save_run_report.m` to save text reports into `reports/`.
+
+The helper:
+
+- creates `reports/` under the run directory if needed
+- writes `.txt` or `.md` files
+- defaults to `.txt` when no extension is provided
+
+Example:
+
+```matlab
+save_run_report(reportText, 'run_summary.md', run_output_dir)
+```
+
+

@@ -102,8 +102,11 @@ fprintf('Aging geometry outputs saved to:\n%s\n', outDir);
 if ~isempty(activeRunCtx) && isstruct(activeRunCtx) && isfield(activeRunCtx, 'run_id') && ~isempty(activeRunCtx.run_id)
     fprintf('Run context active: YES\n');
     fprintf('Active run_id: %s\n', activeRunCtx.run_id);
-    if isfield(activeRunCtx, 'run_dir') && ~isempty(activeRunCtx.run_dir)
-        fprintf('Active run_dir: %s\n', activeRunCtx.run_dir);
+    try
+        activeRunDir = getRunOutputDir();
+        fprintf('Active run_dir: %s\n', activeRunDir);
+    catch
+        % Keep status printing resilient if the run context is partial.
     end
 else
     fprintf('Run context active: NO (getResultsDir fallback path in use)\n');
@@ -639,4 +642,5 @@ if ~isempty(tokHour)
     twSec = 3600 * str2double(tokHour{1});
 end
 end
+
 

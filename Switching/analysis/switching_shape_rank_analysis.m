@@ -14,6 +14,7 @@ repoRoot = fileparts(switchingRoot);
 
 addpath(genpath(fullfile(repoRoot, 'Aging')));
 addpath(fullfile(repoRoot, 'tools'));
+addpath(fullfile(repoRoot, 'Switching', 'utils'), '-begin');
 
 alignDir = resolve_results_input_dir(repoRoot, 'switching', 'alignment_audit');
 [outDir, run] = init_run_output_dir(repoRoot, 'switching', 'shape_rank_analysis'); %#ok<ASGLU>
@@ -316,48 +317,6 @@ fprintf('Singular values CSV: %s\n', svOut);
 fprintf('Reconstruction metrics CSV: %s\n', recOut);
 fprintf('Report: %s\n', repOut);
 fprintf('Review ZIP: %s\n', zipOut);
-
-
-function [temps, currents, Smap] = buildMapRounded(tbl)
-Traw = toNumeric(tbl, 'T_K');
-Iraw = toNumeric(tbl, 'current_mA');
-Sraw = toNumeric(tbl, 'S_percent');
-
-v = isfinite(Traw) & isfinite(Iraw) & isfinite(Sraw);
-Traw = Traw(v);
-Iraw = Iraw(v);
-Sraw = Sraw(v);
-
-Tbin = round(Traw);
-temps = unique(Tbin);
-currents = unique(Iraw);
-temps = sort(temps(:));
-currents = sort(currents(:));
-
-Smap = NaN(numel(temps), numel(currents));
-for it = 1:numel(temps)
-    for ii = 1:numel(currents)
-        m = Tbin == temps(it) & abs(Iraw - currents(ii)) < 1e-9;
-        if any(m)
-            Smap(it,ii) = mean(Sraw(m), 'omitnan');
-        end
-    end
-end
-end
-
-
-function x = toNumeric(tbl, varName)
-if ~ismember(varName, string(tbl.Properties.VariableNames))
-    x = NaN(height(tbl), 1);
-    return;
-end
-col = tbl.(varName);
-if isnumeric(col)
-    x = double(col(:));
-else
-    x = str2double(string(col(:)));
-end
-end
 
 
 function res = analyzeRank(M, maxRank)

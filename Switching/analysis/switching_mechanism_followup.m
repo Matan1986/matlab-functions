@@ -17,6 +17,7 @@ repoRoot = fileparts(switchingRoot);
 
 addpath(genpath(fullfile(repoRoot, 'Aging')));
 addpath(fullfile(repoRoot, 'tools'));
+addpath(fullfile(repoRoot, 'Switching', 'utils'), '-begin');
 
 alignmentDir = resolve_results_input_dir(repoRoot, 'switching', 'alignment_audit');
 mechDir = resolve_results_input_dir(repoRoot, 'switching', 'mechanism_survey');
@@ -562,74 +563,6 @@ fprintf('Mode2 metrics: %s\n', modeCsvOut);
 fprintf('Ridge-shape metrics: %s\n', shapeCsvOut);
 fprintf('Report: %s\n', reportOut);
 fprintf('ZIP: %s\n', zipOut);
-
-
-function x = toNumericColumn(tbl, varName)
-if isempty(tbl) || ~ismember(varName, tbl.Properties.VariableNames)
-    if isempty(tbl)
-        x = NaN(0,1);
-    else
-        x = NaN(height(tbl), 1);
-    end
-    return;
-end
-col = tbl.(varName);
-if isnumeric(col)
-    x = double(col(:));
-else
-    x = str2double(string(col(:)));
-end
-end
-
-
-function [temps, currents, Smap] = buildSwitchingMapRounded(samplesTbl)
-tRaw = toNumericColumn(samplesTbl, 'T_K');
-iRaw = toNumericColumn(samplesTbl, 'current_mA');
-sRaw = toNumericColumn(samplesTbl, 'S_percent');
-
-v = isfinite(tRaw) & isfinite(iRaw) & isfinite(sRaw);
-tRaw = tRaw(v);
-iRaw = iRaw(v);
-sRaw = sRaw(v);
-
-tVals = unique(tRaw);
-currents = unique(iRaw);
-tVals = sort(tVals(:));
-currents = sort(currents(:));
-
-Sraw = NaN(numel(tVals), numel(currents));
-for it = 1:numel(tVals)
-    for ii = 1:numel(currents)
-        m = abs(tRaw - tVals(it)) < 1e-9 & abs(iRaw - currents(ii)) < 1e-9;
-        if any(m)
-            Sraw(it,ii) = mean(sRaw(m), 'omitnan');
-        end
-    end
-end
-
-Tclean = round(tVals);
-[Tuniq,~,idx] = unique(Tclean, 'sorted');
-Smap = NaN(numel(Tuniq), numel(currents));
-for k = 1:numel(Tuniq)
-    mk = idx == k;
-    Smap(k,:) = mean(Sraw(mk,:), 1, 'omitnan');
-end
-temps = Tuniq(:);
-end
-
-
-function r = safeCorr(a, b)
-if isempty(a) || isempty(b)
-    r = NaN;
-    return;
-end
-v = isfinite(a) & isfinite(b);
-if nnz(v) < 3
-    r = NaN;
-    return;
-end
-r = corr(a(v), b(v), 'rows', 'complete');
-end
 
 
 function [z, ok] = zscoreFinite(x)

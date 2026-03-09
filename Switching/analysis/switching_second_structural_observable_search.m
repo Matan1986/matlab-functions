@@ -12,6 +12,7 @@ repoRoot = fileparts(switchingRoot);
 
 addpath(genpath(fullfile(repoRoot, 'Aging')));
 addpath(fullfile(repoRoot, 'tools'));
+addpath(fullfile(repoRoot, 'Switching', 'utils'), '-begin');
 
 alignDir = resolve_results_input_dir(repoRoot, 'switching', 'alignment_audit');
 followDir = resolve_results_input_dir(repoRoot, 'switching', 'mechanism_followup');
@@ -413,109 +414,6 @@ fprintf('Review ZIP: %s\n', zipOut);
 
 function c = mkCand(name, cat, desc, src, vals)
 c = struct('name', string(name), 'category', string(cat), 'description', string(desc), 'source', string(src), 'values', vals(:));
-end
-
-
-function x = toNum(tbl, name)
-if ~ismember(name, string(tbl.Properties.VariableNames))
-    x = NaN(height(tbl),1);
-    return;
-end
-col = tbl.(name);
-if isnumeric(col)
-    x = double(col(:));
-else
-    x = str2double(string(col(:)));
-end
-end
-
-
-function [temps, currents, Smap] = buildMapRounded(tbl)
-Traw = toNum(tbl,'T_K');
-Iraw = toNum(tbl,'current_mA');
-Sraw = toNum(tbl,'S_percent');
-v = isfinite(Traw) & isfinite(Iraw) & isfinite(Sraw);
-Traw = Traw(v); Iraw = Iraw(v); Sraw = Sraw(v);
-Tbin = round(Traw);
-temps = sort(unique(Tbin));
-currents = sort(unique(Iraw));
-Smap = NaN(numel(temps), numel(currents));
-for it = 1:numel(temps)
-    for ii = 1:numel(currents)
-        m = Tbin==temps(it) & abs(Iraw-currents(ii))<1e-9;
-        if any(m)
-            Smap(it,ii) = mean(Sraw(m), 'omitnan');
-        end
-    end
-end
-end
-
-
-function [S_norm, S_shape, Speak, rowMean, validRows, robustRows, peakFloor, gPeak] = buildShapeMaps(Smap, temps)
-Speak = NaN(size(temps));
-S_norm = NaN(size(Smap));
-S_shape = NaN(size(Smap));
-rowMean = NaN(size(temps));
-for it = 1:numel(temps)
-    row = Smap(it,:);
-    v = isfinite(row);
-    if ~any(v), continue; end
-    Speak(it) = max(row(v), [], 'omitnan');
-end
-
-gPeak = max(Speak(isfinite(Speak)), [], 'omitnan');
-peakFloor = max(1e-6, 1e-4*gPeak);
-validRows = isfinite(Speak) & Speak > peakFloor;
-
-for it = 1:numel(temps)
-    if ~validRows(it), continue; end
-    row = Smap(it,:);
-    v = isfinite(row);
-    rn = NaN(size(row));
-    rn(v) = row(v) / Speak(it);
-    S_norm(it,:) = rn;
-    mu = mean(rn(v), 'omitnan');
-    rowMean(it) = mu;
-    rc = rn;
-    rc(v) = rn(v) - mu;
-    S_shape(it,:) = rc;
-end
-
-robustRows = validRows & isfinite(temps) & temps<=30 & Speak >= 0.05*gPeak;
-end
-
-
-function sh = analyzeShapeSubspace(M, rankK)
-mask = isfinite(M);
-M0 = M; M0(~mask)=0;
-[U,S,V] = svd(M0, 'econ');
-sv = diag(S);
-k = min([rankK, numel(sv), size(U,2), size(V,2)]);
-C = U(:,1:k) * S(1:k,1:k);
-V2 = V(:,1:k);
-sh = struct('M',M,'U',U,'S',S,'V',V,'C',C,'V2',V2,'M_native',C*V2');
-end
-
-
-function [Xshape, Aleft, Aright] = computeXshapeFromMap(Smap, currents, Ipeak)
-Xshape = NaN(size(Ipeak));
-Aleft = NaN(size(Ipeak));
-Aright = NaN(size(Ipeak));
-for it = 1:numel(Ipeak)
-    row = Smap(it,:);
-    cur = currents(:)';
-    v = isfinite(row) & isfinite(cur) & isfinite(Ipeak(it));
-    if nnz(v) < 3, continue; end
-    rv = row(v); cv = cur(v);
-    mL = cv < Ipeak(it); mR = cv > Ipeak(it);
-    if ~any(mL) || ~any(mR), continue; end
-    Aleft(it) = sum(rv(mL), 'omitnan');
-    Aright(it) = sum(rv(mR), 'omitnan');
-    den = Aleft(it)+Aright(it);
-    if isfinite(den) && abs(den)>eps
-        Xshape(it) = max(min((Aright(it)-Aleft(it))/den,1),-1);
-    end
-end
 end
 
 

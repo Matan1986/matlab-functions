@@ -80,8 +80,6 @@ writeManifest(run, cfg);
 writeConfigSnapshot(run.config_snapshot_path, cfg, run);
 writeLogHeader(run.log_path, run);
 ensureRunNotesFile(run);
-updateRunIndex(run, cfg);
-updateLatestRunPointer(run);
 
 setRunContextAppdata(run);
 end
@@ -276,72 +274,6 @@ cleanupObj = onCleanup(@() fclose(fid)); %#ok<NASGU>
 % Intentionally empty template for manual notes.
 end
 
-function updateRunIndex(run, cfg)
-% Maintain per-experiment run index: results/<experiment>/run_index.csv
-expRoot = fullfile(run.repo_root, 'results', run.experiment);
-if ~exist(expRoot, 'dir')
-    mkdir(expRoot);
-end
-
-indexPath = fullfile(expRoot, 'run_index.csv');
-
-datasetVal = "";
-if isfield(cfg, 'dataset') && ~isempty(cfg.dataset)
-    datasetVal = string(cfg.dataset);
-end
-
-row = table( ...
-    string(run.run_id), ...
-    string(run.timestamp), ...
-    string(run.label), ...
-    string(run.experiment), ...
-    datasetVal, ...
-    string(run.git_commit), ...
-    'VariableNames', {'run_id','timestamp','label','experiment','dataset','git_commit'});
-
-if exist(indexPath, 'file') == 2
-    try
-        idx = readtable(indexPath, 'TextType', 'string');
-    catch
-        idx = readtable(indexPath);
-    end
-
-    required = row.Properties.VariableNames;
-    for i = 1:numel(required)
-        v = required{i};
-        if ~ismember(v, idx.Properties.VariableNames)
-            idx.(v) = strings(height(idx), 1);
-        else
-            idx.(v) = string(idx.(v));
-        end
-    end
-    idx = idx(:, required);
-
-    % Guard against duplicates by run_id.
-    idx = idx(idx.run_id ~= row.run_id(1), :);
-    idx = [idx; row];
-else
-    idx = row;
-end
-
-writetable(idx, indexPath);
-end
-
-function updateLatestRunPointer(run)
-% Write latest run pointer: results/<experiment>/latest_run.txt
-expRoot = fullfile(run.repo_root, 'results', run.experiment);
-if ~exist(expRoot, 'dir')
-    mkdir(expRoot);
-end
-
-pointerPath = fullfile(expRoot, 'latest_run.txt');
-fid = fopen(pointerPath, 'w');
-if fid < 0
-    error('Failed to write latest run pointer: %s', pointerPath);
-end
-cleanupObj = onCleanup(@() fclose(fid)); %#ok<NASGU>
-fprintf(fid, '%s\n', run.run_id);
-end
 
 function setRunContextAppdata(run)
 % Canonical root appdata storage for active run context.
@@ -369,3 +301,5 @@ if isempty(user)
     user = 'unknown';
 end
 end
+
+

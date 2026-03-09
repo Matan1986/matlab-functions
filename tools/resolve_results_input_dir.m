@@ -1,5 +1,5 @@
 function dirPath = resolve_results_input_dir(repoRoot, experiment, analysisName)
-% resolve_results_input_dir Prefer the latest run-scoped analysis dir, else legacy dir.
+% resolve_results_input_dir Resolve the latest run-scoped analysis dir.
 
 if nargin < 3
     error('resolve_results_input_dir requires repoRoot, experiment, and analysisName.');
@@ -28,6 +28,5 @@ if exist(runsRoot, 'dir') == 7
     end
 end
 
-legacyDir = fullfile(repoRoot, 'results', experiment, analysisName);
-dirPath = legacyDir;
+error('No run-scoped results directory found for %s/%s under %s.', experiment, analysisName, runsRoot);
 end

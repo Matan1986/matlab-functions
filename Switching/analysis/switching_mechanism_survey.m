@@ -17,6 +17,7 @@ repoRoot = fileparts(switchingRoot);
 
 addpath(genpath(fullfile(repoRoot, 'Aging')));
 addpath(fullfile(repoRoot, 'tools'));
+addpath(fullfile(repoRoot, 'Switching', 'utils'), '-begin');
 
 alignmentDir = resolve_results_input_dir(repoRoot, 'switching', 'alignment_audit');
 [outDir, run] = init_run_output_dir(repoRoot, 'switching', 'mechanism_survey'); %#ok<ASGLU>
@@ -223,7 +224,7 @@ title(axM1, 'Amplitude channel check');
 grid(axM1, 'on');
 cb1 = colorbar(axM1);
 ylabel(cb1, 'T (K)');
-rSpeakMode1 = safeCorr(coeff_mode1, S_peak);
+rSpeakMode1 = safeCorr(coeff_mode1, S_peak, 2);
 text(axM1, 0.04, 0.95, sprintf('corr = %.3f', rSpeakMode1), 'Units', 'normalized', ...
     'VerticalAlignment', 'top', 'FontSize', 10);
 
@@ -236,7 +237,7 @@ title(axM2, 'Shape/ridge channel check');
 grid(axM2, 'on');
 cb2 = colorbar(axM2);
 ylabel(cb2, 'T (K)');
-rIpeakMode2 = safeCorr(coeff_mode2, Ipeak);
+rIpeakMode2 = safeCorr(coeff_mode2, Ipeak, 2);
 text(axM2, 0.04, 0.95, sprintf('corr = %.3f', rIpeakMode2), 'Units', 'normalized', ...
     'VerticalAlignment', 'top', 'FontSize', 10);
 
@@ -281,8 +282,8 @@ regLabels = ["4-18K", "18-30K", "22-32K"];
 regRanges = [4 18; 18 30; 22 32];
 for k = 1:size(regRanges,1)
     mR = temps >= regRanges(k,1) & temps <= regRanges(k,2);
-    r1 = safeCorr(coeff_mode1(mR), S_peak(mR));
-    r2 = safeCorr(coeff_mode2(mR), Ipeak(mR));
+    r1 = safeCorr(coeff_mode1(mR), S_peak(mR), 2);
+    r2 = safeCorr(coeff_mode2(mR), Ipeak(mR), 2);
     summaryRows(end+1,1) = mkSummaryRow("mode_channel", sprintf('corr_Speak_mode1_%s', regLabels(k)), r1, ...
         'range-restricted correlation'); %#ok<SAGROW>
     summaryRows(end+1,1) = mkSummaryRow("mode_channel", sprintf('corr_Ipeak_mode2_%s', regLabels(k)), r2, ...
@@ -321,7 +322,7 @@ for aIdx = 1:numel(alphaSet)
         xAll = [xAll; x(:)]; %#ok<AGROW>
         yAll = [yAll; y(:)]; %#ok<AGROW>
     end
-    r = safeCorr(xAll, yAll);
+    r = safeCorr(xAll, yAll, 2);
     xlabel(ax, '((1-I/I_{peak})^{\alpha})/T');
     ylabel(ax, 'log(S)');
     title(ax, sprintf('\\alpha = %.1f (corr=%.3f)', alpha, r));
@@ -414,7 +415,7 @@ title(axPS1, 'S_{peak} vs I_{peak}');
 grid(axPS1, 'on');
 cbPS1 = colorbar(axPS1);
 ylabel(cbPS1, 'T (K)');
-rPS = safeCorr(Ipeak, S_peak);
+rPS = safeCorr(Ipeak, S_peak, 2);
 text(axPS1, 0.03, 0.95, sprintf('corr=%.3f', rPS), 'Units', 'normalized', ...
     'VerticalAlignment', 'top', 'FontSize', 10);
 
@@ -427,7 +428,7 @@ title(axPS2, 'log(S_{peak}) vs I_{peak}');
 grid(axPS2, 'on');
 cbPS2 = colorbar(axPS2);
 ylabel(cbPS2, 'T (K)');
-rLPS = safeCorr(Ipeak(vLPS), log(S_peak(vLPS)));
+rLPS = safeCorr(Ipeak(vLPS), log(S_peak(vLPS)), 2);
 text(axPS2, 0.03, 0.95, sprintf('corr=%.3f', rLPS), 'Units', 'normalized', ...
     'VerticalAlignment', 'top', 'FontSize', 10);
 
@@ -638,70 +639,6 @@ fprintf('Summary CSV: %s\n', obsSummaryCsvOut);
 fprintf('Metrics CSV: %s\n', summaryMetricsCsvOut);
 fprintf('Report: %s\n', reportOut);
 fprintf('ZIP: %s\n', zipOut);
-
-
-function x = toNumericColumn(tbl, varName)
-if ~ismember(varName, tbl.Properties.VariableNames)
-    x = NaN(height(tbl), 1);
-    return;
-end
-col = tbl.(varName);
-if isnumeric(col)
-    x = double(col(:));
-elseif iscell(col)
-    x = str2double(string(col(:)));
-else
-    x = str2double(string(col(:)));
-end
-end
-
-
-function [temps, currents, Smap] = buildSwitchingMapRounded(samplesTbl)
-tempsRaw = toNumericColumn(samplesTbl, 'T_K');
-currRaw = toNumericColumn(samplesTbl, 'current_mA');
-sRaw = toNumericColumn(samplesTbl, 'S_percent');
-
-v = isfinite(tempsRaw) & isfinite(currRaw) & isfinite(sRaw);
-tempsRaw = tempsRaw(v);
-currRaw = currRaw(v);
-sRaw = sRaw(v);
-
-tempsUnique = unique(tempsRaw);
-currents = unique(currRaw);
-tempsUnique = sort(tempsUnique(:));
-currents = sort(currents(:));
-
-SmapRaw = NaN(numel(tempsUnique), numel(currents));
-for it = 1:numel(tempsUnique)
-    for ii = 1:numel(currents)
-        m = abs(tempsRaw - tempsUnique(it)) < 1e-9 & abs(currRaw - currents(ii)) < 1e-9;
-        if any(m)
-            SmapRaw(it, ii) = mean(sRaw(m), 'omitnan');
-        end
-    end
-end
-
-Tclean = round(tempsUnique);
-[Tuniq, ~, idx] = unique(Tclean, 'sorted');
-SmapClean = NaN(numel(Tuniq), size(SmapRaw,2));
-for k = 1:numel(Tuniq)
-    mk = idx == k;
-    SmapClean(k,:) = mean(SmapRaw(mk,:), 1, 'omitnan');
-end
-
-temps = Tuniq(:);
-Smap = SmapClean;
-end
-
-
-function r = safeCorr(a, b)
-v = isfinite(a) & isfinite(b);
-if nnz(v) < 2
-    r = NaN;
-    return;
-end
-r = corr(a(v), b(v), 'rows', 'complete');
-end
 
 
 function [xn, ok] = minmaxNormalize(x)

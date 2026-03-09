@@ -29,7 +29,13 @@ Run folder contents:
 - `config_snapshot.m`
 - `log.txt`
 - `run_notes.txt`
-- analysis output folders (for example `decomposition/`, `svd_pca/`, `baseline_tests/`)
+- `figures/`
+- `tables/`
+- `reports/`
+- `review/`
+
+If observables are exported, `observables.csv` belongs at the run root as
+the run-level summary/index.
 
 ## Run manifest
 

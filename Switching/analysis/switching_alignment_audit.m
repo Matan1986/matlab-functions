@@ -14,6 +14,7 @@ addpath(genpath(legacyRoot));
 % Optional: reuse results helper if available.
 addpath(genpath(fullfile(repoRoot, 'Aging')));
 addpath(fullfile(repoRoot, 'tools'));
+addpath(fullfile(repoRoot, 'Switching', 'utils'), '-begin');
 
 if ~exist('metricType', 'var') || isempty(metricType)
     metricType = "P2P_percent";  % "P2P_percent" | "meanP2P" | "medianAbs"
@@ -65,6 +66,12 @@ assert(isfolder(parentDir), [ ...
 [outDir, switchingRun] = init_run_output_dir(repoRoot, 'switching', 'alignment_audit', parentDir); %#ok<NASGU>
 if ~exist(outDir, 'dir')
     mkdir(outDir);
+end
+if isstruct(switchingRun) && isfield(switchingRun, 'run_dir') && exist(switchingRun.run_dir, 'dir') == 7
+    reviewDir = fullfile(switchingRun.run_dir, 'review');
+    if exist(reviewDir, 'dir') ~= 7
+        mkdir(reviewDir);
+    end
 end
 
 subDirs = findAmpTempSubdirs(parentDir);
@@ -805,7 +812,7 @@ if ranSVD
 
         modeObsCorrTbl = table( ...
             string({'mode1_T_vs_S_peak';'mode2_T_vs_S_peak';'mode1_T_vs_I_peak';'mode2_T_vs_I_peak'}), ...
-            [safeCorr(mode1_T, S_peak); safeCorr(mode2_T, S_peak); safeCorr(mode1_T, Ipeak); safeCorr(mode2_T, Ipeak)], ...
+            [safeCorr(mode1_T, S_peak, 2); safeCorr(mode2_T, S_peak, 2); safeCorr(mode1_T, Ipeak, 2); safeCorr(mode2_T, Ipeak, 2)], ...
             [nnz(isfinite(mode1_T) & isfinite(S_peak)); nnz(isfinite(mode2_T) & isfinite(S_peak)); ...
              nnz(isfinite(mode1_T) & isfinite(Ipeak)); nnz(isfinite(mode2_T) & isfinite(Ipeak))], ...
             'VariableNames', {'comparison','correlation_r','n_points'});
@@ -2209,14 +2216,6 @@ if exist(char(string(srcPath)), 'file') ~= 2
     return
 end
 copyfile(char(string(srcPath)), char(string(dstPath)));
-end
-
-function r = safeCorr(x, y)
-v = isfinite(x) & isfinite(y);
-r = NaN;
-if nnz(v) >= 2
-    r = corr(x(v), y(v), 'rows', 'complete');
-end
 end
 
 function obsTblLong = buildSwitchingObservableLongTable(temps, S_peak, Ipeak, halfwidth_diff_norm, width_I, asym, sampleName)

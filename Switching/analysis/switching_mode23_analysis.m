@@ -12,12 +12,19 @@ repoRoot = fileparts(switchingRoot);
 
 addpath(genpath(fullfile(repoRoot, 'Aging')));
 addpath(fullfile(repoRoot, 'tools'));
+addpath(fullfile(repoRoot, 'Switching', 'utils'), '-begin');
 
 alignDir = resolve_results_input_dir(repoRoot, 'switching', 'alignment_audit');
 followupDir = resolve_results_input_dir(repoRoot, 'switching', 'mechanism_followup');
 [outDir, run] = init_run_output_dir(repoRoot, 'switching', 'mode23_analysis'); %#ok<ASGLU>
 if ~exist(outDir, 'dir')
     mkdir(outDir);
+end
+if isstruct(run) && isfield(run, 'run_dir') && exist(run.run_dir, 'dir') == 7
+    reviewDir = fullfile(run.run_dir, 'review');
+    if exist(reviewDir, 'dir') ~= 7
+        mkdir(reviewDir);
+    end
 end
 
 metricType = "P2P_percent"; %#ok<NASGU>
@@ -157,8 +164,7 @@ for k = 1:numel(shapeColsFound)
 end
 
 corrTbl = struct2table(corrRows);
-corrOut = fullfile(outDir, 'mode23_correlation_table.csv');
-writetable(corrTbl, corrOut);
+corrOut = save_run_table(corrTbl, 'mode23_correlation_table.csv', outDir);
 
 % -------------------------------------------------------------------------
 % STEP 3: Structural subspace regression tests.
@@ -228,8 +234,7 @@ for tt = 1:numel(targets)
 end
 
 regTbl = struct2table(regRows);
-regOut = fullfile(outDir, 'mode23_regression_metrics.csv');
-writetable(regTbl, regOut);
+regOut = save_run_table(regTbl, 'mode23_regression_metrics.csv', outDir);
 
 % -------------------------------------------------------------------------
 % STEP 4: Visualization outputs.
@@ -251,8 +256,8 @@ xlabel(axI2, 'coeff\_mode3'); ylabel(axI2, 'I_{peak} (mA)');
 title(axI2, sprintf('I_{peak} vs mode3 (corr=%.3f)', safeCorr(coeff_mode3(v), I_peak(v))));
 grid(axI2, 'on'); cb = colorbar(axI2); ylabel(cb, 'T (K)');
 
-scatterIOut = fullfile(outDir, 'mode23_scatter_Ipeak.png');
-saveas(figI, scatterIOut);
+scatterIPaths = save_run_figure(figI, 'mode23_scatter_Ipeak', outDir);
+scatterIOut = scatterIPaths.png;
 close(figI);
 
 figW = figure('Color', 'w', 'Visible', 'off', 'Position', [100 100 1100 450]);
@@ -272,8 +277,8 @@ xlabel(axW2, 'coeff\_mode3'); ylabel(axW2, 'width_I (mA)');
 title(axW2, sprintf('width_I vs mode3 (corr=%.3f)', safeCorr(coeff_mode3(v), width_I(v))));
 grid(axW2, 'on'); cb = colorbar(axW2); ylabel(cb, 'T (K)');
 
-scatterWOut = fullfile(outDir, 'mode23_scatter_width.png');
-saveas(figW, scatterWOut);
+scatterWPaths = save_run_figure(figW, 'mode23_scatter_width', outDir);
+scatterWOut = scatterWPaths.png;
 close(figW);
 
 fig3D = figure('Color', 'w', 'Visible', 'off', 'Position', [100 100 800 650]);
@@ -284,8 +289,8 @@ xlabel(ax3, 'coeff\_mode2'); ylabel(ax3, 'coeff\_mode3'); zlabel(ax3, 'I_{peak} 
 title(ax3, '3D structural view: (mode2, mode3, I_{peak})');
 grid(ax3, 'on'); view(ax3, 38, 24); cb = colorbar(ax3); ylabel(cb, 'T (K)');
 
-scatter3DOut = fullfile(outDir, 'mode23_3D_scatter.png');
-saveas(fig3D, scatter3DOut);
+scatter3DPaths = save_run_figure(fig3D, 'mode23_3D_scatter', outDir);
+scatter3DOut = scatter3DPaths.png;
 close(fig3D);
 
 figFit = figure('Color', 'w', 'Visible', 'off', 'Position', [100 100 1300 820]);
@@ -298,48 +303,48 @@ plotPredObs(nexttile(tlF,4), predStore.width_I.obs, predStore.width_I.hat_mode2,
 plotPredObs(nexttile(tlF,5), predStore.width_I.obs, predStore.width_I.hat_mode3, 'width_I: mode3 only', regTbl, 'width_I', 'mode3_only');
 plotPredObs(nexttile(tlF,6), predStore.width_I.obs, predStore.width_I.hat_mode23, 'width_I: mode2+mode3', regTbl, 'width_I', 'mode23');
 
-fitOut = fullfile(outDir, 'mode23_regression_fits.png');
-saveas(figFit, fitOut);
+fitPaths = save_run_figure(figFit, 'mode23_regression_fits', outDir);
+fitOut = fitPaths.png;
 close(figFit);
 
 % -------------------------------------------------------------------------
 % Report
 % -------------------------------------------------------------------------
-reportOut = fullfile(outDir, 'mode23_analysis_report.md');
-fid = fopen(reportOut, 'w');
-assert(fid >= 0, 'Failed opening report: %s', reportOut);
-cleanupObj = onCleanup(@() fclose(fid)); %#ok<NASGU>
-
-fprintf(fid, '# Mode2/Mode3 Structural Analysis Report\n\n');
-fprintf(fid, '## Inputs Reused\n\n');
-fprintf(fid, '- `results/switching/alignment_audit/switching_alignment_observables_vs_T.csv`\n');
-fprintf(fid, '- `results/switching/alignment_audit/switching_alignment_samples.csv` (metricType verified as `P2P_percent`)\n');
+reportLines = strings(0,1);
+reportLines(end+1,1) = "# Mode2/Mode3 Structural Analysis Report";
+reportLines(end+1,1) = "";
+reportLines(end+1,1) = "## Inputs Reused";
+reportLines(end+1,1) = "";
+reportLines(end+1,1) = "- `results/switching/alignment_audit/switching_alignment_observables_vs_T.csv`";
+reportLines(end+1,1) = "- `results/switching/alignment_audit/switching_alignment_samples.csv` (metricType verified as `P2P_percent`)";
 if ~isempty(shapeColsFound)
-    fprintf(fid, '- Optional shape metrics loaded from `results/switching/mechanism_followup/mechanism_ridge_shape_metrics.csv`: %s\n', strjoin(cellstr(shapeColsFound), ', '));
+    reportLines(end+1,1) = sprintf('- Optional shape metrics loaded from `results/switching/mechanism_followup/mechanism_ridge_shape_metrics.csv`: %s', strjoin(cellstr(shapeColsFound), ', '));
 else
-    fprintf(fid, '- Optional shape metrics from mechanism_followup: not available / not used\n');
+    reportLines(end+1,1) = "- Optional shape metrics from mechanism_followup: not available / not used";
 end
 if ~isempty(shapeMissing)
-    fprintf(fid, '- Missing/notes: %s\n', strjoin(cellstr(shapeMissing), '; '));
+    reportLines(end+1,1) = sprintf('- Missing/notes: %s', strjoin(cellstr(shapeMissing), '; '));
 end
-fprintf(fid, '\n');
+reportLines(end+1,1) = "";
 
-fprintf(fid, '## Core Correlations (Global)\n\n');
-printCorr(fid, corrTbl, 'I_peak', 'coeff_mode2', 'global');
-printCorr(fid, corrTbl, 'I_peak', 'coeff_mode3', 'global');
-printCorr(fid, corrTbl, 'width_I', 'coeff_mode2', 'global');
-printCorr(fid, corrTbl, 'width_I', 'coeff_mode3', 'global');
-fprintf(fid, '\n');
+reportLines(end+1,1) = "## Core Correlations (Global)";
+reportLines(end+1,1) = "";
+reportLines(end+1,1) = formatCorrLine(corrTbl, 'I_peak', 'coeff_mode2', 'global');
+reportLines(end+1,1) = formatCorrLine(corrTbl, 'I_peak', 'coeff_mode3', 'global');
+reportLines(end+1,1) = formatCorrLine(corrTbl, 'width_I', 'coeff_mode2', 'global');
+reportLines(end+1,1) = formatCorrLine(corrTbl, 'width_I', 'coeff_mode3', 'global');
+reportLines(end+1,1) = "";
 
-fprintf(fid, '## Regression Results (Global)\n\n');
-printReg(fid, regTbl, 'I_peak', 'mode2_only');
-printReg(fid, regTbl, 'I_peak', 'mode3_only');
-printReg(fid, regTbl, 'I_peak', 'mode23');
-fprintf(fid, '\n');
-printReg(fid, regTbl, 'width_I', 'mode2_only');
-printReg(fid, regTbl, 'width_I', 'mode3_only');
-printReg(fid, regTbl, 'width_I', 'mode23');
-fprintf(fid, '\n');
+reportLines(end+1,1) = "## Regression Results (Global)";
+reportLines(end+1,1) = "";
+reportLines(end+1,1) = formatRegLine(regTbl, 'I_peak', 'mode2_only');
+reportLines(end+1,1) = formatRegLine(regTbl, 'I_peak', 'mode3_only');
+reportLines(end+1,1) = formatRegLine(regTbl, 'I_peak', 'mode23');
+reportLines(end+1,1) = "";
+reportLines(end+1,1) = formatRegLine(regTbl, 'width_I', 'mode2_only');
+reportLines(end+1,1) = formatRegLine(regTbl, 'width_I', 'mode3_only');
+reportLines(end+1,1) = formatRegLine(regTbl, 'width_I', 'mode23');
+reportLines(end+1,1) = "";
 
 r2I2 = getR2(regTbl, 'I_peak', 'mode2_only');
 r2I3 = getR2(regTbl, 'I_peak', 'mode3_only');
@@ -351,76 +356,53 @@ r2W23 = getR2(regTbl, 'width_I', 'mode23');
 dI2to23 = r2I23 - max(r2I2, r2I3);
 dW2to23 = r2W23 - max(r2W2, r2W3);
 
-fprintf(fid, '## Regime-wise Summary\n\n');
+reportLines(end+1,1) = "## Regime-wise Summary";
+reportLines(end+1,1) = "";
 for rr = 2:numel(regimeNames)
-    fprintf(fid, '- %s:\n', regimeNames(rr));
-    printCorr(fid, corrTbl, 'I_peak', 'coeff_mode2', regimeNames(rr));
-    printCorr(fid, corrTbl, 'I_peak', 'coeff_mode3', regimeNames(rr));
-    printCorr(fid, corrTbl, 'width_I', 'coeff_mode2', regimeNames(rr));
-    printCorr(fid, corrTbl, 'width_I', 'coeff_mode3', regimeNames(rr));
+    reportLines(end+1,1) = sprintf('- %s:', regimeNames(rr));
+    reportLines(end+1,1) = formatCorrLine(corrTbl, 'I_peak', 'coeff_mode2', regimeNames(rr));
+    reportLines(end+1,1) = formatCorrLine(corrTbl, 'I_peak', 'coeff_mode3', regimeNames(rr));
+    reportLines(end+1,1) = formatCorrLine(corrTbl, 'width_I', 'coeff_mode2', regimeNames(rr));
+    reportLines(end+1,1) = formatCorrLine(corrTbl, 'width_I', 'coeff_mode3', regimeNames(rr));
 end
-fprintf(fid, '\n');
+reportLines(end+1,1) = "";
 
-fprintf(fid, '## Interpretation\n\n');
-fprintf(fid, '1. **Individual explanatory power**: mode2 and mode3 each correlate with ridge observables, but with different strengths for `I_peak` and `width_I`.\n');
-fprintf(fid, '2. **Joint model gain**: relative to the better single-mode model, adding the second mode changes R^2 by:\n');
-fprintf(fid, '   - `I_peak`: DeltaR^2 = %.3f\n', dI2to23);
-fprintf(fid, '   - `width_I`: DeltaR^2 = %.3f\n', dW2to23);
+reportLines(end+1,1) = "## Interpretation";
+reportLines(end+1,1) = "";
+reportLines(end+1,1) = "1. **Individual explanatory power**: mode2 and mode3 each correlate with ridge observables, but with different strengths for `I_peak` and `width_I`.";
+reportLines(end+1,1) = "2. **Joint model gain**: relative to the better single-mode model, adding the second mode changes R^2 by:";
+reportLines(end+1,1) = sprintf('   - `I_peak`: DeltaR^2 = %.3f', dI2to23);
+reportLines(end+1,1) = sprintf('   - `width_I`: DeltaR^2 = %.3f', dW2to23);
 if isfinite(dI2to23) && isfinite(dW2to23)
     if dI2to23 > 0.05 || dW2to23 > 0.05
-        fprintf(fid, '3. **Subspace conclusion**: the combined mode2+mode3 model gives a material improvement for at least one ridge-shape observable, which is consistent with a two-dimensional structural subspace.\n');
+        reportLines(end+1,1) = "3. **Subspace conclusion**: the combined mode2+mode3 model gives a material improvement for at least one ridge-shape observable, which is consistent with a two-dimensional structural subspace.";
     else
-        fprintf(fid, '3. **Subspace conclusion**: the combined mode2+mode3 model provides limited gain over the best single mode, so current evidence for a strongly two-dimensional shape subspace is moderate rather than definitive.\n');
+        reportLines(end+1,1) = "3. **Subspace conclusion**: the combined mode2+mode3 model provides limited gain over the best single mode, so current evidence for a strongly two-dimensional shape subspace is moderate rather than definitive.";
     end
 else
-    fprintf(fid, '3. **Subspace conclusion**: insufficient finite regression metrics for a strict subspace decision.\n');
+    reportLines(end+1,1) = "3. **Subspace conclusion**: insufficient finite regression metrics for a strict subspace decision.";
 end
-fprintf(fid, '\n');
+reportLines(end+1,1) = "";
 
-fprintf(fid, '## Output Files\n\n');
-fprintf(fid, '- `mode23_correlation_table.csv`\n');
-fprintf(fid, '- `mode23_regression_metrics.csv`\n');
-fprintf(fid, '- `mode23_scatter_Ipeak.png`\n');
-fprintf(fid, '- `mode23_scatter_width.png`\n');
-fprintf(fid, '- `mode23_3D_scatter.png`\n');
-fprintf(fid, '- `mode23_regression_fits.png`\n');
-fprintf(fid, '- `mode23_analysis_report.md`\n\n');
+reportLines(end+1,1) = "## Output Files";
+reportLines(end+1,1) = "";
+reportLines(end+1,1) = "- `mode23_correlation_table.csv`";
+reportLines(end+1,1) = "- `mode23_regression_metrics.csv`";
+reportLines(end+1,1) = "- `mode23_scatter_Ipeak.png`";
+reportLines(end+1,1) = "- `mode23_scatter_width.png`";
+reportLines(end+1,1) = "- `mode23_3D_scatter.png`";
+reportLines(end+1,1) = "- `mode23_regression_fits.png`";
+reportLines(end+1,1) = "- `mode23_analysis_report.md`";
+reportLines(end+1,1) = "";
+reportLines(end+1,1) = sprintf('Generated: %s', datestr(now, 31));
 
-fprintf(fid, 'Generated: %s\n', datestr(now, 31));
+reportOut = save_run_report(reportLines, 'mode23_analysis_report.md', outDir);
 
 fprintf('Mode23 analysis complete.\n');
 fprintf('Output directory: %s\n', outDir);
 fprintf('Correlation table: %s\n', corrOut);
 fprintf('Regression table: %s\n', regOut);
 fprintf('Report: %s\n', reportOut);
-
-
-function x = toNumericColumn(tbl, varName)
-if ~ismember(varName, string(tbl.Properties.VariableNames))
-    x = NaN(height(tbl), 1);
-    return;
-end
-col = tbl.(varName);
-if isnumeric(col)
-    x = double(col(:));
-else
-    x = str2double(string(col(:)));
-end
-end
-
-
-function r = safeCorr(a, b)
-if isempty(a) || isempty(b)
-    r = NaN;
-    return;
-end
-v = isfinite(a) & isfinite(b);
-if nnz(v) < 3
-    r = NaN;
-    return;
-end
-r = corr(a(v), b(v), 'rows', 'complete');
-end
 
 
 function [m, yhat] = fitLinearModel(y, c2, c3, modelName, mask)
@@ -519,6 +501,26 @@ grid(ax, 'on');
 end
 
 
+function line = formatCorrLine(corrTbl, target, predictor, regime)
+row = corrTbl(corrTbl.target == string(target) & corrTbl.predictor == string(predictor) & corrTbl.regime == string(regime), :);
+if isempty(row)
+    line = sprintf('- corr(%s, %s) [%s]: unavailable', target, predictor, regime);
+else
+    line = sprintf('- corr(%s, %s) [%s] = %.3f (n=%d)', target, predictor, regime, row.corr_pearson(1), row.n_points(1));
+end
+end
+
+
+function line = formatRegLine(regTbl, target, model)
+row = regTbl(regTbl.target == string(target) & regTbl.regime == "global" & regTbl.model == string(model), :);
+if isempty(row)
+    line = sprintf('- %s / %s: unavailable', target, model);
+else
+    line = sprintf('- %s / %s: R^2=%.3f, RMSE=%.3g, n=%d', target, model, row.R2(1), row.RMSE(1), row.n_points(1));
+end
+end
+
+
 function printCorr(fid, corrTbl, target, predictor, regime)
 row = corrTbl(corrTbl.target == string(target) & corrTbl.predictor == string(predictor) & corrTbl.regime == string(regime), :);
 if isempty(row)
@@ -546,4 +548,6 @@ if ~isempty(row)
     r2 = row.R2(1);
 end
 end
+
+
 

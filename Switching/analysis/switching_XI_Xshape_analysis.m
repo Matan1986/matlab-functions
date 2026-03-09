@@ -15,11 +15,18 @@ repoRoot = fileparts(switchingRoot);
 
 addpath(genpath(fullfile(repoRoot, 'Aging')));
 addpath(fullfile(repoRoot, 'tools'));
+addpath(fullfile(repoRoot, 'Switching', 'utils'), '-begin');
 
 alignDir = resolve_results_input_dir(repoRoot, 'switching', 'alignment_audit');
 [outDir, run] = init_run_output_dir(repoRoot, 'switching', 'XI_Xshape_analysis'); %#ok<ASGLU>
 if ~exist(outDir, 'dir')
     mkdir(outDir);
+end
+if isstruct(run) && isfield(run, 'run_dir') && exist(run.run_dir, 'dir') == 7
+    reviewDir = fullfile(run.run_dir, 'review');
+    if exist(reviewDir, 'dir') ~= 7
+        mkdir(reviewDir);
+    end
 end
 
 metricType = "P2P_percent"; %#ok<NASGU>
@@ -209,8 +216,7 @@ rowAng.beta2 = NaN;
 metRows(end+1,1) = rowAng; %#ok<SAGROW>
 
 metricsTbl = struct2table(metRows);
-metricsOut = fullfile(outDir, 'XI_Xshape_regression_metrics.csv');
-writetable(metricsTbl, metricsOut);
+metricsOut = save_run_table(metricsTbl, 'XI_Xshape_regression_metrics.csv', outDir);
 
 % Directions CSV
 modeDirTbl = table( ...
@@ -224,8 +230,7 @@ modeDirTbl = table( ...
     [norm(v_I); norm(v_S)], ...
     [ang; ang], ...
     'VariableNames', {'observable','intercept','a_c2','b_c3','R2','RMSE','n_points','vector_norm','angle_deg_between_directions'});
-modeDirOut = fullfile(outDir, 'mode_space_directions.csv');
-writetable(modeDirTbl, modeDirOut);
+modeDirOut = save_run_table(modeDirTbl, 'mode_space_directions.csv', outDir);
 
 % STEP 4/5 figures
 % 1) XI_Xshape_scatter.png
@@ -251,8 +256,8 @@ grid(axSc, 'on');
 cb = colorbar(axSc); ylabel(cb, 'T (K)');
 legend(axSc, 'Location', 'best');
 
-scatterOut = fullfile(outDir, 'XI_Xshape_scatter.png');
-saveas(figSc, scatterOut);
+scatterPaths = save_run_figure(figSc, 'XI_Xshape_scatter', outDir);
+scatterOut = scatterPaths.png;
 close(figSc);
 
 % 2) mode_space_geometry.png
@@ -283,8 +288,8 @@ grid(axGeo, 'on'); axis(axGeo, 'equal');
 cb = colorbar(axGeo); ylabel(cb, 'T (K)');
 legend(axGeo, 'Location', 'best');
 
-geoOut = fullfile(outDir, 'mode_space_geometry.png');
-saveas(figGeo, geoOut);
+geoPaths = save_run_figure(figGeo, 'mode_space_geometry', outDir);
+geoOut = geoPaths.png;
 close(figGeo);
 
 % 3) XI_Xshape_temperature_trajectory.png
@@ -316,41 +321,43 @@ xlabel(axT2, 'X_I = I_{peak} (mA)'); ylabel(axT2, 'X_{shape}');
 title(axT2, 'Temperature trajectory in (X_I, X_{shape})');
 grid(axT2, 'on');
 
-trajOut = fullfile(outDir, 'XI_Xshape_temperature_trajectory.png');
-saveas(figTraj, trajOut);
+trajPaths = save_run_figure(figTraj, 'XI_Xshape_temperature_trajectory', outDir);
+trajOut = trajPaths.png;
 close(figTraj);
 
 % Report
-reportOut = fullfile(outDir, 'XI_Xshape_analysis_report.md');
-fid = fopen(reportOut, 'w');
-assert(fid >= 0, 'Failed opening report: %s', reportOut);
-cleanupObj = onCleanup(@() fclose(fid)); %#ok<NASGU>
-
-fprintf(fid, '# X_I vs X_shape Analysis Report\n\n');
-fprintf(fid, '## 1. Correlation between X_I and X_shape\n\n');
-fprintf(fid, '- corr(X_I, X_shape) = %.3f (n=%d finite points)\n', corr_XI_Xshape, nnz(vBase));
+reportLines = strings(0,1);
+reportLines(end+1,1) = "# X_I vs X_shape Analysis Report";
+reportLines(end+1,1) = "";
+reportLines(end+1,1) = "## 1. Correlation between X_I and X_shape";
+reportLines(end+1,1) = "";
+reportLines(end+1,1) = sprintf('- corr(X_I, X_shape) = %.3f (n=%d finite points)', corr_XI_Xshape, nnz(vBase));
 for rr = 2:numel(regNames)
     row = metricsTbl(metricsTbl.analysis == "XI_Xshape_correlation" & metricsTbl.regime == regNames(rr), :);
     if ~isempty(row)
-        fprintf(fid, '- %s: corr = %.3f (n=%d)\n', regNames(rr), row.corr(1), row.n_points(1));
+        reportLines(end+1,1) = sprintf('- %s: corr = %.3f (n=%d)', regNames(rr), row.corr(1), row.n_points(1));
     end
 end
-fprintf(fid, '\n');
+reportLines(end+1,1) = "";
 
-fprintf(fid, '## 2. Can X_shape be explained as a simple function of X_I?\n\n');
-fprintf(fid, '- Linear fit X_shape(X_I): R^2 = %.3f, RMSE = %.3g\n', linFit.R2, linFit.RMSE);
-fprintf(fid, '- Quadratic fit X_shape(X_I): R^2 = %.3f, RMSE = %.3g\n', quadFit.R2, quadFit.RMSE);
+reportLines(end+1,1) = "## 2. Can X_shape be explained as a simple function of X_I?";
+reportLines(end+1,1) = "";
+reportLines(end+1,1) = sprintf('- Linear fit X_shape(X_I): R^2 = %.3f, RMSE = %.3g', linFit.R2, linFit.RMSE);
+reportLines(end+1,1) = sprintf('- Quadratic fit X_shape(X_I): R^2 = %.3f, RMSE = %.3g', quadFit.R2, quadFit.RMSE);
 if isfinite(quadFit.R2) && isfinite(linFit.R2)
-    fprintf(fid, '- DeltaR^2 (quadratic - linear) = %.3f\n', quadFit.R2 - linFit.R2);
+    reportLines(end+1,1) = sprintf('- DeltaR^2 (quadratic - linear) = %.3f', quadFit.R2 - linFit.R2);
 end
-fprintf(fid, '\n');
+reportLines(end+1,1) = "";
 
-fprintf(fid, '## 3. Angle between regression directions in (mode2, mode3) plane\n\n');
-fprintf(fid, '- X_I model: X_I = %.3g + %.3g*c2 + %.3g*c3 (R^2=%.3f)\n', fitXI.intercept, fitXI.a_c2, fitXI.b_c3, fitXI.R2);
-fprintf(fid, '- X_shape model: X_shape = %.3g + %.3g*c2 + %.3g*c3 (R^2=%.3f)\n', fitXS.intercept, fitXS.a_c2, fitXS.b_c3, fitXS.R2);
-fprintf(fid, '- angle(v_I, v_shape) = %.2f degrees\n\n', ang);
+reportLines(end+1,1) = "## 3. Angle between regression directions in (mode2, mode3) plane";
+reportLines(end+1,1) = "";
+reportLines(end+1,1) = sprintf('- X_I model: X_I = %.3g + %.3g*c2 + %.3g*c3 (R^2=%.3f)', fitXI.intercept, fitXI.a_c2, fitXI.b_c3, fitXI.R2);
+reportLines(end+1,1) = sprintf('- X_shape model: X_shape = %.3g + %.3g*c2 + %.3g*c3 (R^2=%.3f)', fitXS.intercept, fitXS.a_c2, fitXS.b_c3, fitXS.R2);
+reportLines(end+1,1) = sprintf('- angle(v_I, v_shape) = %.2f degrees', ang);
+reportLines(end+1,1) = "";
 
-fprintf(fid, '## 4. Structural degree-of-freedom conclusion\n\n');
+reportLines(end+1,1) = "## 4. Structural degree-of-freedom conclusion";
+reportLines(end+1,1) = "";
 if isfinite(corr_XI_Xshape) && isfinite(linFit.R2) && isfinite(quadFit.R2) && isfinite(ang)
     if abs(corr_XI_Xshape) > 0.9 && quadFit.R2 > 0.8 && ang < 20
         concl = 'X_I and X_shape are largely compatible with a single structural coordinate.';
@@ -362,79 +369,26 @@ if isfinite(corr_XI_Xshape) && isfinite(linFit.R2) && isfinite(quadFit.R2) && is
 else
     concl = 'Insufficient finite metrics for a strict single-vs-two-variable decision.';
 end
-fprintf(fid, '%s\n\n', concl);
+reportLines(end+1,1) = concl;
+reportLines(end+1,1) = "";
+reportLines(end+1,1) = "## Output Files";
+reportLines(end+1,1) = "";
+reportLines(end+1,1) = "- XI_Xshape_scatter.png";
+reportLines(end+1,1) = "- XI_Xshape_regression_metrics.csv";
+reportLines(end+1,1) = "- mode_space_directions.csv";
+reportLines(end+1,1) = "- mode_space_geometry.png";
+reportLines(end+1,1) = "- XI_Xshape_temperature_trajectory.png";
+reportLines(end+1,1) = "- XI_Xshape_analysis_report.md";
+reportLines(end+1,1) = "";
+reportLines(end+1,1) = sprintf('Generated: %s', datestr(now, 31));
 
-fprintf(fid, '## Output Files\n\n');
-fprintf(fid, '- XI_Xshape_scatter.png\n');
-fprintf(fid, '- XI_Xshape_regression_metrics.csv\n');
-fprintf(fid, '- mode_space_directions.csv\n');
-fprintf(fid, '- mode_space_geometry.png\n');
-fprintf(fid, '- XI_Xshape_temperature_trajectory.png\n');
-fprintf(fid, '- XI_Xshape_analysis_report.md\n\n');
-
-fprintf(fid, 'Generated: %s\n', datestr(now, 31));
+reportOut = save_run_report(reportLines, 'XI_Xshape_analysis_report.md', outDir);
 
 fprintf('XI/Xshape analysis complete.\n');
 fprintf('Output directory: %s\n', outDir);
 fprintf('Metrics CSV: %s\n', metricsOut);
 fprintf('Directions CSV: %s\n', modeDirOut);
 fprintf('Report: %s\n', reportOut);
-
-
-function x = toNumeric(tbl, varName)
-if ~ismember(varName, string(tbl.Properties.VariableNames))
-    x = NaN(height(tbl), 1);
-    return;
-end
-col = tbl.(varName);
-if isnumeric(col)
-    x = double(col(:));
-else
-    x = str2double(string(col(:)));
-end
-end
-
-
-function [temps, currents, Smap] = buildMapRounded(sampTbl)
-Traw = toNumeric(sampTbl, 'T_K');
-Iraw = toNumeric(sampTbl, 'current_mA');
-Sraw = toNumeric(sampTbl, 'S_percent');
-
-v = isfinite(Traw) & isfinite(Iraw) & isfinite(Sraw);
-Traw = Traw(v);
-Iraw = Iraw(v);
-Sraw = Sraw(v);
-
-Tclean = round(Traw);
-temps = unique(Tclean);
-currents = unique(Iraw);
-temps = sort(temps(:));
-currents = sort(currents(:));
-
-Smap = NaN(numel(temps), numel(currents));
-for it = 1:numel(temps)
-    for ii = 1:numel(currents)
-        m = Tclean == temps(it) & abs(Iraw - currents(ii)) < 1e-9;
-        if any(m)
-            Smap(it,ii) = mean(Sraw(m), 'omitnan');
-        end
-    end
-end
-end
-
-
-function r = safeCorr(a, b)
-if isempty(a) || isempty(b)
-    r = NaN;
-    return;
-end
-v = isfinite(a) & isfinite(b);
-if nnz(v) < 3
-    r = NaN;
-    return;
-end
-r = corr(a(v), b(v), 'rows', 'complete');
-end
 
 
 function fit = fitPoly(x, y, deg)
@@ -526,5 +480,6 @@ row.beta0 = NaN;
 row.beta1 = NaN;
 row.beta2 = NaN;
 end
+
 
 

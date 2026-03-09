@@ -82,11 +82,6 @@ Run reproducibility files are created at the run root:
 - `log.txt`
 - `run_notes.txt` (empty notes template for manual annotations)
 
-Run index and pointer files:
-
-- `results/<experiment>/run_index.csv`
-- `results/<experiment>/latest_run.txt`
-
 Generated run outputs are local working artifacts. Figures, CSV exports, reports, archives, and other run products should remain under `results/` and should not be committed to git.
 
 You can set a custom label before running:
@@ -101,5 +96,7 @@ See [Repository structure](./docs/repository_structure.md) and [Results system](
 
 - `tools/list_runs.m` - Lists run folders and key metadata (`run_id`, `timestamp`, `label`, `dataset`, `git_commit`) from `results/<experiment>/runs/`.
 - `tools/load_run_manifest.m` - Helper to load and parse `run_manifest.json` for a specific run directory.
-- `tools/getLatestRun.m` - Returns latest run ID from `results/<experiment>/latest_run.txt`.
+- `tools/getLatestRun.m` - Returns the newest run ID by scanning `results/<experiment>/runs/`.
 - `tools/openLatestRun.m` - Opens the latest run folder (Windows) or prints the folder path (non-Windows).
+
+

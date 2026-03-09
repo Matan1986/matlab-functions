@@ -48,10 +48,9 @@ results/<experiment>/runs/run_<timestamp>_<label>/
     log.txt
     run_notes.txt
     figures/
-    csv/
+    tables/
     reports/
-    archives/
-    artifacts/
+    review/
 ```
 
 ### Subfolder roles
@@ -59,10 +58,22 @@ results/<experiment>/runs/run_<timestamp>_<label>/
 | Subfolder | Contents |
 | --- | --- |
 | `figures/` | PNG, PDF, FIG, and other figure files |
-| `csv/` | CSV tables including `observables.csv` |
-| `reports/` | Markdown, TXT, and review summaries |
-| `archives/` | ZIP bundles for handoff or review |
-| `artifacts/` | MAT files or other binary products needed for reproducibility |
+| `tables/` | CSV tables and other machine-readable numeric outputs other than the run-level `observables.csv` index |
+| `reports/` | Markdown, TXT, and other written summaries |
+| `review/` | ZIP bundles prepared for human inspection or handoff |
+
+## Observable Index Policy
+
+When a run exports the standardized observable layer, `observables.csv` acts as a run-level summary/index rather than an analysis-specific table.
+
+Policy:
+
+- `observables.csv` belongs at the run root: `results/<experiment>/runs/run_<timestamp>_<label>/observables.csv`
+- it should remain at the run root
+- artifact helpers should not move it into `tables/`
+- analysis-specific CSV exports should still use `tables/`
+
+This distinction is intentional: `observables.csv` is the canonical machine-readable index for the whole run, while `tables/` stores analysis-specific tabular artifacts.
 
 ## Repository Content Policy
 
@@ -94,10 +105,13 @@ Generated run outputs are local working artifacts and must not be committed to g
 4. Cross-experiment analyses must use `results/cross_experiment/runs/`.
 5. Tests that produce artifacts must use either `results/tests/` or an experiment run folder.
 6. Every script must print the resolved run directory to the console at startup.
-7. Every run should create at least one ZIP archive in `archives/` containing the main review files.
+7. Every run should create at least one ZIP archive in `review/` containing the main review files.
 8. If observables are exported, the canonical machine-readable filename is `observables.csv`.
-9. Analysis-specific CSV names are allowed, but they must still live under `csv/`.
-10. Reports should live under `reports/`, not next to figures.
+9. `observables.csv` is a run-level summary/index and should remain at the run root, not inside `tables/`.
+10. Artifact helpers such as `save_run_table` must not be used to move `observables.csv` into `tables/`.
+11. Analysis-specific CSV names other than `observables.csv` should live under `tables/`.
+12. Reports should live under `reports/`, not next to figures.
+13. Agents must not invent alternative artifact directories such as `plots/`, `figs/`, `analysis_outputs/`, or `archives/`.
 
 ## Backward-compatibility policy
 
@@ -111,7 +125,7 @@ Accepted historical examples:
 
 Policy going forward:
 
-- Existing historical outputs may remain in place.
+- Existing historical outputs may remain in place until migration work is performed.
 - New runs must not add files to these flat folders.
 - Migration work should gradually move those analyses to run-scoped paths.
 
@@ -120,19 +134,19 @@ Policy going forward:
 ### Aging
 
 - Uses a real run helper and currently creates complete run metadata.
-- Still allows fallback writes to flat legacy folders when no run context is active.
-- Needs standardized run-internal subfolders and mandatory ZIP creation.
+- New outputs belong in run folders under `results/aging/runs/`.
+- Remaining work is helper hardening and standard subfolder adoption.
 
 ### Relaxation
 
-- Does not yet use the run system everywhere.
-- Needs `results/relaxation/runs/` plus shared run helper adoption across diagnostics.
+- Legacy outputs have been migrated into `run_legacy_*` folders under `results/relaxation/runs/`.
+- New outputs belong in run folders under `results/relaxation/runs/`.
 
 ### Switching
 
-- Partly uses the run system.
-- Some existing run folders are missing required metadata because they were created by a fallback path.
-- Needs all primary outputs redirected into run folders rather than flat analysis folders.
+- Legacy outputs have been migrated into `run_legacy_*` folders under `results/switching/runs/`.
+- Existing run folders now carry the required root metadata files.
+- New outputs belong in run folders under `results/switching/runs/`.
 
 ## Implementation guidance
 
@@ -141,9 +155,8 @@ Policy going forward:
 1. Create or reuse a run context at script startup.
 2. Resolve all output paths from that run context.
 3. Write metadata files immediately.
-4. Write figures, CSVs, reports, and binary artifacts into their standard subfolders.
-5. Build a review ZIP in `archives/` before the script exits.
-6. Print the final run path and key artifact paths to the console.
+4. Write figures, tables, reports, and review bundles into their standard subfolders.
+5. Print the final run path and key artifact paths to the console.
 
 ### Shared utilities already present
 
@@ -159,13 +172,13 @@ Useful shared files currently in the repository:
 ## Migration priorities
 
 1. Promote the current Aging run helper into shared infrastructure usable by all experiments.
-2. Add Relaxation run creation first, because it currently has no run metadata at all.
-3. Remove Switching fallback run creation that creates run folders without metadata.
-4. Replace flat output writes with run-scoped writes in all new scripts.
-5. Add standard `figures/`, `csv/`, `reports/`, `archives/`, and `artifacts/` subfolder creation to the helper.
+2. Add standard `figures/`, `tables/`, `reports/`, and `review/` subfolder creation to the helper.
+3. Migrate legacy artifacts into the standardized run-internal layout.
+4. Replace non-standard artifact directories with the documented structure in all new scripts.
 
 ## Related documents
 
+- `docs/output_artifacts.md`
 - `docs/repository_structure.md`
 - `docs/repository_organization_audit.md`
 - `results/README.md`

@@ -1,5 +1,5 @@
 function run_id = getLatestRun(experiment)
-% getLatestRun Return latest run_id for an experiment from latest_run.txt.
+% getLatestRun Return the newest run_id for an experiment from runs/.
 %
 % Usage:
 %   run_id = getLatestRun('aging');
@@ -11,15 +11,41 @@ end
 experiment = char(string(experiment));
 
 repoRoot = resolveRepoRoot();
-pointerPath = fullfile(repoRoot, 'results', experiment, 'latest_run.txt');
+runsRoot = fullfile(repoRoot, 'results', experiment, 'runs');
 
-if exist(pointerPath, 'file') ~= 2
-    error('Latest run pointer not found for experiment "%s": %s', experiment, pointerPath);
+if exist(runsRoot, 'dir') ~= 7
+    error('Runs directory not found for experiment "%s": %s', experiment, runsRoot);
 end
 
-run_id = strtrim(fileread(pointerPath));
-if isempty(run_id)
-    error('Latest run pointer file is empty: %s', pointerPath);
+runDirs = dir(fullfile(runsRoot, 'run_*'));
+runDirs = runDirs([runDirs.isdir]);
+if isempty(runDirs)
+    error('No run directories found for experiment "%s": %s', experiment, runsRoot);
+end
+
+names = string({runDirs.name});
+timestamps = NaT(size(names));
+
+for i = 1:numel(names)
+    token = regexp(names(i), '^run_(\d{4})_(\d{2})_(\d{2})_(\d{6})(?:_|$)', 'tokens', 'once');
+    if isempty(token)
+        continue;
+    end
+
+    tsText = sprintf('%s-%s-%s %s:%s:%s', ...
+        token{1}, token{2}, token{3}, token{4}(1:2), token{4}(3:4), token{4}(5:6));
+    timestamps(i) = datetime(tsText, 'InputFormat', 'yyyy-MM-dd HH:mm:ss');
+end
+
+valid = ~isnat(timestamps);
+if any(valid)
+    validNames = names(valid);
+    validTimestamps = timestamps(valid);
+    [~, idx] = max(validTimestamps);
+    run_id = char(validNames(idx));
+else
+    names = sort(names, 'descend');
+    run_id = char(names(1));
 end
 end
 
