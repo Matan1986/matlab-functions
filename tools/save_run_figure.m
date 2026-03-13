@@ -1,5 +1,5 @@
 function paths = save_run_figure(figure_handle, figure_name, run_output_dir)
-% save_run_figure Save a run figure in canonical PNG and FIG formats.
+% save_run_figure Save a run figure in canonical PDF, PNG, and FIG formats.
 %
 % Usage:
 %   paths = save_run_figure(gcf, 'aging_map_heatmap', run_output_dir)
@@ -10,7 +10,7 @@ function paths = save_run_figure(figure_handle, figure_name, run_output_dir)
 %   run_output_dir  - Run root directory, e.g. results/<experiment>/runs/run_...
 %
 % Output:
-%   paths           - struct with fields png and fig
+%   paths           - struct with fields pdf, png, and fig
 
 if nargin < 3
     error('save_run_figure requires figure_handle, figure_name, and run_output_dir.');
@@ -19,7 +19,8 @@ if isempty(figure_handle) || ~ishandle(figure_handle)
     error('save_run_figure requires a valid figure handle.');
 end
 
-figure_name = char(string(figure_name));
+figure_handle = resolve_figure_handle(figure_handle);
+figure_name = strip_extension(char(string(figure_name)));
 run_output_dir = char(string(run_output_dir));
 if isempty(strtrim(figure_name))
     error('save_run_figure requires a non-empty figure_name.');
@@ -34,15 +35,80 @@ if exist(figures_dir, 'dir') ~= 7
     mkdir(figures_dir);
 end
 
+ensure_figure_helpers_on_path();
+try_apply_publication_style(figure_handle);
+try_run_figure_quality_check(figure_handle);
+
 paths = struct();
+paths.pdf = fullfile(figures_dir, [figure_name '.pdf']);
 paths.png = fullfile(figures_dir, [figure_name '.png']);
 paths.fig = fullfile(figures_dir, [figure_name '.fig']);
 
-exportgraphics(figure_handle, paths.png, 'Resolution', 300);
+set(figure_handle, 'Color', 'w');
+exportgraphics(figure_handle, paths.pdf, 'ContentType', 'vector');
+exportgraphics(figure_handle, paths.png, 'Resolution', 600);
 savefig(figure_handle, paths.fig);
 
+fprintf('Saved figure PDF: %s\n', paths.pdf);
 fprintf('Saved figure PNG: %s\n', paths.png);
 fprintf('Saved figure FIG: %s\n', paths.fig);
+end
+
+function figure_handle = resolve_figure_handle(handle_in)
+if strcmp(get(handle_in, 'Type'), 'figure')
+    figure_handle = handle_in;
+    return;
+end
+
+figure_handle = ancestor(handle_in, 'figure');
+if isempty(figure_handle) || ~ishandle(figure_handle)
+    error('save_run_figure requires a valid figure handle.');
+end
+end
+
+function figure_name = strip_extension(figure_name)
+[~, base_name] = fileparts(char(string(figure_name)));
+if isempty(base_name)
+    figure_name = char(string(figure_name));
+else
+    figure_name = base_name;
+end
+end
+
+function ensure_figure_helpers_on_path()
+this_file = mfilename('fullpath');
+tools_dir = fileparts(this_file);
+helpers_dir = fullfile(tools_dir, 'figures');
+if exist(helpers_dir, 'dir') ~= 7
+    return;
+end
+if isempty(strfind(path, helpers_dir))
+    addpath(helpers_dir);
+end
+end
+
+function try_apply_publication_style(figure_handle)
+if exist('apply_publication_style', 'file') ~= 2
+    return;
+end
+try
+    apply_publication_style(figure_handle);
+catch ME
+    warning('save_run_figure:publicationStyleFailed', ...
+        'apply_publication_style failed for this export: %s', ME.message);
+end
+end
+
+function try_run_figure_quality_check(figure_handle)
+if exist('figure_quality_check', 'file') ~= 2
+    return;
+end
+try
+    figure_quality_check(figure_handle);
+catch ME
+    warning('save_run_figure:qualityCheckFailed', ...
+        'figure_quality_check failed for this export: %s', ME.message);
+end
 end
 
 function run_root_dir = resolve_run_root(run_output_dir)

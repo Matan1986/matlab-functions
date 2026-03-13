@@ -1,0 +1,54 @@
+{
+  "surveys": [
+    {
+      "survey_id": "project_synthesis",
+      "project_scope": {
+        "scope_type": "project",
+        "projects": [
+          "magnetic_dynamics"
+        ]
+      },
+      "description": "High level synthesis of project findings"
+    },
+    {
+      "survey_id": "relaxation_dynamics",
+      "project_scope": {
+        "scope_type": "project",
+        "projects": [
+          "magnetic_dynamics"
+        ]
+      },
+      "description": "Rolling survey focused on relaxation behavior across approved run surveys"
+    },
+    {
+      "survey_id": "aging_dynamics",
+      "project_scope": {
+        "scope_type": "project",
+        "projects": [
+          "magnetic_dynamics"
+        ]
+      },
+      "description": "Rolling survey focused on aging behavior across approved run surveys"
+    },
+    {
+      "survey_id": "switching_dynamics",
+      "project_scope": {
+        "scope_type": "project",
+        "projects": [
+          "magnetic_dynamics"
+        ]
+      },
+      "description": "Rolling survey focused on switching behavior across approved run surveys"
+    },
+    {
+      "survey_id": "cross_experiment",
+      "project_scope": {
+        "scope_type": "cross_project",
+        "projects": [
+          "magnetic_dynamics"
+        ]
+      },
+      "description": "Cross-project survey for synthesizing findings across experiments and project registries"
+    }
+  ]
+}

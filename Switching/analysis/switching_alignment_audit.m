@@ -192,8 +192,7 @@ xlabel(axTempCleanup, 'Original T (K)')
 ylabel(axTempCleanup, 'Cleaned T (K)')
 title(axTempCleanup, 'Temperature cleanup: original vs rounded bins')
 grid(axTempCleanup, 'on')
-tempCleanupOut = fullfile(outDir, 'switching_alignment_temperature_cleanup.png');
-saveas(figTempCleanup, tempCleanupOut);
+tempCleanupOut = export_alignment_figure(figTempCleanup, 'switching_alignment_temperature_cleanup', outDir);
 close(figTempCleanup);
 
 % Temperature-dependent switching observables from S(T,I).
@@ -468,8 +467,7 @@ if runSVD
     ylabel(axSvdScree, 'normalized singular value')
     title(axSvdScree, 'SVD scree plot')
     grid(axSvdScree, 'on')
-    svdScreeOut = fullfile(outDir, 'switching_alignment_svd_scree.png');
-    saveas(figSvdScree, svdScreeOut);
+    svdScreeOut = export_alignment_figure(figSvdScree, 'switching_alignment_svd_scree', outDir);
     close(figSvdScree);
 
     figSvdEV = figure('Color','w','Visible','off', 'Position', [100 100 900 600]);
@@ -484,8 +482,7 @@ if runSVD
     ylabel(axSvdEV, 'explained variance')
     title(axSvdEV, 'SVD explained variance')
     grid(axSvdEV, 'on')
-    svdExplainedOut = fullfile(outDir, 'switching_alignment_svd_explained_variance.png');
-    saveas(figSvdEV, svdExplainedOut);
+    svdExplainedOut = export_alignment_figure(figSvdEV, 'switching_alignment_svd_explained_variance', outDir);
     close(figSvdEV);
 
     M1 = U(:,1)*S(1,1)*V(:,1)';
@@ -542,8 +539,7 @@ if runSVD
     title(axModesT,'SVD temperature modes')
     legend(axModesT, hT, compose('mode %d', 1:nModesT), 'Location', 'best')
     grid(axModesT,'on')
-    svdTOut = fullfile(outDir, 'switching_alignment_svd_T.png');
-    saveas(figModesT, svdTOut);
+    svdTOut = export_alignment_figure(figModesT, 'switching_alignment_svd_T', outDir);
     close(figModesT);
 
     nModesI = min(2, size(V,2));
@@ -562,8 +558,7 @@ if runSVD
     title(axModesI,'SVD current modes')
     legend(axModesI, hI, compose('mode %d', 1:nModesI), 'Location', 'best')
     grid(axModesI,'on')
-    svdIOut = fullfile(outDir, 'switching_alignment_svd_I.png');
-    saveas(figModesI, svdIOut);
+    svdIOut = export_alignment_figure(figModesI, 'switching_alignment_svd_I', outDir);
     close(figModesI);
 
     figSvdRec2 = figure('Color', 'w', 'Visible', 'off', 'Position', [100 100 900 600]);
@@ -576,8 +571,7 @@ if runSVD
     title(axSvdRec2, 'SVD rank-2 reconstruction');
     cbSvdRec2 = colorbar(axSvdRec2);
     ylabel(cbSvdRec2, 'Switching amplitude \DeltaR/R (%)');
-    svdRec2Out = fullfile(outDir, 'switching_alignment_svd_rank2_reconstruction.png');
-    saveas(figSvdRec2, svdRec2Out);
+    svdRec2Out = export_alignment_figure(figSvdRec2, 'switching_alignment_svd_rank2_reconstruction', outDir);
     close(figSvdRec2);
 
     if all(isfinite(M3(:)))
@@ -591,8 +585,7 @@ if runSVD
         title(axSvdRec3, 'SVD rank-3 reconstruction');
         cbSvdRec3 = colorbar(axSvdRec3);
         ylabel(cbSvdRec3, 'Switching amplitude \DeltaR/R (%)');
-        svdRec3Out = fullfile(outDir, 'switching_alignment_svd_rank3_reconstruction.png');
-        saveas(figSvdRec3, svdRec3Out);
+        svdRec3Out = export_alignment_figure(figSvdRec3, 'switching_alignment_svd_rank3_reconstruction', outDir);
         close(figSvdRec3);
     end
 
@@ -649,8 +642,7 @@ if ranSVD
         ylabel(axModeObsI, 'coeffI_modek(I)')
         title(axModeObsI, 'Current mode observables')
         legend(axModeObsI, 'Location', 'best');
-        modeObsOut = fullfile(outDir, 'switching_alignment_mode_observables.png');
-        saveas(figModeObs, modeObsOut);
+        modeObsOut = export_alignment_figure(figModeObs, 'switching_alignment_mode_observables', outDir);
         close(figModeObs);
 
         fprintf('Mode observables summary:\n');
@@ -695,8 +687,7 @@ if ranSVD
         title(axModeAmp, 'SVD mode amplitudes vs temperature')
         grid(axModeAmp, 'on')
         legend(axModeAmp, 'Location', 'best');
-        svdModeAmpOut = fullfile(outDir, 'switching_alignment_svd_mode_amplitudes_vs_T.png');
-        saveas(figModeAmp, svdModeAmpOut);
+        svdModeAmpOut = export_alignment_figure(figModeAmp, 'switching_alignment_svd_mode_amplitudes_vs_T', outDir);
         close(figModeAmp);
 
         figModeRatio = figure('Color','w','Visible','off','Position',[100 100 900 600]);
@@ -706,8 +697,7 @@ if ranSVD
         ylabel(axModeRatio, '|mode2|/|mode1|')
         title(axModeRatio, 'SVD mode ratio vs temperature')
         grid(axModeRatio, 'on')
-        svdModeRatioOut = fullfile(outDir, 'switching_alignment_mode_ratio_vs_T.png');
-        saveas(figModeRatio, svdModeRatioOut);
+        svdModeRatioOut = export_alignment_figure(figModeRatio, 'switching_alignment_mode_ratio_vs_T', outDir);
         close(figModeRatio);
 
         figModeRatioSmooth = figure('Color','w','Visible','off','Position',[100 100 900 600]);
@@ -717,8 +707,7 @@ if ranSVD
         ylabel(axModeRatioSmooth, 'smoothed |mode2|/|mode1|')
         title(axModeRatioSmooth, 'Smoothed SVD mode ratio')
         grid(axModeRatioSmooth, 'on')
-        svdModeRatioSmoothOut = fullfile(outDir, 'switching_alignment_mode_ratio_smoothed.png');
-        saveas(figModeRatioSmooth, svdModeRatioSmoothOut);
+        svdModeRatioSmoothOut = export_alignment_figure(figModeRatioSmooth, 'switching_alignment_mode_ratio_smoothed', outDir);
         close(figModeRatioSmooth);
 
         figCurrModes2 = figure('Color','w','Visible','off','Position',[100 100 900 600]);
@@ -731,8 +720,7 @@ if ranSVD
         title(axCurrModes2, 'SVD current-mode structure')
         grid(axCurrModes2, 'on')
         legend(axCurrModes2, 'Location', 'best');
-        svdCurrentModesOut = fullfile(outDir, 'switching_alignment_svd_current_modes.png');
-        saveas(figCurrModes2, svdCurrentModesOut);
+        svdCurrentModesOut = export_alignment_figure(figCurrModes2, 'switching_alignment_svd_current_modes', outDir);
         close(figCurrModes2);
 
         S1 = U(:,1) * S(1,1) * V(:,1)';
@@ -757,8 +745,7 @@ if ranSVD
         title(axS2, 'Mode-2 reconstruction')
         cbS2 = colorbar(axS2);
         ylabel(cbS2, '\DeltaR/R (%)')
-        svdModeReconOut = fullfile(outDir, 'switching_alignment_mode_reconstruction.png');
-        saveas(figModeRecon, svdModeReconOut);
+        svdModeReconOut = export_alignment_figure(figModeRecon, 'switching_alignment_mode_reconstruction', outDir);
         close(figModeRecon);
 
         valid12 = isfinite(mode1_T) & isfinite(mode2_T);
@@ -777,8 +764,7 @@ if ranSVD
         cbModeScatter = colorbar(axModeScatter);
         ylabel(cbModeScatter, 'T (K)')
         text(axModeScatter, 0.03, 0.95, sprintf('r = %.3f', corr12), 'Units', 'normalized', 'VerticalAlignment', 'top', 'FontWeight', 'bold');
-        svdModeScatterOut = fullfile(outDir, 'switching_alignment_mode_scatter.png');
-        saveas(figModeScatter, svdModeScatterOut);
+        svdModeScatterOut = export_alignment_figure(figModeScatter, 'switching_alignment_mode_scatter', outDir);
         close(figModeScatter);
 
         figModeObsCorr = figure('Color','w','Visible','off','Position',[100 100 1000 800]);
@@ -806,8 +792,7 @@ if ranSVD
                 ylabel(cb, 'T (K)')
             end
         end
-        svdModeObsCorrOut = fullfile(outDir, 'switching_alignment_mode_observable_correlations.png');
-        saveas(figModeObsCorr, svdModeObsCorrOut);
+        svdModeObsCorrOut = export_alignment_figure(figModeObsCorr, 'switching_alignment_mode_observable_correlations', outDir);
         close(figModeObsCorr);
 
         modeObsCorrTbl = table( ...
@@ -880,8 +865,7 @@ if runNMF
                 ylabel(axNmfStab, 'reconstruction error')
                 title(axNmfStab, 'NMF stability (rank 2)')
                 grid(axNmfStab, 'on')
-                nmfStabilityOut = fullfile(outDir, 'switching_alignment_nmf_stability.png');
-                saveas(figNmfStab, nmfStabilityOut);
+                nmfStabilityOut = export_alignment_figure(figNmfStab, 'switching_alignment_nmf_stability', outDir);
                 close(figNmfStab);
 
                 try
@@ -913,8 +897,7 @@ if runNMF
                 title(axNmfT, 'NMF temperature components')
                 legend(axNmfT, 'component 1', 'component 2', 'Location', 'best')
                 grid(axNmfT, 'on')
-                nmfTOut = fullfile(outDir, 'switching_alignment_nmf_T.png');
-                saveas(figNmfT, nmfTOut);
+                nmfTOut = export_alignment_figure(figNmfT, 'switching_alignment_nmf_T', outDir);
                 close(figNmfT);
 
                 figNmfI = figure('Color','w','Visible','off', 'Position', [100 100 900 600]);
@@ -924,8 +907,7 @@ if runNMF
                 title(axNmfI, 'NMF current components')
                 legend(axNmfI, 'component 1', 'component 2', 'Location', 'best')
                 grid(axNmfI, 'on')
-                nmfIOut = fullfile(outDir, 'switching_alignment_nmf_I.png');
-                saveas(figNmfI, nmfIOut);
+                nmfIOut = export_alignment_figure(figNmfI, 'switching_alignment_nmf_I', outDir);
                 close(figNmfI);
 
                 Mcomp1 = W(:,1) * H(1,:);
@@ -939,8 +921,7 @@ if runNMF
                 title(axNmfC1, 'NMF component 1');
                 cbNmfC1 = colorbar(axNmfC1);
                 ylabel(cbNmfC1, 'Switching amplitude \DeltaR/R (%)');
-                nmfComp1Out = fullfile(outDir, 'switching_alignment_nmf_component1.png');
-                saveas(figNmfC1, nmfComp1Out);
+                nmfComp1Out = export_alignment_figure(figNmfC1, 'switching_alignment_nmf_component1', outDir);
                 close(figNmfC1);
 
                 Mcomp2 = W(:,2) * H(2,:);
@@ -954,8 +935,7 @@ if runNMF
                 title(axNmfC2, 'NMF component 2');
                 cbNmfC2 = colorbar(axNmfC2);
                 ylabel(cbNmfC2, 'Switching amplitude \DeltaR/R (%)');
-                nmfComp2Out = fullfile(outDir, 'switching_alignment_nmf_component2.png');
-                saveas(figNmfC2, nmfComp2Out);
+                nmfComp2Out = export_alignment_figure(figNmfC2, 'switching_alignment_nmf_component2', outDir);
                 close(figNmfC2);
 
                 figNmfRec = figure('Color', 'w', 'Visible', 'off', 'Position', [100 100 900 600]);
@@ -968,8 +948,7 @@ if runNMF
                 title(axNmfRec, 'NMF reconstruction W*H');
                 cbNmfRec = colorbar(axNmfRec);
                 ylabel(cbNmfRec, 'Switching amplitude \DeltaR/R (%)');
-                nmfRecOut = fullfile(outDir, 'switching_alignment_nmf_reconstruction.png');
-                saveas(figNmfRec, nmfRecOut);
+                nmfRecOut = export_alignment_figure(figNmfRec, 'switching_alignment_nmf_reconstruction', outDir);
                 close(figNmfRec);
 
                 if all(isfinite(M_nmf_rec3(:)))
@@ -983,8 +962,7 @@ if runNMF
                     title(axNmfRec3, 'NMF rank-3 reconstruction');
                     cbNmfRec3 = colorbar(axNmfRec3);
                     ylabel(cbNmfRec3, 'Switching amplitude \DeltaR/R (%)');
-                    nmfRec3Out = fullfile(outDir, 'switching_alignment_nmf_rank3_reconstruction.png');
-                    saveas(figNmfRec3, nmfRec3Out);
+                    nmfRec3Out = export_alignment_figure(figNmfRec3, 'switching_alignment_nmf_rank3_reconstruction', outDir);
                     close(figNmfRec3);
                 end
             catch ME
@@ -1016,8 +994,7 @@ ylabel(axHeat, 'T (K)');
 title(axHeat, 'Switching map S(T,I)');
 cbHeat = colorbar(axHeat);
 ylabel(cbHeat, 'Switching amplitude \DeltaR/R (%)');
-heatOut = fullfile(outDir, 'switching_alignment_heatmap.png');
-saveas(figHeat, heatOut);
+heatOut = export_alignment_figure(figHeat, 'switching_alignment_heatmap', outDir);
 close(figHeat);
 
 if ranSVD
@@ -1041,8 +1018,7 @@ if ranSVD
     title(axRes2, 'Residual map: rank-2 (S - SVD_{rank2})');
     cbRes2 = colorbar(axRes2);
     ylabel(cbRes2, 'Residual \DeltaR/R (%)');
-    residualRank2Out = fullfile(outDir, 'switching_alignment_residual_rank2.png');
-    saveas(figRes2, residualRank2Out);
+    residualRank2Out = export_alignment_figure(figRes2, 'switching_alignment_residual_rank2', outDir);
     close(figRes2);
 
     if all(isfinite(M3(:)))
@@ -1066,8 +1042,7 @@ if ranSVD
         title(axRes3, 'Residual map: rank-3 (S - SVD_{rank3})');
         cbRes3 = colorbar(axRes3);
         ylabel(cbRes3, 'Residual \DeltaR/R (%)');
-        residualRank3Out = fullfile(outDir, 'switching_alignment_residual_rank3.png');
-        saveas(figRes3, residualRank3Out);
+        residualRank3Out = export_alignment_figure(figRes3, 'switching_alignment_residual_rank3', outDir);
         close(figRes3);
     end
 end
@@ -1095,8 +1070,7 @@ ylabel(axHeatNorm, 'T (K)');
 title(axHeatNorm, 'Normalized switching map S/max(S)');
 cbHeatNorm = colorbar(axHeatNorm);
 ylabel(cbHeatNorm, 'Normalized switching amplitude');
-heatNormOut = fullfile(outDir, 'switching_alignment_heatmap_normalized.png');
-saveas(figHeatNorm, heatNormOut);
+heatNormOut = export_alignment_figure(figHeatNorm, 'switching_alignment_heatmap_normalized', outDir);
 close(figHeatNorm);
 
 figdSdI = figure('Color', 'w', 'Visible', 'off', 'Position', [100 100 900 600]);
@@ -1116,8 +1090,7 @@ ylabel(axdSdI, 'T (K)');
 title(axdSdI, 'Current susceptibility \partialS/\partialI');
 cbdSdI = colorbar(axdSdI);
 ylabel(cbdSdI, '\partialS/\partialI');
-dSdIOut = fullfile(outDir, 'switching_alignment_dSdI_heatmap.png');
-saveas(figdSdI, dSdIOut);
+dSdIOut = export_alignment_figure(figdSdI, 'switching_alignment_dSdI_heatmap', outDir);
 close(figdSdI);
 figd2SdI2 = figure('Color', 'w', 'Visible', 'off', 'Position', [100 100 900 600]);
 axd2SdI2 = axes(figd2SdI2);
@@ -1136,8 +1109,7 @@ ylabel(axd2SdI2, 'T (K)');
 title(axd2SdI2, 'Second current derivative \partial^2S/\partialI^2');
 cbd2 = colorbar(axd2SdI2);
 ylabel(cbd2, '\partial^2S/\partialI^2');
-d2SdI2Out = fullfile(outDir, 'switching_alignment_d2SdI2_heatmap.png');
-saveas(figd2SdI2, d2SdI2Out);
+d2SdI2Out = export_alignment_figure(figd2SdI2, 'switching_alignment_d2SdI2_heatmap', outDir);
 close(figd2SdI2);
 
 figSusCuts = figure('Color', 'w', 'Visible', 'off', 'Position', [100 100 900 600]);
@@ -1163,8 +1135,7 @@ xlabel(axSusCuts, 'I_0 (mA)');
 ylabel(axSusCuts, '\partialS/\partialI');
 title(axSusCuts, 'Susceptibility cuts');
 legend(axSusCuts, 'Location', 'eastoutside');
-susCutsOut = fullfile(outDir, 'switching_alignment_susceptibility_cuts.png');
-saveas(figSusCuts, susCutsOut);
+susCutsOut = export_alignment_figure(figSusCuts, 'switching_alignment_susceptibility_cuts', outDir);
 close(figSusCuts);
 
 figRidge = figure('Color','w','Visible','off','Position',[100 100 900 600]);
@@ -1174,8 +1145,7 @@ xlabel(axRidge,'T (K)')
 ylabel(axRidge,'I_{peak} (mA)')
 title(axRidge,'Peak switching current I_{peak}(T)')
 grid(axRidge,'on')
-ridgeOut = fullfile(outDir, 'switching_alignment_ridge.png');
-saveas(figRidge, ridgeOut);
+ridgeOut = export_alignment_figure(figRidge, 'switching_alignment_ridge', outDir);
 close(figRidge);
 
 I_ridge_smooth = Ipeak;
@@ -1193,8 +1163,7 @@ ylabel(axRidgeCurve, 'I (mA)')
 title(axRidgeCurve, 'Ridge tracking curve')
 grid(axRidgeCurve, 'on')
 legend(axRidgeCurve, 'Location', 'best');
-ridgeCurveOut = fullfile(outDir, 'switching_alignment_ridge_curve.png');
-saveas(figRidgeCurve, ridgeCurveOut);
+ridgeCurveOut = export_alignment_figure(figRidgeCurve, 'switching_alignment_ridge_curve', outDir);
 close(figRidgeCurve);
 
 figIpeakVsT = figure('Color', 'w', 'Visible', 'off', 'Position', [100 100 900 600]);
@@ -1204,8 +1173,7 @@ xlabel(axIpeakVsT, 'T (K)')
 ylabel(axIpeakVsT, 'I_{peak} (mA)')
 title(axIpeakVsT, 'Peak position vs temperature')
 grid(axIpeakVsT, 'on')
-IpeakVsTOut = fullfile(outDir, 'switching_alignment_Ipeak_vs_T.png');
-saveas(figIpeakVsT, IpeakVsTOut);
+IpeakVsTOut = export_alignment_figure(figIpeakVsT, 'switching_alignment_Ipeak_vs_T', outDir);
 close(figIpeakVsT);
 
 figRidgeLaw = figure('Color', 'w', 'Visible', 'off', 'Position', [100 100 1000 700]);
@@ -1237,8 +1205,7 @@ ylabel(axRL3, 'log(I_{peak})')
 title(axRL3, 'Ridge law test: log(I_{peak}) vs 1/T')
 grid(axRL3, 'on')
 
-ridgeLawOut = fullfile(outDir, 'switching_alignment_ridge_law_tests.png');
-saveas(figRidgeLaw, ridgeLawOut);
+ridgeLawOut = export_alignment_figure(figRidgeLaw, 'switching_alignment_ridge_law_tests', outDir);
 close(figRidgeLaw);
 
 
@@ -1249,8 +1216,7 @@ xlabel(axWidthVsT, 'T (K)')
 ylabel(axWidthVsT, 'width_I (mA)')
 title(axWidthVsT, 'Peak width vs temperature')
 grid(axWidthVsT, 'on')
-widthVsTOut = fullfile(outDir, 'switching_alignment_peak_width_vs_T.png');
-saveas(figWidthVsT, widthVsTOut);
+widthVsTOut = export_alignment_figure(figWidthVsT, 'switching_alignment_peak_width_vs_T', outDir);
 close(figWidthVsT);
 
 figRidgeObs = figure('Color', 'w', 'Visible', 'off', 'Position', [100 100 1000 800]);
@@ -1279,8 +1245,7 @@ xlabel(axRO4, 'T (K)')
 ylabel(axRO4, 'width_{rel} = width_I/I_{peak}')
 title(axRO4, 'Ridge: relative width')
 grid(axRO4, 'on')
-ridgeObsOut = fullfile(outDir, 'switching_alignment_ridge_observables.png');
-saveas(figRidgeObs, ridgeObsOut);
+ridgeObsOut = export_alignment_figure(figRidgeObs, 'switching_alignment_ridge_observables', outDir);
 close(figRidgeObs);
 
 
@@ -1307,8 +1272,7 @@ ylabel(axActW2, 'd(width_I)/dT')
 title(axActW2, 'Width slope vs temperature')
 grid(axActW2, 'on')
 
-activationWidthOut = fullfile(outDir, 'switching_alignment_activation_width_vs_T.png');
-saveas(figActWidth, activationWidthOut);
+activationWidthOut = export_alignment_figure(figActWidth, 'switching_alignment_activation_width_vs_T', outDir);
 close(figActWidth);
 
 
@@ -1319,8 +1283,7 @@ xlabel(axChiPeakVsT, 'T (K)')
 ylabel(axChiPeakVsT, '\chi_{peak}')
 title(axChiPeakVsT, 'Susceptibility peak vs temperature')
 grid(axChiPeakVsT, 'on')
-chiPeakVsTOut = fullfile(outDir, 'switching_alignment_chiPeak_vs_T.png');
-saveas(figChiPeakVsT, chiPeakVsTOut);
+chiPeakVsTOut = export_alignment_figure(figChiPeakVsT, 'switching_alignment_chiPeak_vs_T', outDir);
 close(figChiPeakVsT);
 
 chiWidth_I = chiWidth;
@@ -1331,8 +1294,7 @@ xlabel(axChiWidth, 'T (K)')
 ylabel(axChiWidth, 'chiWidth_I (mA)')
 title(axChiWidth, 'Susceptibility width vs temperature')
 grid(axChiWidth, 'on')
-chiWidthVsTOut = fullfile(outDir, 'switching_alignment_susceptibility_width_vs_T.png');
-saveas(figChiWidth, chiWidthVsTOut);
+chiWidthVsTOut = export_alignment_figure(figChiWidth, 'switching_alignment_susceptibility_width_vs_T', outDir);
 close(figChiWidth);
 
 dS_peak_dT = NaN(size(S_peak));
@@ -1380,8 +1342,7 @@ xlabel(axD4, 'T (K)')
 ylabel(axD4, 'd^2S_{peak}/dT^2')
 title(axD4, 'Curvature diagnostic')
 grid(axD4, 'on')
-derivTestsOut = fullfile(outDir, 'switching_alignment_derivative_tests.png');
-saveas(figDeriv, derivTestsOut);
+derivTestsOut = export_alignment_figure(figDeriv, 'switching_alignment_derivative_tests', outDir);
 close(figDeriv);
 
 dSpeak_dT = dS_peak_dT;
@@ -1399,8 +1360,7 @@ xlabel(axRD2, 'T (K)')
 ylabel(axRD2, 'dS_{peak}/dT')
 title(axRD2, 'Ridge derivative: dS_{peak}/dT')
 grid(axRD2, 'on')
-ridgeDerivOut = fullfile(outDir, 'switching_alignment_ridge_derivatives.png');
-saveas(figRidgeDeriv, ridgeDerivOut);
+ridgeDerivOut = export_alignment_figure(figRidgeDeriv, 'switching_alignment_ridge_derivatives', outDir);
 close(figRidgeDeriv);
 
 charNames = strings(0,1);
@@ -1484,8 +1444,7 @@ ylabel(axObs3, 'width_I (mA)')
 title(axObs3, 'Half-maximum width')
 grid(axObs3, 'on')
 
-obsOut = fullfile(outDir, 'switching_alignment_observables.png');
-saveas(figObs, obsOut);
+obsOut = export_alignment_figure(figObs, 'switching_alignment_observables', outDir);
 close(figObs);
 figChiObs = figure('Color','w','Visible','off','Position',[100 100 900 600]);
 tlChiObs = tiledlayout(figChiObs, 4, 1, 'TileSpacing', 'compact', 'Padding', 'compact');
@@ -1517,8 +1476,7 @@ ylabel(axChi4, 'chiArea')
 title(axChi4, 'Integrated positive susceptibility')
 grid(axChi4, 'on')
 
-susObsOut = fullfile(outDir, 'switching_alignment_susceptibility_observables.png');
-saveas(figChiObs, susObsOut);
+susObsOut = export_alignment_figure(figChiObs, 'switching_alignment_susceptibility_observables', outDir);
 close(figChiObs);
 
 figScaling = figure('Color', 'w', 'Visible', 'off', 'Position', [100 100 900 600]);
@@ -1550,8 +1508,7 @@ xlabel(axScaling, 'I / I_{peak}(T)');
 ylabel(axScaling, 'S(T,I)');
 title(axScaling, 'Scaling test: S vs I/I_{peak}');
 legend(axScaling, 'Location', 'eastoutside');
-scalingIoverIpeakOut = fullfile(outDir, 'switching_alignment_scaling_I_over_Ipeak.png');
-saveas(figScaling, scalingIoverIpeakOut);
+scalingIoverIpeakOut = export_alignment_figure(figScaling, 'switching_alignment_scaling_I_over_Ipeak', outDir);
 close(figScaling);
 
 figEnergyCollapse = figure('Color', 'w', 'Visible', 'off', 'Position', [100 100 900 600]);
@@ -1583,8 +1540,7 @@ xlabel(axEnergyCollapse, 'I / I_{peak}(T)');
 ylabel(axEnergyCollapse, 'S(T,I) / S_{peak}(T)');
 title(axEnergyCollapse, 'Energy-scale collapse: normalized S vs I/I_{peak}');
 legend(axEnergyCollapse, 'Location', 'eastoutside');
-energyScaleCollapseOut = fullfile(outDir, 'switching_alignment_energy_scale_collapse.png');
-saveas(figEnergyCollapse, energyScaleCollapseOut);
+energyScaleCollapseOut = export_alignment_figure(figEnergyCollapse, 'switching_alignment_energy_scale_collapse', outDir);
 close(figEnergyCollapse);
 
 
@@ -1618,8 +1574,7 @@ xlabel(axScalingShift, 'I - I_{peak}(T) (mA)');
 ylabel(axScalingShift, 'S(T,I)');
 title(axScalingShift, 'Threshold-collapse test: S vs I - I_{peak}');
 legend(axScalingShift, 'Location', 'eastoutside');
-scalingImIpeakOut = fullfile(outDir, 'switching_alignment_scaling_I_minus_Ipeak.png');
-saveas(figScalingShift, scalingImIpeakOut);
+scalingImIpeakOut = export_alignment_figure(figScalingShift, 'switching_alignment_scaling_I_minus_Ipeak', outDir);
 close(figScalingShift);
 
 figScalingNormThresh = figure('Color', 'w', 'Visible', 'off', 'Position', [100 100 900 600]);
@@ -1646,8 +1601,7 @@ xlabel(axScalingNormThresh, '(I - I_{peak}(T)) / width_I(T)');
 ylabel(axScalingNormThresh, 'S(T,I)');
 title(axScalingNormThresh, 'Normalized threshold-collapse test');
 legend(axScalingNormThresh, 'Location', 'eastoutside');
-scalingThreshNormOut = fullfile(outDir, 'switching_alignment_scaling_threshold_normalized.png');
-saveas(figScalingNormThresh, scalingThreshNormOut);
+scalingThreshNormOut = export_alignment_figure(figScalingNormThresh, 'switching_alignment_scaling_threshold_normalized', outDir);
 close(figScalingNormThresh);
 ridgeScalingMessage = sprintf('Reused ridge scaling diagnostics: %s ; %s', scalingImIpeakOut, scalingThreshNormOut);
 
@@ -1676,8 +1630,7 @@ xlabel(axScalingInorm, 'I_{norm} = (I - I_{\chi}(T))/chiWidth(T)');
 ylabel(axScalingInorm, 'S(T,I)');
 title(axScalingInorm, 'Scaling collapse test: S vs I_{norm}');
 legend(axScalingInorm, 'Location', 'eastoutside');
-scalingInormOut = fullfile(outDir, 'switching_alignment_scaling_I_norm.png');
-saveas(figScalingInorm, scalingInormOut);
+scalingInormOut = export_alignment_figure(figScalingInorm, 'switching_alignment_scaling_I_norm', outDir);
 close(figScalingInorm);
 
 
@@ -1711,8 +1664,7 @@ ylabel(axAdd4, 'asym = area_{right}/area_{left}')
 title(axAdd4, 'Peak asymmetry around I_{peak}')
 grid(axAdd4, 'on')
 
-additionalObsOut = fullfile(outDir, 'switching_alignment_additional_observables.png');
-saveas(figAddObs, additionalObsOut);
+additionalObsOut = export_alignment_figure(figAddObs, 'switching_alignment_additional_observables', outDir);
 close(figAddObs);
 
 % --- Extended empirical structural diagnostics (ridge, scaling, SVD structure) ---
@@ -1735,8 +1687,7 @@ ylabel(axActTest, 'log(I_{peak})')
 title(axActTest, 'Activation test: log(I_{peak}) vs 1/T')
 grid(axActTest, 'on')
 legend(axActTest, 'Location', 'best');
-activationTestOut = fullfile(outDir, 'switching_alignment_activation_test.png');
-saveas(figActTest, activationTestOut);
+activationTestOut = export_alignment_figure(figActTest, 'switching_alignment_activation_test', outDir);
 close(figActTest);
 
 if isfile(heatOut)
@@ -1753,8 +1704,7 @@ else
     xlabel(axMapRidge, 'I_0 (mA)'); ylabel(axMapRidge, 'T (K)');
     title(axMapRidge, 'Switching map with ridge');
     colorbar(axMapRidge);
-    mapWithRidgeOut = fullfile(outDir, 'switching_alignment_map_with_ridge.png');
-    saveas(figMapRidge, mapWithRidgeOut);
+    mapWithRidgeOut = export_alignment_figure(figMapRidge, 'switching_alignment_map_with_ridge', outDir);
     close(figMapRidge);
 end
 
@@ -1801,8 +1751,7 @@ if ~isempty(dIgrid)
     ylabel(axRCMap, 'T (K)')
     title(axRCMap, 'Ridge-centered collapse map')
     colorbar(axRCMap);
-    ridgeCollapseMapOut = fullfile(outDir, 'switching_alignment_ridge_collapse_map.png');
-    saveas(figRCMap, ridgeCollapseMapOut);
+    ridgeCollapseMapOut = export_alignment_figure(figRCMap, 'switching_alignment_ridge_collapse_map', outDir);
     close(figRCMap);
 
     figRCCurves = figure('Color', 'w', 'Visible', 'off', 'Position', [100 100 900 600]);
@@ -1824,8 +1773,7 @@ if ~isempty(dIgrid)
     ylabel(axRCCurves, 'S(T,I)')
     title(axRCCurves, 'Ridge-centered collapse curves')
     legend(axRCCurves, 'Location', 'eastoutside');
-    ridgeCollapseCurvesOut = fullfile(outDir, 'switching_alignment_ridge_collapse_curves.png');
-    saveas(figRCCurves, ridgeCollapseCurvesOut);
+    ridgeCollapseCurvesOut = export_alignment_figure(figRCCurves, 'switching_alignment_ridge_collapse_curves', outDir);
     close(figRCCurves);
 end
 
@@ -1854,8 +1802,7 @@ xlabel(axTP1, 'I_0 (mA)'); ylabel(axTP1, 'T_{peak,high} (K)'); title(axTP1, 'Hig
 axTP2 = nexttile(tlTPeak, 2);
 plot(axTP2, currents, T_width_high, '-o', 'LineWidth', 1.6);
 xlabel(axTP2, 'I_0 (mA)'); ylabel(axTP2, 'T_{width,high} (K)'); title(axTP2, 'High-T peak width'); grid(axTP2, 'on');
-tempPeakTrackOut = fullfile(outDir, 'switching_alignment_temperature_peak_tracking.png');
-saveas(figTPeakTrack, tempPeakTrackOut);
+tempPeakTrackOut = export_alignment_figure(figTPeakTrack, 'switching_alignment_temperature_peak_tracking', outDir);
 close(figTPeakTrack);
 
 lowTMask = isfinite(temps) & temps >= 4 & temps <= 8;
@@ -1867,8 +1814,7 @@ figLowT = figure('Color', 'w', 'Visible', 'off', 'Position', [100 100 900 600]);
 axLowT = axes(figLowT);
 plot(axLowT, currents, S_lowT, '-o', 'LineWidth', 1.7);
 xlabel(axLowT, 'I_0 (mA)'); ylabel(axLowT, 'S_{lowT}'); title(axLowT, 'Low-T background: mean(4-8 K)'); grid(axLowT, 'on');
-lowTBackgroundOut = fullfile(outDir, 'switching_alignment_lowT_background.png');
-saveas(figLowT, lowTBackgroundOut);
+lowTBackgroundOut = export_alignment_figure(figLowT, 'switching_alignment_lowT_background', outDir);
 close(figLowT);
 
 if ranSVD && size(U,2) >= 2 && size(V,2) >= 2
@@ -1883,8 +1829,7 @@ if ranSVD && size(U,2) >= 2 && size(V,2) >= 2
     axMM1 = nexttile(tlMM, 1); imagesc(axMM1, currents, temps, S1_map); set(axMM1,'YDir','normal'); colormap(axMM1,turbo); title(axMM1,'Mode1 reconstruction'); xlabel(axMM1,'I_0 (mA)'); ylabel(axMM1,'T (K)'); colorbar(axMM1);
     axMM2 = nexttile(tlMM, 2); imagesc(axMM2, currents, temps, S2_map); set(axMM2,'YDir','normal'); colormap(axMM2,turbo); title(axMM2,'Mode2 reconstruction'); xlabel(axMM2,'I_0 (mA)'); ylabel(axMM2,'T (K)'); colorbar(axMM2);
     axMM3 = nexttile(tlMM, 3); imagesc(axMM3, currents, temps, modeResidual); set(axMM3,'YDir','normal'); applyDivergingColormap(axMM3); title(axMM3,'Residual (S - mode1 - mode2)'); xlabel(axMM3,'I_0 (mA)'); ylabel(axMM3,'T (K)'); colorbar(axMM3);
-    modeMapsOut = fullfile(outDir, 'switching_alignment_mode_maps.png');
-    saveas(figModeMaps, modeMapsOut);
+    modeMapsOut = export_alignment_figure(figModeMaps, 'switching_alignment_mode_maps', outDir);
     close(figModeMaps);
 
     figModeLoc = figure('Color', 'w', 'Visible', 'off', 'Position', [100 100 1000 450]);
@@ -1893,8 +1838,7 @@ if ranSVD && size(U,2) >= 2 && size(V,2) >= 2
     mode2_energy = abs(S2_map).^2;
     axLoc1 = nexttile(tlLoc, 1); imagesc(axLoc1, currents, temps, mode1_energy); set(axLoc1,'YDir','normal'); colormap(axLoc1,turbo); title(axLoc1,'Mode1 energy localization'); xlabel(axLoc1,'I_0 (mA)'); ylabel(axLoc1,'T (K)'); colorbar(axLoc1);
     axLoc2 = nexttile(tlLoc, 2); imagesc(axLoc2, currents, temps, mode2_energy); set(axLoc2,'YDir','normal'); colormap(axLoc2,turbo); title(axLoc2,'Mode2 energy localization'); xlabel(axLoc2,'I_0 (mA)'); ylabel(axLoc2,'T (K)'); colorbar(axLoc2);
-    modeLocalizationOut = fullfile(outDir, 'switching_alignment_mode_localization.png');
-    saveas(figModeLoc, modeLocalizationOut);
+    modeLocalizationOut = export_alignment_figure(figModeLoc, 'switching_alignment_mode_localization', outDir);
     close(figModeLoc);
 
     rU = corr(U(:,1), U(:,2), 'rows', 'complete');
@@ -1903,8 +1847,7 @@ if ranSVD && size(U,2) >= 2 && size(V,2) >= 2
     tlMC = tiledlayout(figModeCorr, 1, 2, 'TileSpacing', 'compact', 'Padding', 'compact');
     axMC1 = nexttile(tlMC, 1); scatter(axMC1, U(:,1), U(:,2), 30, temps, 'filled'); grid(axMC1,'on'); xlabel(axMC1,'U(:,1)'); ylabel(axMC1,'U(:,2)'); title(axMC1,'Temperature mode correlation'); text(axMC1,0.03,0.95,sprintf('r = %.3f',rU),'Units','normalized','VerticalAlignment','top'); colorbar(axMC1);
     axMC2 = nexttile(tlMC, 2); scatter(axMC2, V(:,1), V(:,2), 30, currents, 'filled'); grid(axMC2,'on'); xlabel(axMC2,'V(:,1)'); ylabel(axMC2,'V(:,2)'); title(axMC2,'Current mode correlation'); text(axMC2,0.03,0.95,sprintf('r = %.3f',rV),'Units','normalized','VerticalAlignment','top'); colorbar(axMC2);
-    modeCorrOut = fullfile(outDir, 'switching_alignment_mode_correlation.png');
-    saveas(figModeCorr, modeCorrOut);
+    modeCorrOut = export_alignment_figure(figModeCorr, 'switching_alignment_mode_correlation', outDir);
     close(figModeCorr);
 end
 
@@ -1912,8 +1855,7 @@ figWidthScale = figure('Color', 'w', 'Visible', 'off', 'Position', [100 100 1000
 tlWS = tiledlayout(figWidthScale, 1, 2, 'TileSpacing', 'compact', 'Padding', 'compact');
 axWS1 = nexttile(tlWS, 1); plot(axWS1, temps, width_I, '-o', 'LineWidth', 1.6); xlabel(axWS1,'T (K)'); ylabel(axWS1,'width_I (mA)'); title(axWS1,'Width scaling: width_I'); grid(axWS1,'on');
 axWS2 = nexttile(tlWS, 2); plot(axWS2, temps, width_rel, '-o', 'LineWidth', 1.6); xlabel(axWS2,'T (K)'); ylabel(axWS2,'width_{rel}'); title(axWS2,'Width scaling: width_{rel}'); grid(axWS2,'on');
-widthScalingOut = fullfile(outDir, 'switching_alignment_width_scaling.png');
-saveas(figWidthScale, widthScalingOut);
+widthScalingOut = export_alignment_figure(figWidthScale, 'switching_alignment_width_scaling', outDir);
 close(figWidthScale);
 
 bgMask = isfinite(temps) & (temps < 10);
@@ -1925,8 +1867,7 @@ end
 S_residual = Smap - S_background;
 figBgSub = figure('Color', 'w', 'Visible', 'off', 'Position', [100 100 900 600]);
 axBgSub = axes(figBgSub); imagesc(axBgSub, currents, temps, S_residual); set(axBgSub,'YDir','normal'); applyDivergingColormap(axBgSub); xlabel(axBgSub,'I_0 (mA)'); ylabel(axBgSub,'T (K)'); title(axBgSub,'Background-subtracted map (T<10 K baseline)'); colorbar(axBgSub);
-bgSubMapOut = fullfile(outDir, 'switching_alignment_background_subtracted_map.png');
-saveas(figBgSub, bgSubMapOut);
+bgSubMapOut = export_alignment_figure(figBgSub, 'switching_alignment_background_subtracted_map', outDir);
 close(figBgSub);
 
 Mfull = Smap; Mfull(~isfinite(Mfull)) = 0;
@@ -1949,8 +1890,7 @@ axSvdStab = axes(figSvdStab); hold(axSvdStab, 'on');
 plot(axSvdStab, 1:numel(sBefore), sBefore, '-o', 'LineWidth', 1.8, 'DisplayName', 'all T');
 plot(axSvdStab, 1:numel(sAfter), sAfter, '-s', 'LineWidth', 1.8, 'DisplayName', 'T >= 10 K');
 xlabel(axSvdStab, 'mode'); ylabel(axSvdStab, 'normalized singular value'); title(axSvdStab, 'SVD stability vs low-T removal'); grid(axSvdStab, 'on'); legend(axSvdStab,'Location','best');
-svdStabilityOut = fullfile(outDir, 'switching_alignment_svd_stability.png');
-saveas(figSvdStab, svdStabilityOut);
+svdStabilityOut = export_alignment_figure(figSvdStab, 'switching_alignment_svd_stability', outDir);
 close(figSvdStab);
 
 curvT = NaN(size(Smap));
@@ -1965,8 +1905,7 @@ for ii = 1:numel(currents)
 end
 figCurv = figure('Color', 'w', 'Visible', 'off', 'Position', [100 100 900 600]);
 axCurv = axes(figCurv); imagesc(axCurv, currents, temps, curvT); set(axCurv,'YDir','normal'); applyDivergingColormap(axCurv); xlabel(axCurv,'I_0 (mA)'); ylabel(axCurv,'T (K)'); title(axCurv,'Curvature map: \partial^2S/\partialT^2'); colorbar(axCurv);
-curvatureMapOut = fullfile(outDir, 'switching_alignment_curvature_map.png');
-saveas(figCurv, curvatureMapOut);
+curvatureMapOut = export_alignment_figure(figCurv, 'switching_alignment_curvature_map', outDir);
 close(figCurv);
 
 nRowsExt = max(numel(temps), numel(currents));
@@ -2000,27 +1939,32 @@ axLeft = nexttile(tl, 1);
 plotTemperatureCuts(axLeft, rawTbl, currentsToPlot);
 axRight = nexttile(tl, 2);
 plotCurrentCuts(axRight, rawTbl, tempsToPlot, tempMatchTol_K);
-combinedOut = fullfile(outDir, 'switching_alignment_two_panel.png');
-saveas(figCombined, combinedOut);
+combinedOut = export_alignment_figure(figCombined, 'switching_alignment_two_panel', outDir);
 close(figCombined);
 
 figTemp = figure('Color', 'w', 'Visible', 'off', 'Position', [100 100 900 600]);
 axTemp = axes(figTemp);
 plotTemperatureCuts(axTemp, rawTbl, currentsToPlot);
-tempOut = fullfile(outDir, 'switching_alignment_temperature_cuts.png');
-saveas(figTemp, tempOut);
+tempOut = export_alignment_figure(figTemp, 'switching_alignment_temperature_cuts', outDir);
 close(figTemp);
 
 figCurr = figure('Color', 'w', 'Visible', 'off', 'Position', [100 100 900 600]);
 axCurr = axes(figCurr);
 plotCurrentCuts(axCurr, rawTbl, tempsToPlot, tempMatchTol_K);
-currOut = fullfile(outDir, 'switching_alignment_current_cuts.png');
-saveas(figCurr, currOut);
+currOut = export_alignment_figure(figCurr, 'switching_alignment_current_cuts', outDir);
 close(figCurr);
 
 % Mirror key SVD/observable-SVD outputs into the run-scoped folder when available.
+observableMatrixOut = "";
+svdModeCoeffOut = "";
 if strlength(obsRunCsvOut) > 0
     runObsDir = fileparts(char(obsRunCsvOut));
+
+    observableMatrixTbl = table(temps, S_peak, Ipeak, width_I, halfwidth_diff_norm, asym, ...
+        'VariableNames', {'T','S_peak','I_peak','width_I','halfwidth_diff_norm','asym'});
+    observableMatrixOut = fullfile(runObsDir, 'observable_matrix.csv');
+    writetable(observableMatrixTbl, observableMatrixOut);
+
     copyFileIfExists(svdSingValsOut, fullfile(runObsDir, 'switching_alignment_svd_singular_values.csv'));
     copyFileIfExists(svdScreeOut, fullfile(runObsDir, 'switching_alignment_svd_scree.png'));
     copyFileIfExists(svdExplainedOut, fullfile(runObsDir, 'switching_alignment_svd_explained_variance.png'));
@@ -2037,6 +1981,11 @@ if strlength(obsRunCsvOut) > 0
         svdDataPath = fullfile(runObsDir, 'switching_alignment_svd_data.mat');
         save(svdDataPath, 'U', 'S', 'V', 'svals_raw', 'singvals', 'mode1_T', 'mode2_T', ...
             'coeff_mode1', 'coeff_mode2', 'coeff_mode3', 'err_svd_1', 'err_svd_2', 'err_svd_3');
+
+        svdModeCoeffTbl = table(temps, coeff_mode1, coeff_mode2, coeff_mode3, ...
+            'VariableNames', {'T','mode1_coeff','mode2_coeff','mode3_coeff'});
+        svdModeCoeffOut = fullfile(runObsDir, 'svd_mode_coefficients.csv');
+        writetable(svdModeCoeffTbl, svdModeCoeffOut);
     end
 end
 
@@ -2044,6 +1993,12 @@ fprintf('Saved switching alignment raw table: %s\n', rawCsv);
 fprintf('Saved observables CSV: %s\n', obsCsvOut);
 if strlength(obsRunCsvOut) > 0
     fprintf('Saved run-scoped observable-layer CSV: %s\n', obsRunCsvOut);
+end
+if strlength(observableMatrixOut) > 0
+    fprintf('Saved run-scoped observable matrix CSV: %s\n', observableMatrixOut);
+end
+if strlength(svdModeCoeffOut) > 0
+    fprintf('Saved run-scoped SVD mode coefficients CSV: %s\n', svdModeCoeffOut);
 end
 fprintf('Saved temperature-cleanup figure: %s\n', tempCleanupOut);
 fprintf('Temperature cleanup: original points = %d, cleaned bins = %d\n', numTempsOriginal, numTempsCleaned);
@@ -2206,6 +2161,11 @@ if isfinite(rel_nmf_23)
     end
 else
     fprintf('NMF audit summary: insufficient data for rank-3 sufficiency decision.\n');
+end
+
+function pngPath = export_alignment_figure(figHandle, figureName, run_output_dir)
+paths = save_run_figure(figHandle, figureName, run_output_dir);
+pngPath = paths.png;
 end
 
 function copyFileIfExists(srcPath, dstPath)

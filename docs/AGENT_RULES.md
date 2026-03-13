@@ -33,6 +33,22 @@ Agents must not rename, relocate, normalize, or reorganize unrelated
 modules, legacy folders, or directory trees unless the task explicitly
 requires it.
 
+## Legacy Visualization Code
+
+Agents must not reuse visualization or figure post-processing utilities
+from `General ver2/` in new development.
+
+`General ver2/` is preserved for reproducibility only. All new figures
+must follow `docs/figure_style_guide.md`.
+
+## Visualization Helpers
+
+All figure exports must go through `tools/save_run_figure.m`.
+
+New figures should be created with `tools/figures/create_figure.m` when possible.
+
+Visualization helpers must reside in `tools/figures/`.
+
 ## Agent Output Template
 
 When reporting repository changes, use this structure:

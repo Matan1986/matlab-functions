@@ -1,7 +1,6 @@
 % aging_geometry_visualization
 % Exploratory geometry diagnostics for aging DeltaM(T, tw) data.
-% This script reuses the staged aging loaders (stage0-3 only) and produces
-% run-scoped diagnostic figures for physical intuition (not publication).
+% Uses staged loading (stage0-3 only) and repository artifact helpers.
 
 clearvars;
 clc;
@@ -12,10 +11,9 @@ agingRoot = fileparts(analysisDir);
 repoRoot = fileparts(agingRoot); %#ok<NASGU>
 addpath(genpath(agingRoot));
 
-% Auto-discover all configured wait-time datasets from agingConfig.
+% Auto-discover configured wait-time datasets from agingConfig.
 datasetSpecs = discoverDatasetSpecs(agingRoot);
 if isempty(datasetSpecs)
-    % Fallback list if config parsing fails.
     datasetSpecs = {
         'MG119_3sec',   3;
         'MG119_36sec',  36;
@@ -31,6 +29,9 @@ tpNormHalfWindowK = 0.5;
 nTempSlicesDesired = 20;
 nTempSlicesMin = 15;
 nTempSlicesMax = 20;
+fontSizeMain = 14;
+lineWidthMain = 2.0;
+lineStylesSmall = {'-', '--', ':', '-.', '-', '--'};
 
 loaded = struct('key', {}, 'fallbackTwSec', {}, 'pauseRuns', {}, 'tpVals', {});
 runCtx = [];
@@ -44,7 +45,7 @@ for i = 1:size(datasetSpecs, 1)
         cfg.runLabel = 'geometry_visualization';
         cfg.doPlotting = false;
         cfg.saveTableMode = 'none';
-        cfg.doFilterDeltaM = false; % keep raw geometry
+        cfg.doFilterDeltaM = false;
         cfg.alignDeltaM = false;
 
         if isfield(cfg, 'debug') && isstruct(cfg.debug)
@@ -55,7 +56,7 @@ for i = 1:size(datasetSpecs, 1)
         end
 
         if ~isempty(runCtx)
-            cfg.run = runCtx; % keep one run context for all datasets in this script
+            cfg.run = runCtx;
         end
 
         cfg = stage0_setupPaths(cfg);
@@ -86,33 +87,13 @@ end
 
 assert(~isempty(loaded), 'No aging datasets could be loaded.');
 
-outDir = getResultsDir('aging', 'geometry_visualization');
-if ~exist(outDir, 'dir')
-    mkdir(outDir);
-end
+run_output_dir = getRunOutputDir();
+fprintf('Aging geometry run root:\n%s\n', run_output_dir);
+fprintf('Figures dir: %s\n', fullfile(run_output_dir, 'figures'));
+fprintf('Reports dir: %s\n', fullfile(run_output_dir, 'reports'));
+fprintf('Review dir: %s\n', fullfile(run_output_dir, 'review'));
 
-activeRunCtx = [];
-if isappdata(0, 'runContext')
-    activeRunCtx = getappdata(0, 'runContext');
-elseif isappdata(0, 'MATLAB_FUNCTIONS_ACTIVE_RUN_CONTEXT')
-    activeRunCtx = getappdata(0, 'MATLAB_FUNCTIONS_ACTIVE_RUN_CONTEXT');
-end
-
-fprintf('Aging geometry outputs saved to:\n%s\n', outDir);
-if ~isempty(activeRunCtx) && isstruct(activeRunCtx) && isfield(activeRunCtx, 'run_id') && ~isempty(activeRunCtx.run_id)
-    fprintf('Run context active: YES\n');
-    fprintf('Active run_id: %s\n', activeRunCtx.run_id);
-    try
-        activeRunDir = getRunOutputDir();
-        fprintf('Active run_dir: %s\n', activeRunDir);
-    catch
-        % Keep status printing resilient if the run context is partial.
-    end
-else
-    fprintf('Run context active: NO (getResultsDir fallback path in use)\n');
-end
-
-% Find common Tp across loaded wait-time datasets.
+% Determine common Tp across loaded wait-time datasets.
 commonTp = loaded(1).tpVals;
 for i = 2:numel(loaded)
     commonTp = intersectTol(commonTp, loaded(i).tpVals, tpTolK);
@@ -135,13 +116,13 @@ for i = 1:numel(loaded)
         continue;
     end
 
-    twSec = extractTwSeconds(pr, loaded(i).fallbackTwSec);
-    if ~isfinite(twSec) || twSec <= 0
+    twSecThis = extractTwSeconds(pr, loaded(i).fallbackTwSec);
+    if ~isfinite(twSecThis) || twSecThis <= 0
         continue;
     end
 
     c.datasetKey = loaded(i).key;
-    c.twSec = twSec;
+    c.twSec = twSecThis;
     c.Tp = getFieldOrNaN(pr, 'waitK');
     c.T = T(:);
     c.dM = dM(:);
@@ -150,29 +131,28 @@ end
 
 assert(numel(curves) >= 2, 'Need at least two valid tw curves at common Tp to build M(T,tw).');
 
-% Sort by tw.
+% Sort by tw and build map M(T,tw).
 [~, order] = sort([curves.twSec]);
 curves = curves(order);
 twSec = [curves.twSec].';
 logTw = log10(twSec);
 idxTwAll = 1:numel(twSec);
 
-% Common T grid across all tw curves.
-tMin = -Inf;
-tMax = Inf;
+Tmin = -Inf;
+Tmax = Inf;
 for i = 1:numel(curves)
-    tMin = max(tMin, min(curves(i).T));
-    tMax = min(tMax, max(curves(i).T));
+    Tmin = max(Tmin, min(curves(i).T));
+    Tmax = min(Tmax, max(curves(i).T));
 end
-assert(tMax > tMin, 'No overlapping T-range across selected tw curves.');
+assert(Tmax > Tmin, 'No overlapping T-range across selected tw curves.');
 
-Tgrid = linspace(tMin, tMax, nCommonGrid).';
-M = nan(nCommonGrid, numel(curves)); % M(T,tw) = DeltaM
+Tgrid = linspace(Tmin, Tmax, nCommonGrid).';
+M = nan(nCommonGrid, numel(curves));
 for i = 1:numel(curves)
     M(:, i) = interp1(curves(i).T, curves(i).dM, Tgrid, 'linear', NaN);
 end
 
-% Full-range temperature sampling for wait-time slices.
+% Full-range temperature sampling (~20 evenly spaced values).
 nTempSlices = min(nTempSlicesMax, max(nTempSlicesMin, nTempSlicesDesired));
 nTempSlices = min(nTempSlices, numel(Tgrid));
 targetTemps = linspace(min(Tgrid), max(Tgrid), nTempSlices);
@@ -187,7 +167,6 @@ end
 actualTemps = Tgrid(idxTempSel).';
 targetTemps = targetTemps(:).';
 
-% Shared colormaps/limits.
 cmapTw = getPerceptualColormap(256);
 cmapTemp = getPerceptualColormap(256);
 twMin = min(logTw);
@@ -197,123 +176,164 @@ if ~isfinite(twMin) || ~isfinite(twMax) || twMax <= twMin
     twMax = max(logTw) + 0.5;
 end
 
-% ========================
-% 1) Heatmap DeltaM(T,tw)
-% ========================
+figSaved = strings(0, 1);
+nTwCurves = numel(idxTwAll);
+
+% 1) Aging heatmap DeltaM(T,tw)
 fig1 = figure('Color', 'w', 'Visible', 'off', 'Position', [80 80 920 620]);
-imagesc(Tgrid, logTw, M.');
-set(gca, 'YDir', 'normal');
-colormap(getPerceptualColormap(256));
-cb = colorbar;
-ylabel(cb, '\DeltaM');
-xlabel('T (K)');
-ylabel('log_{10}(t_w [s])');
-title(sprintf('Aging map: \\DeltaM(T, t_w), T_p = %.2f K', TpRef));
-grid on;
-saveas(fig1, fullfile(outDir, 'aging_map_heatmap.png'));
+ax1 = axes(fig1);
+imagesc(ax1, Tgrid, logTw, M.');
+axis(ax1, 'xy');
+colormap(ax1, cmapTw);
+cb1 = colorbar(ax1);
+ylabel(cb1, '\DeltaM');
+xlabel(ax1, 'Temperature (K)', 'FontSize', fontSizeMain);
+ylabel(ax1, 'log_{10}(t_w [s])', 'FontSize', fontSizeMain);
+title(ax1, sprintf('Aging map: \\DeltaM(T, t_w), T_p = %.2f K', TpRef), 'FontSize', fontSizeMain);
+grid(ax1, 'on');
+set(ax1, 'FontSize', fontSizeMain);
+p1 = save_run_figure(fig1, 'aging_map_heatmap', run_output_dir);
+figSaved(end + 1, 1) = string(p1.png); %#ok<SAGROW>
 close(fig1);
 
-% =========================================
-% 1b) Heatmap derivative d(DeltaM)/dT(T,tw)
-% =========================================
+% 1b) Derivative heatmap dDeltaM/dT(T,tw)
+% Light SG smoothing before derivative to reduce numerical noise.
+M_smooth = M;
+for j = 1:size(M, 2)
+    y = M(:, j);
+    if any(~isfinite(y))
+        y = fillmissing(y, 'linear', 'EndValues', 'nearest');
+    end
+    if numel(y) >= 11
+        y = sgolayfilt(y, 2, 11);
+    end
+    M_smooth(:, j) = y;
+end
+
 dMdT = nan(size(M));
 for j = 1:size(M, 2)
-    dMdT(:, j) = gradient(M(:, j), Tgrid);
+    dMdT(:, j) = gradient(M_smooth(:, j), Tgrid);
 end
 
 fig1b = figure('Color', 'w', 'Visible', 'off', 'Position', [80 80 920 620]);
-imagesc(Tgrid, logTw, dMdT.');
-set(gca, 'YDir', 'normal');
-colormap(getPerceptualColormap(256));
-cb1b = colorbar;
+ax1b = axes(fig1b);
+imagesc(ax1b, Tgrid, logTw, dMdT.');
+axis(ax1b, 'xy');
+colormap(ax1b, cmapTw);
+cb1b = colorbar(ax1b);
 ylabel(cb1b, 'd\DeltaM/dT');
-xlabel('T (K)');
-ylabel('log_{10}(t_w [s])');
-title(sprintf('Aging map derivative: d\\DeltaM/dT(T, t_w), T_p = %.2f K', TpRef));
-grid on;
-saveas(fig1b, fullfile(outDir, 'aging_dMdT_heatmap.png'));
+xlabel(ax1b, 'Temperature (K)', 'FontSize', fontSizeMain);
+ylabel(ax1b, 'log_{10}(t_w [s])', 'FontSize', fontSizeMain);
+title(ax1b, sprintf('Aging derivative map: d\\DeltaM/dT(T, t_w), T_p = %.2f K', TpRef), 'FontSize', fontSizeMain);
+grid(ax1b, 'on');
+set(ax1b, 'FontSize', fontSizeMain);
+p1b = save_run_figure(fig1b, 'aging_dMdT_heatmap', run_output_dir);
+figSaved(end + 1, 1) = string(p1b.png); %#ok<SAGROW>
 close(fig1b);
 
-% ================================================
-% 2) Temperature slices: DeltaM(T) for all tw
-% ================================================
+% 2) Temperature slices DeltaM(T) for all wait times
 fig2 = figure('Color', 'w', 'Visible', 'off', 'Position', [80 80 920 620]);
 ax2 = axes(fig2); hold(ax2, 'on');
-twColorLims = [twMin, twMax];
-for i = 1:numel(idxTwAll)
-    j = idxTwAll(i);
-    thisLogTw = logTw(j);
-    colorThis = mapValueToColormap(thisLogTw, twColorLims, cmapTw);
-    plot(ax2, Tgrid, M(:, j), '-', 'LineWidth', 1.2, 'Color', colorThis, 'HandleVisibility', 'off');
+if nTwCurves <= 6
+    colsSmall = lines(nTwCurves);
+    for i = 1:nTwCurves
+        j = idxTwAll(i);
+        plot(ax2, Tgrid, M(:, j), lineStylesSmall{i}, 'LineWidth', lineWidthMain, ...
+            'Color', colsSmall(i, :), 'DisplayName', formatTwLabel(twSec(j)));
+    end
+else
+    for i = 1:numel(idxTwAll)
+        j = idxTwAll(i);
+        colorThis = mapValueToColormap(logTw(j), [twMin, twMax], cmapTw);
+        plot(ax2, Tgrid, M(:, j), '-', 'LineWidth', lineWidthMain, 'Color', colorThis, 'HandleVisibility', 'off');
+    end
 end
-xline(ax2, TpRef, '--k', 'LineWidth', 1.1, 'HandleVisibility', 'off');
-xlabel(ax2, 'T (K)');
-ylabel(ax2, '\DeltaM');
-title(ax2, '\DeltaM(T) for all wait times');
+xline(ax2, TpRef, '--k', 'LineWidth', max(2.0, lineWidthMain), 'HandleVisibility', 'off');
+xlabel(ax2, 'Temperature (K)', 'FontSize', fontSizeMain);
+ylabel(ax2, '\DeltaM', 'FontSize', fontSizeMain);
+title(ax2, '\DeltaM(T) for all wait times', 'FontSize', fontSizeMain);
 grid(ax2, 'on');
-colormap(ax2, cmapTw);
-clim(ax2, twColorLims);
-cb2 = colorbar(ax2);
-ylabel(cb2, 'log_{10}(t_w [s])');
-saveas(fig2, fullfile(outDir, 'aging_temperature_slices.png'));
+if nTwCurves <= 6
+    legend(ax2, 'Location', 'eastoutside');
+else
+    colormap(ax2, cmapTw);
+    clim(ax2, [twMin, twMax]);
+    cb2 = colorbar(ax2);
+    ylabel(cb2, 'log_{10}(t_w [s])');
+end
+set(ax2, 'FontSize', fontSizeMain);
+p2 = save_run_figure(fig2, 'aging_temperature_slices', run_output_dir);
+figSaved(end + 1, 1) = string(p2.png); %#ok<SAGROW>
 close(fig2);
 
-% =========================
-% 3) Wait-time slices DeltaM(tw)
-% =========================
-fig3 = figure('Color', 'w', 'Visible', 'off', 'Position', [80 80 920 620]);
-ax3 = axes(fig3); hold(ax3, 'on');
-
+% 3) Wait-time slices DeltaM(tw) for ~20 full-range temperatures
 tempMin = min(actualTemps);
 tempMax = max(actualTemps);
 if ~isfinite(tempMin) || ~isfinite(tempMax) || tempMax <= tempMin
     tempMin = min(Tgrid);
     tempMax = max(Tgrid);
 end
+
+fig3 = figure('Color', 'w', 'Visible', 'off', 'Position', [80 80 920 620]);
+ax3 = axes(fig3); hold(ax3, 'on');
 for i = 1:numel(idxTempSel)
     thisTemp = actualTemps(i);
     colorThis = mapValueToColormap(thisTemp, [tempMin, tempMax], cmapTemp);
-    plot(ax3, logTw, M(idxTempSel(i), :), '-o', 'LineWidth', 1.2, ...
+    plot(ax3, logTw, M(idxTempSel(i), :), '-o', 'LineWidth', lineWidthMain, ...
         'Color', colorThis, 'HandleVisibility', 'off');
 end
-xlabel(ax3, 'log_{10}(t_w [s])');
-ylabel(ax3, '\DeltaM');
-title(ax3, sprintf('Wait-time slices across full T range (%.2f-%.2f K)', min(actualTemps), max(actualTemps)));
+xlabel(ax3, 'log_{10}(t_w [s])', 'FontSize', fontSizeMain);
+ylabel(ax3, '\DeltaM', 'FontSize', fontSizeMain);
+title(ax3, sprintf('Wait-time slices across full T range (%.2f-%.2f K)', min(actualTemps), max(actualTemps)), ...
+    'FontSize', fontSizeMain);
 grid(ax3, 'on');
 colormap(ax3, cmapTemp);
 clim(ax3, [tempMin, tempMax]);
 cb3 = colorbar(ax3);
 ylabel(cb3, 'Temperature (K)');
-saveas(fig3, fullfile(outDir, 'aging_waittime_slices.png'));
+set(ax3, 'FontSize', fontSizeMain);
+p3 = save_run_figure(fig3, 'aging_waittime_slices', run_output_dir);
+figSaved(end + 1, 1) = string(p3.png); %#ok<SAGROW>
 close(fig3);
 
-% ==========================================
-% 4) Centered axis: x = T - Tp, DeltaM(x,tw)
-% ==========================================
+% 4) Centered representation DeltaM(T - Tp)
 xCentered = Tgrid - TpRef;
 fig4 = figure('Color', 'w', 'Visible', 'off', 'Position', [80 80 920 620]);
 ax4 = axes(fig4); hold(ax4, 'on');
-for i = 1:numel(idxTwAll)
-    j = idxTwAll(i);
-    thisLogTw = logTw(j);
-    colorThis = mapValueToColormap(thisLogTw, [twMin, twMax], cmapTw);
-    plot(ax4, xCentered, M(:, j), '-', 'LineWidth', 1.2, 'Color', colorThis, 'HandleVisibility', 'off');
+if nTwCurves <= 6
+    colsSmall = lines(nTwCurves);
+    for i = 1:nTwCurves
+        j = idxTwAll(i);
+        plot(ax4, xCentered, M(:, j), lineStylesSmall{i}, 'LineWidth', lineWidthMain, ...
+            'Color', colsSmall(i, :), 'DisplayName', formatTwLabel(twSec(j)));
+    end
+else
+    for i = 1:numel(idxTwAll)
+        j = idxTwAll(i);
+        colorThis = mapValueToColormap(logTw(j), [twMin, twMax], cmapTw);
+        plot(ax4, xCentered, M(:, j), '-', 'LineWidth', lineWidthMain, 'Color', colorThis, 'HandleVisibility', 'off');
+    end
 end
-xline(ax4, 0, '--k', 'LineWidth', 1.1, 'HandleVisibility', 'off');
-xlabel(ax4, 'x = T - T_p (K)');
-ylabel(ax4, '\DeltaM');
-title(ax4, 'Centered temperature slices: all wait times');
+xline(ax4, 0, '--k', 'LineWidth', max(2.0, lineWidthMain), 'HandleVisibility', 'off');
+xlabel(ax4, 'T - T_p (K)', 'FontSize', fontSizeMain);
+ylabel(ax4, '\DeltaM', 'FontSize', fontSizeMain);
+title(ax4, 'Centered temperature slices: all wait times', 'FontSize', fontSizeMain);
 grid(ax4, 'on');
-colormap(ax4, cmapTw);
-clim(ax4, [twMin, twMax]);
-cb4 = colorbar(ax4);
-ylabel(cb4, 'log_{10}(t_w [s])');
-saveas(fig4, fullfile(outDir, 'aging_centered_temperature_slices.png'));
+if nTwCurves <= 6
+    legend(ax4, 'Location', 'eastoutside');
+else
+    colormap(ax4, cmapTw);
+    clim(ax4, [twMin, twMax]);
+    cb4 = colorbar(ax4);
+    ylabel(cb4, 'log_{10}(t_w [s])');
+end
+set(ax4, 'FontSize', fontSizeMain);
+p4 = save_run_figure(fig4, 'aging_centered_temperature_slices', run_output_dir);
+figSaved(end + 1, 1) = string(p4.png); %#ok<SAGROW>
 close(fig4);
 
-% ==========================================================
-% 5) Normalized dip shape: DeltaM / |mean_{Tp+-window}(DeltaM)|
-% ==========================================================
+% 5) Robust normalized dip shape
+% M_norm(T,tw) = DeltaM(T,tw) / |mean_{Tp+-0.5K}(DeltaM)|
 tpNormMask = abs(Tgrid - TpRef) <= tpNormHalfWindowK;
 if ~any(tpNormMask)
     [~, iTpNearest] = min(abs(Tgrid - TpRef));
@@ -342,104 +362,118 @@ end
 
 fig5 = figure('Color', 'w', 'Visible', 'off', 'Position', [80 80 920 620]);
 ax5 = axes(fig5); hold(ax5, 'on');
-for i = 1:numel(idxTwAll)
-    j = idxTwAll(i);
-    thisLogTw = logTw(j);
-    colorThis = mapValueToColormap(thisLogTw, [twMin, twMax], cmapTw);
-    plot(ax5, Tgrid, Mnorm(:, i), '-', 'LineWidth', 1.2, 'Color', colorThis, 'HandleVisibility', 'off');
+if nTwCurves <= 6
+    colsSmall = lines(nTwCurves);
+    for i = 1:nTwCurves
+        j = idxTwAll(i);
+        plot(ax5, Tgrid, Mnorm(:, i), lineStylesSmall{i}, 'LineWidth', lineWidthMain, ...
+            'Color', colsSmall(i, :), 'DisplayName', formatTwLabel(twSec(j)));
+    end
+else
+    for i = 1:numel(idxTwAll)
+        j = idxTwAll(i);
+        colorThis = mapValueToColormap(logTw(j), [twMin, twMax], cmapTw);
+        plot(ax5, Tgrid, Mnorm(:, i), '-', 'LineWidth', lineWidthMain, 'Color', colorThis, 'HandleVisibility', 'off');
+    end
 end
-xline(ax5, TpRef, '--k', 'LineWidth', 1.1, 'HandleVisibility', 'off');
-xlabel(ax5, 'T (K)');
-ylabel(ax5, '\DeltaM(T,t_w) / |\langle\DeltaM\rangle_{T_p\pm0.5K}|');
-title(ax5, sprintf('Normalized dip-shape (robust window avg), skipped=%d', normSkipped));
+xline(ax5, TpRef, '--k', 'LineWidth', max(2.0, lineWidthMain), 'HandleVisibility', 'off');
+xlabel(ax5, 'Temperature (K)', 'FontSize', fontSizeMain);
+ylabel(ax5, '\DeltaM(T,t_w) / |\langle\DeltaM\rangle_{T_p\pm0.5K}|', 'FontSize', fontSizeMain);
+title(ax5, sprintf('Normalized dip-shape (robust window avg), skipped=%d', normSkipped), 'FontSize', fontSizeMain);
 grid(ax5, 'on');
-colormap(ax5, cmapTw);
-clim(ax5, [twMin, twMax]);
-cb5 = colorbar(ax5);
-ylabel(cb5, 'log_{10}(t_w [s])');
-saveas(fig5, fullfile(outDir, 'aging_normalized_dip_shape.png'));
+if nTwCurves <= 6
+    legend(ax5, 'Location', 'eastoutside');
+else
+    colormap(ax5, cmapTw);
+    clim(ax5, [twMin, twMax]);
+    cb5 = colorbar(ax5);
+    ylabel(cb5, 'log_{10}(t_w [s])');
+end
+set(ax5, 'FontSize', fontSizeMain);
+p5 = save_run_figure(fig5, 'aging_normalized_dip_shape', run_output_dir);
+figSaved(end + 1, 1) = string(p5.png); %#ok<SAGROW>
 close(fig5);
 
-% ===========================
-% Text report
-% ===========================
-reportPath = fullfile(outDir, 'aging_geometry_report.txt');
-fid = fopen(reportPath, 'w');
-assert(fid >= 0, 'Failed to write report: %s', reportPath);
+% Build report text and save via helper.
+reportText = "";
+reportText = reportText + "Aging Geometry Diagnostic Report" + newline;
+reportText = reportText + sprintf('Generated: %s', datestr(now, 31)) + newline + newline;
+reportText = reportText + "Plots generated:" + newline;
+reportText = reportText + "- aging_map_heatmap" + newline;
+reportText = reportText + "- aging_dMdT_heatmap" + newline;
+reportText = reportText + "- aging_temperature_slices" + newline;
+reportText = reportText + "- aging_waittime_slices" + newline;
+reportText = reportText + "- aging_centered_temperature_slices" + newline;
+reportText = reportText + "- aging_normalized_dip_shape" + newline + newline;
 
-fprintf(fid, 'Aging Geometry Diagnostic Report\n');
-fprintf(fid, 'Generated: %s\n\n', datestr(now, 31));
-fprintf(fid, 'Output directory: %s\n\n', outDir);
+reportText = reportText + "Slicing strategy:" + newline;
+reportText = reportText + "- Temperature slices: all available wait times" + newline;
+reportText = reportText + sprintf('- Wait-time slices: %d temperatures evenly sampled across full T range', numel(actualTemps)) + newline;
+reportText = reportText + sprintf('- Full T range used: [%.4f, %.4f] K', min(Tgrid), max(Tgrid)) + newline + newline;
 
-fprintf(fid, 'Dataset keys loaded:\n');
-for i = 1:numel(loaded)
-    fprintf(fid, '  - %s\n', loaded(i).key);
-end
-fprintf(fid, '\n');
+reportText = reportText + "Normalization method:" + newline;
+reportText = reportText + sprintf('- Tp selected: %.4f K', TpRef) + newline;
+reportText = reportText + sprintf('- Robust window: [Tp-%.3f, Tp+%.3f] K', tpNormHalfWindowK, tpNormHalfWindowK) + newline;
+reportText = reportText + sprintf('- Grid points in normalization window: %d', nnz(tpNormMask)) + newline;
+reportText = reportText + sprintf('- Denominator threshold floor: %.6g', normDenMin) + newline;
+reportText = reportText + sprintf('- Curves skipped due tiny denominator: %d', normSkipped) + newline + newline;
 
-fprintf(fid, 'Selected common Tp for M(T,tw): %.4f K\n', TpRef);
-fprintf(fid, 'Common-Tp tolerance used: %.3f K\n', tpTolK);
-fprintf(fid, 'Preferred Tp target: %.2f K\n', preferredTpK);
-fprintf(fid, 'Normalization window: [Tp-%.3f, Tp+%.3f] K\n', tpNormHalfWindowK, tpNormHalfWindowK);
-fprintf(fid, 'Normalization points in T-grid: %d\n', nnz(tpNormMask));
-fprintf(fid, 'Normalization denominator minimum threshold: %.6g\n\n', normDenMin);
+reportText = reportText + "Derivative method:" + newline;
+reportText = reportText + "- Light smoothing before derivative: sgolayfilt(order=2, frame=11)" + newline;
+reportText = reportText + "- Derivative computed along temperature axis via gradient(M_smooth(:,j), Tgrid)" + newline + newline;
 
-fprintf(fid, 'All wait times used in geometry plots:\n');
+reportText = reportText + "All wait times used:" + newline;
 for i = 1:numel(curves)
-    fprintf(fid, '  - %s | %s | tw = %.6g s (%.6g h)\n', ...
-        curves(i).datasetKey, formatTwLabel(curves(i).twSec), curves(i).twSec, curves(i).twSec / 3600);
+    reportText = reportText + sprintf('- %s | %s | tw = %.6g s (%.6g h)', ...
+        curves(i).datasetKey, formatTwLabel(curves(i).twSec), curves(i).twSec, curves(i).twSec / 3600) + newline;
 end
-fprintf(fid, '\n');
+reportText = reportText + newline;
 
-fprintf(fid, 'Temperature coverage for wait-time slices:\n');
-fprintf(fid, '  - target range: [%.4f, %.4f] K\n', min(targetTemps), max(targetTemps));
-fprintf(fid, '  - number of temperature slices: %d\n', numel(actualTemps));
-for i = 1:numel(actualTemps)
-    tgt = targetTemps(min(i, numel(targetTemps)));
-    fprintf(fid, '  - target %.4f K -> actual %.4f K\n', tgt, actualTemps(i));
+reportText = reportText + "Anomalies observed:" + newline;
+if normSkipped > 0
+    reportText = reportText + sprintf('- %d normalized curves were skipped due tiny denominator.', normSkipped) + newline;
+else
+    reportText = reportText + "- No normalization-denominator anomalies detected." + newline;
 end
-fprintf(fid, '\n');
+if any(~isfinite(M(:)))
+    reportText = reportText + "- Non-finite values exist in interpolated M matrix (likely interpolation boundaries)." + newline;
+else
+    reportText = reportText + "- No non-finite values in interpolated M matrix." + newline;
+end
+reportText = reportText + newline;
 
-fprintf(fid, 'Matrix shape:\n');
-fprintf(fid, '  - M size: %d x %d (T x tw)\n', size(M, 1), size(M, 2));
-fprintf(fid, '  - T range: [%.4f, %.4f] K\n', min(Tgrid), max(Tgrid));
-fprintf(fid, '  - log10(tw[s]) range: [%.4f, %.4f]\n', min(logTw), max(logTw));
-fprintf(fid, '  - normalized curves skipped due small denominator: %d\n', normSkipped);
-fprintf(fid, '\n');
+reportText = reportText + "Visualization issues fixed:" + newline;
+reportText = reportText + "- Removed colormap/colorbar usage from low-curve wait-time overlays (4 curves)." + newline;
+reportText = reportText + "- Kept colormap/colorbar only for dense wait-time slices and heatmaps." + newline + newline;
 
-fprintf(fid, 'Data-loading path reused:\n');
-fprintf(fid, '  agingConfig -> stage0_setupPaths -> stage1_loadData -> stage2_preprocess -> stage3_computeDeltaM\n');
-fprintf(fid, '  DeltaM source used here: state.pauseRuns_raw (pre-filter, exploratory geometry)\n');
+reportText = reportText + "Visualization choices:" + newline;
+reportText = reportText + sprintf('- number of wait-time curves: %d', numel(idxTwAll)) + newline;
+reportText = reportText + sprintf('- number of wait-time slice temperatures: %d', numel(actualTemps)) + newline;
+reportText = reportText + "- legend vs colormap: explicit legends for <=6-curve overlays, colormap + colorbar for >6 curves" + newline;
+reportText = reportText + "- colormap used: perceptual (turbo fallback to parula)" + newline;
+reportText = reportText + "- smoothing applied: SG(2,11) before dDeltaM/dT" + newline;
+reportText = reportText + "- rules applied: one visualization per figure, one colormap/colorbar per heatmap, low-curve overlays use legend" + newline;
 
-fclose(fid);
+reportPath = save_run_report(reportText, 'aging_geometry_report.txt', run_output_dir);
 
-reviewFiles = {
-    'aging_map_heatmap.png'
-    'aging_dMdT_heatmap.png'
-    'aging_temperature_slices.png'
-    'aging_waittime_slices.png'
-    'aging_centered_temperature_slices.png'
-    'aging_normalized_dip_shape.png'
-    'aging_geometry_report.txt'
-};
-reviewZipPath = fullfile(outDir, 'aging_geometry_review.zip');
+% Create review ZIP in canonical review/ folder.
+reviewDir = fullfile(run_output_dir, 'review');
+if exist(reviewDir, 'dir') ~= 7
+    mkdir(reviewDir);
+end
+reviewZipPath = fullfile(reviewDir, 'aging_geometry_review.zip');
 if isfile(reviewZipPath)
     delete(reviewZipPath);
 end
-zipPaths = strings(0, 1);
-for i = 1:numel(reviewFiles)
-    p = fullfile(outDir, reviewFiles{i});
-    assert(isfile(p), 'Missing expected output for review ZIP: %s', p);
-    zipPaths(end + 1, 1) = string(p); %#ok<AGROW>
-end
-zip(char(reviewZipPath), cellstr(zipPaths));
-assert(isfile(reviewZipPath), 'Failed to create review ZIP: %s', reviewZipPath);
-fprintf('Review ZIP created at:\n%s\n', reviewZipPath);
 
+zipInputs = [figSaved; string(reportPath)];
+zip(char(reviewZipPath), cellstr(zipInputs));
+assert(isfile(reviewZipPath), 'Failed to create review ZIP: %s', reviewZipPath);
+
+fprintf('Review ZIP created at:\n%s\n', reviewZipPath);
 fprintf('Aging geometry diagnostics complete.\n');
-fprintf('Output directory: %s\n', outDir);
+fprintf('Run root: %s\n', run_output_dir);
 fprintf('Report: %s\n', reportPath);
-fprintf('Review ZIP: %s\n', reviewZipPath);
 
 function pauseRunsRaw = extractRawPauseRuns(state)
 if isfield(state, 'pauseRuns_raw') && ~isempty(state.pauseRuns_raw)
@@ -642,5 +676,9 @@ if ~isempty(tokHour)
     twSec = 3600 * str2double(tokHour{1});
 end
 end
+
+
+
+
 
 
