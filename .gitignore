@@ -81,4 +81,8 @@ Aging/which_baseline.txt
 SAFECORR_PR_DIFF.md
 verification_results.txt
 Aging/verification/probe.txt
-.codex_tmp/
+# =========================================================
+# AI / Codex temporary files
+# =========================================================
+.codex*
+tmp/
