@@ -1,10 +1,18 @@
-function verifyRobustBaseline_WithLogging
+﻿function verifyRobustBaseline_WithLogging
 % VERIFYROBUSTBASELINE_WITHLOGGING - Verification with full file logging
 %
 % Runs all verifications and logs everything to a text file
 
-    % Create log file
-    logfile = fullfile(pwd, 'verification_results.txt');
+    % Create log file in a debug area under the repository root.
+    thisFile = mfilename('fullpath');
+    verificationDir = fileparts(thisFile);
+    agingDir = fileparts(verificationDir);
+    repoRoot = fileparts(agingDir);
+    logDir = fullfile(repoRoot, 'tmp_debug_outputs', 'verification');
+    if exist(logDir, 'dir') ~= 7
+        mkdir(logDir);
+    end
+    logfile = fullfile(logDir, 'verification_results.txt');
     
     % Override fprintf to also log to file
     fid_log = fopen(logfile, 'w');
@@ -14,9 +22,9 @@ function verifyRobustBaseline_WithLogging
         fprintf_to_both(fid_log, fmt, varargin{:});
     
     fprintf_both('\n');
-    fprintf_both('╔════════════════════════════════════════════════════════════════╗\n');
-    fprintf_both('║  ROBUST BASELINE VERIFICATION (WITH LOGGING)                  ║\n');
-    fprintf_both('╚════════════════════════════════════════════════════════════════╝\n\n');
+    fprintf_both('â•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—\n');
+    fprintf_both('â•‘  ROBUST BASELINE VERIFICATION (WITH LOGGING)                  â•‘\n');
+    fprintf_both('â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•\n\n');
     fprintf_both('Log file: %s\n\n', logfile);
     
     % Setup
@@ -25,7 +33,7 @@ function verifyRobustBaseline_WithLogging
     
     % Create synthetic dataset
     fprintf_both('STEP 1: Creating synthetic Aging dataset\n');
-    fprintf_both('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n');
+    fprintf_both('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n\n');
     
     cfg = struct();
     cfg.dip_window_K = 4;
@@ -41,14 +49,14 @@ function verifyRobustBaseline_WithLogging
     % Create test dataset
     [pauseRuns_base, metadata] = createSyntheticDataset();
     N = numel(pauseRuns_base);
-    fprintf_both('✓ Created %d pause runs from %d combinations\n', N, metadata.n_Tp * metadata.n_wait);
+    fprintf_both('âœ“ Created %d pause runs from %d combinations\n', N, metadata.n_Tp * metadata.n_wait);
     fprintf_both('  Pause temperatures: %s K\n', sprintf('%.0f ', metadata.Tp_list));
     fprintf_both('  Wait times: %s min\n', sprintf('%.0f ', metadata.wait_times));
     fprintf_both('\n');
     
     % Run OLD method
     fprintf_both('STEP 2: Running OLD method (Tp-dependent plateaus)\n');
-    fprintf_both('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n');
+    fprintf_both('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n\n');
     
     cfg_old = cfg;
     cfg_old.useRobustBaseline = false;
@@ -59,9 +67,9 @@ function verifyRobustBaseline_WithLogging
             cfg.excludeLowT_FM, cfg.excludeLowT_K, ...
             cfg.FM_plateau_K, cfg.excludeLowT_mode, cfg.FM_buffer_K, ...
             'area', cfg_old);
-        fprintf_both('✓ Old method completed successfully\n\n');
+        fprintf_both('âœ“ Old method completed successfully\n\n');
     catch ME
-        fprintf_both('✗ Old method failed with error:\n');
+        fprintf_both('âœ— Old method failed with error:\n');
         fprintf_both('  %s\n\n', ME.message);
         fclose(fid_log);
         return;
@@ -69,7 +77,7 @@ function verifyRobustBaseline_WithLogging
     
     % Run NEW method
     fprintf_both('STEP 3: Running NEW method (scan-based robust baseline)\n');
-    fprintf_both('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n');
+    fprintf_both('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n\n');
     
     cfg_new = cfg;
     cfg_new.useRobustBaseline = true;
@@ -83,9 +91,9 @@ function verifyRobustBaseline_WithLogging
             cfg.excludeLowT_FM, cfg.excludeLowT_K, ...
             cfg.FM_plateau_K, cfg.excludeLowT_mode, cfg.FM_buffer_K, ...
             'area', cfg_new);
-        fprintf_both('✓ New method completed successfully\n\n');
+        fprintf_both('âœ“ New method completed successfully\n\n');
     catch ME
-        fprintf_both('✗ New method failed with error:\n');
+        fprintf_both('âœ— New method failed with error:\n');
         fprintf_both('  %s\n\n', ME.message);
         fclose(fid_log);
         return;
@@ -93,23 +101,23 @@ function verifyRobustBaseline_WithLogging
     
     % Extract tables
     fprintf_both('STEP 4: Extracting diagnostic tables\n');
-    fprintf_both('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n');
+    fprintf_both('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n\n');
     
     [t_old, t_new] = buildTableComparison(pauseRuns_old, pauseRuns_new, cfg);
     
     fprintf_both('OLD METHOD RESULTS:\n');
-    fprintf_both('───────────────────\n');
+    fprintf_both('â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€\n');
     printTable_brief(fid_log, t_old);
     fprintf_both('\n');
     
     fprintf_both('NEW METHOD RESULTS:\n');
-    fprintf_both('───────────────────\n');
+    fprintf_both('â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€\n');
     printTable_brief(fid_log, t_new);
     fprintf_both('\n');
     
     % Physics checks
     fprintf_both('STEP 5: Physics sanity checks\n');
-    fprintf_both('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n');
+    fprintf_both('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n\n');
     
     warnings_list = {};
     
@@ -129,7 +137,7 @@ function verifyRobustBaseline_WithLogging
             end
         end
     else
-        fprintf_both('    ✓ All within tolerance\n');
+        fprintf_both('    âœ“ All within tolerance\n');
     end
     fprintf_both('\n');
     
@@ -154,7 +162,7 @@ function verifyRobustBaseline_WithLogging
             end
         end
     else
-        fprintf_both('    ✓ All plateaus properly separated\n');
+        fprintf_both('    âœ“ All plateaus properly separated\n');
     end
     fprintf_both('\n');
     
@@ -172,13 +180,13 @@ function verifyRobustBaseline_WithLogging
             dip_clean = dip_v(valid);
             try
                 [rho, pval] = corr(wt_clean, dip_clean, 'type', 'Spearman');
-                fprintf_both('    Tp=%.1f K: ρ=%.3f (p=%.4f), n=%d', tp, rho, pval, sum(valid));
+                fprintf_both('    Tp=%.1f K: Ï=%.3f (p=%.4f), n=%d', tp, rho, pval, sum(valid));
                 if rho < 0
-                    fprintf_both(' ⚠ NEGATIVE CORRELATION\n');
+                    fprintf_both(' âš  NEGATIVE CORRELATION\n');
                     w = sprintf('Negative aging correlation at Tp=%.1f K (rho=%.3f)', tp, rho);
                     warnings_list{end+1} = w;
                 else
-                    fprintf_both(' ✓\n');
+                    fprintf_both(' âœ“\n');
                 end
             catch
                 fprintf_both('    Tp=%.1f K: correlation computation failed\n', tp);
@@ -200,11 +208,11 @@ function verifyRobustBaseline_WithLogging
             rel_var = s / (abs(m) + eps);
             fprintf_both('    Tp=%.1f K: rel_var=%.1f%%, mean=%.4g, std=%.4g', tp, 100*rel_var, m, s);
             if rel_var > 0.3
-                fprintf_both(' ⚠ HIGH VARIATION\n');
+                fprintf_both(' âš  HIGH VARIATION\n');
                 w = sprintf('FM stability: Tp=%.1f K rel_var=%.1f%% > 30%%', tp, 100*rel_var);
                 warnings_list{end+1} = w;
             else
-                fprintf_both(' ✓\n');
+                fprintf_both(' âœ“\n');
             end
         end
     end
@@ -222,7 +230,7 @@ function verifyRobustBaseline_WithLogging
                 Thi = max(T);
                 Tmin_dip = t_new.Tmin(i);
                 if abs(Tmin_dip - Tlo) < 0.5 || abs(Tmin_dip - Thi) < 0.5
-                    fprintf_both('    ⚠ Run %d: Tmin=%.2f near edge [%.2f, %.2f]\n', i, Tmin_dip, Tlo, Thi);
+                    fprintf_both('    âš  Run %d: Tmin=%.2f near edge [%.2f, %.2f]\n', i, Tmin_dip, Tlo, Thi);
                     n_boundary = n_boundary + 1;
                     w = sprintf('Boundary artifact: Run %d Tmin=%.2f near [%.2f,%.2f]', i, Tmin_dip, Tlo, Thi);
                     warnings_list{end+1} = w;
@@ -231,13 +239,13 @@ function verifyRobustBaseline_WithLogging
         end
     end
     if n_boundary == 0
-        fprintf_both('    ✓ No boundary artifacts\n');
+        fprintf_both('    âœ“ No boundary artifacts\n');
     end
     fprintf_both('\n');
     
     % Summary statistics
     fprintf_both('STEP 6: Summary statistics\n');
-    fprintf_both('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n');
+    fprintf_both('â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”â”\n\n');
     
     fprintf_both('OLD METHOD STATISTICS:\n');
     n_ok_old = sum(strcmp(t_old.Status, 'ok'), 'omitnan');
@@ -254,16 +262,16 @@ function verifyRobustBaseline_WithLogging
     fprintf_both('\n');
     
     % Final verdict
-    fprintf_both('╔════════════════════════════════════════════════════════════════╗\n');
-    fprintf_both('║  FINAL VERIFICATION REPORT                                    ║\n');
-    fprintf_both('╚════════════════════════════════════════════════════════════════╝\n\n');
+    fprintf_both('â•”â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•—\n');
+    fprintf_both('â•‘  FINAL VERIFICATION REPORT                                    â•‘\n');
+    fprintf_both('â•šâ•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•\n\n');
     
     if isempty(warnings_list)
-        fprintf_both('✓✓✓ ROBUST BASELINE STABLE ✓✓✓\n');
+        fprintf_both('âœ“âœ“âœ“ ROBUST BASELINE STABLE âœ“âœ“âœ“\n');
         fprintf_both('NO ISSUES DETECTED\n\n');
         overall = 'robust baseline stable';
     else
-        fprintf_both('⚠⚠⚠ %d WARNINGS DETECTED ⚠⚠⚠\n\n', numel(warnings_list));
+        fprintf_both('âš âš âš  %d WARNINGS DETECTED âš âš âš \n\n', numel(warnings_list));
         for i = 1:numel(warnings_list)
             fprintf_both('[%d] %s\n', i, warnings_list{i});
         end
@@ -277,7 +285,7 @@ function verifyRobustBaseline_WithLogging
     fclose(fid_log);
     
     % Display file path
-    fprintf('✓ Full verification report saved to:\n  %s\n', logfile);
+    fprintf('âœ“ Full verification report saved to:\n  %s\n', logfile);
     
 end
 
@@ -304,7 +312,7 @@ function [pauseRuns, metadata] = createSyntheticDataset()
             T = linspace(4, 34, 150)';
             dT = mean(diff(T));
             
-            % Synthetic ΔM with FM background + AFM dip
+            % Synthetic Î”M with FM background + AFM dip
             dM_fm = 0.2 * (1 - exp(-(T - 4)/8));
             
             % Dip depth scales with aging (wait time)
@@ -418,7 +426,7 @@ function printTable_brief(fid, tbl)
             fprintf(fid, '%s\n', vars{i});
         end
     end
-    fprintf(fid, '%s\n', repmat('─', 1, 80));
+    fprintf(fid, '%s\n', repmat('â”€', 1, 80));
     
     % Print first n rows
     for row = 1:n_show
@@ -468,3 +476,4 @@ function val = getFieldOrDefault(s, fieldName, defaultVal)
         val = defaultVal;
     end
 end
+

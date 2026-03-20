@@ -149,8 +149,12 @@ md{end + 1} = "- MATLAB base installation.";
 md{end + 1} = "- Additional toolboxes may be required by specific modules.";
 md{end + 1} = "";
 
-% Write README_GENERATED.md
-outPath = fullfile(rootDir, "README_GENERATED.md");
+% Write README_GENERATED.md into legacy docs to avoid root clutter.
+outDir = fullfile(rootDir, 'docs', 'reports', 'legacy');
+if exist(outDir, 'dir') ~= 7
+    mkdir(outDir);
+end
+outPath = fullfile(outDir, "README_GENERATED.md");
 fid = fopen(outPath, "w");
 for i = 1:numel(md)
     fprintf(fid, "%s\n", md{i});

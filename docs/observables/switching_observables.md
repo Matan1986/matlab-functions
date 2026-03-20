@@ -114,6 +114,43 @@ Units:
 
 unitless
 
+### χ_amp(T) — temperature susceptibility of switching amplitude
+
+> **Note:** In MATLAB code and CSV outputs, this observable is stored under the legacy name **a1**.
+> New reports and documentation use **χ_amp(T)**. See [observable_naming.md](../observable_naming.md).
+
+Definition:
+
+`χ_amp(T) ≈ −dS_peak/dT`
+
+Physical meaning:
+
+Rate of change of the peak switching amplitude with temperature.
+Measures how rapidly the switching response evolves across the low-temperature sector.
+
+Characteristics:
+
+- Peaks at approximately T ~ 10 K
+- Support: T = 4–30 K (14 measured points on even-K grid)
+- Shape: peaked (rises from 4 K, peaks ~10 K, decays toward 30 K)
+- Represents the low-temperature dynamic susceptibility sector of the phase diagram
+
+Relation to other observables:
+
+- Classified as EXPLAINED_BY_X_KAPPA in the minimal basis sufficiency analysis
+- Requires both the primary coordinate X and the geometric correction κ (kappa)
+- Sensitive to alignment method choice (SENSITIVE_TO_ALIGNMENT status)
+
+Units:
+
+dimensionless (normalized)
+
+Legacy name:
+
+`a1`
+
+---
+
 ## SVD Decomposition and Observable Relations
 
 Switching analysis also stores SVD diagnostics for:

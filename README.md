@@ -54,7 +54,7 @@ Each module maintains its own documentation:
 
 - [Aging](./Aging/README.md) - AFM/FM coexistence model and global J-dependent fitting
 
-For repository-level notes, conventions, and workflow documentation, see [DOCUMENTATION.md](./DOCUMENTATION.md).
+For repository-level notes, conventions, and workflow documentation, see [DOCUMENTATION.md](./docs/internal/DOCUMENTATION.md).
 
 ## Canonical Documentation
 

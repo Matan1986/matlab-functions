@@ -1,5 +1,6 @@
 function [smoothed_data, fit_data, TC_index, TC2_index, resistivity_at_TH, max_temp_index, ...
-          fit_TemperatureK, fit_params, RRR, TC_to_TL_drop, TC_to_TL_drop_normalized, best_fit_model] = ...
+          fit_TemperatureK, fit_params, RRR, TC_to_TL_drop, TC_to_TL_drop_normalized, best_fit_model, ...
+          dR_dT, d2R_dT2] = ...
           Resistivity_analysis(TemperatureK, resistivity, TH, TL, delta_T, ...
           smoothing_window, edge_ignore_range, sgolay_order, sgolay_frame_length, forced_log_fit, twoTCs)
 % RESISTIVITY_ANALYSIS
@@ -20,6 +21,8 @@ function [smoothed_data, fit_data, TC_index, TC2_index, resistivity_at_TH, max_t
     RRR = NaN;
     TC_to_TL_drop = NaN;
     TC_to_TL_drop_normalized = NaN;
+    dR_dT = [];
+    d2R_dT2 = [];
 
     best_fit_model = '';
 
@@ -126,5 +129,10 @@ function [smoothed_data, fit_data, TC_index, TC2_index, resistivity_at_TH, max_t
     RRR = resistivity_at_TH / rhoTC;
     TC_to_TL_drop = rhoTC / resistivity_at_TL;
     TC_to_TL_drop_normalized = TC_to_TL_drop / RRR;
+
+    % ========= OPTIONAL DERIVATIVES ========= %
+    % Temperature-aware gradients from already prepared smoothed_data.
+    dR_dT = gradient(smoothed_data, TemperatureK);
+    d2R_dT2 = gradient(dR_dT, TemperatureK);
 
 end

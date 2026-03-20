@@ -73,6 +73,10 @@ if ~isnan(TC2_index)
     datatip(hRaw,'DataIndex',TC2_index,'Location','southeast');
 end
 
+if ~isnan(TC_index)
+    xline(ax, TemperatureK(TC_index), '--');
+end
+
 % ---------------- AXES LABELS ----------------
 
 % X axis — TEXT, NOT LaTeX (no italics)

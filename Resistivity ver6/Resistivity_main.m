@@ -13,8 +13,8 @@ addpath(genpath(baseFolder));
 %  USER PARAMETERS
 % ===========================
 import_data   = true;
-dir       = "C:\Users\User\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3NbS2\Transport\MG337\SWitching_F1\Cooling";
-filename_ending = "MG337_Vxx1_Vxx2_Vxy3_10micoAmp_Cooling_0T";
+dir       = "L:\My Drive\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\MG119 FIB2 transport and out of plane rotator\First cooling 1";
+filename_ending = "MG_119_Outof_plan_rotator_CoxTaS2_Vxy1_Vxx2_Ixx_0p1mAmp_f_277p77Hz_Cooling_0T";
 
 force_manual_preset = false;
 manual_preset_name  = '1xy_2xx_3xx';
@@ -40,6 +40,18 @@ twoTCs           = false;
 force_plane_str = "";
 
 force_TC_by_growth = true;
+
+compute_derivatives = true;
+plot_derivatives = struct( ...
+    'raw', false, ...
+    'first', true, ...
+    'second', true ...
+);
+
+derivative_plot_mode = 'separate';
+% options:
+% 'separate' -> new figures
+% 'overlay'  -> same axes
 
 %% ===========================
 %  FILTER CONTROL
@@ -80,7 +92,14 @@ end
 %% ===========================
 %  IMPORT RAW
 % ===========================
-filename = dir + "\" + filename_ending;
+files = builtin('dir', fullfile(char(dir), char(filename_ending + ".*")));
+
+if isempty(files)
+    error("File not found: %s (no matching extension)", filename_ending);
+end
+
+% If multiple matches exist, take the first one
+filename = fullfile(char(dir), files(1).name);
 
 [~, ~, TemperatureK, ~, ...
     LI1_XV, ~, LI2_XV, ~, LI3_XV, ~, LI4_XV, ~] = read_data(filename);
@@ -200,7 +219,7 @@ if run_analysis && ismember(analysis_channel_id, enabledKeys)
         y_raw = clean_resistivity_curve_auto(filtered_temp, y_raw, false);
     end
 
-    [sm, fit_y, TC_idx, ~, rhoTH, maxidx, fit_T, p, RRR, drop, dropN, modelStr] = ...
+    [sm, fit_y, TC_idx, ~, rhoTH, maxidx, fit_T, p, RRR, drop, dropN, modelStr, dR_dT, d2R_dT2] = ...
         Resistivity_analysis(filtered_temp, y_raw, TH, TL, delta_T, ...
         smoothing_window, edge_ignore_range, sgolay_order, sgolay_frame_len, ...
         forced_log_fit, twoTCs);
@@ -238,4 +257,107 @@ if run_analysis && ismember(analysis_channel_id, enabledKeys)
 
     build_resistivity_analysis_table( ...
         figNameStr, filtered_temp(TC_idx), RRR, drop, dropN);
+
+    if compute_derivatives
+        plot_cfg = plot_derivatives;
+        plot_cfg.mode = derivative_plot_mode;
+        plot_cfg.TC_index = TC_idx;
+        plot_resistivity_derivatives(filtered_temp, sm, dR_dT, d2R_dT2, ...
+            plot_cfg, figNameStr, fontSize);
+    end
+end
+
+function plot_resistivity_derivatives(T, R, dR_dT, d2R_dT2, plot_config, figNameStr, fontSize)
+% Plot resistivity and selected derivatives in separate or overlay mode.
+
+if ~isfield(plot_config, 'raw'), plot_config.raw = false; end
+if ~isfield(plot_config, 'first'), plot_config.first = false; end
+if ~isfield(plot_config, 'second'), plot_config.second = false; end
+if ~isfield(plot_config, 'mode'), plot_config.mode = 'separate'; end
+
+show_raw = plot_config.raw;
+show_first = plot_config.first;
+show_second = plot_config.second;
+mode_str = lower(string(plot_config.mode));
+
+TC_index = NaN;
+if isfield(plot_config, 'TC_index')
+    TC_index = plot_config.TC_index;
+end
+
+if ~(show_raw || show_first || show_second)
+    return;
+end
+
+lw = 1.8;
+
+if mode_str == "overlay"
+    fig = figure('Name', [figNameStr ' - Derivatives'], 'Color', 'w');
+    ax = axes(fig); hold(ax, 'on');
+
+    if show_raw
+        plot(ax, T, R, '-', 'LineWidth', lw, 'DisplayName', '$\rho(T)$');
+    end
+    if show_first
+        plot(ax, T, dR_dT, '-', 'LineWidth', lw, 'DisplayName', '$\frac{d\rho}{dT}$');
+    end
+    if show_second
+        plot(ax, T, d2R_dT2, '-', 'LineWidth', lw, 'DisplayName', '$\frac{d^2\rho}{dT^2}$');
+    end
+
+    if ~isnan(TC_index) && TC_index >= 1 && TC_index <= numel(T)
+        xline(ax, T(TC_index), '--');
+    end
+
+    xlabel(ax, 'Temperature (K)', 'Interpreter', 'latex', 'FontSize', fontSize);
+    ylabel(ax, '$\rho,\ \frac{d\rho}{dT},\ \frac{d^2\rho}{dT^2}$', ...
+        'Interpreter', 'latex', 'FontSize', fontSize);
+    ax.TickLabelInterpreter = 'latex';
+    ax.FontSize = fontSize - 2;
+    grid(ax, 'on');
+    legend(ax, 'Interpreter', 'latex', 'Location', 'best');
+    return;
+end
+
+if show_raw
+    fig = figure('Name', [figNameStr ' - Raw'], 'Color', 'w');
+    ax = axes(fig); hold(ax, 'on');
+    plot(ax, T, R, '-', 'LineWidth', lw);
+    if ~isnan(TC_index) && TC_index >= 1 && TC_index <= numel(T)
+        xline(ax, T(TC_index), '--');
+    end
+    xlabel(ax, 'Temperature (K)', 'Interpreter', 'latex', 'FontSize', fontSize);
+    ylabel(ax, '$\rho\ (\mu\Omega\cdot cm)$', 'Interpreter', 'latex', 'FontSize', fontSize);
+    ax.TickLabelInterpreter = 'latex';
+    ax.FontSize = fontSize - 2;
+    grid(ax, 'on');
+end
+
+if show_first
+    fig = figure('Name', [figNameStr ' - First Derivative'], 'Color', 'w');
+    ax = axes(fig); hold(ax, 'on');
+    plot(ax, T, dR_dT, '-', 'LineWidth', lw);
+    if ~isnan(TC_index) && TC_index >= 1 && TC_index <= numel(T)
+        xline(ax, T(TC_index), '--');
+    end
+    xlabel(ax, 'Temperature (K)', 'Interpreter', 'latex', 'FontSize', fontSize);
+    ylabel(ax, '$\frac{d\rho}{dT}$', 'Interpreter', 'latex', 'FontSize', fontSize);
+    ax.TickLabelInterpreter = 'latex';
+    ax.FontSize = fontSize - 2;
+    grid(ax, 'on');
+end
+
+if show_second
+    fig = figure('Name', [figNameStr ' - Second Derivative'], 'Color', 'w');
+    ax = axes(fig); hold(ax, 'on');
+    plot(ax, T, d2R_dT2, '-', 'LineWidth', lw);
+    if ~isnan(TC_index) && TC_index >= 1 && TC_index <= numel(T)
+        xline(ax, T(TC_index), '--');
+    end
+    xlabel(ax, 'Temperature (K)', 'Interpreter', 'latex', 'FontSize', fontSize);
+    ylabel(ax, '$\frac{d^2\rho}{dT^2}$', 'Interpreter', 'latex', 'FontSize', fontSize);
+    ax.TickLabelInterpreter = 'latex';
+    ax.FontSize = fontSize - 2;
+    grid(ax, 'on');
+end
 end

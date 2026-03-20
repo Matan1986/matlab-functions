@@ -8,7 +8,7 @@
 *.md text eol=lf
 *.txt text eol=lf
 
-# Configuration / structured text
+# Structured text / data
 *.json text eol=lf
 *.yaml text eol=lf
 *.yml text eol=lf
@@ -21,10 +21,13 @@
 *.bat text eol=crlf
 *.ps1 text eol=crlf
 
-# Binary files (never modify line endings)
+# Binary files
 *.mat binary
+*.fig binary
 *.png binary
 *.jpg binary
 *.pdf binary
 *.zip binary
-*.fig binary
+*.eps binary
+*.svg binary
+*.xlsx binary

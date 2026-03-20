@@ -13,7 +13,100 @@
         "Move-Item": true,
         "Get-Item": true,
         "ren": true,
-        "xcopy": true
+        "xcopy": true,
+        "ForEach-Object": true,
+        "Import-Csv": true,
+        "Test-Path": true,
+        "/^cmd /c \"dir C:\\\\Dev\\\\matlab-functions\\\\results\\\\switching\\\\runs /b \\| findstr amplitude\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^cmd /c \"dir C:\\\\Dev\\\\matlab-functions\\\\results\\\\switching\\\\runs\\\\run_2026_03_15_221649_switching_a1_amplitude_response_test /s /b\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^cmd /c \"dir C:\\\\Dev\\\\matlab-functions\\\\results\\\\switching\\\\runs\\\\run_2026_03_15_212718_switching_a1_vs_curvature_test /b /s\" 2>&1 \\| Select-String -Pattern \"\\\\\\.\\(png\\|pdf\\|md\\|csv\\)\" \\| Select-Object -First 15$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^cmd /c \"dir C:\\\\Dev\\\\matlab-functions\\\\results\\\\switching\\\\runs\\\\run_2026_03_15_222244_switching_a1_amplitude_response_test /s /b 2>&1\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^cmd /c \"dir C:\\\\Dev\\\\matlab-functions\\\\results\\\\switching\\\\runs /b\" 2>&1 \\| Select-String amplitude$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^cmd /c \"dir C:\\\\Dev\\\\matlab-functions\\\\results\\\\switching\\\\runs\\\\run_2026_03_15_222144_switching_a1_amplitude_response_test /s /b\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^cmd /c \"dir C:\\\\Dev\\\\matlab-functions\\\\results\\\\switching\\\\runs\\\\run_2026_03_13_112155_switching_geometry_diagnostics /s /b\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^cmd /c \"dir C:\\\\Dev\\\\matlab-functions\\\\results\\\\switching\\\\runs\\\\run_2026_03_12_234016_switching_full_scaling_collapse\\\\tables /b\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^cmd /c \"dir C:\\\\Dev\\\\matlab-functions\\\\results\\\\switching\\\\runs\\\\run_2026_03_12_234016_switching_full_scaling_collapse /s /b\" \\| Select-String \"\\.csv\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^cmd /c \"dir C:\\\\Dev\\\\matlab-functions\\\\results\\\\switching\\\\runs\\\\run_2026_03_13_152008_switching_effective_observables\\\\tables /b\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "Set-Content": true,
+        "/^python -c \"\nimport json\ntasks = \\{\n    'version': '2\\.0\\.0',\n    'tasks': \\[\n        \\{'label': 'Run switching a1 vs curvature test', 'type': 'shell', 'command': 'matlab', 'args': \\['-batch', 'run_curvature_wrapper'\\], 'isBackground': False\\},\n        \\{'label': 'Run switching a1 vs geometry deformation test', 'type': 'shell', 'command': 'matlab', 'args': \\['-batch', 'run_geometry_deformation_wrapper'\\], 'isBackground': False\\},\n        \\{'label': 'Run switching a1 vs mobility test', 'type': 'shell', 'command': 'matlab', 'args': \\['-batch', 'run_a1_mobility_wrapper'\\], 'isBackground': False\\},\n        \\{'label': 'Run switching activation signature test', 'type': 'shell', 'command': 'matlab', 'args': \\['-batch', 'run_activation_signature_wrapper'\\], 'isBackground': False\\}\n    \\]\n\\}\nwith open\\(r'C:\\\\Dev\\\\matlab-functions\\\\\\.vscode\\\\tasks\\.json', 'w', encoding='utf-8'\\) as f:\n    json\\.dump\\(tasks, f, indent=4\\)\nprint\\('Done'\\)\n\"\n$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^python3 -c \"import json; tasks = \\{'version':'2\\.0\\.0','tasks':\\[\\{'label':'Run switching a1 vs curvature test','type':'shell','command':'matlab','args':\\['-batch','run_curvature_wrapper'\\],'isBackground':False\\},\\{'label':'Run switching a1 vs geometry deformation test','type':'shell','command':'matlab','args':\\['-batch','run_geometry_deformation_wrapper'\\],'isBackground':False\\},\\{'label':'Run switching a1 vs mobility test','type':'shell','command':'matlab','args':\\['-batch','run_a1_mobility_wrapper'\\],'isBackground':False\\},\\{'label':'Run switching activation signature test','type':'shell','command':'matlab','args':\\['-batch','run_activation_signature_wrapper'\\],'isBackground':False\\}\\]\\}; open\\(r'C:\\\\Dev\\\\matlab-functions\\\\\\.vscode\\\\tasks\\.json','w',encoding='utf-8'\\)\\.write\\(json\\.dumps\\(tasks,indent=4\\)\\); print\\('Done'\\)\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "ConvertFrom-Json": true,
+        "ConvertTo-Json": true,
+        "/^cmd /c \"dir C:\\\\Dev\\\\matlab-functions\\\\results\\\\switching\\\\runs /b \\| findstr susceptibility\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^cmd /c \"dir C:\\\\Dev\\\\matlab-functions\\\\results\\\\switching\\\\runs /b\" 2>&1 \\| Select-String \"susceptib\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^\\$runDir = \"C:\\\\Dev\\\\matlab-functions\\\\results\\\\switching\\\\runs\\\\run_2026_03_15_225418_switching_ridge_temperature_susceptibili\"; cmd /c \"dir `\"\\$runDir`\" /s /b\" 2>&1$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^cmd /c \"dir C:\\\\Dev\\\\matlab-functions\\\\results\\\\switching\\\\runs /b\" 2>&1 \\| findstr /i \"susceptibil\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^cmd /c \"dir C:\\\\Dev\\\\matlab-functions\\\\results\\\\switching\\\\runs /b /ad\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^cmd /c \"dir C:\\\\Dev\\\\matlab-functions\\\\results\\\\switching\\\\runs\\\\run_2026_03_15_225730_switching_ridge_temperature_susceptibili /b /s\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^cmd /c \"dir C:\\\\Dev\\\\matlab-functions\\\\results\\\\switching\\\\runs /b /ad /o-d\" 2>&1 \\| findstr /i \"suscepti\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "New-Item": true,
+        "Out-Null": true,
+        "Start-Process": true,
+        "Get-Member": true,
+        "Group-Object": true,
+        "Get-Process": true,
+        "Get-Unique": true,
+        "/^\\$targets = @\\('results/switching/runs/run_20\\*/tables/\\*\\.csv','results/relaxation/runs/run_20\\*/tables/\\*\\.csv','results/aging/runs/run_20\\*/tables/\\*\\.csv','results/cross_experiment/runs/run_20\\*/tables/\\*\\.csv'\\); foreach \\(\\$pat in \\$targets\\) \\{ Get-ChildItem -Path \\$pat -ErrorAction SilentlyContinue \\| ForEach-Object \\{ \\$h = \\(Get-Content -Path \\$_\\.FullName -TotalCount 1\\); if \\(\\$h -match 'T\\|Tp\\|Ipeak\\|width\\|S_peak\\|X\\|A\\|tau\\|chi\\|a1\\|curvature\\|kappa\\|ridge'\\) \\{ \"\\{0\\}`t\\{1\\}\" -f \\$_\\.FullName,\\$h \\} \\} \\} \\| Out-String -Width 4096$/": {
+            "approve": true,
+            "matchCommandLine": true
+        }
     },
     "chat.agent.maxRequests": 100
 }

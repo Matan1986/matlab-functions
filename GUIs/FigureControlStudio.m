@@ -748,6 +748,11 @@ ddScope = uidropdown(tgtGrid, ...
     cbNormalizeFontsExport.Layout.Row = 8;
     cbNormalizeFontsExport.Layout.Column = [1 2];
 
+    cbIllustratorSafeExport = uicheckbox(secExportA, 'Text', 'Illustrator-safe (force tex + normalize)', 'Value', false, ...
+        'ValueChangedFcn', @onPersistedControlChanged);
+    cbIllustratorSafeExport.Layout.Row = 9;
+    cbIllustratorSafeExport.Layout.Column = [1 2];
+
     secExportB = uigridlayout(tabRootExport, [2 1]);
     secExportB.Layout.Row = 2;
     secExportB.Layout.Column = 1;
@@ -998,6 +1003,7 @@ ddScope = uidropdown(tgtGrid, ...
         'reversePlotOrder', false, ...
         'panelsPerRow', "2", ...
         'exportComposedOnly', false, ...
+        'illustratorSafeExport', false, ...
         'exportJournal', "PRL", ...
         'exportColumn', "Single Column", ...
         'exportOutDir', string(pwd));
@@ -1009,7 +1015,14 @@ ddScope = uidropdown(tgtGrid, ...
     legendLocationState = char(defaultUIState.legendLocation);
     axesBasePositions = containers.Map('KeyType', 'char', 'ValueType', 'any');
     manualLegendPositions = containers.Map('KeyType', 'char', 'ValueType', 'any');
-    manualLegendDragState = struct('active', false, 'fig', gobjects(0,1), 'ax', gobjects(0,1), 'startPoint', [0 0], 'startPos', [0 0 1 1]);
+    manualLegendDragState = struct( ...
+        'active', false, ...
+        'fig', gobjects(0,1), ...
+        'ax', gobjects(0,1), ...
+        'startPoint', [0 0], ...
+        'startPos', [0 0 1 1], ...
+        'prevWindowButtonMotionFcn', [], ...
+        'prevWindowButtonUpFcn', []);
     lastComposedFigure = gobjects(0,1);
 
     % ---------------- Initialize ----------------
@@ -1659,6 +1672,16 @@ ddScope = uidropdown(tgtGrid, ...
         manualLegendDragState.ax = src;
         manualLegendDragState.startPoint = i_getFigurePointerNormalized(fig);
         manualLegendDragState.startPos = startPos;
+        try
+            manualLegendDragState.prevWindowButtonMotionFcn = fig.WindowButtonMotionFcn;
+        catch
+            manualLegendDragState.prevWindowButtonMotionFcn = [];
+        end
+        try
+            manualLegendDragState.prevWindowButtonUpFcn = fig.WindowButtonUpFcn;
+        catch
+            manualLegendDragState.prevWindowButtonUpFcn = [];
+        end
 
         try
             fig.WindowButtonMotionFcn = @onManualLegendDragMotion;
@@ -1714,10 +1737,25 @@ ddScope = uidropdown(tgtGrid, ...
 
     function i_stopManualLegendDrag()
         if manualLegendDragState.active && isgraphics(manualLegendDragState.fig, 'figure')
-            try, manualLegendDragState.fig.WindowButtonMotionFcn = []; catch, end
-            try, manualLegendDragState.fig.WindowButtonUpFcn = []; catch, end
+            try
+                manualLegendDragState.fig.WindowButtonMotionFcn = manualLegendDragState.prevWindowButtonMotionFcn;
+            catch ME
+                warning('FCS:ManualLegendDragRestoreMotionFailed', 'Failed to restore WindowButtonMotionFcn: %s', ME.message);
+            end
+            try
+                manualLegendDragState.fig.WindowButtonUpFcn = manualLegendDragState.prevWindowButtonUpFcn;
+            catch ME
+                warning('FCS:ManualLegendDragRestoreUpFailed', 'Failed to restore WindowButtonUpFcn: %s', ME.message);
+            end
         end
-        manualLegendDragState = struct('active', false, 'fig', gobjects(0,1), 'ax', gobjects(0,1), 'startPoint', [0 0], 'startPos', [0 0 1 1]);
+        manualLegendDragState = struct( ...
+            'active', false, ...
+            'fig', gobjects(0,1), ...
+            'ax', gobjects(0,1), ...
+            'startPoint', [0 0], ...
+            'startPos', [0 0 1 1], ...
+            'prevWindowButtonMotionFcn', [], ...
+            'prevWindowButtonUpFcn', []);
     end
 
     function pNorm = i_getFigurePointerNormalized(fig)
@@ -2113,10 +2151,10 @@ ddScope = uidropdown(tgtGrid, ...
                 continue;
             end
 
-            axList = findall(fig, 'Type', 'axes');
+            axList = FCS_getPrimaryAxes(fig, struct('mode', 'primary'));
             for a = 1:numel(axList)
                 ax = axList(a);
-                if ~isgraphics(ax, 'axes') || ~i_isPrimaryPlotAxes(ax)
+                if ~isgraphics(ax, 'axes')
                     continue;
                 end
 
@@ -2879,6 +2917,124 @@ ddScope = uidropdown(tgtGrid, ...
         end
     end
 
+    function relinkColorbars(fig)
+        if isempty(fig) || ~isgraphics(fig, 'figure')
+            return;
+        end
+
+        axList = findall(fig, 'Type', 'axes');
+        if isempty(axList)
+            return;
+        end
+
+        gap = 0.01;
+        defaultCbWidth = 0.022;
+
+        for a = 1:numel(axList)
+            ax = axList(a);
+            if ~isgraphics(ax, 'axes') || i_isTiledLayoutManagedAxes(ax) || ~i_isPrimaryPlotAxes(ax)
+                continue;
+            end
+
+            cbList = i_getColorbarsForAxes(fig, ax);
+            if isempty(cbList)
+                continue;
+            end
+
+            try
+                axOldUnits = ax.Units;
+                ax.Units = 'normalized';
+                axUnitsCleanup = onCleanup(@() set(ax, 'Units', axOldUnits));
+                axPos = [];
+                if isprop(ax, 'InnerPosition')
+                    try
+                        candPos = double(ax.InnerPosition);
+                        if isnumeric(candPos) && numel(candPos) >= 4 && all(isfinite(candPos(1:4))) && candPos(3) > 0 && candPos(4) > 0
+                            axPos = candPos(1:4);
+                        end
+                    catch
+                    end
+                end
+                if isempty(axPos)
+                    candPos = double(ax.Position);
+                    if isnumeric(candPos) && numel(candPos) >= 4 && all(isfinite(candPos(1:4))) && candPos(3) > 0 && candPos(4) > 0
+                        axPos = candPos(1:4);
+                    end
+                end
+                clear axUnitsCleanup;
+            catch
+                continue;
+            end
+
+            if numel(axPos) < 4 || any(~isfinite(axPos(1:4))) || axPos(3) <= 0 || axPos(4) <= 0
+                continue;
+            end
+
+            try
+                tagVal = lower(strtrim(string(ax.Tag)));
+            catch
+                tagVal = "";
+            end
+            if contains(tagVal, "inset") || (axPos(3) < 0.2 && axPos(4) < 0.2)
+                continue;
+            end
+
+            axRight = axPos(1) + axPos(3);
+            nextRightX = axRight + gap;
+            cbSpacing = 0.005;
+
+            for c = 1:numel(cbList)
+                cb = cbList(c);
+                if ~isgraphics(cb, 'colorbar') || ~isprop(cb, 'Position')
+                    continue;
+                end
+
+                try
+                    if isprop(cb, 'Location')
+                        cb.Location = 'manual';
+                    end
+
+                    cbOldUnits = cb.Units;
+                    cb.Units = 'normalized';
+                    cbUnitsCleanup = onCleanup(@() set(cb, 'Units', cbOldUnits));
+
+                    cbWidth = defaultCbWidth;
+                    try
+                        cbPos = double(cb.Position);
+                        if numel(cbPos) >= 3 && isfinite(cbPos(3)) && cbPos(3) > 0
+                            cbWidth = cbPos(3);
+                        end
+                    catch
+                    end
+
+                    minXNoOverlap = axRight + gap;
+                    maxXAllowed = 1 - cbWidth;
+                    if minXNoOverlap <= maxXAllowed
+                        newX = min(nextRightX, maxXAllowed);
+                    else
+                        % Not enough space: prioritize staying inside figure
+                        newX = maxXAllowed;
+                    end
+                    newPos = [newX, axPos(2), cbWidth, axPos(4)];
+                    newPos = i_clampAxesPositionIfNeeded(newPos);
+
+                    % ensure no overlap with axes after clamp
+                    minXNoOverlap = axRight + gap;
+                    if newPos(1) < minXNoOverlap
+                        newPos(1) = min(minXNoOverlap, 1 - newPos(3));
+                    end
+
+                    cb.Position = newPos;
+                    nextRightX = newPos(1) + newPos(3) + cbSpacing;
+                    clear cbUnitsCleanup;
+                catch
+                end
+            end
+        end
+
+        drawnow limitrate;
+    end
+
     function cbList = i_getColorbarsForAxes(fig, ax)
         cbList = gobjects(0,1);
         allCb = findall(fig, 'Type', 'colorbar');
@@ -3258,12 +3414,20 @@ ddScope = uidropdown(tgtGrid, ...
         annOpts.annFontName = string(efAnnFontName.Value);
         annOpts.annFontSize = double(nfAnnFontSize.Value);
         annOpts.annFontWeight = string(ddAnnFontWeight.Value);
-        annOpts.annInterpreter = string(ddAnnInterpreter.Value);
+        annOpts.annInterpreter = "tex";
         annOpts.annColor = string(efAnnColor.Value);
 
         try
+            % Normalize LaTeX-like strings before typography mutations so any
+            % existing tex targets do not error during subsequent property updates.
+            preNormalizeReport = FCS_normalizeTexStrings(figs, struct('debug', false, 'allowedInterpreters', ["tex","latex"]));
+            if preNormalizeReport.modifiedCount > 0
+                fprintf('[FCS Tex Normalize][pre-typography] modified=%d skippedComplex=%d unchanged=%d errors=%d\n', ...
+                    preNormalizeReport.modifiedCount, preNormalizeReport.skippedComplexCount, preNormalizeReport.unchangedCount, preNormalizeReport.errorCount);
+            end
+
             % === STRICT UNIFORM FONT ENFORCEMENT ===
-            % Apply uniform FontSize and Interpreter='latex' to all objects
+            % Apply uniform FontSize and Interpreter='tex' to all objects
             for k = 1:numel(figs)
                 fig = figs(k);
                 if ~isgraphics(fig, 'figure')
@@ -3280,22 +3444,55 @@ ddScope = uidropdown(tgtGrid, ...
 
                     % Axes FontSize (uniform, no scaling)
                     ax.FontSize = fs;
-                    ax.TickLabelInterpreter = 'latex';
+                    ax.TickLabelInterpreter = 'tex';
+                    % Normalize X tick labels
+                    try
+                        xt = ax.XTickLabel;
+                        if iscell(xt)
+                            xt = regexprep(xt, '^\$|\$$', '');
+                            ax.XTickLabel = xt;
+                        end
+                    catch
+                    end
+
+                    % Normalize Y tick labels
+                    try
+                        yt = ax.YTickLabel;
+                        if iscell(yt)
+                            yt = regexprep(yt, '^\$|\$$', '');
+                            ax.YTickLabel = yt;
+                        end
+                    catch
+                    end
+
+                    % Normalize Z tick labels
+                    try
+                        zt = ax.ZTickLabel;
+                        if iscell(zt)
+                            zt = regexprep(zt, '^\$|\$$', '');
+                            ax.ZTickLabel = zt;
+                        end
+                    catch
+                    end
 
                     % Title (uniform, no fs+4)
                     if ~isempty(ax.Title.String)
                         ax.Title.FontSize = fs;
-                        ax.Title.Interpreter = 'latex';
+                        ax.Title.Interpreter = 'tex';
                     end
 
                     % XLabel and YLabel (uniform, no fs+4)
                     if ~isempty(ax.XLabel.String)
                         ax.XLabel.FontSize = fs;
-                        ax.XLabel.Interpreter = 'latex';
+                        ax.XLabel.Interpreter = 'tex';
                     end
                     if ~isempty(ax.YLabel.String)
                         ax.YLabel.FontSize = fs;
-                        ax.YLabel.Interpreter = 'latex';
+                        ax.YLabel.Interpreter = 'tex';
+                    end
+                    if ~isempty(ax.ZLabel.String)
+                        ax.ZLabel.FontSize = fs;
+                        ax.ZLabel.Interpreter = 'tex';
                     end
                 end
 
@@ -3303,26 +3500,102 @@ ddScope = uidropdown(tgtGrid, ...
                 cbList = findall(fig, 'Type', 'colorbar');
                 for cb = cbList(:)'
                     cb.FontSize = fs;
-                    cb.TickLabelInterpreter = 'latex';
+                    cb.TickLabelInterpreter = 'tex';
+                    try
+                        if isprop(cb, 'Label') && isgraphics(cb.Label, 'text')
+                            cb.Label.FontSize = fs;
+                            cb.Label.Interpreter = 'tex';
+                        end
+                    catch
+                    end
                 end
 
                 % 3. All text() objects in the figure
                 textList = findall(fig, 'Type', 'text');
                 for t = textList(:)'
                     t.FontSize = fs;
-                    t.Interpreter = 'latex';
+                    t.Interpreter = 'tex';
                 end
 
                 % 4. All legend objects (apply base first, override applied later)
                 lgList = findall(fig, 'Type', 'legend');
                 for lg = lgList(:)'
                     lg.FontSize = fs;
-                    lg.Interpreter = 'latex';
+                    lg.Interpreter = 'tex';
+                end
+
+                % 5. Figure annotation objects with Interpreter support
+                annTextbox = findall(fig, 'Type', 'textboxshape');
+                for aObj = annTextbox(:)'
+                    try
+                        if isprop(aObj, 'FontSize')
+                            aObj.FontSize = fs;
+                        end
+                        if isprop(aObj, 'Interpreter')
+                            aObj.Interpreter = 'tex';
+                        end
+                    catch
+                    end
+                end
+                annTextArrow = findall(fig, 'Type', 'textarrowshape');
+                for aObj = annTextArrow(:)'
+                    try
+                        if isprop(aObj, 'FontSize')
+                            aObj.FontSize = fs;
+                        end
+                        if isprop(aObj, 'Interpreter')
+                            aObj.Interpreter = 'tex';
+                        end
+                    catch
+                    end
                 end
             end
 
             % Apply axis policy
             FCS_applyAxisPolicy(figs, preset);
+            for k = 1:numel(figs)
+                fig = figs(k);
+                if ~isgraphics(fig, 'figure')
+                    continue;
+                end
+                axList = findall(fig, 'Type', 'axes');
+                for a = 1:numel(axList)
+                    ax = axList(a);
+                    if ~isgraphics(ax, 'axes')
+                        continue;
+                    end
+                    ax.TickLabelInterpreter = 'tex';
+                    % Normalize X tick labels
+                    try
+                        xt = ax.XTickLabel;
+                        if iscell(xt)
+                            xt = regexprep(xt, '^\$|\$$', '');
+                            ax.XTickLabel = xt;
+                        end
+                    catch
+                    end
+
+                    % Normalize Y tick labels
+                    try
+                        yt = ax.YTickLabel;
+                        if iscell(yt)
+                            yt = regexprep(yt, '^\$|\$$', '');
+                            ax.YTickLabel = yt;
+                        end
+                    catch
+                    end
+
+                    % Normalize Z tick labels
+                    try
+                        zt = ax.ZTickLabel;
+                        if iscell(zt)
+                            zt = regexprep(zt, '^\$|\$$', '');
+                            ax.ZTickLabel = zt;
+                        end
+                    catch
+                    end
+                end
+            end
 
             % Apply annotation text styles
             profileName = string(ddTypoProfile.Value);
@@ -3348,7 +3621,7 @@ ddScope = uidropdown(tgtGrid, ...
                 i_applyLegendFontSize(figs, overrideFontSize);
             end
 
-            report = FCS_applyTypography(figs, profileName);
+            report = FCS_applyTypography(figs, profileName, struct());
             fprintf('[FCS Typography] profile=%s resolved=%s figures=%d changed=%d skipped=%d errors=%d\n', ...
                 report.profileName, report.resolvedFontName, report.figuresProcessed, report.objectsChanged, report.objectsSkipped, report.objectsErrored);
             if report.objectsErrored > 0
@@ -3549,6 +3822,8 @@ ddScope = uidropdown(tgtGrid, ...
             catch
             end
 
+            relinkColorbars(fig);
+
         end
     end
 
@@ -3567,13 +3842,13 @@ ddScope = uidropdown(tgtGrid, ...
                 continue;
             end
 
-            axList = findall(fig, 'Type', 'axes');
+            axList = FCS_getPrimaryAxes(fig, struct('mode', 'primary'));
             primaryAxes = gobjects(0,1);
             positions = zeros(0,4);
 
             for a = 1:numel(axList)
                 ax = axList(a);
-                if ~isgraphics(ax, 'axes') || ~i_isPrimaryPlotAxes(ax)
+                if ~isgraphics(ax, 'axes')
                     continue;
                 end
                 try
@@ -3658,33 +3933,11 @@ ddScope = uidropdown(tgtGrid, ...
                     ax.Units = 'normalized';
                     ax.Position = newPos;
                     ax.Units = oldUnits;
-
-                    % Apply same transform to associated colorbars
-                    cbList = i_getColorbarsForAxes(fig, ax);
-                    for cb_idx = 1:numel(cbList)
-                        cb = cbList(cb_idx);
-                        if isgraphics(cb, 'colorbar') && isprop(cb, 'Position')
-                            try
-                                cb_oldUnits = cb.Units;
-                                cb.Units = 'normalized';
-                                oldCbPos = double(cb.Position);
-                                
-                                % Transform colorbar position using same scale and translation
-                                newCbPos = [ ...
-                                    figInfo.xmin + (oldCbPos(1) - figInfo.xmin) * sx + dx, ...
-                                    figInfo.ymin + (oldCbPos(2) - figInfo.ymin) * sy + dy, ...
-                                    oldCbPos(3) * sx, ...
-                                    oldCbPos(4) * sy];
-                                
-                                cb.Position = newCbPos;
-                                cb.Units = cb_oldUnits;
-                            catch
-                            end
-                        end
-                    end
                 catch
                 end
             end
+
+            relinkColorbars(figInfo.fig);
         end
 
         i_captureAxesBasePositions(figs);
@@ -3809,6 +4062,7 @@ ddScope = uidropdown(tgtGrid, ...
 
         nAxes = size(basePositions,1);
         if nAxes == 0
+            relinkColorbars(fig);
             return;
         end
 
@@ -3818,6 +4072,7 @@ ddScope = uidropdown(tgtGrid, ...
                 validAxes(1).Position = newPos;
             catch
             end
+            relinkColorbars(fig);
             return;
         end
 
@@ -3829,6 +4084,7 @@ ddScope = uidropdown(tgtGrid, ...
         unionH = ymax - ymin;
 
         if ~isfinite(unionW) || ~isfinite(unionH) || unionW <= 0 || unionH <= 0
+            relinkColorbars(fig);
             return;
         end
 
@@ -3856,6 +4112,8 @@ ddScope = uidropdown(tgtGrid, ...
             catch
             end
         end
+
+        relinkColorbars(fig);
     end
 
     function basePos = i_getAxesBasePositionFromSnapshot(ax)
@@ -4024,6 +4282,9 @@ ddScope = uidropdown(tgtGrid, ...
 
     function onApplyExport(~, ~)
         exportTempComposedFig = false;
+        illustratorSafe = logical(cbIllustratorSafeExport.Value);
+        illustratorRestoreState = [];
+        illustratorRestoreGuard = []; %#ok<NASGU>
         if logical(cbExportComposedOnly.Value)
             fig = [];
             if ~isempty(lastComposedFigure) && isgraphics(lastComposedFigure, 'figure')
@@ -4077,6 +4338,11 @@ ddScope = uidropdown(tgtGrid, ...
                     baseName = "Figure_1";
                 end
 
+                if illustratorSafe
+                    illustratorRestoreState = i_applyIllustratorSafeMode(fig);
+                    illustratorRestoreGuard = onCleanup(@() i_restoreInterpreterState(illustratorRestoreState)); %#ok<NASGU>
+                end
+
                 outFile = fullfile(outDir, char(baseName + ".pdf"));
                 if ~logical(cbOverwrite.Value)
                     [p, n, e] = fileparts(outFile);
@@ -4094,7 +4360,7 @@ ddScope = uidropdown(tgtGrid, ...
                     disp(allAxesBeforeExport(iAx).Position);
                 end
 
-                allAxes = findall(exportFig,'Type','axes');
+                allAxes = findall(fig,'Type','axes');
                 for k = 1:numel(allAxes)
                     disp(['Axis ' num2str(k)])
                     disp('Units:')
@@ -4105,110 +4371,15 @@ ddScope = uidropdown(tgtGrid, ...
                     disp(allAxes(k).InnerPosition)
                 end
 
-                % === FIG DIAGNOSTICS AND FONT ENFORCEMENT (right before exportgraphics) ===
-                debugExport = true;  % Set to true for verbose diagnostics
-                normalizeFontsOnExport = logical(cbNormalizeFontsExport.Value);
-                
-                [exportFontName, exportFontSize] = i_getExportFontSettings(fig);
-
-                if debugExport
-                    disp('=== FIG DIAGNOSTIC (before export) ===');
-                    disp(sprintf('fig class: %s', class(fig)));
-                    disp('fig.Position:'); disp(fig.Position);
-                    disp('fig.PaperSize:'); disp(fig.PaperSize);
-                    disp('fig.PaperPosition:'); disp(fig.PaperPosition);
-                    disp(sprintf('fig.Renderer: %s', fig.Renderer));
-                    fprintf('Export font settings: FontName=%s, FontSize=%.1f\n', exportFontName, exportFontSize);
-                    fprintf('Normalize fonts on export: %d\n', normalizeFontsOnExport);
-                end
-
-                % Normalize fonts on all axes (if enabled)
-                axAll = findall(fig, 'Type', 'axes');
-                if debugExport
-                    fprintf('Axes count: %d\n', numel(axAll));
-                end
-                for k = 1:numel(axAll)
-                    if debugExport
-                        fprintf('\nAXIS %d (before font enforcement)\n', k);
-                        fprintf('  FontName: %s\n', axAll(k).FontName);
-                        fprintf('  FontSize: %.2f\n', axAll(k).FontSize);
-                        fprintf('  TickLabelInterpreter: %s\n', axAll(k).TickLabelInterpreter);
-                        fprintf('  Units: %s\n', axAll(k).Units);
-                        disp('  Position:'); disp(axAll(k).Position);
-                        disp('  InnerPosition:'); disp(axAll(k).InnerPosition);
-                        disp('  TightInset:'); disp(axAll(k).TightInset);
-                    end
-
-                    % Normalize font settings only if enabled
-                    if normalizeFontsOnExport
-                        if isprop(axAll(k), 'FontName')
-                            axAll(k).FontName = exportFontName;
-                        end
-                        if isprop(axAll(k), 'FontSize')
-                            axAll(k).FontSize = exportFontSize;
-                        end
-                    end
-                end
-
-                % Normalize fonts on colorbars (if enabled)
-                cbAll = findall(fig, 'Type', 'colorbar');
-                if debugExport
-                    fprintf('\nColorbar count: %d\n', numel(cbAll));
-                end
-                for k = 1:numel(cbAll)
-                    if debugExport
-                        fprintf('COLORBAR %d\n', k);
-                        if isprop(cbAll(k), 'FontName')
-                            fprintf('  FontName: %s\n', cbAll(k).FontName);
-                        end
-                        if isprop(cbAll(k), 'FontSize')
-                            fprintf('  FontSize: %.2f\n', cbAll(k).FontSize);
-                        end
-                        if isprop(cbAll(k), 'Units')
-                            fprintf('  Units: %s\n', cbAll(k).Units);
-                        end
-                        if isprop(cbAll(k), 'Position')
-                            disp('  Position:'); disp(cbAll(k).Position);
-                        end
-                    end
-                    if normalizeFontsOnExport
-                        if isprop(cbAll(k), 'FontName')
-                            cbAll(k).FontName = exportFontName;
-                        end
-                        if isprop(cbAll(k), 'FontSize')
-                            cbAll(k).FontSize = exportFontSize;
-                        end
-                    end
-                end
-
-                % Normalize fonts on all text objects (if enabled)
-                txAll = findall(fig, 'Type', 'text');
-                if debugExport
-                    fprintf('\nText count: %d\n', numel(txAll));
-                end
-                for k = 1:numel(txAll)
-                    if debugExport
-                        fprintf('TEXT %d (before font enforcement)\n', k);
-                        fprintf('  FontName: %s\n', txAll(k).FontName);
-                        fprintf('  FontSize: %.2f\n', txAll(k).FontSize);
-                        fprintf('  Interpreter: %s\n', txAll(k).Interpreter);
-                    end
-
-                    % Normalize font settings only if enabled
-                    if normalizeFontsOnExport
-                        if isprop(txAll(k), 'FontName')
-                            txAll(k).FontName = exportFontName;
-                        end
-                        if isprop(txAll(k), 'FontSize')
-                            txAll(k).FontSize = exportFontSize;
-                        end
-                    end
-                end
-                if debugExport
-                    fprintf('=== End FIG DIAGNOSTIC ===\n\n');
-                end
+                prepState = FCS_prepareExportFigure(fig, struct( ...
+                    'outType', 'pdf', ...
+                    'debugExport', true, ...
+                    'normalizeFontsOnExport', logical(cbNormalizeFontsExport.Value), ...
+                    'syncPaperSize', false));
+                prepGuard = onCleanup(@() FCS_restoreExportFigureState(prepState)); %#ok<NASGU>
 
                 exportgraphics(fig, outFile, 'ContentType', 'vector');
+                clear prepGuard;
                 disp('--- After export ---');
                 allAxesAfterExport = findall(fig, 'Type', 'axes');
                 for iAx = 1:numel(allAxesAfterExport)
@@ -4227,6 +4398,11 @@ ddScope = uidropdown(tgtGrid, ...
         end
         if isempty(figs), return; end
 
+        if illustratorSafe
+            illustratorRestoreState = i_applyIllustratorSafeMode(figs);
+            illustratorRestoreGuard = onCleanup(@() i_restoreInterpreterState(illustratorRestoreState)); %#ok<NASGU>
+        end
+
         exportOpts = struct();
         exportOpts.format = char(ddExportFmt.Value);
         exportOpts.outDir = char(string(efExportDir.Value));
@@ -4236,6 +4412,10 @@ ddScope = uidropdown(tgtGrid, ...
         exportOpts.sanitize = true;
         exportOpts.normalizeFontsOnExport = logical(cbNormalizeFontsExport.Value);
         exportOpts.debugExport = true;  % Set to true for verbose diagnostics
+        if illustratorSafe
+            exportOpts.format = 'pdf';
+            exportOpts.pdfMode = 'Vector (exportgraphics)';
+        end
 
         try
             FCS_export(figs, exportOpts);
@@ -4244,6 +4424,208 @@ ddScope = uidropdown(tgtGrid, ...
         end
         if exportTempComposedFig && exist('fig', 'var') && ~isempty(fig) && isgraphics(fig, 'figure')
             close(fig);
+        end
+    end
+
+    function restoreState = i_applyIllustratorSafeMode(figs)
+        restoreState = struct();
+        restoreState.obj = gobjects(0,1);
+        restoreState.prop = strings(0,1);
+        restoreState.value = cell(0,1);
+        if isempty(figs)
+            return;
+        end
+        preReport = FCS_normalizeTexStrings(figs, struct('debug', true, 'allowedInterpreters', ["tex","latex"]));
+        fprintf('[FCS Illustrator-safe][pre-tex normalize] modified=%d skippedComplex=%d unchanged=%d errors=%d\n', ...
+            preReport.modifiedCount, preReport.skippedComplexCount, preReport.unchangedCount, preReport.errorCount);
+        for kFig = 1:numel(figs)
+            fig = figs(kFig);
+            if ~isgraphics(fig, 'figure')
+                continue;
+            end
+
+            axList = findall(fig, 'Type', 'axes');
+            for iAx = 1:numel(axList)
+                ax = axList(iAx);
+                if ~isgraphics(ax, 'axes')
+                    continue;
+                end
+                try
+                    if isprop(ax, 'TickLabelInterpreter')
+                        restoreState = i_recordInterpreterState(restoreState, ax, 'TickLabelInterpreter');
+                        ax.TickLabelInterpreter = 'tex';
+                    end
+                catch
+                end
+                try
+                    if isgraphics(ax.Title, 'text')
+                        restoreState = i_recordInterpreterState(restoreState, ax.Title, 'Interpreter');
+                        ax.Title.Interpreter = 'tex';
+                    end
+                catch
+                end
+                try
+                    if isgraphics(ax.XLabel, 'text')
+                        restoreState = i_recordInterpreterState(restoreState, ax.XLabel, 'Interpreter');
+                        ax.XLabel.Interpreter = 'tex';
+                    end
+                catch
+                end
+                try
+                    if isgraphics(ax.YLabel, 'text')
+                        restoreState = i_recordInterpreterState(restoreState, ax.YLabel, 'Interpreter');
+                        ax.YLabel.Interpreter = 'tex';
+                    end
+                catch
+                end
+                try
+                    if isgraphics(ax.ZLabel, 'text')
+                        restoreState = i_recordInterpreterState(restoreState, ax.ZLabel, 'Interpreter');
+                        ax.ZLabel.Interpreter = 'tex';
+                    end
+                catch
+                end
+            end
+
+            cbList = findall(fig, 'Type', 'colorbar');
+            for iCb = 1:numel(cbList)
+                cb = cbList(iCb);
+                try
+                    if isprop(cb, 'TickLabelInterpreter')
+                        restoreState = i_recordInterpreterState(restoreState, cb, 'TickLabelInterpreter');
+                        cb.TickLabelInterpreter = 'tex';
+                    end
+                catch
+                end
+                try
+                    if isprop(cb, 'Label') && isgraphics(cb.Label, 'text')
+                        restoreState = i_recordInterpreterState(restoreState, cb.Label, 'Interpreter');
+                        cb.Label.Interpreter = 'tex';
+                    end
+                catch
+                end
+            end
+
+            lgList = findall(fig, 'Type', 'legend');
+            for iLg = 1:numel(lgList)
+                lg = lgList(iLg);
+                try
+                    if isprop(lg, 'Interpreter')
+                        restoreState = i_recordInterpreterState(restoreState, lg, 'Interpreter');
+                        lg.Interpreter = 'tex';
+                    end
+                catch
+                end
+            end
+
+            txList = findall(fig, 'Type', 'text');
+            for iTx = 1:numel(txList)
+                tx = txList(iTx);
+                try
+                    if isprop(tx, 'Interpreter')
+                        restoreState = i_recordInterpreterState(restoreState, tx, 'Interpreter');
+                        tx.Interpreter = 'tex';
+                    end
+                catch
+                end
+            end
+
+            annTextbox = findall(fig, 'Type', 'textboxshape');
+            for iAnn = 1:numel(annTextbox)
+                a = annTextbox(iAnn);
+                try
+                    if isprop(a, 'Interpreter')
+                        restoreState = i_recordInterpreterState(restoreState, a, 'Interpreter');
+                        a.Interpreter = 'tex';
+                    end
+                catch
+                end
+            end
+
+            annTextArrow = findall(fig, 'Type', 'textarrowshape');
+            for iAnn = 1:numel(annTextArrow)
+                a = annTextArrow(iAnn);
+                try
+                    if isprop(a, 'Interpreter')
+                        restoreState = i_recordInterpreterState(restoreState, a, 'Interpreter');
+                        a.Interpreter = 'tex';
+                    end
+                catch
+                end
+            end
+        end
+
+        nonTexCount = i_countNonTexInterpreterTargets(figs);
+        if nonTexCount > 0
+            fprintf('[FCS Illustrator-safe][WARN] non-tex interpreter targets after tex-assign stage: %d\n', nonTexCount);
+        else
+            fprintf('[FCS Illustrator-safe] interpreter order check passed: all discovered targets set to tex after pre-normalization.\n');
+        end
+
+        report = FCS_normalizeTexStrings(figs, struct('debug', true));
+        fprintf('[FCS Illustrator-safe][post-tex normalize] modified=%d skippedComplex=%d unchanged=%d errors=%d\n', ...
+            report.modifiedCount, report.skippedComplexCount, report.unchangedCount, report.errorCount);
+    end
+
+    function state = i_recordInterpreterState(state, obj, propName)
+        if isempty(obj) || ~isgraphics(obj) || ~isprop(obj, propName)
+            return;
+        end
+        try
+            val = obj.(propName);
+        catch
+            return;
+        end
+        state.obj(end+1,1) = obj; %#ok<AGROW>
+        state.prop(end+1,1) = string(propName); %#ok<AGROW>
+        state.value{end+1,1} = val; %#ok<AGROW>
+    end
+
+    function i_restoreInterpreterState(state)
+        if ~isstruct(state) || ~isfield(state, 'obj') || isempty(state.obj)
+            return;
+        end
+        n = numel(state.obj);
+        for i = 1:n
+            obj = state.obj(i);
+            if isempty(obj) || ~isgraphics(obj)
+                continue;
+            end
+            try
+                propName = char(state.prop(i));
+                if isprop(obj, propName)
+                    obj.(propName) = state.value{i};
+                end
+            catch
+            end
+        end
+    end
+
+    function countOut = i_countNonTexInterpreterTargets(figs)
+        countOut = 0;
+        if isempty(figs)
+            return;
+        end
+        for kFig = 1:numel(figs)
+            fig = figs(kFig);
+            if ~isgraphics(fig, 'figure')
+                continue;
+            end
+            targets = [findall(fig, 'Type', 'text'); ...
+                       findall(fig, 'Type', 'legend'); ...
+                       findall(fig, 'Type', 'textboxshape'); ...
+                       findall(fig, 'Type', 'textarrowshape')];
+            for iT = 1:numel(targets)
+                t = targets(iT);
+                try
+                    if isprop(t, 'Interpreter')
+                        if ~strcmpi(char(string(t.Interpreter)), 'tex')
+                            countOut = countOut + 1;
+                        end
+                    end
+                catch
+                end
+            end
         end
     end
 
@@ -4367,6 +4749,10 @@ ddScope = uidropdown(tgtGrid, ...
         % Pure visual compose: create tiledlayout and copy axes without geometry modification
         newFig = [];
         composeWarnings = strings(0,1);
+        processedPrimaryCount = 0;
+        skippedAxesCount = 0;
+        freezeAxes = gobjects(0,1);
+        freezePos = zeros(0,4);
         
         if isempty(figs) || rows < 1 || cols < 1
             return;
@@ -4374,13 +4760,25 @@ ddScope = uidropdown(tgtGrid, ...
         
         % Create new figure
         newFig = figure('Name', 'Composed Figure', 'Renderer', 'painters');
+        try
+            newFig.Units = 'centimeters';
+            figPos = newFig.Position;
+            figPos(3) = widthCm;
+            newFig.Position = figPos;
+        catch
+        end
         
-        % Create tiledlayout
-        tl = tiledlayout(newFig, rows, cols, 'Padding', 'compact', 'TileSpacing', 'compact');
+        % Create tiledlayout (used only to resolve panel boxes deterministically)
+        tl = tiledlayout(newFig, rows, cols, 'Padding', 'none', 'TileSpacing', 'none');
+        drawnow;
         
         % Copy each figure's primary axes into tiles
         for k = 1:numel(figs)
             srcFig = figs(k);
+            try
+                normalizeReport = FCS_normalizeTexStrings(srcFig, struct('debug', false, 'allowedInterpreters', ["tex","latex"])); %#ok<NASGU>
+            catch
+            end
             
             % Find primary axes in source figure
             allAxes = findall(srcFig, 'Type', 'axes');
@@ -4389,15 +4787,39 @@ ddScope = uidropdown(tgtGrid, ...
             for iAx = 1:numel(allAxes)
                 ax = allAxes(iAx);
                 if ~isgraphics(ax, 'axes')
+                    skippedAxesCount = skippedAxesCount + 1;
                     continue;
                 end
-                % Skip legend axes
-                if strcmp(get(ax, 'Tag'), 'legend')
+                if isa(ax, 'matlab.graphics.illustration.ColorBar') || isa(ax, 'matlab.graphics.illustration.Legend')
+                    skippedAxesCount = skippedAxesCount + 1;
                     continue;
                 end
-                % Skip axes with no children
+                axTag = lower(string(get(ax, 'Tag')));
+                % Skip legend/colorbar/helper axes
+                if contains(axTag, "legend") || contains(axTag, "colorbar") || contains(axTag, "inset") || contains(axTag, "helper")
+                    skippedAxesCount = skippedAxesCount + 1;
+                    continue;
+                end
+                if ~strcmpi(string(get(ax, 'Visible')), "on")
+                    skippedAxesCount = skippedAxesCount + 1;
+                    continue;
+                end
                 children = allchild(ax);
-                if isempty(children)
+                % Skip degenerate/inset-like axes
+                isDegenerate = false;
+                try
+                    oldUnits = ax.Units;
+                    ax.Units = 'normalized';
+                    axPos = ax.Position;
+                    ax.Units = oldUnits;
+                    if numel(axPos) < 4 || ~all(isfinite(axPos(1:4))) || axPos(3) <= 1e-4 || axPos(4) <= 1e-4
+                        isDegenerate = true;
+                    end
+                catch
+                    isDegenerate = true;
+                end
+                if isDegenerate
+                    skippedAxesCount = skippedAxesCount + 1;
                     continue;
                 end
                 % Check for plot objects
@@ -4412,24 +4834,74 @@ ddScope = uidropdown(tgtGrid, ...
                     isa(h,'matlab.graphics.primitive.Patch'), children));
                 
                 if hasPlot
+                    try
+                        ax.Units = 'normalized';
+                    catch
+                    end
+                    try
+                        if isprop(ax, 'ActivePositionProperty')
+                            ax.ActivePositionProperty = 'position';
+                        end
+                    catch
+                    end
                     primaryAxes(end+1,1) = ax; %#ok<AGROW>
+                else
+                    skippedAxesCount = skippedAxesCount + 1;
                 end
             end
             
-            % Create tile and copy axes
-            nexttile(tl, k);
-            disp(sprintf('--- After nexttile (tile %d) ---', k));
+            % Resolve target tile box once, then place copied axes manually
+            tilePos = [0 0 1 1];
+            try
+                tileHost = nexttile(tl, k);
+                tileHost.Units = 'normalized';
+                tilePos = double(tileHost.Position);
+                if isnumeric(tilePos) && numel(tilePos) >= 4 && all(isfinite(tilePos(1:4)))
+                    tilePos = tilePos(1:4);
+                else
+                    tilePos = [0 0 1 1];
+                end
+                delete(tileHost);
+            catch
+                tilePos = [0 0 1 1];
+            end
+            disp(sprintf('--- Tile %d resolved ---', k));
             if ~isempty(primaryAxes)
                 try
-                    copiedAxes = copyobj(primaryAxes, tl);
+                    copiedAxes = copyobj(primaryAxes, newFig);
                     disp('--- After copyobj ---');
-                    % Set units to centimeters and prevent layout-driven resizing
+                    % Preserve source axes geometry in mapped tile box
                     for i = 1:numel(copiedAxes)
                         if isgraphics(copiedAxes(i), 'axes')
+                            srcAx = primaryAxes(min(i, numel(primaryAxes)));
+                            srcPos = [0 0 1 1];
+                            try
+                                srcOldUnits = srcAx.Units;
+                                srcAx.Units = 'normalized';
+                                srcPosCand = double(srcAx.Position);
+                                srcAx.Units = srcOldUnits;
+                                if isnumeric(srcPosCand) && numel(srcPosCand) >= 4 && all(isfinite(srcPosCand(1:4)))
+                                    srcPos = srcPosCand(1:4);
+                                end
+                            catch
+                            end
+                            mappedPos = [ ...
+                                tilePos(1) + srcPos(1) * tilePos(3), ...
+                                tilePos(2) + srcPos(2) * tilePos(4), ...
+                                srcPos(3) * tilePos(3), ...
+                                srcPos(4) * tilePos(4)];
+                            mappedPos = i_clampRectNormalized(mappedPos);
                             disp(sprintf('  Axis %d Position:', i));
                             disp(copiedAxes(i).Position);
-                            copiedAxes(i).Units = 'centimeters';
+                            copiedAxes(i).Units = 'normalized';
+                            copiedAxes(i).Position = mappedPos;
+                            if isprop(copiedAxes(i), 'ActivePositionProperty')
+                                copiedAxes(i).ActivePositionProperty = 'position';
+                            end
                             copiedAxes(i).PositionConstraint = 'innerposition';
+                            freezeAxes(end+1,1) = copiedAxes(i); %#ok<AGROW>
+                            freezePos(end+1,:) = mappedPos; %#ok<AGROW>
+                            processedPrimaryCount = processedPrimaryCount + 1;
                         end
                     end
                 catch ME
@@ -4437,12 +4909,37 @@ ddScope = uidropdown(tgtGrid, ...
                     disp('--- After copyobj (fallback path) ---');
                     for j = 1:numel(primaryAxes)
                         try
-                            copiedAxes = copyobj(primaryAxes(j), tl);
+                            copiedAxes = copyobj(primaryAxes(j), newFig);
                             if isgraphics(copiedAxes, 'axes')
+                                srcAx = primaryAxes(j);
+                                srcPos = [0 0 1 1];
+                                try
+                                    srcOldUnits = srcAx.Units;
+                                    srcAx.Units = 'normalized';
+                                    srcPosCand = double(srcAx.Position);
+                                    srcAx.Units = srcOldUnits;
+                                    if isnumeric(srcPosCand) && numel(srcPosCand) >= 4 && all(isfinite(srcPosCand(1:4)))
+                                        srcPos = srcPosCand(1:4);
+                                    end
+                                catch
+                                end
+                                mappedPos = [ ...
+                                    tilePos(1) + srcPos(1) * tilePos(3), ...
+                                    tilePos(2) + srcPos(2) * tilePos(4), ...
+                                    srcPos(3) * tilePos(3), ...
+                                    srcPos(4) * tilePos(4)];
+                                mappedPos = i_clampRectNormalized(mappedPos);
                                 disp(sprintf('  Axis %d Position:', j));
                                 disp(copiedAxes.Position);
-                                copiedAxes.Units = 'centimeters';
+                                copiedAxes.Units = 'normalized';
+                                copiedAxes.Position = mappedPos;
+                                if isprop(copiedAxes, 'ActivePositionProperty')
+                                    copiedAxes.ActivePositionProperty = 'position';
+                                end
                                 copiedAxes.PositionConstraint = 'innerposition';
+                                freezeAxes(end+1,1) = copiedAxes; %#ok<AGROW>
+                                freezePos(end+1,:) = mappedPos; %#ok<AGROW>
+                                processedPrimaryCount = processedPrimaryCount + 1;
                             end
                         catch
                         end
@@ -4450,6 +4947,34 @@ ddScope = uidropdown(tgtGrid, ...
                 end
             end
         end
+
+        try
+            delete(tl);
+        catch
+        end
+
+        drawnow;
+        freezeAxes = freezeAxes(isgraphics(freezeAxes, 'axes'));
+        for i = 1:numel(freezeAxes)
+            try
+                freezeAxes(i).Units = 'normalized';
+            catch
+            end
+            if i <= size(freezePos, 1)
+                try
+                    freezeAxes(i).Position = freezePos(i,:);
+                catch
+                end
+            end
+            try
+                if isprop(freezeAxes(i), 'ActivePositionProperty')
+                    freezeAxes(i).ActivePositionProperty = 'position';
+                end
+            catch
+            end
+        end
+        relinkColorbars(newFig);
+        disp(sprintf('Compose primary-axes filter: skip tags {legend,colorbar,inset,helper}, invisible, empty, degenerate, non-plot axes. processed=%d skipped=%d', processedPrimaryCount, skippedAxesCount));
     end
 
     function [newFig, composeWarnings, errMsg] = i_buildComposedFigureFromCurrentSelection()
@@ -5043,27 +5568,7 @@ ddScope = uidropdown(tgtGrid, ...
     end
 
     function axesOut = i_getPrimaryAxesForCompose(container)
-        axesOut = gobjects(0,1);
-        if isempty(container) || ~isgraphics(container)
-            return;
-        end
-
-        srcAxes = findall(container, 'Type', 'axes');
-        if isempty(srcAxes)
-            return;
-        end
-
-        keep = false(numel(srcAxes),1);
-        for i = 1:numel(srcAxes)
-            keep(i) = i_isPrimaryPlotAxes(srcAxes(i));
-        end
-        axesOut = srcAxes(keep);
-
-        try
-            [~, idx] = sort(double(axesOut), 'ascend');
-            axesOut = axesOut(idx);
-        catch
-        end
+        axesOut = FCS_getPrimaryAxes(container, struct('mode', 'primary'));
     end
 
     function bbox = i_computeAxesBBoxNormalized(axList)
@@ -6168,6 +6673,12 @@ ddScope = uidropdown(tgtGrid, ...
             if isfield(uiState, 'cbExportComposedOnly')
                 cbExportComposedOnly.Value = logical(uiState.cbExportComposedOnly);
             end
+            if isfield(uiState, 'illustratorSafeExport') && ~isempty(uiState.illustratorSafeExport)
+                cbIllustratorSafeExport.Value = logical(uiState.illustratorSafeExport);
+            end
+            if isfield(uiState, 'cbIllustratorSafeExport')
+                cbIllustratorSafeExport.Value = logical(uiState.cbIllustratorSafeExport);
+            end
             if isfield(uiState, 'exportOutDir')
                 efExportDir.Value = char(string(uiState.exportOutDir));
             end
@@ -6290,7 +6801,7 @@ ddScope = uidropdown(tgtGrid, ...
                 'nfWsWidth','nfWsBaseRatio', ...
                 'slAxScaleX','slAxScaleY','slAxOffsetX','slAxOffsetY', ...
                 'ddPanelsPerRow','cbReversePlotOrder', ...
-                'ddExportFmt','exportJournal','exportColumn','pdfMode','cbOverwrite','ddFilenameFrom','cbExportComposedOnly','exportOutDir'};
+                'ddExportFmt','exportJournal','exportColumn','pdfMode','cbOverwrite','ddFilenameFrom','cbExportComposedOnly','cbIllustratorSafeExport','exportOutDir'};
 
             currentValues = {
                 ddScope.Value, efTag.Value, efNameContains.Value, lbFigures.Value, cbExcludeGUIs.Value, ...
@@ -6304,7 +6815,7 @@ ddScope = uidropdown(tgtGrid, ...
                 nfWsWidth.Value, nfWsBaseRatio.Value, ...
                 slAxScaleX.Value, slAxScaleY.Value, slAxOffsetX.Value, slAxOffsetY.Value, ...
                 ddPanelsPerRow.Value, cbReversePlotOrder.Value, ...
-                ddExportFmt.Value, ddExportJournal.Value, ddExportColumn.Value, ddPdfMode.Value, cbOverwrite.Value, ddFilenameFrom.Value, cbExportComposedOnly.Value, efExportDir.Value};
+                ddExportFmt.Value, ddExportJournal.Value, ddExportColumn.Value, ddPdfMode.Value, cbOverwrite.Value, ddFilenameFrom.Value, cbExportComposedOnly.Value, cbIllustratorSafeExport.Value, efExportDir.Value};
 
             diffs = {};
             for iField = 1:numel(fieldNames)
@@ -6510,6 +7021,8 @@ ddScope = uidropdown(tgtGrid, ...
         uiState.ddFilenameFrom = ddFilenameFrom.Value;
         uiState.exportComposedOnly = logical(cbExportComposedOnly.Value);
         uiState.cbExportComposedOnly = cbExportComposedOnly.Value;
+        uiState.illustratorSafeExport = logical(cbIllustratorSafeExport.Value);
+        uiState.cbIllustratorSafeExport = cbIllustratorSafeExport.Value;
         uiState.exportOutDir = string(efExportDir.Value);
 
         up = userpath;
@@ -6531,14 +7044,6 @@ ddScope = uidropdown(tgtGrid, ...
         catch
             % Best-effort persistence only
         end
-    end
-
-    function restorePaperProps(fig, orig)
-        fig.PaperUnits = orig.PaperUnits;
-        fig.PaperPosition = orig.PaperPosition;
-        fig.PaperSize = orig.PaperSize;
-        fig.PaperPositionMode = orig.PaperPositionMode;
-        fig.InvertHardcopy = orig.InvertHardcopy;
     end
 
     function i_scalePanel(container, scaleFactor)
@@ -6570,51 +7075,4 @@ ddScope = uidropdown(tgtGrid, ...
         end
     end
 
-    function [fontName, fontSize] = i_getExportFontSettings(fig)
-        % i_getExportFontSettings
-        % Return export font settings with intelligent fallback.
-        % Priority: figure defaults -> first axis -> groot defaults -> Helvetica/8
-        
-        fontName = 'Helvetica';   % final fallback
-        fontSize = 8;              % final fallback
-        
-        % Try to get from figure defaults
-        if isprop(fig, 'DefaultAxesFontName') && ~isempty(fig.DefaultAxesFontName)
-            fontName = fig.DefaultAxesFontName;
-        end
-        if isprop(fig, 'DefaultAxesFontSize') && isfinite(fig.DefaultAxesFontSize) && fig.DefaultAxesFontSize > 0
-            fontSize = fig.DefaultAxesFontSize;
-        end
-        
-        % Try first axis if no figure defaults found
-        axAll = findall(fig, 'Type', 'axes');
-        if ~isempty(axAll)
-            firstAx = axAll(1);
-            if isprop(firstAx, 'FontName') && ~isempty(firstAx.FontName)
-                fontName = firstAx.FontName;
-            end
-            if isprop(firstAx, 'FontSize') && isfinite(firstAx.FontSize) && firstAx.FontSize > 0
-                fontSize = firstAx.FontSize;
-            end
-        end
-        
-        % Fallback to groot defaults if still unset
-        try
-            root = groot;
-            defaultAxesFontName = get(root, 'DefaultAxesFontName');
-            defaultAxesFontSize = get(root, 'DefaultAxesFontSize');
-            if ~isempty(defaultAxesFontName)
-                if strcmp(fontName, 'Helvetica')  % Still at fallback
-                    fontName = defaultAxesFontName;
-                end
-            end
-            if isfinite(defaultAxesFontSize) && defaultAxesFontSize > 0
-                if fontSize == 8  % Still at fallback
-                    fontSize = defaultAxesFontSize;
-                end
-            end
-        catch
-            % If groot fails, use already-set fallback
-        end
-    end
 end

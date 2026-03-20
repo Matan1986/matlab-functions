@@ -1,6 +1,12 @@
-%% Wrapper to run diagnostic with explicit output capture
+﻿%% Wrapper to run diagnostic with explicit output capture
 
-logfile = 'diagnostic_captured_output.txt';
+scriptDir = fileparts(mfilename('fullpath'));
+repoRoot = fileparts(fileparts(fileparts(scriptDir)));
+logDir = fullfile(repoRoot, 'tmp_debug_outputs', 'switching_stability');
+if exist(logDir, 'dir') ~= 7
+    mkdir(logDir);
+end
+logfile = fullfile(logDir, 'diagnostic_captured_output.txt');
 diary(logfile);
 
 try
@@ -20,3 +26,4 @@ end
 diary off;
 fprintf('Output saved to: %s\n', logfile);
 exit;
+
