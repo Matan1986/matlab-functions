@@ -211,10 +211,13 @@ The helper:
 - writes `.csv` or `.tsv` table files
 - defaults to `.csv` when no extension is provided
 
+Observables index note:
+`observables.csv` is a run-level summary/index and should be written at the run root (not under `tables/`).
+
 Example:
 
 ```matlab
-save_run_table(T, 'observables.csv', run_output_dir)
+save_run_table(T, 'alignment_metrics.csv', run_output_dir)
 ```
 
 ### Report helper

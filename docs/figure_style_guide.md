@@ -338,6 +338,10 @@ Optional only when a journal requires raster delivery:
 - Do not rasterize line art unnecessarily
 - Use vector PDF for line plots, scatter plots, and mixed vector figures whenever possible
 
+### Repository-wide strict naming linkage
+
+The STRICT figure-window naming convention is defined in [docs/visualization_rules.md](/C:/Dev/matlab-functions/docs/visualization_rules.md) under Figure Window Naming (STRICT) and is mandatory for publication figures as well.
+
 ### Naming convention
 
 - Use lowercase snake_case
@@ -511,3 +515,4 @@ When reviewing a figure set for compliance, verify:
 - heatmaps use consistent color limits across comparisons
 - panel spacing and labels are aligned
 - final exports include vector PDF and high-resolution PNG
+

@@ -5,7 +5,7 @@ format shortEng;
 %% dir & file list
 baseFolder = 'C:\Dev\matlab-functions';
 addpath(genpath(baseFolder));
-dir = "L:\My Drive\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\FIB5_Switching_old_PPMS\Config3 23\Amp Temp Dep all\Temp Dep 45mA 10ms 0T 15sec 10pulses 30";
+dir = "L:\My Drive\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\FIB5_Switching_old_PPMS\Config3 23\Amp Temp Dep all";
 % dir = "L:\My Drive\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\FIB5_Switching_old_PPMS\Config3 23\Temp Dep 35mA 10ms 0T 15sec 10pulses Fixed 29";
 % dir = "L:\My Drive\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\FIB5_Switching_old_PPMS\Config3 23\Width Dep 30mA 4K 0T 15sec 10pulses 20";
 % -------------------------------------------------
@@ -13,12 +13,16 @@ dir = "L:\My Drive\Quantum materials lab\Analysis Lab measurments\Magnetic Inter
 % plotAmpTempSwitchingMap_switchCh(parentDir, metricType, channelMode)
 % parentDir must contain subfolders named "Temp Dep ... mA ..."
 if detectAmpTempSwitchingMap(dir)
-    plotAmpTempMode = "map+fc";       % "map" | "map+fc"
+    plotAmpTempMode = "map";       % "map" | "map+fc"
     ampTempMetric = "P2P_percent";   %  "P2P_percent" | "medianAbs" | "meanP2P"
     ChannesToPlotAmpTemp = "switchCh";      % "switchCh"  |  "all"
     FC_amp_subset = [15 25 35];   % mA
+    swapAxes = true;       
+    useMathLabels = true;   % ← I,T,S
+    showOverlay = true;
     plotAmpTempSwitchingMap_switchCh( ...
-        dir, ampTempMetric, ChannesToPlotAmpTemp, plotAmpTempMode,FC_amp_subset);
+        dir, ampTempMetric, ChannesToPlotAmpTemp, plotAmpTempMode, ...
+        FC_amp_subset, swapAxes, useMathLabels,showOverlay);
     return;
 end
 %% -------------------------------------------------

@@ -20,13 +20,29 @@ if isempty(figure_handle) || ~ishandle(figure_handle)
 end
 
 figure_handle = resolve_figure_handle(figure_handle);
-figure_name = strip_extension(char(string(figure_name)));
+if ~(ischar(figure_name) || (isstring(figure_name) && isscalar(figure_name)))
+    error('Figure Name must exactly match base_name and must be non-empty');
+end
+figure_name = char(figure_name);
 run_output_dir = char(string(run_output_dir));
-if isempty(strtrim(figure_name))
-    error('save_run_figure requires a non-empty figure_name.');
+base_name = strtrim(figure_name);
+if isempty(base_name)
+    error('Figure Name must exactly match base_name and must be non-empty');
 end
 if isempty(strtrim(run_output_dir))
     error('save_run_figure requires a non-empty run_output_dir.');
+end
+
+if ~isprop(figure_handle, 'Name')
+    error('Figure Name must exactly match base_name and must be non-empty');
+end
+figName = get(figure_handle, 'Name');
+if ~(ischar(figName) || (isstring(figName) && isscalar(figName)))
+    error('Figure Name must exactly match base_name and must be non-empty');
+end
+figName = strtrim(char(string(figName)));
+if isempty(figName) || ~strcmp(figName, base_name)
+    error('Figure Name must exactly match base_name and must be non-empty');
 end
 
 run_output_dir = resolve_run_root(run_output_dir);
@@ -40,9 +56,9 @@ try_apply_publication_style(figure_handle);
 try_run_figure_quality_check(figure_handle);
 
 paths = struct();
-paths.pdf = fullfile(figures_dir, [figure_name '.pdf']);
-paths.png = fullfile(figures_dir, [figure_name '.png']);
-paths.fig = fullfile(figures_dir, [figure_name '.fig']);
+paths.pdf = fullfile(figures_dir, [base_name '.pdf']);
+paths.png = fullfile(figures_dir, [base_name '.png']);
+paths.fig = fullfile(figures_dir, [base_name '.fig']);
 
 set(figure_handle, 'Color', 'w');
 exportgraphics(figure_handle, paths.pdf, 'ContentType', 'vector');
@@ -63,15 +79,6 @@ end
 figure_handle = ancestor(handle_in, 'figure');
 if isempty(figure_handle) || ~ishandle(figure_handle)
     error('save_run_figure requires a valid figure handle.');
-end
-end
-
-function figure_name = strip_extension(figure_name)
-[~, base_name] = fileparts(char(string(figure_name)));
-if isempty(base_name)
-    figure_name = char(string(figure_name));
-else
-    figure_name = base_name;
 end
 end
 
@@ -135,3 +142,5 @@ end
 
 run_root_dir = run_output_dir;
 end
+
+

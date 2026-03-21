@@ -74,6 +74,71 @@ exportgraphics(gcf,'figure.png','Resolution',300)
 savefig(gcf,'figure.fig')
 ```
 
+## Figure Window Naming (STRICT)
+
+This is a mandatory repository-wide rule for all new figure-producing code.
+
+Required behavior:
+
+- Do not use `title(...)` to encode file identity or figure identity.
+- Every figure must set a window name via the figure `Name` property.
+- Every figure must set `'NumberTitle','off'`.
+- The figure `Name` and the saved filename base (without extension) must be programmatically reused from the same variable.
+- Defining separate string literals or separate variables for figure `Name` and saved filename is forbidden, even if the text appears identical.
+
+Recommended pattern:
+
+```matlab
+base_name = 'switching_alignment_heatmap';
+fig = figure('Name', base_name, 'NumberTitle', 'off');
+imagesc(data);
+xlabel('Temperature (K)');
+ylabel('log_{10}(t / s)');
+save_run_figure(fig, base_name, run_output_dir);
+```
+
+Correct example:
+
+```matlab
+base_name = 'switching_alignment_heatmap';
+fig = figure('Name', base_name, 'NumberTitle', 'off');
+% ... plotting commands ...
+save_run_figure(fig, base_name, run_output_dir);
+```
+
+Forbidden behavior:
+
+```matlab
+% Forbidden: title used as naming identity
+fig = figure;
+title('switching_alignment_heatmap');
+save_run_figure(fig, 'switching_alignment_heatmap', run_output_dir);
+
+% Forbidden: separate string definitions (independent sources of truth)
+fig = figure('Name', 'switching_alignment_heatmap', 'NumberTitle', 'off');
+save_run_figure(fig, 'switching_alignment_heatmap', run_output_dir);
+
+% Forbidden: almost-identical names
+base_name = 'switching_alignment_heatmap';
+fig = figure('Name', base_name, 'NumberTitle', 'off');
+save_run_figure(fig, 'switching_alignment_heatmap_v2', run_output_dir);
+
+% Forbidden: suffix drift (_final, _v2, etc.)
+base_name = 'switching_alignment_heatmap';
+fig = figure('Name', base_name, 'NumberTitle', 'off');
+save_run_figure(fig, [base_name '_final'], run_output_dir);
+
+% Forbidden: NumberTitle left enabled
+base_name = 'switching_alignment_heatmap';
+fig = figure('Name', base_name);
+save_run_figure(fig, base_name, run_output_dir);
+```
+
+Rationale:
+
+- Single-variable reuse creates one source of truth and prevents accidental drift between figure-window identity and exported artifact identity.
+- Forbidding independent definitions eliminates near-match mistakes (`_v2`, `_final`, typo variants) that break traceability during review and post-run inspection.
+- Keeping naming metadata in figure properties avoids overloading scientific plot titles with artifact identity.
 ## Agent visualization self-check
 
 Agents generating figures must include a `Visualization choices` section in their report stating:
@@ -91,4 +156,7 @@ Before finalizing a figure set, agents should verify:
 - fonts and lines are readable
 - derivatives are not dominated by noise
 - both PNG and FIG exports were produced
+
+
+
 

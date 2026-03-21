@@ -34,10 +34,19 @@ Numeric outputs must be stored in `tables/`.
 
 Examples:
 
-- `tables/observables.csv`
 - `tables/fit_summary.csv`
+- `tables/alignment_metrics.csv`
 
 Use `tables/` for CSV and similar machine-readable numeric outputs.
+
+## Run-level observable index
+
+`observables.csv` is a run-level index file and must remain at the run root:
+
+- `results/<experiment>/runs/run_<timestamp>_<label>/observables.csv`
+
+Do not place `observables.csv` under `tables/`.
+Do not use `save_run_table` for `observables.csv`.
 
 ## Reports
 
@@ -64,7 +73,9 @@ Use `review/` only for review bundles and handoff archives.
 ## Naming rule
 
 Keep filenames descriptive and analysis-specific so that artifacts remain understandable when viewed outside MATLAB.
+For figure artifacts, enforce the STRICT figure-window naming rule in docs/visualization_rules.md: figure Name must exactly match the saved filename base, and 'NumberTitle','off' is required.
 
 ## Agent rule
 
 Agents must follow this artifact layout for every new run and must not create alternative folders for the same output types.
+

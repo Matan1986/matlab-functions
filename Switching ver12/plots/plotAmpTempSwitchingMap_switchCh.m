@@ -1,4 +1,6 @@
-function plotAmpTempSwitchingMap_switchCh(parentDir, metricType, channelMode, plotAmpTempMode,FC_amp_subset)
+function plotAmpTempSwitchingMap_switchCh( ...
+    parentDir, metricType, channelMode, plotAmpTempMode, FC_amp_subset, ...
+    swapAxes, useMathLabels, showOverlay)
 % Amp–Temp switching map with TEMPERATURE BINNING
 % Figure Name = META ONLY (preset-based labels)
 % No title, no LaTeX in Name
@@ -12,6 +14,15 @@ if nargin < 4 || isempty(plotAmpTempMode)
 end
 if nargin < 5 || isempty(FC_amp_subset)
     FC_amp_subset = [];
+end
+if nargin < 6 || isempty(swapAxes)
+    swapAxes = false;
+end
+if nargin < 7 || isempty(useMathLabels)
+    useMathLabels = false;
+end
+if nargin < 8 || isempty(showOverlay)
+    showOverlay = false;
 end
 
 doFCstack = (plotAmpTempMode == "map+fc");
@@ -246,47 +257,207 @@ for ch = channelsPlotted
 
     M_interp = interp2(Tm, Am, M_filled, Tq, Aq, 'linear');
     M_interp = imgaussfilt(M_interp,0.5);
+    M_interp = M_interp.^0.8;
 
     % ---- draw image ----
-    hImg = imagesc(ax, Tq(1,:), Aq(:,1), M_interp);
+    if swapAxes
+        hImg = imagesc(ax, Aq(:,1), Tq(1,:), M_interp');  % <-- TRANSPOSE!!!
+    else
+        hImg = imagesc(ax, Tq(1,:), Aq(:,1), M_interp);
+    end
+
+    % --- Try to use Oslo scientific colormap ---
+    cmap = [];
+
+    % Option A: function exists
+    if exist('loadScientificColourMaps','file') == 2
+        try
+            maps = loadScientificColourMaps();
+            if isfield(maps,'oslo')
+                cmap = maps.oslo;
+            end
+        catch
+        end
+    end
+
+    % Option B: local folder fallback
+    if isempty(cmap)
+        try
+            basePath = fileparts(mfilename('fullpath'));
+            cmapPath = fullfile(basePath,'ScientificColourMaps8','oslo.mat');
+            if exist(cmapPath,'file')
+                s = load(cmapPath);
+                fn = fieldnames(s);
+                cmap = s.(fn{1});
+            end
+        catch
+        end
+    end
+
+    % Option C: fallback
+    if isempty(cmap)
+        cmap = parula(256);
+    end
+
+    colormap(ax, cmap);
+
     set(ax,'YDir','normal');
 
+    if swapAxes
+        alphaMask = double(~isnan(M_interp')) ;
+    else
+        alphaMask = double(~isnan(M_interp));
+    end
+
     set(hImg, ...
-        'AlphaData', double(~isnan(M_interp)), ...
+        'AlphaData', alphaMask, ...
         'AlphaDataMapping','none', ...
         'Interpolation','bilinear');
 
     % ---- contours ----
     hold(ax,'on')
 
-% --- smooth ridge via weighted center of mass ---
+    % --- smooth ridge via weighted center of mass ---
 
-Z = M_interp;
-Z = Z - min(Z(:),[],'omitnan');
-Z = Z ./ max(Z(:),[],'omitnan');
+    Z = M_interp;
+    Z = Z - min(Z(:),[],'omitnan');
+    Z = Z ./ max(Z(:),[],'omitnan');
 
-p = 3;                 % sharpening exponent (2–4 טוב)
-W = Z.^p;
+    p = 3;                 % sharpening exponent (2–4 טוב)
+    W = Z.^p;
 
-num = sum(Aq .* W, 1, 'omitnan');
-den = sum(W,       1, 'omitnan');
-Ir  = num ./ max(den, eps);
+    num = sum(Aq .* W, 1, 'omitnan');
+    den = sum(W,       1, 'omitnan');
+    Ir  = num ./ max(den, eps);
 
-% final smoothing
-Ir = smoothdata(Ir,'gaussian',21);
+    % final smoothing
+    Ir = smoothdata(Ir,'gaussian',21);
 
-Tcut = 32;
+    Tcut = 32;
 
-mask = Tq(1,:) <= Tcut;
-%{
-plot(ax, Tq(1,mask), Ir(mask), ...
-    'Color',[1 1 1 0.6], ...   % לבן עם 60% שקיפות
-    'LineWidth',1.0);
-%}
+    if showOverlay
+        % ================= COLOR =================
+        overlayColor = [1 0.8 0.2];   % strong visibility on Oslo
+
+        % ===== RIDGE =====
+        mask = Tq(1,:) <= Tcut;
+
+        if swapAxes
+            plot(ax, Ir(mask), Tq(1,mask), ...
+                'Color', overlayColor, 'LineWidth',1.2);
+        else
+            plot(ax, Tq(1,mask), Ir(mask), ...
+                'Color', overlayColor, 'LineWidth',1.2);
+        end
+
+        % ===== WIDTH =====
+        T_target = 20;
+        [~, it] = min(abs(Tq(1,:) - T_target));
+
+        col = M_interp(:,it);
+        col = col - min(col);
+        col = col ./ max(col + eps);
+
+        Wloc = col.^3;
+
+        num = sum(Aq(:,it) .* Wloc, 'omitnan');
+        den = sum(Wloc, 'omitnan');
+        Icm = num / max(den,eps);
+
+        var = sum(Wloc .* (Aq(:,it)-Icm).^2, 'omitnan') / max(den,eps);
+        w = sqrt(var);
+
+        I_left  = Icm - w;
+        I_right = Icm + w;
+
+        dt = 0.2;
+
+        if swapAxes
+            plot(ax, [I_left I_right], [Tq(1,it) Tq(1,it)], ...
+                'Color', overlayColor, 'LineWidth',1.2);
+
+            plot(ax, [I_left I_left], [Tq(1,it)-dt Tq(1,it)+dt], ...
+                'Color', overlayColor, 'LineWidth',1.2);
+
+            plot(ax, [I_right I_right], [Tq(1,it)-dt Tq(1,it)+dt], ...
+                'Color', overlayColor, 'LineWidth',1.2);
+
+            text(ax, I_right, Tq(1,it)+0.5, 'w', ...
+                'Color', overlayColor, ...
+                'FontSize',12, 'FontWeight','bold');
+
+        else
+            plot(ax, [Tq(1,it) Tq(1,it)], [I_left I_right], ...
+                'Color', overlayColor, 'LineWidth',1.2);
+
+            plot(ax, [Tq(1,it)-dt Tq(1,it)+dt], [I_left I_left], ...
+                'Color', overlayColor, 'LineWidth',1.2);
+
+            plot(ax, [Tq(1,it)-dt Tq(1,it)+dt], [I_right I_right], ...
+                'Color', overlayColor, 'LineWidth',1.2);
+
+            text(ax, Tq(1,it)+0.5, I_right, 'w', ...
+                'Color', overlayColor, ...
+                'FontSize',12, 'FontWeight','bold');
+        end
+
+        % ===== SHIFT =====
+        it2 = round(0.6 * numel(Ir));
+        I_base = Ir(it2);
+        I_shift = I_base + 0.8 * (max(Ir) - min(Ir));
+
+        if swapAxes
+            quiver(ax, ...
+                I_base, Tq(1,it2), ...
+                I_shift - I_base, 0.6, ...
+                0, ...
+                'Color', overlayColor, ...
+                'LineWidth',1.2, ...
+                'MaxHeadSize',2);
+
+            text(ax, I_shift, Tq(1,it2)+0.5, 'I - I_{peak}', ...
+                'Color', overlayColor, 'FontSize',12);
+
+        else
+            quiver(ax, ...
+                Tq(1,it2), I_base, ...
+                0.6, I_shift - I_base, ...
+                0, ...
+                'Color', overlayColor, ...
+                'LineWidth',1.2, ...
+                'MaxHeadSize',2);
+
+            text(ax, Tq(1,it2)+0.5, I_shift, 'I - I_{peak}', ...
+                'Color', overlayColor, 'FontSize',12);
+        end
+
+        % ===== FORMULA =====
+        text(ax, 0.02, 0.95, 'X = (I - I_{peak}) / w', ...
+            'Units','normalized', ...
+            'Color', overlayColor, ...
+            'FontSize',12, ...
+            'FontWeight','bold', ...
+            'VerticalAlignment','top');
+    end
 
     % ---- axes typography ----
-    xlabel(ax,'Temperature (K)','Interpreter','latex','FontSize',fs);
-    ylabel(ax,'$\mathrm{Pulse\, amplitude\, (mA)}$','Interpreter','latex','FontSize',fs);
+    if useMathLabels
+        if swapAxes
+            xlabel(ax,'I (mA)','Interpreter','latex','FontSize',fs);
+            ylabel(ax,'T (K)','Interpreter','latex','FontSize',fs);
+        else
+            xlabel(ax,'T (K)','Interpreter','latex','FontSize',fs);
+            ylabel(ax,'I (mA)','Interpreter','latex','FontSize',fs);
+        end
+    else
+        if swapAxes
+            xlabel(ax,'Current (mA)','Interpreter','latex','FontSize',fs);
+            ylabel(ax,'Temperature (K)','Interpreter','latex','FontSize',fs);
+        else
+            xlabel(ax,'Temperature (K)','Interpreter','latex','FontSize',fs);
+            ylabel(ax,'Current (mA)','Interpreter','latex','FontSize',fs);
+        end
+    end
 
     ax.TickLabelInterpreter = 'latex';
     ax.TickDir = 'out';
@@ -295,11 +466,15 @@ plot(ax, Tq(1,mask), Ir(mask), ...
 
     % ---- colorbar ----
     cb = colorbar(ax);
-    switch metricType
-        case "P2P_percent"
-            xlabel(cb, physLabel('symbol','R','delta',true,'ratioTo','R','units','\%'),'Interpreter','latex','FontSize',fs);
-        otherwise
-            xlabel(cb, physLabel('symbol','R','delta',true,'ratioTo','R'),'Interpreter','latex','FontSize',fs);
+    if useMathLabels
+        ylabel(cb,'$S\ (\%)$','Interpreter','latex','FontSize',fs);
+    else
+        switch metricType
+            case "P2P_percent"
+                ylabel(cb,'\DeltaR/R (%)','Interpreter','latex','FontSize',fs);
+            otherwise
+                ylabel(cb,'\DeltaR/R','Interpreter','latex','FontSize',fs);
+        end
     end
     cb.TickLabelInterpreter = 'latex';
     cb.FontSize = fs;

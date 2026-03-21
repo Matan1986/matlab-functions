@@ -1,0 +1,48 @@
+{
+    "unified_stack":  [
+                          "Aging",
+                          "Switching",
+                          "Relaxation ver3",
+                          "analysis"
+                      ],
+    "independent_experimental_pipelines":  [
+                                               "AC HC MagLab ver8",
+                                               "ARPES ver1",
+                                               "FieldSweep ver3",
+                                               "MH ver1",
+                                               "MT ver2",
+                                               "PS ver4",
+                                               "Resistivity MagLab ver1",
+                                               "Resistivity ver6",
+                                               "Susceptibility ver1",
+                                               "zfAMR ver11"
+                                           ],
+    "infrastructure":  [
+                           "tools",
+                           "GUIs",
+                           "results",
+                           "surveys",
+                           "claims"
+                       ],
+    "active_modules":  [
+                           "Aging",
+                           "Switching",
+                           "Relaxation ver3",
+                           "analysis",
+                           "AC HC MagLab ver8",
+                           "ARPES ver1",
+                           "FieldSweep ver3",
+                           "MH ver1",
+                           "MT ver2",
+                           "PS ver4",
+                           "Resistivity MagLab ver1",
+                           "Resistivity ver6",
+                           "Susceptibility ver1",
+                           "zfAMR ver11",
+                           "tools",
+                           "GUIs",
+                           "results",
+                           "surveys",
+                           "claims"
+                       ]
+}

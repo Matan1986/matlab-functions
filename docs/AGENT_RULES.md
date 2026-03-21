@@ -7,8 +7,10 @@ Use these rules for all analysis and diagnostic work in this repository.
 - Never write outputs inside module directories such as `Aging/`, `Relaxation ver3/`, or `Switching/`.
 - Always generate a ZIP archive for sharing results from a completed run.
 - Before generating figures, read docs/visualization_rules.md and follow its standards.
+- STRICT: Figure naming must follow docs/visualization_rules.md (Figure Window Naming): set figure Name, set NumberTitle off, and keep Name == saved filename base (no title(...) naming).
 - Before writing run artifacts, read docs/output_artifacts.md and use only its required artifact directories.
-- Analysis scripts must not manage artifact paths directly. All artifact generation must use the repository helpers: save_run_figure, save_run_table, save_run_report.
+- Analysis scripts must not manage artifact paths directly. Artifact generation should use the repository helpers: save_run_figure, save_run_table, save_run_report.
+- Exception: run-level `observables.csv` must remain at run root and should not be moved into `tables/` by `save_run_table`.
 
 ## Documentation Precedence
 
@@ -19,6 +21,8 @@ When repository documents overlap, use this precedence order:
 3. docs/run_system.md for run creation and run-context invariants.
 4. docs/repository_structure.md for code placement and repository layout.
 5. docs/output_artifacts.md for artifact subfolder usage within a run.
+
+- Versioned folders (for example `* verX`) must NOT be assumed legacy or inactive based on naming alone.
 
 ## Architecture Alignment Policy
 
@@ -71,7 +75,41 @@ Verification
 - checks performed such as `git status`, path verification, or run-folder validation
 
 Agents should keep reports concise and avoid repeating repository context that is already documented in repository_structure.md or results_system.md.
+## System Registry (Authoritative Source)
 
+`docs/system_registry.json` is the authoritative source for:
 
+- module classification
+- pipeline grouping
+- system structure
+
+All documentation MUST be consistent with this registry.
+
+## Structural Change Gate (STRICT)
+
+Any structural change task is COMPLETE only if ALL conditions are satisfied:
+
+1. Registry update (if needed):
+
+   * `docs/system_registry.json` reflects the current system structure
+
+2. Registry <-> filesystem consistency:
+
+   * All active folders == `system_registry.json["active_modules"]`
+   * No extra or missing active modules
+
+3. Documentation sync:
+
+   * `docs/repository_map.md`
+   * `docs/root_inventory_table.md`
+   * `docs/snapshot_system_design.md`
+     are consistent with `docs/system_registry.json`
+
+4. Snapshot consistency:
+
+   * Snapshot includes all modules required by `docs/system_registry.json`
+
+If ANY condition fails:
+-> Task is NOT complete
 
 
