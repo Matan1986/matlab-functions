@@ -2,7 +2,6 @@
 # IDE / Local settings
 # =========================================================
 .vscode/
-.vscode/settings.json
 .matlab_prefs/
 
 # =========================================================
@@ -11,6 +10,8 @@
 *.asv
 *.m~
 *.p
+.mwhome/
+MathWorks/
 
 # =========================================================
 # Logs
@@ -24,7 +25,7 @@ test_verify_run.log
 # Temporary / output text
 # =========================================================
 **/*output*.txt
-**/*log*.txt
+*log*.txt
 verification_test_output.txt
 diagnostic_output.txt
 output.txt
@@ -40,12 +41,6 @@ Aging/results/
 Aging/diagnostics/results/
 Aging/tests/**/results/
 Switching ver12/main/Debug/
-
-*.png
-*.pdf
-*.fig
-*.mat
-*.zip
 
 # =========================================================
 # Local testing files
@@ -64,6 +59,7 @@ Aging old/
 # Local configuration
 # =========================================================
 runs/localPaths.m
+runs/
 
 # =========================================================
 # External dependency
@@ -75,14 +71,38 @@ General ver2/appearanceControl/altmany-export_fig-3.54.0.0/
 # =========================================================
 tmp_*
 Debug/
-
 which_baseline.txt
 Aging/which_baseline.txt
 SAFECORR_PR_DIFF.md
 verification_results.txt
 Aging/verification/probe.txt
+
 # =========================================================
 # AI / Codex temporary files
 # =========================================================
 .codex*
+
+# =========================================================
+# Snapshot system
+# =========================================================
+snapshot/
+
+# =========================================================
+# Archives / temp zips
+# =========================================================
+*.zip
+*.tmp
+*.tmp.zip
+
+# =========================================================
+# Temp folders
+# =========================================================
+.tmp*
 tmp/
+temp/
+
+# =========================================================
+# Validation / runtime artifacts
+# =========================================================
+_validation_tmp/
+**/runtime/
