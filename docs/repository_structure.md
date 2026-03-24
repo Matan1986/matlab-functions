@@ -236,4 +236,7 @@ Example:
 save_run_report(reportText, 'run_summary.md', run_output_dir)
 ```
 
+## Agent Context Files
 
+- Read `docs/context_bundle.json` before tasks.
+- Optional: `docs/context_bundle_full.json` for ChatGPT/analysis.

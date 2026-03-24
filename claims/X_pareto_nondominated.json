@@ -1,0 +1,42 @@
+﻿{
+"claim_id": "X_pareto_nondominated",
+
+"statement": "X is non-dominated across evaluation criteria, including scaling quality, peak alignment, cross-experiment consistency, and robustness",
+
+"status": "supported",
+
+"role": "supporting",
+
+"confidence": "high",
+
+"constraints": [
+"not_best_in_every_metric",
+"tradeoffs_exist"
+],
+
+"source_runs": [],
+
+"related_surveys": [
+"reports/pareto_x_defense_report.md",
+"reports/adversarial_observable_report.md"
+],
+
+"notes": [
+"No observable simultaneously outperforms X across all criteria",
+"Alternative observables improve some metrics but degrade others"
+],
+
+"evidence": {
+    "reports":  [
+                    "reports/pareto_x_defense_report.md",
+                    "reports/adversarial_observable_report.md"
+                ],
+    "runs":  [
+                 "run_2026_03_13_082753_switching_relaxation_bridge_robustness_a",
+                 "run_2026_03_12_211204_aging_dataset_build",
+                 "run_2026_03_13_071713_switching_composite_observable_scan",
+                 "run_2026_03_16_173307_R_X_reconciliation_analysis"
+             ]
+}
+}
+

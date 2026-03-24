@@ -112,4 +112,8 @@ Any structural change task is COMPLETE only if ALL conditions are satisfied:
 If ANY condition fails:
 -> Task is NOT complete
 
+## Context Bundle Usage (Required)
 
+- Read `docs/context_bundle.json` before starting.
+- Optional: use `docs/context_bundle_full.json` for ChatGPT/analysis.
+- Workflow: `RUN → SNAPSHOT → CONTEXT → TASK`.

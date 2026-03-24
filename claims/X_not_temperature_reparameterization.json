@@ -1,0 +1,39 @@
+﻿{
+"claim_id": "X_not_temperature_reparameterization",
+
+"statement": "X is not a trivial reparameterization of temperature; temperature alone does not collapse the dynamics, whereas X does",
+
+"status": "supported",
+
+"role": "supporting",
+
+"confidence": "high",
+
+"constraints": [
+"X_is_function_of_T",
+"temperature_not_sufficient"
+],
+
+"source_runs": [],
+
+"related_surveys": [
+"reports/observable_search_report.md",
+"reports/functional_form_scan_report.md"
+],
+
+"notes": [
+"Alternative smooth functions of temperature fail to reproduce alignment and cross-experiment consistency",
+"X captures a non-trivial projection of the dynamics"
+],
+
+"evidence": {
+    "reports":  [
+                    "reports/temperature_null_test_report.md"
+                ],
+    "runs":  [
+                 "run_2026_03_13_115401_AX_functional_relation_analysis",
+                 "run_2026_03_13_123230_AX_scaling_temperature_robustness"
+             ]
+}
+}
+

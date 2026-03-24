@@ -1,0 +1,20 @@
+﻿{
+  "claim_id": "X_peak_alignment",
+  "statement": "X aligns the peak structure of dynamical observables across switching, relaxation, and aging experiments near ~26K",
+  "status": "supported",
+  "role": "core",
+  "confidence": "high",
+
+"evidence": {
+    "reports":  [
+                    "reports/speak_vs_x_cross_experiment_report.md",
+                    "reports/observable_search_report.md"
+                ],
+    "runs":  [
+                 "run_2026_03_13_082753_switching_relaxation_bridge_robustness_a",
+                 "run_2026_03_16_173307_R_X_reconciliation_analysis",
+                 "run_2026_03_13_071713_switching_composite_observable_scan"
+             ]
+}
+}
+

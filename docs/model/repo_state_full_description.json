@@ -1,0 +1,247 @@
+{
+  "version": "v1.1",
+  "type": "repo_state",
+  "repo_kind": "experiment_platform",
+
+  "summary": {
+    "description": "Run-based MATLAB experiment-analysis platform with observable extraction and cross-experiment physics abstraction.",
+    "core_flow": [
+      "run_execution",
+      "observable_extraction",
+      "analysis",
+      "cross_experiment_mapping"
+    ]
+  },
+
+  "repository": {
+    "root": "C:/Dev/matlab-functions",
+    "results_root": "results",
+    "run_pattern": "results/<experiment>/runs/run_<timestamp>_<label>/",
+    "run_context_system": "createRunContext (MATLAB appdata: runContext)",
+    "source_of_truth": "run_outputs",
+    "immutability": "runs_are_immutable"
+  },
+
+  "modules": {
+    "Aging": {
+      "path": "Aging/",
+      "role": "Memory and aging dynamics decomposition (dip + FM background)",
+
+      "entry_points": [
+        "Aging_main.m",
+        "analysis/aging_clock_ratio_analysis.m"
+      ],
+
+      "analysis_scripts": [
+        "analysis/aging_clock_ratio_analysis.m",
+        "analysis/aging_tri_scaling_test.m"
+      ],
+
+      "observables": {
+        "primary": ["Dip_depth", "coeff_mode1", "FM_abs"],
+        "timescales": ["tau_dip", "tau_FM"],
+        "derived": ["R"]
+      },
+
+      "structure": {
+        "sectors": ["dip_like_memory", "FM_like_background"],
+        "clock_structure": "two_distinct_clocks"
+      },
+
+      "known_runs": [
+        "run_2026_03_13_122404_aging_timescale_bridge"
+      ],
+
+      "notes": [
+        "Dip and FM components do not share a single clock.",
+        "Clock ratio R defined only where both clocks exist."
+      ]
+    },
+
+    "Switching": {
+      "path": "Switching/",
+      "role": "Switching map analysis S(I,T) and geometric observable extraction",
+
+      "entry_points": [
+        "Switching_main.m",
+        "analysis/switching_full_scaling_collapse.m"
+      ],
+
+      "analysis_scripts": [
+        "analysis/switching_full_scaling_collapse.m"
+      ],
+
+      "observables": {
+        "core": ["S_peak", "I_peak", "width_I"],
+        "shape": ["halfwidth_diff_norm", "asym"],
+        "derived": ["X", "chi_amp", "kappa"]
+      },
+
+      "structure": {
+        "map": "S(I,T)",
+        "collapse": "shift_and_scale (I_peak + width)",
+        "geometry": "ridge_based"
+      },
+
+      "known_runs": [
+        "run_2026_03_12_234016_switching_full_scaling_collapse"
+      ],
+
+      "notes": [
+        "see claims/X_canonical_coordinate",
+        "chi_amp ≈ -dS_peak/dT is a response observable.",
+        "Low-T (~10K) is a susceptibility sector."
+      ]
+    },
+
+    "Relaxation": {
+      "path": "Relaxation/",
+      "role": "Relaxation activity extraction vs temperature",
+
+      "entry_points": [
+        "Relaxation_main.m"
+      ],
+
+      "observables": {
+        "primary": ["A"]
+      },
+
+      "notes": [
+        "A(T) is the anchor observable for cross-experiment comparison."
+      ]
+    },
+
+    "ARPES": {
+      "path": "ARPES ver1/",
+      "role": "Spectral / FS visualization and figure pipelines",
+
+      "entry_points": [
+        "run_arpes_dual.m"
+      ],
+
+      "observables": [],
+      "notes": [
+        "Visualization-focused module."
+      ]
+    }
+  },
+
+  "observable_definitions": {
+    "X": {
+      "formula": "see claims/X_canonical_coordinate",
+      "module": "Switching",
+      "type": "geometric_coordinate",
+      "scope": "cross_experiment",
+      "status": "stable",
+      "confidence": "high"
+    },
+
+    "R": {
+      "formula": "tau_FM / tau_dip",
+      "module": "Aging",
+      "type": "clock_ratio",
+      "scope": "cross_experiment",
+      "status": "limited_support",
+      "confidence": "medium"
+    },
+
+    "chi_amp": {
+      "formula": "-dS_peak/dT",
+      "module": "Switching",
+      "type": "response_observable",
+      "scope": "module_local",
+      "status": "derived",
+      "confidence": "high"
+    }
+  },
+
+  "cross_experiment_physics": {
+    "main_bridge": {
+      "relation": "see claims/X_scaling_relation",
+      "beta": "~0.68–0.70",
+      "status": "strong_empirical",
+      "confidence": "high",
+      "peak_alignment": "~26K",
+      "notes": [
+        "see claims/X_scaling_relation"
+      ]
+    },
+
+    "aging_switching_link": {
+      "relation": "R ∝ X^beta",
+      "status": "validated_on_overlap",
+      "confidence": "medium",
+      "temperature_support": [14, 18, 22, 26],
+      "notes": [
+        "Defined only where both aging clocks exist."
+      ]
+    },
+
+    "low_temperature_sector": {
+      "observable": "chi_amp",
+      "peak": "~10K",
+      "interpretation": "temperature_susceptibility",
+      "status": "independent_sector",
+      "confidence": "high",
+      "notes": [
+        "Not part of X-driven crossover."
+      ]
+    }
+  },
+
+  "physics_abstraction": {
+    "minimal_basis": ["X", "kappa", "R"],
+
+    "confidence": "high",
+
+    "roles": {
+      "X": "main_dynamical_coordinate",
+      "kappa": "low_temperature_rigidity",
+      "R": "aging_sector_competition"
+    },
+
+    "regimes": {
+      "low_T": "kappa_dominated",
+      "mid_T": "chi_amp_response",
+      "crossover": "X_dominated (~26K)",
+      "high_T": "mobile_weak_memory"
+    }
+  },
+
+  "run_system": {
+    "expected_files": [
+      "run_manifest.json",
+      "observables.csv",
+      "observable_matrix.csv"
+    ],
+    "rules": [
+      "runs_are_immutable",
+      "no_outputs_outside_run_dirs",
+      "analysis_must_reference_source_runs"
+    ]
+  },
+
+  "agent_rules": {
+    "read_before_work": [
+      "docs/repo_state.json",
+      "docs/AGENT_RULES.md",
+      "docs/results_system.md",
+      "docs/repository_map.md"
+    ],
+
+    "constraints": [
+      "do_not_modify_existing_runs",
+      "prefer_existing_code_over_new",
+      "pin_source_runs",
+      "write_outputs_only_to_runs"
+    ]
+  },
+
+  "system_status": {
+    "snapshot_system": "stable",
+    "git_state": "clean",
+    "observable_layer": "complete",
+    "cross_experiment_links": "established",
+    "repo_state": "v1.1_active"
+  }
+}

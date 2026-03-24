@@ -1,0 +1,41 @@
+﻿{
+"claim_id": "X_broad_basin",
+
+"statement": "X lies within a broad basin of high-quality parameterizations, indicating that its performance is not the result of fine-tuning",
+
+"status": "supported",
+
+"role": "supporting",
+
+"confidence": "high",
+
+"constraints": [
+"not_unique",
+"equivalent_parameterizations_exist"
+],
+
+"source_runs": [],
+
+"related_surveys": [
+"reports/stability_basin_report.md",
+"reports/functional_form_scan_report.md"
+],
+
+"notes": [
+"Coarse-to-fine scans show many nearby parameterizations with similar performance",
+"X is a representative point in this basin"
+],
+
+"evidence": {
+    "reports":  [
+                    "reports/stability_basin_report.md",
+                    "reports/functional_form_scan_report.md"
+                ],
+    "runs":  [
+                 "run_2026_03_13_082753_switching_relaxation_bridge_robustness_a",
+                 "run_2026_03_13_071713_switching_composite_observable_scan",
+                 "run_2026_03_14_074613_aging_clock_ratio_analysis"
+             ]
+}
+}
+

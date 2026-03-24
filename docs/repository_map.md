@@ -139,3 +139,7 @@ matlab-functions/
 ### Category Note
 - independent experimental pipelines: not in the unified Aging/Switching/Relaxation stack, but actively used and scientifically relevant.
 
+## Agent Context Workflow
+
+- Read `docs/context_bundle.json` before tasks.
+- Optional: `docs/context_bundle_full.json` for ChatGPT/analysis.

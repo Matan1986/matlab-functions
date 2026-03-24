@@ -1,0 +1,51 @@
+﻿{
+"claim_id": "X_canonical_coordinate",
+
+"statement": "X = I_peak / (w * S_peak) is a canonical dimensionless coordinate organizing the system dynamics across switching, relaxation, and aging experiments",
+
+"status": "supported",
+
+"role": "core",
+
+"confidence": "high",
+
+"constraints": [
+"not_unique",
+"temperature_dependent",
+"not_trivial_reparameterization"
+],
+
+"source_runs": [],
+
+"related_surveys": [
+"reports/observable_search_report.md",
+"reports/stability_basin_report.md",
+"reports/dimensionless_constrained_basin_report.md",
+"reports/pareto_x_defense_report.md",
+"reports/adversarial_observable_report.md",
+"reports/functional_form_scan_report.md"
+],
+
+"notes": [
+"A âˆ X^Î² with strong scaling and peak alignment (~26 K)",
+"X lies on the Pareto front and is non-dominated across evaluation criteria",
+"X lies within a broad basin of parameterizations and is not fine-tuned",
+"No observable dominates X across scaling, alignment, and cross-experiment consistency",
+"Temperature alone does not collapse the dynamics, while X does"
+],
+
+"evidence": {
+    "reports":  [
+                    "reports/observable_search_report.md",
+                    "reports/dimensionless_constrained_basin_report.md",
+                    "reports/pareto_x_defense_report.md"
+                ],
+    "runs":  [
+                 "run_2026_03_13_082753_switching_relaxation_bridge_robustness_a",
+                 "run_2026_03_13_071713_switching_composite_observable_scan",
+                 "run_2026_03_16_173307_R_X_reconciliation_analysis",
+                 "run_2026_03_12_211204_aging_dataset_build"
+             ]
+}
+}
+

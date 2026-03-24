@@ -1,0 +1,123 @@
+﻿{
+  "observables_meaning": {
+    "Dip_depth": {
+      "module": "Aging",
+      "role": "primary",
+      "physical_type": "amplitude"
+    },
+    "FM_abs": {
+      "module": "Aging",
+      "role": "primary",
+      "physical_type": "amplitude"
+    },
+    "Dip_T0": {
+      "module": "Aging",
+      "role": "derived",
+      "physical_type": "position"
+    },
+    "Dip_sigma": {
+      "module": "Aging",
+      "role": "derived",
+      "physical_type": "width"
+    },
+    "R": {
+      "module": "Aging",
+      "role": "derived",
+      "physical_type": "clock_ratio",
+      "definition": "tau_FM / tau_dip"
+    },
+    "S_peak": {
+      "module": "Switching",
+      "role": "core",
+      "physical_type": "amplitude"
+    },
+    "I_peak": {
+      "module": "Switching",
+      "role": "core",
+      "physical_type": "position"
+    },
+    "width_I": {
+      "module": "Switching",
+      "role": "core",
+      "physical_type": "width"
+    },
+    "asym": {
+      "module": "Switching",
+      "role": "derived",
+      "physical_type": "derived"
+    },
+    "X": {
+      "module": "Switching",
+      "role": "derived",
+      "physical_type": "derived",
+      "definition": "see claims/X_canonical_coordinate"
+    },
+    "A": {
+      "module": "Relaxation",
+      "role": "primary",
+      "physical_type": "timescale",
+      "definition": "Relax_tau (canonical relaxation timescale; per-T uses Relax_tau_T, global uses Relax_tau_global)"
+    },
+    "Relax_tau_T": {
+      "module": "Relaxation",
+      "role": "derived",
+      "physical_type": "timescale"
+    },
+    "Relax_initial_slope": {
+      "module": "Relaxation",
+      "role": "derived",
+      "physical_type": "derived"
+    },
+    "chi_amp": {
+      "module": "Switching",
+      "role": "cross_experiment_support",
+      "physical_type": "response"
+    }
+  },
+  "cross_experiment_relations": {
+    "main_bridge": {
+      "relation": "see claims/X_scaling_relation",
+      "observables": [
+        "A",
+        "X"
+      ]
+    },
+    "aging_switching_link": {
+      "relation": "R is the bridge observable for aging-switching linkage",
+      "observables": [
+        "R"
+      ]
+    },
+    "low_temperature_sector": {
+      "relation": "chi_amp defines the low-temperature sector",
+      "observables": [
+        "chi_amp"
+      ]
+    }
+  },
+  "regimes": {
+    "low_temperature": {
+      "driver": "chi_amp"
+    },
+    "crossover": {
+      "driver": "X",
+      "response": "A"
+    },
+    "aging_switching_overlap": {
+      "driver": "R"
+    }
+  },
+  "confidence_levels": {
+    "observables": {
+      "X": "high",
+      "R": "medium",
+      "A": "high",
+      "chi_amp": "medium"
+    },
+    "relations": {
+      "main_bridge": "high",
+      "aging_switching_link": "medium",
+      "low_temperature_sector": "medium"
+    }
+  }
+}

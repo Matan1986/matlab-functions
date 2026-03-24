@@ -1,0 +1,38 @@
+﻿{
+"claim_id": "X_adversarial_robustness",
+
+"statement": "No adversarially constructed observable was found to dominate X across all evaluation criteria",
+
+"status": "supported",
+
+"role": "supporting",
+
+"confidence": "high",
+
+"constraints": [
+"equivalent_candidates_exist",
+"no_global_dominator"
+],
+
+"source_runs": [],
+
+"related_surveys": [
+"reports/adversarial_observable_report.md"
+],
+
+"notes": [
+"Constructed perturbations and alternative forms remain tradeoff-equivalent at best",
+"No candidate improves all metrics simultaneously"
+],
+
+"evidence": {
+    "reports":  [
+                    "reports/adversarial_observable_report.md"
+                ],
+    "runs":  [
+                 "run_2026_03_13_071713_switching_composite_observable_scan",
+                 "run_2026_03_16_173307_R_X_reconciliation_analysis"
+             ]
+}
+}
+
