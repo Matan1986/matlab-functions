@@ -1,0 +1,2 @@
+best_poly_degree,poly_loocv_rmse,spline_loocv_rmse,ax_loocv_rmse,pcorr_lin,p_pcorr_lin,pcorr_poly3,p_pcorr_poly3,corr_res_poly,p_res_poly,corr_res_spline,p_res_spline,deltaT_poly_vs_X,deltaT_spline_vs_X,deltaT_AX_vs_X,verdict
+4,4.43208281036803e-05,7.92656225643401e-05,0.000174190703524678,0.796587116654678,0.000649434114040484,0.566363418167729,0.0347282547927646,-0.025060095734028,0.932232489440474,NaN,NaN,0.0350000000000001,0.620000000000001,0,NO

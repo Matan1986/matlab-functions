@@ -1,0 +1,242 @@
+﻿{
+    "generated_at":  "2026-03-23T11:24:29.6232332+02:00",
+    "snapshot_root":  "snapshot_scientific_v3",
+    "overall_verdict":  "PARTIAL",
+    "scores":  {
+                   "determinism":  5,
+                   "usability":  3
+               },
+    "navigation_complexity":  {
+                                  "average_steps":  5.4,
+                                  "per_test":  {
+                                                   "test_1_claim_validation":  8,
+                                                   "test_2_analysis_loading":  5,
+                                                   "test_3_run_debug":  5,
+                                                   "test_4_partial_extraction":  6,
+                                                   "test_5_reverse_navigation":  3
+                                               }
+                              },
+    "critical_issues":  [
+                            "Missing runpack payloads: 10/10 runpack paths in run_index.json do not exist under 30_runs_evidence/runpacks/.",
+                            "Missing code bundle payload: 20_code_workflow/code_core_dynamics.zip is referenced but absent.",
+                            "Missing context payload: quick_start requires 10_context_state/context_bundle_full.zip but 10_context_state is empty.",
+                            "Edge coverage is incomplete: claim-\u003erun/report edges exist for only 2/7 claims.",
+                            "analysis_r_x_reconciliation has no analysis-\u003erun edge rows in evidence_edges_analysis_to_run.jsonl.",
+                            "Evidence drift exists between claim files and evidence_summary (run mismatches for 6 claims; status mismatches for 2 claims)."
+                        ],
+    "minor_frictions":  [
+                            "Analysis manifests require an extra lookup to report_index.json because they include report_ids only.",
+                            "Reverse navigation requires joins; there is no direct run_id-\u003eclaim_ids index.",
+                            "Claim evidence uses report paths while graph/index layers use report IDs."
+                        ],
+    "redundancy_risks":  [
+                             "Claim evidence duplicated across claims/*.json, evidence_summary.json, and evidence_edges_*.jsonl.",
+                             "claims_evidence_map.json duplicates claim evidence but is empty for 5/7 claims.",
+                             "Report references diverge between claim files and report_index coverage."
+                         ],
+    "naming_issues":  [
+                          "Claim IDs are consistent (X_*).",
+                          "Analysis IDs are consistent (analysis_*).",
+                          "Observable IDs are consistent in catalog (X/A/R).",
+                          "Aliasing risk exists in raw run names: lowercase x_* and mixed AX/R_X tokens outside catalog naming."
+                      ],
+    "reverse_navigation_quality":  "partial",
+    "minimal_bundle_capability":  "partial",
+    "consistency":  {
+                        "counts":  {
+                                       "claims_in_claim_index":  7,
+                                       "claims_in_evidence_summary":  7,
+                                       "runs_in_run_index":  10,
+                                       "analyses_in_analysis_registry":  4,
+                                       "reports_in_report_index":  13,
+                                       "edges_claim_to_run":  5,
+                                       "edges_claim_to_report":  5,
+                                       "edges_analysis_to_run":  5,
+                                       "edges_observable_to_analysis":  5,
+                                       "edges_question_to_claim":  3
+                                   },
+                        "coverage":  {
+                                         "claim_edges_cover_claim_ids":  [
+                                                                             "X_scaling_relation",
+                                                                             "X_canonical_coordinate"
+                                                                         ],
+                                         "analysis_edges_cover_analysis_ids":  [
+                                                                                   "analysis_ax_scaling",
+                                                                                   "analysis_switching_full_scaling_collapse",
+                                                                                   "analysis_relaxation_temperature_scaling"
+                                                                               ],
+                                         "missing_analysis_edge_rows":  [
+                                                                            "analysis_r_x_reconciliation"
+                                                                        ]
+                                     },
+                        "payload_presence":  {
+                                                 "runpacks_present":  0,
+                                                 "runpacks_expected":  10,
+                                                 "code_bundle_present":  false,
+                                                 "context_bundle_full_present":  false
+                                             },
+                        "drift":  {
+                                      "claim_primary_run_mismatches":  [
+                                                                           "X_adversarial_robustness",
+                                                                           "X_broad_basin",
+                                                                           "X_canonical_coordinate",
+                                                                           "X_not_temperature_reparameterization",
+                                                                           "X_pareto_nondominated",
+                                                                           "X_peak_alignment"
+                                                                       ],
+                                      "claim_status_mismatches":  [
+                                                                      "X_canonical_coordinate",
+                                                                      "X_scaling_relation"
+                                                                  ],
+                                      "claim_report_paths_not_in_report_index":  {
+                                                                                     "X_adversarial_robustness":  [
+                                                                                                                      "reports/adversarial_observable_report.md"
+                                                                                                                  ],
+                                                                                     "X_broad_basin":  [
+                                                                                                           "reports/stability_basin_report.md"
+                                                                                                       ],
+                                                                                     "X_canonical_coordinate":  [
+                                                                                                                    "reports/dimensionless_constrained_basin_report.md",
+                                                                                                                    "reports/pareto_x_defense_report.md"
+                                                                                                                ],
+                                                                                     "X_pareto_nondominated":  [
+                                                                                                                   "reports/pareto_x_defense_report.md",
+                                                                                                                   "reports/adversarial_observable_report.md"
+                                                                                                               ],
+                                                                                     "X_peak_alignment":  [
+                                                                                                              "reports/speak_vs_x_cross_experiment_report.md"
+                                                                                                          ]
+                                                                                 }
+                                  }
+                    },
+    "tests":  {
+                  "test_1_claim_validation_flow":  {
+                                                       "query":  "prove X_scaling_relation",
+                                                       "files_accessed":  [
+                                                                              "snapshot_scientific_v3/60_claims_surveys/claim_index.json",
+                                                                              "snapshot_scientific_v3/70_evidence_index/evidence_summary.json",
+                                                                              "snapshot_scientific_v3/70_evidence_index/evidence_edges_claim_to_run.jsonl",
+                                                                              "snapshot_scientific_v3/70_evidence_index/evidence_edges_claim_to_report.jsonl",
+                                                                              "snapshot_scientific_v3/30_runs_evidence/run_index.json",
+                                                                              "snapshot_scientific_v3/50_reports_knowledge/report_index.json",
+                                                                              "results/cross_experiment/runs/run_2026_03_13_115401_AX_functional_relation_analysis/reports/AX_functional_relation_analysis.md",
+                                                                              "snapshot_scientific_v3/30_runs_evidence/runpacks/runpack__cross_experiment__run_2026_03_13_115401_AX_functional_relation_analysis__v2026_03_23.zip"
+                                                                          ],
+                                                       "step_count":  8,
+                                                       "deterministic":  true,
+                                                       "ambiguity":  [
+                                                                         "Fallback to source_run_path is required because runpack payload is missing.",
+                                                                         "Status differs between claim_index (supported) and evidence_summary (strong for scaling/canonical claims)."
+                                                                     ],
+                                                       "unnecessary_files":  [
+                                                                                 "evidence_summary.json is optional for strict provenance proof."
+                                                                             ]
+                                                   },
+                  "test_2_analysis_loading":  {
+                                                  "query":  "load analysis_ax_scaling",
+                                                  "files_accessed":  [
+                                                                         "snapshot_scientific_v3/40_analysis_catalog/analysis_registry.json",
+                                                                         "snapshot_scientific_v3/30_runs_evidence/analysis_views/analysis__analysis_ax_scaling.manifest.json",
+                                                                         "snapshot_scientific_v3/70_evidence_index/evidence_edges_analysis_to_run.jsonl",
+                                                                         "snapshot_scientific_v3/30_runs_evidence/run_index.json",
+                                                                         "snapshot_scientific_v3/50_reports_knowledge/report_index.json"
+                                                                     ],
+                                                  "step_count":  5,
+                                                  "deterministic":  true,
+                                                  "missing_links":  [
+
+                                                                    ],
+                                                  "manifest_sufficient_without_extra_lookup":  false
+                                              },
+                  "test_3_run_debug":  {
+                                           "query":  "inspect run_2026_03_12_234016_switching_full_scaling_collapse",
+                                           "files_accessed":  [
+                                                                  "snapshot_scientific_v3/30_runs_evidence/run_index.json",
+                                                                  "snapshot_scientific_v3/30_runs_evidence/runpacks/runpack__switching__run_2026_03_12_234016_switching_full_scaling_collapse__v2026_03_23.zip",
+                                                                  "results/switching/runs/run_2026_03_12_234016_switching_full_scaling_collapse/run_manifest.json",
+                                                                  "snapshot_scientific_v3/50_reports_knowledge/report_index.json",
+                                                                  "snapshot_scientific_v3/20_code_workflow/code_core_dynamics.zip"
+                                                              ],
+                                           "step_count":  5,
+                                           "run_index_sufficient_entrypoint":  true,
+                                           "runpack_sufficient_evidence":  "cannot_verify_missing_payload",
+                                           "missing_or_redundant_references":  [
+                                                                                   "runpack_path missing; source_run_path fallback required.",
+                                                                                   "code_bundle reference unresolved because payload absent."
+                                                                               ]
+                                       },
+                  "test_4_partial_knowledge_extraction":  {
+                                                              "query":  "extract minimal bundle for X_scaling_relation",
+                                                              "minimal_file_set":  [
+                                                                                       "snapshot_scientific_v3/60_claims_surveys/claim_index.json",
+                                                                                       "snapshot_scientific_v3/70_evidence_index/evidence_summary.json",
+                                                                                       "snapshot_scientific_v3/70_evidence_index/evidence_edges_claim_to_run.jsonl",
+                                                                                       "snapshot_scientific_v3/70_evidence_index/evidence_edges_claim_to_report.jsonl",
+                                                                                       "snapshot_scientific_v3/30_runs_evidence/run_index.json",
+                                                                                       "snapshot_scientific_v3/50_reports_knowledge/report_index.json",
+                                                                                       "results/cross_experiment/runs/run_2026_03_13_115401_AX_functional_relation_analysis/reports/AX_functional_relation_analysis.md"
+                                                                                   ],
+                                                              "step_count":  6,
+                                                              "unrelated_files_needed":  [
+
+                                                                                         ],
+                                                              "supports_partial_sharing_cleanly":  "partial"
+                                                          },
+                  "test_5_reverse_navigation":  {
+                                                    "start":  "run_id only",
+                                                    "tested_paths":  [
+                                                                         "run_index -\u003e analysis_registry -\u003e claim_index",
+                                                                         "run_index -\u003e evidence_edges_analysis_to_run (reverse match) -\u003e analysis_registry -\u003e claim_index"
+                                                                     ],
+                                                    "step_count":  3,
+                                                    "difficulty":  "medium",
+                                                    "asymmetric":  true
+                                                },
+                  "test_6_zero_thinking":  {
+                                               "cognitive_load":  {
+                                                                      "claim_validation":  "medium_high",
+                                                                      "analysis_loading":  "medium",
+                                                                      "run_debug":  "high",
+                                                                      "partial_extraction":  "medium_high",
+                                                                      "reverse_navigation":  "medium"
+                                                                  },
+                                               "decision_points":  {
+                                                                       "claim_validation":  4,
+                                                                       "analysis_loading":  2,
+                                                                       "run_debug":  4,
+                                                                       "partial_extraction":  3,
+                                                                       "reverse_navigation":  2
+                                                                   },
+                                               "meets_zero_thinking_goal":  false
+                                           },
+                  "test_7_redundancy_and_drift":  {
+                                                      "duplicated_layers":  [
+                                                                                "claim_json",
+                                                                                "evidence_summary",
+                                                                                "evidence_edges",
+                                                                                "reports"
+                                                                            ],
+                                                      "drift_detected":  true
+                                                  },
+                  "test_8_naming_consistency":  {
+                                                    "claim_ids_consistent":  true,
+                                                    "analysis_ids_consistent":  true,
+                                                    "observable_names_consistent":  true,
+                                                    "aliasing_risk":  true
+                                                },
+                  "test_9_evidence_summary_quality":  {
+                                                          "summary_has_primary_runs_for_all_claims":  true,
+                                                          "summary_has_key_reports_for_all_claims":  true,
+                                                          "summary_sufficient_for_high_level_usage":  true,
+                                                          "edges_required_for_basic_usage":  "for_strict_provenance_yes",
+                                                          "edge_coverage_for_claims":  "2_of_7_claims"
+                                                      }
+              },
+    "recommendations_non_destructive":  [
+                                            "Materialize the already-referenced payload files only (runpacks, code bundle, context bundle).",
+                                            "Auto-sync evidence_summary from one source to remove run/status drift.",
+                                            "Complete existing edge rows for already-indexed claims/analyses.",
+                                            "Add a derived run_id-\u003eclaim_ids shortcut index.",
+                                            "Provide one canonical report path\u003c-\u003ereport_id lookup for claim/report joins."
+                                        ]
+}

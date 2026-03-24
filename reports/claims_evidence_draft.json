@@ -1,0 +1,92 @@
+﻿{
+    "X_adversarial_robustness":  {
+                                     "reports":  [
+                                                     "reports/adversarial_observable_report.md"
+                                                 ],
+                                     "runs":  [
+                                                  "run_2026_03_13_071713_switching_composite_observable_scan",
+                                                  "run_2026_03_16_173307_R_X_reconciliation_analysis"
+                                              ],
+                                     "confidence":  "high",
+                                     "notes":  "Adversarial report directly tests whether alternatives dominate X and reports they do not."
+                                 },
+    "X_broad_basin":  {
+                          "reports":  [
+                                          "reports/stability_basin_report.md",
+                                          "reports/functional_form_scan_report.md"
+                                      ],
+                          "runs":  [
+                                       "run_2026_03_13_082753_switching_relaxation_bridge_robustness_a",
+                                       "run_2026_03_13_071713_switching_composite_observable_scan",
+                                       "run_2026_03_14_074613_aging_clock_ratio_analysis"
+                                   ],
+                          "confidence":  "high",
+                          "notes":  "Both reports explicitly place X in a broad near-best basin rather than a fine-tuned point."
+                      },
+    "X_canonical_coordinate":  {
+                                   "reports":  [
+                                                   "reports/observable_search_report.md",
+                                                   "reports/dimensionless_constrained_basin_report.md",
+                                                   "reports/pareto_x_defense_report.md"
+                                               ],
+                                   "runs":  [
+                                                "run_2026_03_13_082753_switching_relaxation_bridge_robustness_a",
+                                                "run_2026_03_13_071713_switching_composite_observable_scan",
+                                                "run_2026_03_16_173307_R_X_reconciliation_analysis",
+                                                "run_2026_03_12_211204_aging_dataset_build"
+                                            ],
+                                   "confidence":  "high",
+                                   "notes":  "Reports explicitly evaluate X as canonical/dimensionless and compare it across switching-relaxation-aging targets."
+                               },
+    "X_not_temperature_reparameterization":  {
+                                                 "reports":  [
+                                                                 "reports/temperature_null_test_report.md"
+                                                             ],
+                                                 "runs":  [
+                                                              "run_2026_03_13_115401_AX_functional_relation_analysis",
+                                                              "run_2026_03_13_123230_AX_scaling_temperature_robustness"
+                                                          ],
+                                                 "confidence":  "low",
+                                                 "notes":  "No report in this pass was judged to explicitly establish this claim without ambiguity."
+                                             },
+    "X_pareto_nondominated":  {
+                                  "reports":  [
+                                                  "reports/pareto_x_defense_report.md",
+                                                  "reports/adversarial_observable_report.md"
+                                              ],
+                                  "runs":  [
+                                               "run_2026_03_13_082753_switching_relaxation_bridge_robustness_a",
+                                               "run_2026_03_12_211204_aging_dataset_build",
+                                               "run_2026_03_13_071713_switching_composite_observable_scan",
+                                               "run_2026_03_16_173307_R_X_reconciliation_analysis"
+                                           ],
+                                  "confidence":  "high",
+                                  "notes":  "Pareto and adversarial reports explicitly evaluate non-domination/dominance criteria for X."
+                              },
+    "X_peak_alignment":  {
+                             "reports":  [
+                                             "reports/speak_vs_x_cross_experiment_report.md",
+                                             "reports/observable_search_report.md"
+                                         ],
+                             "runs":  [
+                                          "run_2026_03_13_082753_switching_relaxation_bridge_robustness_a",
+                                          "run_2026_03_16_173307_R_X_reconciliation_analysis",
+                                          "run_2026_03_13_071713_switching_composite_observable_scan"
+                                      ],
+                             "confidence":  "medium",
+                             "notes":  "Cross-experiment report explicitly shows zero peak offset for X against A and R (including 26 K alignment for A)."
+                         },
+    "X_scaling_relation":  {
+                               "reports":  [
+                                               "reports/observable_search_report.md",
+                                               "reports/functional_form_scan_report.md"
+                                           ],
+                               "runs":  [
+                                            "run_2026_03_13_082753_switching_relaxation_bridge_robustness_a",
+                                            "run_2026_03_13_115401_AX_functional_relation_analysis",
+                                            "run_2026_03_13_123230_AX_scaling_temperature_robustness"
+                                        ],
+                               "confidence":  "high",
+                               "notes":  "Reports explicitly evaluate power-law scaling A versus X with fitted beta and stability metrics."
+                           }
+}
