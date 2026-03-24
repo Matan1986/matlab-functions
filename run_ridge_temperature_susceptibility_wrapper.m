@@ -1,16 +1,16 @@
-﻿% Compatibility shim (auto-generated cleanup shim).
-% Deprecated root entrypoint: moved to runs/experimental/run_ridge_temperature_susceptibility_wrapper.m
+﻿% run_ridge_temperature_susceptibility_wrapper
+% Batch wrapper: a1(T) vs d/dT[S_ridge(T)] (ridge temperature susceptibility test).
+%
+% Run with:
+%   matlab -batch "run_ridge_temperature_susceptibility_wrapper"
+%
+% Creates:
+%   results/switching/runs/run_<timestamp>_switching_ridge_temperature_susceptibility_test/
 
-shimDir = fileparts(mfilename('fullpath'));
-targetPath = fullfile(shimDir, 'runs', 'experimental', 'run_ridge_temperature_susceptibility_wrapper.m');
-if exist(targetPath, 'file') ~= 2
-    error('run_ridge_temperature_susceptibility_wrapper:MissingTarget', 'Moved wrapper not found: %s', targetPath);
-end
-warning('run_ridge_temperature_susceptibility_wrapper:DeprecatedEntrypoint', ...
-    ['Deprecated root entrypoint. Use runs/experimental/run_ridge_temperature_susceptibility_wrapper.m instead. ', ...
-     'This compatibility shim will be removed in a future cleanup.']);
+repoRoot = fileparts(mfilename('fullpath'));
+addpath(genpath(fullfile(repoRoot, 'Aging')));
+addpath(fullfile(repoRoot, 'tools'));
+addpath(fullfile(repoRoot, 'tools', 'figures'));
+addpath(fullfile(repoRoot, 'analysis'));
 
-prevDir = pwd;
-cleanupObj = onCleanup(@() cd(prevDir)); %#ok<NASGU>
-cd(shimDir);
-run(targetPath);
+out = switching_ridge_temperature_susceptibility_test(); %#ok<NASGU>

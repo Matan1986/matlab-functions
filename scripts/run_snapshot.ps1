@@ -19,6 +19,14 @@ $tmpZip    = $null
 $lockStream = $null
 $lockFile = Join-Path $tempRoot 'snapshot.lock'
 
+if (Test-Path -LiteralPath $lockFile) {
+    $lockAgeMinutes = ((Get-Date) - (Get-Item -LiteralPath $lockFile).LastWriteTime).TotalMinutes
+    if ($lockAgeMinutes -gt 30) {
+        Write-Warning ("Removing stale snapshot lock older than 30 minutes: " + $lockFile)
+        Remove-Item -LiteralPath $lockFile -Force -ErrorAction SilentlyContinue
+    }
+}
+
 try {
     $lockStream = [System.IO.File]::Open(
         $lockFile,
@@ -439,6 +447,14 @@ try {
 
     Write-Output "=== SNAPSHOT SUCCESS ==="
     Write-Output "Snapshot created: $finalZip"
+
+    Write-Output "Building snapshot_simple bundles..."
+    try {
+        .\scripts\build_snapshot_simple.ps1
+    }
+    catch {
+        Write-Warning ("snapshot_simple build failed: " + $_.Exception.Message)
+    }
 }
 finally {
     if ($lockStream) {
@@ -465,4 +481,12 @@ finally {
             Write-Warning "Cleanup failed: $stageRoot"
         }
     }
+}
+
+Write-Output "Updating context bundles..."
+try {
+.\scripts\update_context.ps1
+}
+catch {
+Write-Warning "Context update failed"
 }

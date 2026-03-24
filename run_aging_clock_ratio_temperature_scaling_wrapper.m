@@ -1,16 +1,5 @@
-﻿% Compatibility shim (auto-generated cleanup shim).
-% Deprecated root entrypoint: moved to runs/experimental/run_aging_clock_ratio_temperature_scaling_wrapper.m
-
-shimDir = fileparts(mfilename('fullpath'));
-targetPath = fullfile(shimDir, 'runs', 'experimental', 'run_aging_clock_ratio_temperature_scaling_wrapper.m');
-if exist(targetPath, 'file') ~= 2
-    error('run_aging_clock_ratio_temperature_scaling_wrapper:MissingTarget', 'Moved wrapper not found: %s', targetPath);
-end
-warning('run_aging_clock_ratio_temperature_scaling_wrapper:DeprecatedEntrypoint', ...
-    ['Deprecated root entrypoint. Use runs/experimental/run_aging_clock_ratio_temperature_scaling_wrapper.m instead. ', ...
-     'This compatibility shim will be removed in a future cleanup.']);
-
-prevDir = pwd;
-cleanupObj = onCleanup(@() cd(prevDir)); %#ok<NASGU>
-cd(shimDir);
-run(targetPath);
+﻿baseFolder = fileparts(mfilename('fullpath'));
+addpath(genpath(baseFolder));
+out = aging_clock_ratio_temperature_scaling();
+disp('Aging clock ratio temperature scaling complete.');
+disp(out.runDir);

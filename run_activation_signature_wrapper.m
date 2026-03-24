@@ -1,16 +1,37 @@
-﻿% Compatibility shim (auto-generated cleanup shim).
-% Deprecated root entrypoint: moved to runs/experimental/run_activation_signature_wrapper.m
+﻿% run_activation_signature_wrapper.m
+% Batch-safe entry point for:
+%   matlab -batch run_activation_signature_wrapper
+%
+% Runs switching_activation_signature_test with default configuration.
 
-shimDir = fileparts(mfilename('fullpath'));
-targetPath = fullfile(shimDir, 'runs', 'experimental', 'run_activation_signature_wrapper.m');
-if exist(targetPath, 'file') ~= 2
-    error('run_activation_signature_wrapper:MissingTarget', 'Moved wrapper not found: %s', targetPath);
+addpath('analysis');
+addpath(genpath('Aging'));
+addpath('tools');
+addpath(fullfile('tools', 'figures'));
+
+if ~exist('tmp', 'dir')
+    mkdir('tmp');
 end
-warning('run_activation_signature_wrapper:DeprecatedEntrypoint', ...
-    ['Deprecated root entrypoint. Use runs/experimental/run_activation_signature_wrapper.m instead. ', ...
-     'This compatibility shim will be removed in a future cleanup.']);
 
-prevDir = pwd;
-cleanupObj = onCleanup(@() cd(prevDir)); %#ok<NASGU>
-cd(shimDir);
-run(targetPath);
+logFile = fullfile('tmp', 'run_activation_signature_wrapper_trace.txt');
+fid = fopen(logFile, 'w');
+if fid < 0
+    error('Unable to open trace log: %s', logFile);
+end
+cleanupObj = onCleanup(@() fclose(fid)); %#ok<NASGU>
+
+fprintf(fid, 'Batch wrapper started at %s\n', char(datetime('now')));
+
+try
+    out = switching_activation_signature_test(); %#ok<NASGU>
+    fprintf(fid, 'Run completed successfully at %s\n', char(datetime('now')));
+catch ME
+    fprintf(fid, 'ERROR at %s\n', char(datetime('now')));
+    fprintf(fid, 'MESSAGE:\n%s\n\n', ME.message);
+    fprintf(fid, 'IDENTIFIER:\n%s\n\n', ME.identifier);
+    fprintf(fid, 'STACK:\n');
+    for k = 1:numel(ME.stack)
+        fprintf(fid, '  %s (line %d)\n', ME.stack(k).name, ME.stack(k).line);
+    end
+    rethrow(ME);
+end

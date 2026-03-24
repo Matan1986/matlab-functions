@@ -1,16 +1,15 @@
-﻿% Compatibility shim (auto-generated cleanup shim).
-% Deprecated root entrypoint: moved to runs/experimental/run_amplitude_response_wrapper.m
+﻿% run_amplitude_response_wrapper
+% Batch wrapper: a1(T) vs dS_peak/dT and d2S_peak/dT2 (amplitude-response test).
+%
+% Run with:
+%   matlab -batch "run_amplitude_response_wrapper"
+%
+% Creates: results/switching/runs/run_<timestamp>_switching_a1_amplitude_response_test/
 
-shimDir = fileparts(mfilename('fullpath'));
-targetPath = fullfile(shimDir, 'runs', 'experimental', 'run_amplitude_response_wrapper.m');
-if exist(targetPath, 'file') ~= 2
-    error('run_amplitude_response_wrapper:MissingTarget', 'Moved wrapper not found: %s', targetPath);
-end
-warning('run_amplitude_response_wrapper:DeprecatedEntrypoint', ...
-    ['Deprecated root entrypoint. Use runs/experimental/run_amplitude_response_wrapper.m instead. ', ...
-     'This compatibility shim will be removed in a future cleanup.']);
+repoRoot = fileparts(mfilename('fullpath'));
+addpath(genpath(fullfile(repoRoot, 'Aging')));
+addpath(fullfile(repoRoot, 'tools'));
+addpath(fullfile(repoRoot, 'tools', 'figures'));
+addpath(fullfile(repoRoot, 'analysis'));
 
-prevDir = pwd;
-cleanupObj = onCleanup(@() cd(prevDir)); %#ok<NASGU>
-cd(shimDir);
-run(targetPath);
+out = switching_a1_amplitude_response_test(); %#ok<NASGU>

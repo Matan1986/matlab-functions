@@ -1,16 +1,18 @@
-﻿% Compatibility shim (auto-generated cleanup shim).
-% Deprecated root entrypoint: moved to runs/experimental/run_ridge_susceptibility_analysis_wrapper.m
+﻿% run_ridge_susceptibility_analysis_wrapper
+% Batch wrapper: extract chi_ridge(T) = |dS/dI| near I_peak from switching
+% map S(I,T) and test its relationship to a1(T) and X(T).
+%
+% Run with:
+%   matlab -batch "run_ridge_susceptibility_analysis_wrapper"
+%
+% Creates:
+%   results/switching/runs/run_<timestamp>_switching_ridge_susceptibility_analysis/
 
-shimDir = fileparts(mfilename('fullpath'));
-targetPath = fullfile(shimDir, 'runs', 'experimental', 'run_ridge_susceptibility_analysis_wrapper.m');
-if exist(targetPath, 'file') ~= 2
-    error('run_ridge_susceptibility_analysis_wrapper:MissingTarget', 'Moved wrapper not found: %s', targetPath);
-end
-warning('run_ridge_susceptibility_analysis_wrapper:DeprecatedEntrypoint', ...
-    ['Deprecated root entrypoint. Use runs/experimental/run_ridge_susceptibility_analysis_wrapper.m instead. ', ...
-     'This compatibility shim will be removed in a future cleanup.']);
+repoRoot = fileparts(mfilename('fullpath'));
+addpath(genpath(fullfile(repoRoot, 'Aging')));
+addpath(fullfile(repoRoot, 'tools'));
+addpath(fullfile(repoRoot, 'tools', 'figures'));
+addpath(fullfile(repoRoot, 'Switching', 'analysis'));
+addpath(fullfile(repoRoot, 'Switching', 'utils'));
 
-prevDir = pwd;
-cleanupObj = onCleanup(@() cd(prevDir)); %#ok<NASGU>
-cd(shimDir);
-run(targetPath);
+out = switching_ridge_susceptibility_analysis(); %#ok<NASGU>
