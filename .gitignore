@@ -106,3 +106,27 @@ temp/
 # =========================================================
 _validation_tmp/
 **/runtime/
+
+# =========================================================
+# CRITICAL: repo pollution guards
+# =========================================================
+
+# legacy / experiments
+_legacy/
+
+# matlab debug outputs
+logs/
+probe_outputs/
+wrapper_run.txt
+
+# matlab prefs (agent)
+matlab_prefs_agent/
+
+# matlab figures (binary)
+*.fig
+
+# debug txt (more aggressive)
+*_debug*.txt
+*_stdout*.txt
+*_stderr*.txt
+*_probe*.txt
