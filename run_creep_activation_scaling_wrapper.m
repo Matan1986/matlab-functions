@@ -1,7 +1,7 @@
-﻿% run_creep_activation_scaling_wrapper.m
+% run_creep_activation_scaling_wrapper.m
 % Batch-safe entry point for:
 %   matlab -batch run_creep_activation_scaling_wrapper
-
+error('FORBIDDEN: Use tools/run_matlab_safe.bat for execution');
 addpath('analysis');
 addpath(genpath('Aging'));
 addpath('tools');

@@ -1,8 +1,8 @@
-﻿% run_relaxation_temperature_scaling_wrapper
+% run_relaxation_temperature_scaling_wrapper
 % Wrapper script for relaxation_temperature_scaling_test.
 % Run from the repo root with:
 %   matlab -batch run_relaxation_temperature_scaling_wrapper
-
+error('FORBIDDEN: Use tools/run_matlab_safe.bat for execution');
 if ~exist('tmp', 'dir')
     mkdir('tmp');
 end

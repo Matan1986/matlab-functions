@@ -160,7 +160,9 @@ end
 function curvesTbl = buildComparisonTable(relax, switching, composite, cfg)
 T = switching.T(:);
 A = interp1(relax.T, relax.A, T, cfg.interpMethod, NaN);
-X = switching.I_peak ./ (switching.width .* switching.S_peak);
+[canonicalT, canonicalX] = get_canonical_X();
+% X is loaded from canonical run to avoid drift from duplicated implementations
+X = interp1(canonicalT, canonicalX, T, cfg.interpMethod, NaN);
 M = centralFiniteDifferenceAbs(T, switching.I_peak);
 
 curvesTbl = table();

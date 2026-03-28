@@ -1,3 +1,8 @@
+% NOTE:
+% R_relax = time-dependent relaxation (-dM/dlog t)
+% R_age   = aging scalar (tau ratio)
+% These MUST NOT be confused
+
 % switching_mode23_analysis
 % Quantifies whether switching ridge/shape evolution is better described by
 % coeff_mode2 alone, coeff_mode3 alone, or the joint mode2+mode3 subspace.

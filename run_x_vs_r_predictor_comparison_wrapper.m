@@ -1,7 +1,7 @@
 function run_x_vs_r_predictor_comparison_wrapper()
 % RUN_X_VS_R_PREDICTOR_COMPARISON_WRAPPER
 % Compare switching-side predictors for aging competition observable R.
-
+error('FORBIDDEN: Use tools/run_matlab_safe.bat for execution');
 baseFolder = fileparts(mfilename('fullpath'));
 addpath(genpath(baseFolder));
 

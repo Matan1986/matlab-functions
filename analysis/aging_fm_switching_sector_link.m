@@ -266,7 +266,10 @@ obs(end+1,1) = makeSwitchObs("S_peak", 'Switching S_peak(T)', switching.canonica
 obs(end+1,1) = makeSwitchObs("I_peak", 'Switching I_peak(T)', switching.canonical.T, switching.canonical.I_peak, "ridge_position", true, "Canonical ridge-position observable; useful as a pinned/mobile coordinate rather than as a mobility amplitude.", "run_2026_03_10_112659_alignment_audit", "Available through 34 K, but the 34 K point is non-monotone."); %#ok<AGROW>
 obs(end+1,1) = makeSwitchObs("width_I", 'Switching width_I(T)', switching.canonical.T, switching.canonical.width_I, "width", true, "Requested canonical width observable from the alignment audit.", "run_2026_03_10_112659_alignment_audit", "High-temperature support is poor because width_I is NaN above 28 K."); %#ok<AGROW>
 obs(end+1,1) = makeSwitchObs("width_full_scaling", 'Switching full-scaling width(T)', switching.fullScaling.T_K, switching.fullScaling.width_chosen_mA, "width", true, "Newer saved width observable from the full-scaling collapse run.", "run_2026_03_12_234016_switching_full_scaling_collapse", "Extends usable width coverage to 30 K, but still lacks 34 K."); %#ok<AGROW>
-obs(end+1,1) = makeSwitchObs("I_over_wS", 'Switching composite I/(w S)', switching.fullScaling.T_K, switching.fullScaling.Ipeak_mA ./ (switching.fullScaling.width_chosen_mA .* switching.fullScaling.S_peak), "composite", false, "Exploratory composite from the switching composite scan; inspected but not used in the main assignment.", "run_2026_03_13_020519_switching_composite_observable_scan", "Composite context only, not a canonical target."); %#ok<AGROW>
+[canonicalT, canonicalX] = get_canonical_X();
+% X is loaded from canonical run to avoid drift from duplicated implementations
+XcanonicalAtFullScalingT = interp1(canonicalT, canonicalX, switching.fullScaling.T_K, 'linear', NaN);
+obs(end+1,1) = makeSwitchObs("I_over_wS", 'Switching composite I/(w S)', switching.fullScaling.T_K, XcanonicalAtFullScalingT, "composite", false, "Exploratory composite from the switching composite scan; inspected but not used in the main assignment.", "run_2026_03_13_020519_switching_composite_observable_scan", "Composite context only, not a canonical target."); %#ok<AGROW>
 end
 
 function tbl = buildSwitchingObservableSummary(selectedSwitch)

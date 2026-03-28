@@ -1,10 +1,10 @@
-﻿% run_a1_mobility_wrapper
+% run_a1_mobility_wrapper
 % Wrapper script for switching_a1_vs_mobility_test.
 % Run from the repo root with:  matlab -batch run_a1_mobility_wrapper
 %
 % Writes a trace log to tmp/run_a1_mobility_wrapper_trace.txt so that
 % batch runs leave a record even when the console is not visible.
-
+error('FORBIDDEN: Use tools/run_matlab_safe.bat for execution');
 if ~exist('tmp', 'dir')
     mkdir('tmp');
 end

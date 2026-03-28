@@ -2,7 +2,7 @@ function run_switching_threshold_residual_structure_wrapper()
 % RUN_SWITCHING_THRESHOLD_RESIDUAL_STRUCTURE_WRAPPER
 % Wrapper for residual-structure characterization after minimal
 % threshold-distribution switching model.
-
+error('FORBIDDEN: Use tools/run_matlab_safe.bat for execution');
 baseFolder = fileparts(mfilename('fullpath'));
 addpath(genpath(baseFolder));
 

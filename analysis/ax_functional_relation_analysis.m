@@ -175,7 +175,9 @@ end
 function aligned = buildAlignedData(relax, switching, cfg)
 T = switching.T(:);
 A = interp1(relax.T, relax.A, T, cfg.interpMethod, NaN);
-X = switching.I_peak ./ (switching.width .* switching.S_peak);
+[canonicalT, canonicalX] = get_canonical_X();
+% X is loaded from canonical run to avoid drift from duplicated implementations
+X = interp1(canonicalT, canonicalX, T, cfg.interpMethod, NaN);
 mask = isfinite(T) & isfinite(A) & isfinite(X) & A > 0 & X > 0;
 if nnz(mask) < 5
     error('Too few valid points remain after interpolation.');

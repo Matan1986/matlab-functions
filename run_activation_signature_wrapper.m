@@ -1,9 +1,9 @@
-﻿% run_activation_signature_wrapper.m
+% run_activation_signature_wrapper.m
 % Batch-safe entry point for:
 %   matlab -batch run_activation_signature_wrapper
 %
 % Runs switching_activation_signature_test with default configuration.
-
+error('FORBIDDEN: Use tools/run_matlab_safe.bat for execution');
 addpath('analysis');
 addpath(genpath('Aging'));
 addpath('tools');

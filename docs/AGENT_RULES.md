@@ -11,12 +11,67 @@ Use these rules for all analysis and diagnostic work in this repository.
 - Before writing run artifacts, read docs/output_artifacts.md and use only its required artifact directories.
 - Analysis scripts must not manage artifact paths directly. Artifact generation should use the repository helpers: save_run_figure, save_run_table, save_run_report.
 - Exception: run-level `observables.csv` must remain at run root and should not be moved into `tables/` by `save_run_table`.
+- MATLAB execution must use `tools/run_matlab_safe.bat` to avoid startup hangs caused by MathWorks Service Host.
+
+## MATLAB Execution Rules (CRITICAL)
+
+1. All MATLAB execution MUST go through the approved repository wrapper.
+   - Direct invocation of `matlab` is not allowed for automated/agent runs.
+   - This includes direct `matlab -batch`, direct `matlab -r`, and inline command-string execution styles.
+
+2. Canonical invocation format is script-path only.
+   - Use `tools/run_matlab_safe.bat "<ABSOLUTE_PATH_TO_SCRIPT.m>"`.
+   - The wrapper validates the runnable script contract and executes it via `eval(fileread(...))`.
+
+3. No parallel infrastructure modifications are allowed.
+   - This includes changes that alter execution behavior (MATLAB invocation method, wrapper/launcher, environment configuration, path setup, or related scripts).
+
+4. Infrastructure changes MUST be executed SERIAL ONLY.
+   - Only one infrastructure agent may run at a time.
+
+5. Analysis agents are READ-ONLY with respect to infrastructure.
+   - They may create runs and write outputs under `results/<experiment>/runs/run_<timestamp>_<label>/`.
+   - They must NOT modify system files, environment configuration, or execution behavior.
+
+## MATLAB Runnable Script Contract (STRICT)
+
+Any runnable MATLAB script that is executed via `tools/run_matlab_safe.bat` must satisfy all of the following:
+
+1. Runnable file must be a PURE SCRIPT.
+   - Forbidden in runnable scripts: `function` definitions of any kind.
+   - This includes local functions and nested functions.
+
+2. Helper logic must live in separate `.m` helper files.
+   - Runnable scripts may call helpers, but must not define helper functions inline.
+
+3. Runnable scripts must write outputs and explicit error/status artifacts.
+   - Scripts should persist intended outputs and write clear status/error artifacts for failure diagnosis.
+
+4. Preflight validation is mandatory.
+   - `tools/run_matlab_safe.bat` must validate runnable script structure before launching MATLAB.
+   - Invalid runnable scripts must be blocked before execution.
+
+## Agent Types
+
+### Infrastructure Agents
+- May modify: environment, setup, and documentation.
+- Must run SERIAL ONLY (no concurrent infrastructure agents).
+- Must NOT run in parallel with other infrastructure agents.
+- Must NOT change MATLAB execution behavior outside of the approved rules.
+- Before changing wrappers, run helpers, manifest writers, path resolution, or shared execution behavior: produce the pre-change report in docs/infrastructure_laws.md (PART 3: EXISTING_SYSTEMS_FOUND, CANONICAL_COMPONENT, DUPLICATION_RISK, REUSE_PLAN, FILES_TO_TOUCH, WHY_NEW_SYSTEM_IS_NOT_BEING_CREATED).
+- Must not introduce a parallel run root convention, parallel manifest system, or parallel fingerprint scheme; see docs/infrastructure_laws.md (PART 1 and PART 2).
+
+### Analysis Agents
+- May run in parallel.
+- Must NOT modify: environment, MATLAB execution method, or repository structure.
+- Must operate in read-only mode for infrastructure (no execution-method changes, no wrapper/path changes).
 
 ## Documentation Precedence
 
 When repository documents overlap, use this precedence order:
 
 1. docs/AGENT_RULES.md for agent behavior and repository safety limits.
+1a. docs/infrastructure_laws.md for infrastructure architecture only: canonical run roots, `run_manifest.json` and fingerprint fields, execution entrypoints (`run_matlab_safe.bat`), output ownership, drift violations, and consolidation gates. When this document conflicts with informal mentions elsewhere, infrastructure_laws wins for those topics.
 2. docs/results_system.md for output locations and run artifact layout.
 3. docs/run_system.md for run creation and run-context invariants.
 4. docs/repository_structure.md for code placement and repository layout.

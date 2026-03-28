@@ -1,8 +1,8 @@
-﻿% run_a1_integral_consistency_wrapper.m
+% run_a1_integral_consistency_wrapper.m
 % Wrapper script: switching a1 integral consistency test.
 % Run from the repo root with:
 %   matlab -batch run_a1_integral_consistency_wrapper
-
+error('FORBIDDEN: Use tools/run_matlab_safe.bat for execution');
 thisDir  = fileparts(mfilename('fullpath'));
 repoRoot = thisDir;
 

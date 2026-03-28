@@ -1,8 +1,8 @@
-﻿% run_geometry_deformation_wrapper.m
+% run_geometry_deformation_wrapper.m
 % Wrapper script: switching a1 vs geometric deformation test.
 % Run from the repo root with:
 %   matlab -batch run_geometry_deformation_wrapper
-
+error('FORBIDDEN: Use tools/run_matlab_safe.bat for execution');
 thisDir  = fileparts(mfilename('fullpath'));
 repoRoot = thisDir;
 
