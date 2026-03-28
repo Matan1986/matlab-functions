@@ -69,14 +69,11 @@ run.experiment = experiment;
 run.label = runLabel;
 run.repo_root = repoRoot;
 run.run_dir = runDir;
-run.git_commit = resolveGitCommit(repoRoot);
-run.matlab_version = version;
-run.host = getComputerName();
-run.user = getUserName();
+fingerprint = computeRunFingerprint(repoRoot);
 
 run = ensureRunFilePaths(run);
 
-writeManifest(run, cfg);
+writeManifest(run, cfg, fingerprint);
 writeConfigSnapshot(run.config_snapshot_path, cfg, run);
 writeLogHeader(run.log_path, run);
 ensureRunNotesFile(run);
@@ -160,18 +157,58 @@ if isempty(commit)
 end
 end
 
-function writeManifest(run, cfg)
+function writeManifest(run, cfg, fingerprint)
+if exist(run.manifest_path, 'file') == 2
+    warning('Run manifest already exists; preserving existing file: %s', run.manifest_path);
+    return;
+end
+
+if nargin < 3 || ~isstruct(fingerprint)
+    error('writeManifest requires a fingerprint struct from computeRunFingerprint.');
+end
+
+normalizedRepoRoot = normalizeAbsolutePath(run.repo_root);
+normalizedRunDir = normalizeAbsolutePath(run.run_dir);
+if ~isfield(fingerprint, 'git_commit') || isempty(fingerprint.git_commit)
+    fingerprint.git_commit = 'unknown';
+end
+if ~isfield(fingerprint, 'script_path') || isempty(fingerprint.script_path)
+    fingerprint.script_path = '';
+end
+if ~isfield(fingerprint, 'script_hash') || isempty(fingerprint.script_hash)
+    fingerprint.script_hash = '';
+end
+if ~isfield(fingerprint, 'matlab_version') || isempty(fingerprint.matlab_version)
+    fingerprint.matlab_version = 'unknown';
+end
+if ~isfield(fingerprint, 'host') || isempty(fingerprint.host)
+    fingerprint.host = 'unknown';
+end
+if ~isfield(fingerprint, 'user') || isempty(fingerprint.user)
+    fingerprint.user = 'unknown';
+end
+requiredOutputs = sort({ ...
+    normalizeAbsolutePath(run.manifest_path), ...
+    normalizeAbsolutePath(run.config_snapshot_path), ...
+    normalizeAbsolutePath(run.log_path), ...
+    normalizeAbsolutePath(run.notes_path)});
+
 manifest = struct();
 manifest.run_id = run.run_id;
 manifest.timestamp = run.timestamp;
+manifest.execution_start = run.timestamp;
 manifest.experiment = run.experiment;
 manifest.label = run.label;
-manifest.git_commit = run.git_commit;
-manifest.matlab_version = run.matlab_version;
-manifest.host = run.host;
-manifest.user = run.user;
-manifest.repo_root = run.repo_root;
-manifest.run_dir = run.run_dir;
+manifest.git_commit = fingerprint.git_commit;
+manifest.matlab_version = fingerprint.matlab_version;
+manifest.host = fingerprint.host;
+manifest.user = fingerprint.user;
+manifest.repo_root = normalizedRepoRoot;
+manifest.run_dir = normalizedRunDir;
+manifest.script_path = fingerprint.script_path;
+manifest.script_hash = fingerprint.script_hash;
+manifest.required_outputs = requiredOutputs;
+manifest.manifest_valid = true;
 
 if isfield(cfg, 'datasetName')
     manifest.dataset = cfg.datasetName;
@@ -193,6 +230,80 @@ if fid < 0
 end
 cleanupObj = onCleanup(@() fclose(fid)); %#ok<NASGU>
 fprintf(fid, '%s\n', jsonText);
+end
+
+function fingerprint = computeRunFingerprint(repoRoot)
+fingerprint = struct();
+fingerprint.git_commit = resolveGitCommit(repoRoot);
+fingerprint.script_path = resolveCallingScriptPath();
+fingerprint.script_hash = computeFileSha256(fingerprint.script_path);
+fingerprint.matlab_version = version;
+fingerprint.host = getComputerName();
+fingerprint.user = getUserName();
+end
+
+function absPath = normalizeAbsolutePath(pathValue)
+pathText = strtrim(char(string(pathValue)));
+if isempty(pathText)
+    absPath = '';
+    return;
+end
+try
+    absPath = char(java.io.File(pathText).getCanonicalPath());
+catch
+    if isAbsolutePath(pathText)
+        absPath = pathText;
+    else
+        absPath = fullfile(pwd, pathText);
+    end
+end
+absPath = strrep(absPath, '/', filesep);
+absPath = strrep(absPath, '\\', filesep);
+end
+
+function tf = isAbsolutePath(pathText)
+if isempty(pathText)
+    tf = false;
+    return;
+end
+tf = (~isempty(regexp(pathText, '^[A-Za-z]:[\\/]', 'once')) || startsWith(pathText, '\\\\'));
+end
+
+function scriptPath = resolveCallingScriptPath()
+stack = dbstack('-completenames');
+thisFile = mfilename('fullpath');
+
+scriptPath = '';
+for i = 1:numel(stack)
+    if isfield(stack(i), 'file')
+        candidate = char(string(stack(i).file));
+        if ~isempty(candidate) && ~strcmpi(candidate, thisFile)
+            scriptPath = normalizeAbsolutePath(candidate);
+            return;
+        end
+    end
+end
+
+scriptPath = normalizeAbsolutePath(thisFile);
+end
+
+function hashHex = computeFileSha256(filePath)
+hashHex = '';
+if isempty(filePath) || exist(filePath, 'file') ~= 2
+    return;
+end
+
+fid = fopen(filePath, 'rb');
+if fid < 0
+    return;
+end
+cleanupObj = onCleanup(@() fclose(fid)); %#ok<NASGU>
+
+bytes = fread(fid, Inf, '*uint8');
+md = java.security.MessageDigest.getInstance('SHA-256');
+md.update(bytes);
+digest = typecast(md.digest(), 'uint8');
+hashHex = lower(reshape(dec2hex(digest).', 1, []));
 end
 
 function writeConfigSnapshot(snapshotPath, cfg, run)
@@ -255,8 +366,7 @@ fprintf(fid, '[%s] Run initialized\n', run.timestamp);
 fprintf(fid, 'run_id: %s\n', run.run_id);
 fprintf(fid, 'label: %s\n', run.label);
 fprintf(fid, 'experiment: %s\n', run.experiment);
-fprintf(fid, 'git_commit: %s\n', run.git_commit);
-fprintf(fid, 'matlab_version: %s\n\n', run.matlab_version);
+fprintf(fid, '\n');
 end
 
 function ensureRunNotesFile(run)

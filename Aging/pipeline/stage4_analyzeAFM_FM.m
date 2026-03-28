@@ -203,6 +203,114 @@ for i = 1:numel(state.pauseRuns)
         run.Tmin_K = Tmin;
     end
 
+    % ===== CANONICAL TWO-TIME LAYER (Audit-Ready) =====
+    % Apply symmetric, audit-ready clock extraction to both dip and FM.
+    % This centralizes selector logic and preserves sign information.
+    
+    if isfield(cfg, 'useCanonicalClocks') && cfg.useCanonicalClocks
+        % DIP (AFM) CLOCK - Symmetric extraction
+        if hasT && hasDM
+            % Prepare dip observable data within dip window
+            dipMask = (T >= dip_lo) & (T <= dip_hi);
+            if any(dipMask)
+                T_dip = T(dipMask);
+                dM_dip = DeltaM(dipMask);
+                
+                % Signed version: negative = memory effect depth
+                dM_dip_signed = -dM_dip;  % Flip sign to make memory = positive
+                % Raw version: unsigned
+                dM_dip_raw = abs(dM_dip);
+                
+                % Build canonical dip clock
+                cfg_dip = struct();
+                if isfield(cfg, 'dip_selector_mode')
+                    cfg_dip.selector_mode = cfg.dip_selector_mode;
+                else
+                    cfg_dip.selector_mode = 'half_range_primary';
+                end
+                if isfield(cfg, 'dip_support_mode')
+                    cfg_dip.support_mode = cfg.dip_support_mode;
+                else
+                    cfg_dip.support_mode = 'resolved';
+                end
+                if isfield(cfg, 'dip_crossing_rule')
+                    cfg_dip.crossing_rule = cfg.dip_crossing_rule;
+                else
+                    cfg_dip.crossing_rule = 'first_point';
+                end
+                cfg_dip.sign_handling = 'preserve';  % Always preserve sign for audit
+                
+                dip_clock = construct_canonical_clock(T_dip, dM_dip_raw, dM_dip_signed, cfg_dip);
+                
+                % Assign canonical dip outputs
+                run.tau_dip_canonical = dip_clock.value;
+                run.tau_dip_signed = dip_clock.signed_value;
+                run.tau_dip_absolute = dip_clock.absolute_value;
+                run.tau_dip_selector_mode = dip_clock.selector_mode_used;
+                run.tau_dip_crossing_mode = dip_clock.crossing_rule_used;
+                run.tau_dip_support_status = dip_clock.support_status;
+                run.tau_dip_n_valid_points = dip_clock.n_valid_points;
+                run.tau_dip_range = dip_clock.data_range;
+                % Store full clock struct for robustness audits
+                run.tau_dip_clock_struct = dip_clock;
+            end
+        end
+        
+        % FM CLOCK - Symmetric extraction using same logic
+        if isfinite(run.FM_step_raw) || isfinite(run.FM_step_mag)
+            % Use FM step value (preserved signed and unsigned)
+            FM_signed = run.FM_step_raw;  % Positive = drop in FM, negative = rise
+            FM_raw = abs(FM_signed);
+            
+            % Create synthetic temperature array [low, high] for FM plateau
+            if isfinite(run.FM_plateau_left_width_K) && isfinite(run.FM_plateau_right_width_K)
+                T_fm = [0; 1];  % Synthetic: low to high temperature
+            else
+                T_fm = [];
+            end
+            
+            if ~isempty(T_fm)
+                % Build canonical FM clock using same selector logic
+                cfg_fm = struct();
+                if isfield(cfg, 'fm_selector_mode')
+                    cfg_fm.selector_mode = cfg.fm_selector_mode;
+                else
+                    cfg_fm.selector_mode = 'half_range_primary';
+                end
+                if isfield(cfg, 'fm_support_mode')
+                    cfg_fm.support_mode = cfg.fm_support_mode;
+                else
+                    cfg_fm.support_mode = 'resolved';
+                end
+                if isfield(cfg, 'fm_crossing_rule')
+                    cfg_fm.crossing_rule = cfg.fm_crossing_rule;
+                else
+                    cfg_fm.crossing_rule = 'first_point';
+                end
+                cfg_fm.sign_handling = 'preserve';  % Always preserve sign for audit
+                
+                % For FM, treatment is scalar; replicate to match structure
+                FM_observable_raw = [FM_raw; FM_raw];
+                FM_observable_signed = [FM_signed; FM_signed];
+                
+                fm_clock = construct_canonical_clock(T_fm, FM_observable_raw, FM_observable_signed, cfg_fm);
+                
+                % Assign canonical FM outputs
+                run.tau_fm_canonical = fm_clock.value;
+                run.tau_fm_signed = fm_clock.signed_value;
+                run.tau_fm_absolute = fm_clock.absolute_value;
+                run.tau_fm_selector_mode = fm_clock.selector_mode_used;
+                run.tau_fm_crossing_mode = fm_clock.crossing_rule_used;
+                run.tau_fm_support_status = fm_clock.support_status;
+                run.tau_fm_n_valid_points = fm_clock.n_valid_points;
+                run.tau_fm_range = fm_clock.data_range;
+                % Store full clock struct for robustness audits
+                run.tau_fm_clock_struct = fm_clock;
+            end
+        end
+    end
+    % ===== END CANONICAL TWO-TIME LAYER =====
+
     state.pauseRuns = assignRunFields(state.pauseRuns, i, run);
 end
 
