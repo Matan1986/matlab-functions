@@ -1,6 +1,6 @@
 function plotAmpTempSwitchingMap_switchCh( ...
     parentDir, metricType, channelMode, plotAmpTempMode, FC_amp_subset, ...
-    swapAxes, useMathLabels, showOverlay)
+    swapAxes, useMathLabels, showOverlay,ridge_vis_mode)
 % Amp–Temp switching map with TEMPERATURE BINNING
 % Figure Name = META ONLY (preset-based labels)
 % No title, no LaTeX in Name
@@ -23,6 +23,22 @@ if nargin < 7 || isempty(useMathLabels)
 end
 if nargin < 8 || isempty(showOverlay)
     showOverlay = false;
+end
+
+if nargin < 9 || isempty(ridge_vis_mode)
+    ridge_vis_mode = 'smooth_map';
+end
+
+% options:
+% 'raw'          -> raw argmax ridge (staircase)
+% 'smooth_map'   -> argmax on smoothed map (recommended)
+% 'refined'      -> parabolic sub-pixel refinement
+
+validModes = ["raw","smooth_map","refined"];
+ridge_vis_mode = string(ridge_vis_mode);
+
+if ~ismember(ridge_vis_mode, validModes)
+    ridge_vis_mode = "smooth_map";
 end
 
 doFCstack = (plotAmpTempMode == "map+fc");
@@ -257,7 +273,11 @@ for ch = channelsPlotted
 
     M_interp = interp2(Tm, Am, M_filled, Tq, Aq, 'linear');
     M_interp = imgaussfilt(M_interp,0.5);
-    M_interp = M_interp.^0.8;
+    M_interp = sign(M_interp) .* abs(M_interp).^0.8;
+    if ~isreal(M_interp)
+        warning('M_interp contains complex values — taking real part');
+        M_interp = real(M_interp);
+    end
 
     % ---- draw image ----
     if swapAxes
@@ -333,111 +353,295 @@ for ch = channelsPlotted
     % final smoothing
     Ir = smoothdata(Ir,'gaussian',21);
 
+    % Overlay defaults (legacy ridge/width from map itself).
+    I_overlay = Ir;
+    width_overlay = NaN(size(Ir));
+    S_peak_overlay = NaN(size(Ir));
+    useCanonicalOverlay = false;
+    if showOverlay
+        obsOverlay = loadCollapseOverlayObservables(Tq(1,:));
+        if obsOverlay.loaded
+            I_overlay = obsOverlay.I_peak(:).';
+            width_overlay = obsOverlay.width(:).';
+            S_peak_overlay = obsOverlay.S_peak(:).';
+            useCanonicalOverlay = true;
+            fprintf('[OVERLAY] using canonical observables (collapse)\n');
+        else
+            % fallback to legacy overlay computation
+            fprintf('[OVERLAY] using legacy overlay (fallback)\n');
+        end
+    end
+
     Tcut = 32;
 
     if showOverlay
         % ================= COLOR =================
         overlayColor = [1 0.8 0.2];   % strong visibility on Oslo
+        widthMarkerColor = [0.9 0.9 0.9];
 
-        % ===== RIDGE =====
-        mask = Tq(1,:) <= Tcut;
+        I_axis = Aq(:,1);
+        T_axis = Tq(1,:);
+
+        % ridge_method is kept for extensibility.
+        % current visualization uses smoothed-map ridge only.
+        ridge_method = 'argmax';
+
+        switch ridge_method
+            case 'argmax'
+                [~, idx_ridge] = max(M_interp, [], 1);
+                idx_ridge = idx_ridge(:);
+                I_ridge = I_axis(idx_ridge);
+
+            case 'parabolic'
+                I_ridge = nan(size(T_axis));
+                for j = 1:numel(T_axis)
+                    idx = idx_ridge(j);
+                    if idx > 1 && idx < size(M_interp,1)
+                        y1 = M_interp(idx-1,j);
+                        y2 = M_interp(idx,  j);
+                        y3 = M_interp(idx+1,j);
+
+                        denom = (y1 - 2*y2 + y3);
+
+                        if abs(denom) > eps
+                            delta = 0.5 * (y1 - y3) / denom;
+                        else
+                            delta = 0;
+                        end
+
+                        dI = I_axis(2) - I_axis(1);
+                        I_ridge(j) = I_axis(idx) + delta * dI;
+                    else
+                        I_ridge(j) = I_axis(idx);
+                    end
+                end
+
+            case 'centroid'
+                I_ridge = nan(size(T_axis));
+                for j = 1:numel(T_axis)
+                    idx = idx_ridge(j);
+
+                    i1 = max(1, idx-2);
+                    i2 = min(size(M_interp,1), idx+2);
+
+                    I_loc = I_axis(i1:i2);
+                    W_loc = M_interp(i1:i2, j);
+
+                    valid_loc = isfinite(I_loc) & isfinite(W_loc);
+                    I_loc = I_loc(valid_loc);
+                    W_loc = W_loc(valid_loc);
+
+                    if isempty(W_loc) || sum(W_loc) <= 0
+                        I_ridge(j) = I_axis(idx);
+                    else
+                        I_ridge(j) = sum(I_loc .* W_loc) / sum(W_loc);
+                    end
+                end
+
+            case 'weighted'
+                I_ridge = Ir;
+
+            otherwise
+                [~, idx_ridge] = max(M_interp, [], 1);
+                idx_ridge = idx_ridge(:);
+                I_ridge = I_axis(idx_ridge);
+        end
+
+        I_ridge = I_ridge(:);
+
+        % --- Alternative visual ridge methods (optional, not used) ---
+        % % Parabolic sub-pixel refinement
+        % % (kept for future use, currently disabled)
+        %
+        % % Local centroid method
+        % % (kept for future use, currently disabled)
+        %
+        % % Interpolation-based smoothing
+        % % (kept for future use, currently disabled)
+
+        T_axis_vis = T_axis(:);
+
+        % NOTE:
+        % Ridge is interpolated along temperature for visualization only.
+        % All quantitative analysis uses the raw ridge (I_ridge).
+        T_dense = linspace(min(T_axis), max(T_axis), 600);
+        I_dense = linspace(min(I_axis), max(I_axis), 600);
+
+        [Tq_dense, Iq_dense] = meshgrid(T_dense, I_dense);
+
+        M_dense = interp2(T_bins, amps, M_filled, Tq_dense, Iq_dense, 'spline');
+        M_dense = imgaussfilt(M_dense, 0.8);
+
+        I_ridge_vis = nan(1, size(M_dense,2));
+        I_ridge_vis = nan(1, size(M_dense,2));
+
+        for j = 1:size(M_dense,2)
+            col = M_dense(:,j);
+
+            % remove NaNs
+            valid = isfinite(col);
+
+            if ~any(valid)
+                continue;
+            end
+
+            col_valid = col(valid);
+            I_valid   = I_dense(valid);
+
+            [mx, ~] = max(col_valid);
+
+            % threshold around peak
+            mask = col_valid > 0.7 * mx;
+
+            if ~any(mask)
+                % fallback → argmax
+                [~, idx] = max(col_valid);
+                I_ridge_vis(j) = I_valid(idx);
+            else
+                w = col_valid(mask);
+                x = I_valid(mask);
+
+                w = w(:);
+                x = x(:);
+
+                I_ridge_vis(j) = sum(x .* w) / sum(w);
+            end
+        end
+        T_axis_vis = T_dense(:);
+        I_ridge_vis = I_ridge_vis(:);
+
+        valid_vis = isfinite(T_axis_vis) & isfinite(I_ridge_vis) & (T_axis_vis <= Tcut);
+        valid_vis = valid_vis(:);
+
+        assert(numel(T_axis) == numel(I_ridge), 'Ridge size mismatch');
 
         if swapAxes
-            plot(ax, Ir(mask), Tq(1,mask), ...
-                'Color', overlayColor, 'LineWidth',1.2);
+            plot(ax, I_ridge_vis(valid_vis), T_axis_vis(valid_vis), ...
+                '--','Color', overlayColor, 'LineWidth', 1.2);
         else
-            plot(ax, Tq(1,mask), Ir(mask), ...
-                'Color', overlayColor, 'LineWidth',1.2);
+            plot(ax, T_axis_vis(valid_vis), I_ridge_vis(valid_vis), ...
+                '--','Color', overlayColor, 'LineWidth', 1.2);
         end
+
+        % NOTE:
+        % Label indicates that the visual ridge approximates I_peak(T).
+        % It is a guide only and not used in analysis.
+        % --- Ridge label (visual guide) ---
+        midIdx = round(numel(T_axis_vis) * 0.7);   % place away from center/W
+        x_text = I_ridge_vis(midIdx);
+        y_text = T_axis_vis(midIdx);
+
+        text(ax, x_text, y_text, '$\sim I_{peak}$', ...
+            'Color', overlayColor, ...
+            'FontSize', 14, ...
+            'FontWeight', 'bold', ...
+            'Interpreter', 'latex');
 
         % ===== WIDTH =====
         T_target = 20;
         [~, it] = min(abs(Tq(1,:) - T_target));
 
-        col = M_interp(:,it);
-        col = col - min(col);
-        col = col ./ max(col + eps);
+        I = Aq(:,it);
+        S = M_interp(:,it);
+        S = S - min(S);
 
-        Wloc = col.^3;
+        if any(diff(I) <= 0)
+            [I, sortIdx] = sort(I);
+            S = S(sortIdx);
+        end
 
-        num = sum(Aq(:,it) .* Wloc, 'omitnan');
-        den = sum(Wloc, 'omitnan');
-        Icm = num / max(den,eps);
+        hasLeft = false;
+        hasRight = false;
+        I_left = NaN;
+        I_right = NaN;
+        if useCanonicalOverlay && isfinite(I_overlay(it)) && isfinite(width_overlay(it)) && width_overlay(it) > eps
+            S_peak = S_peak_overlay(it);
+            halfMax = 0.5 * S_peak; %#ok<NASGU>
+            I_left = I_overlay(it) - 0.5 * width_overlay(it);
+            I_right = I_overlay(it) + 0.5 * width_overlay(it);
+            hasLeft = isfinite(I_left);
+            hasRight = isfinite(I_right);
+        else
+            [~, iPeak] = min(abs(I - I_overlay(it)));
+            S_peak = S(iPeak);
+            halfMax = 0.5 * S_peak;
 
-        var = sum(Wloc .* (Aq(:,it)-Icm).^2, 'omitnan') / max(den,eps);
-        w = sqrt(var);
+            iL = find(S(1:iPeak) <= halfMax, 1, 'last');
+            if ~isempty(iL) && iL < iPeak
+                s1 = S(iL);
+                s2 = S(iL+1);
+                ds = s2 - s1;
+                if abs(ds) > eps
+                    I_left = I(iL) + (halfMax - s1) * (I(iL+1) - I(iL)) / ds;
+                    hasLeft = true;
+                end
+            end
 
-        I_left  = Icm - w;
-        I_right = Icm + w;
+            iRrel = find(S(iPeak:end) <= halfMax, 1, 'first');
+            if ~isempty(iRrel) && iRrel > 1
+                iR = iPeak + iRrel - 1;
+                s1 = S(iR-1);
+                s2 = S(iR);
+                ds = s2 - s1;
+                if abs(ds) > eps
+                    I_right = I(iR-1) + (halfMax - s1) * (I(iR) - I(iR-1)) / ds;
+                    hasRight = true;
+                end
+            end
+        end
+
+        if ~(hasLeft && hasRight && isfinite(I_left) && isfinite(I_right) && I_right > I_left)
+            fprintf('[WIDTH] fallback used at T=%.1f K\n', Tq(1,it));
+            col = M_interp(:,it);
+            col = col - min(col);
+            col = col ./ (max(col) + eps);
+
+            Wloc = col.^3;
+
+            num = sum(Aq(:,it) .* Wloc, 'omitnan');
+            den = sum(Wloc, 'omitnan');
+            Icm = num / max(den,eps);
+
+            var = sum(Wloc .* (Aq(:,it)-Icm).^2, 'omitnan') / max(den,eps);
+            w = sqrt(var);
+
+            I_left  = Icm - w;
+            I_right = Icm + w;
+        else
+            fprintf('[WIDTH] FWHM used at T=%.1f K\n', Tq(1,it));
+        end
 
         dt = 0.2;
 
         if swapAxes
             plot(ax, [I_left I_right], [Tq(1,it) Tq(1,it)], ...
-                'Color', overlayColor, 'LineWidth',1.2);
+                 '--','Color', widthMarkerColor, 'LineWidth',1.2);
 
             plot(ax, [I_left I_left], [Tq(1,it)-dt Tq(1,it)+dt], ...
-                'Color', overlayColor, 'LineWidth',1.2);
+                 '--','Color', widthMarkerColor, 'LineWidth',1.2);
 
             plot(ax, [I_right I_right], [Tq(1,it)-dt Tq(1,it)+dt], ...
-                'Color', overlayColor, 'LineWidth',1.2);
+                 '--','Color', widthMarkerColor, 'LineWidth',1.2);
 
-            text(ax, I_right, Tq(1,it)+0.5, 'w', ...
-                'Color', overlayColor, ...
-                'FontSize',12, 'FontWeight','bold');
+            text(ax, I_right, Tq(1,it)+0.5, '$w$', ...
+                'Color', widthMarkerColor, ...
+                'FontSize',14, 'Interpreter','latex');
 
         else
             plot(ax, [Tq(1,it) Tq(1,it)], [I_left I_right], ...
-                'Color', overlayColor, 'LineWidth',1.2);
+                'Color', widthMarkerColor, 'LineWidth',1.2);
 
             plot(ax, [Tq(1,it)-dt Tq(1,it)+dt], [I_left I_left], ...
-                'Color', overlayColor, 'LineWidth',1.2);
+                'Color', widthMarkerColor, 'LineWidth',1.2);
 
             plot(ax, [Tq(1,it)-dt Tq(1,it)+dt], [I_right I_right], ...
-                'Color', overlayColor, 'LineWidth',1.2);
+                'Color', widthMarkerColor, 'LineWidth',1.2);
 
             text(ax, Tq(1,it)+0.5, I_right, 'w', ...
-                'Color', overlayColor, ...
-                'FontSize',12, 'FontWeight','bold');
+                'Color', widthMarkerColor, ...
+                'FontSize',14,'Interpreter','latex');
         end
 
-        % ===== SHIFT =====
-        it2 = round(0.6 * numel(Ir));
-        I_base = Ir(it2);
-        I_shift = I_base + 0.8 * (max(Ir) - min(Ir));
-
-        if swapAxes
-            quiver(ax, ...
-                I_base, Tq(1,it2), ...
-                I_shift - I_base, 0.6, ...
-                0, ...
-                'Color', overlayColor, ...
-                'LineWidth',1.2, ...
-                'MaxHeadSize',2);
-
-            text(ax, I_shift, Tq(1,it2)+0.5, 'I - I_{peak}', ...
-                'Color', overlayColor, 'FontSize',12);
-
-        else
-            quiver(ax, ...
-                Tq(1,it2), I_base, ...
-                0.6, I_shift - I_base, ...
-                0, ...
-                'Color', overlayColor, ...
-                'LineWidth',1.2, ...
-                'MaxHeadSize',2);
-
-            text(ax, Tq(1,it2)+0.5, I_shift, 'I - I_{peak}', ...
-                'Color', overlayColor, 'FontSize',12);
-        end
-
-        % ===== FORMULA =====
-        text(ax, 0.02, 0.95, 'X = (I - I_{peak}) / w', ...
-            'Units','normalized', ...
-            'Color', overlayColor, ...
-            'FontSize',12, ...
-            'FontWeight','bold', ...
-            'VerticalAlignment','top');
     end
 
     % ---- axes typography ----
@@ -487,6 +691,96 @@ end
 % =====================================================================
 % Helpers
 % =====================================================================
+function obs = loadCollapseOverlayObservables(Tquery)
+obs = struct( ...
+    'loaded', false, ...
+    'sourcePath', "", ...
+    'message', "", ...
+    'I_peak', NaN(size(Tquery)), ...
+    'width', NaN(size(Tquery)), ...
+    'S_peak', NaN(size(Tquery)));
+
+repoRoot = fileparts(fileparts(fileparts(mfilename('fullpath'))));
+runsRoot = fullfile(repoRoot, 'results', 'switching', 'runs');
+if exist(runsRoot, 'dir') ~= 7
+    obs.message = sprintf('missing runs root: %s', runsRoot);
+    return;
+end
+
+paramsPath = "";
+if exist('getLatestRun', 'file') == 2
+    try
+        runId = string(getLatestRun('switching'));
+        paramsCandidate = fullfile(runsRoot, char(runId), 'tables', 'switching_full_scaling_parameters.csv');
+        if exist(paramsCandidate, 'file') == 2
+            paramsPath = string(paramsCandidate);
+        end
+    catch
+    end
+end
+
+if strlength(paramsPath) == 0
+    runDirs = dir(fullfile(runsRoot, 'run_*'));
+    runDirs = runDirs([runDirs.isdir]);
+    if isempty(runDirs)
+        obs.message = 'no switching run_* directories';
+        return;
+    end
+    [~, order] = sort([runDirs.datenum], 'descend');
+    runDirs = runDirs(order);
+    for k = 1:numel(runDirs)
+        paramsCandidate = fullfile(runDirs(k).folder, runDirs(k).name, 'tables', 'switching_full_scaling_parameters.csv');
+        if exist(paramsCandidate, 'file') == 2
+            paramsPath = string(paramsCandidate);
+            break;
+        end
+    end
+end
+
+if strlength(paramsPath) == 0
+    obs.message = 'switching_full_scaling_parameters.csv not found';
+    return;
+end
+
+tbl = readtable(char(paramsPath));
+required = {'T_K','Ipeak_mA','width_chosen_mA','S_peak'};
+if ~all(ismember(required, tbl.Properties.VariableNames))
+    obs.message = sprintf('missing required columns in %s', paramsPath);
+    return;
+end
+
+Tobs = double(tbl.T_K(:));
+Iobs = double(tbl.Ipeak_mA(:));
+Wobs = double(tbl.width_chosen_mA(:));
+Sobs = double(tbl.S_peak(:));
+validRows = isfinite(Tobs) & isfinite(Iobs);
+if ~any(validRows)
+    obs.message = 'no finite T/I_peak rows in collapse observables';
+    return;
+end
+
+Tobs = Tobs(validRows);
+Iobs = Iobs(validRows);
+Wobs = Wobs(validRows);
+Sobs = Sobs(validRows);
+
+Iout = NaN(size(Tquery));
+Wout = NaN(size(Tquery));
+Sout = NaN(size(Tquery));
+for it = 1:numel(Tquery)
+    [~, idx] = min(abs(Tobs - Tquery(it)));
+    Iout(it) = Iobs(idx);
+    Wout(it) = Wobs(idx);
+    Sout(it) = Sobs(idx);
+end
+
+obs.loaded = true;
+obs.sourcePath = paramsPath;
+obs.I_peak = Iout;
+obs.width = Wout;
+obs.S_peak = Sout;
+end
+
 function [T, V] = extractMetric_switchCh_tableData(tableData, ch, metricType, NegP2P)
 
 chName = sprintf('ch%d', ch);

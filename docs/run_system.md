@@ -1,105 +1,174 @@
 # Run System
 
-This document is the authoritative reference for the repository run-tracking system.
+This document defines the strict run contract for this repository.
+This contract is deterministic and validator-ready.
 
-## Architecture
+## 1. Scope and precedence
 
-Run initialization is centralized in module `stage0_setupPaths`.
+This contract is normative for run identity, run layout, and required run artifacts.
+Rules in this document are enforced with MUST and MUST NOT language only.
 
-- Run context is created by `createRunContext`.
-- Active run context is stored in MATLAB root appdata:
-  - `setappdata(0, 'runContext', runCtx)`
-- Output paths are resolved through `getResultsDir(experiment, analysis, ...)`.
+## 2. Canonical run root
 
-This architecture ensures reproducible, run-scoped outputs and avoids accidental overwrites.
+run_dir MUST match exactly:
 
-## Run directory structure
+results/<experiment>/runs/run_<timestamp>_<label>/
 
-Each run is created under:
+Rules:
 
-`results/<experiment>/runs/run_<timestamp>_<label>/`
+- ALL run outputs MUST be written inside run_dir.
+- NO run outputs are allowed outside run_dir.
+- Writing run outputs to repo root is FORBIDDEN.
+- Writing run outputs to module folders is FORBIDDEN.
+- Writing run outputs to legacy result paths is FORBIDDEN.
 
-Example:
+## 3. Status artifact (mandatory)
 
-`results/aging/runs/run_2026_03_07_184500_MG119_AF_decomp_test/`
+STATUS_FILENAME is fixed:
 
-Run folder contents:
+execution_status.csv
 
-- `run_manifest.json`
-- `config_snapshot.m`
-- `log.txt`
-- `run_notes.txt`
-- `figures/`
-- `tables/`
-- `reports/`
-- `review/`
+The status file MUST:
 
-If observables are exported, `observables.csv` belongs at the run root as
-the run-level summary/index.
+- Exist for every run.
+- Be written at run root: run_dir/execution_status.csv.
+- Be ASCII only.
+- Be written on success and on failure.
 
-## Run manifest
+No alternative status filename is allowed.
 
-`run_manifest.json` stores metadata such as:
+execution_status.csv MUST contain exactly these columns:
 
-- `run_id`
-- `timestamp`
-- `experiment`
-- `label`
-- `git_commit`
-- `matlab_version`
-- `host`
-- `user`
-- `dataset` (when available)
+1. EXECUTION_STATUS
+2. INPUT_FOUND
+3. ERROR_MESSAGE
+4. N_T
+5. MAIN_RESULT_SUMMARY
 
-## Config snapshot
+## 4. Required outputs (strict)
 
-`config_snapshot.m` stores the run configuration captured at run start.
+required_outputs is fixed and MUST be represented in run_manifest.json exactly as:
 
-- Preferred path: MATLAB script snapshot of `cfg`.
-- Fallback path: JSON snapshot reconstructed into `cfg`.
+{
+  "tables": ["*.csv"],
+  "reports": ["*.md"],
+  "status": ["execution_status.csv"]
+}
 
-Goal: allow reconstruction of run configuration for reproducibility.
+Rules:
 
-## Run index
+- At least one CSV file MUST exist in run_dir (placeholder allowed).
+- At least one MD file MUST exist in run_dir (minimal content allowed).
+- execution_status.csv MUST exist in run_dir.
+- ALL required outputs MUST be inside run_dir.
+- Outputs outside run_dir are FORBIDDEN.
 
-Each experiment has:
+## 5. Manifest contract (final schema)
 
-`results/<experiment>/run_index.csv`
+Exactly one manifest file is allowed per run.
+Manifest filename is fixed:
 
-Columns:
+run_manifest.json
 
-- `run_id`
-- `timestamp`
-- `label`
-- `experiment`
-- `dataset`
-- `git_commit`
+Manifest location is fixed:
 
-The index is updated only when a **new run** is created.
+run_dir/run_manifest.json
 
-## Latest run pointer
+Secondary manifest files are FORBIDDEN.
 
-Each experiment has:
+run_manifest.json MUST include all required fields:
 
-`results/<experiment>/latest_run.txt`
+1. run_id
+2. timestamp
+3. execution_start
+4. experiment
+5. label
+6. repo_root
+7. run_dir
+8. script_path
+9. script_hash
+10. git_commit
+11. matlab_version
+12. host
+13. user
+14. required_outputs
+15. manifest_valid
 
-This file contains only the latest `run_id` and is updated when a **new run** is created.
+Optional field:
 
-## Developer tools
+- manifest_schema_version
 
-Tools are located under `tools/`:
+No other required fields are allowed by this contract.
 
-- `tools/list_runs.m` - list runs and key manifest metadata.
-- `tools/load_run_manifest.m` - load and parse a run manifest by path.
-- `tools/getLatestRun.m` - read `latest_run.txt` and return latest `run_id`.
-- `tools/openLatestRun.m` - open the latest run folder for an experiment (Windows) or print its path (non-Windows).
+## 6. Wrapper to run link (only allowed mechanism)
 
-## Protection rules
+The executed script MUST write:
 
-The following rules must be preserved:
+run_dir_pointer.txt
 
-- Run initialization remains in `stage0_setupPaths`.
-- Run context is created by `createRunContext`.
-- Active run context is stored in root appdata.
-- Outputs are routed via `getResultsDir`.
-- New direct writes to `results/<experiment>` should not be introduced.
+run_dir_pointer.txt content MUST be exactly one absolute path string to run_dir.
+
+Rules:
+
+- run_dir_pointer.txt MUST be written before script termination.
+- Wrapper MUST read run_dir_pointer.txt after execution.
+- Wrapper run discovery MUST use only run_dir_pointer.txt.
+- Guessing run_dir is FORBIDDEN.
+- Directory scanning to discover run_dir is FORBIDDEN.
+
+## 7. Fingerprint contract (locked)
+
+Fingerprint is fixed as:
+
+{
+  git_commit,
+  script_hash,
+  matlab_version,
+  host,
+  user
+}
+
+Rules:
+
+- Fingerprint fields MUST be computed at run start.
+- Fingerprint fields MUST be stored in run_manifest.json.
+- Secondary fingerprint files are FORBIDDEN.
+
+## 8. Execution contract
+
+A valid run MUST satisfy all requirements below.
+
+1. Invocation
+- The run MUST be executed via:
+  tools/run_matlab_safe.bat "<ABSOLUTE_PATH>"
+
+2. Runnable script format
+- The runnable file MUST be a pure script.
+- Function definitions in the runnable file are FORBIDDEN.
+- The runnable file MUST be ASCII only.
+- The runnable file MUST start with:
+  clear; clc;
+
+3. Required run-context call
+- The runnable script MUST call createRunContext.
+
+4. Mandatory artifacts
+- The runnable script MUST write execution_status.csv.
+- The runnable script MUST write at least one CSV file.
+- The runnable script MUST write at least one MD file.
+
+5. Prohibited behavior
+- Writing run artifacts outside run_dir is FORBIDDEN.
+- Silent exit without required artifacts is FORBIDDEN.
+
+## 9. Valid run definition
+
+A run is valid if and only if all conditions in sections 2 through 8 are true.
+
+If any condition in sections 2 through 8 is false, the run is invalid.
+
+## 10. Determinism and enforcement
+
+This contract contains no optional behavior and no implementation-defined behavior.
+Validator logic MUST evaluate explicit field presence, fixed filenames, fixed locations,
+fixed schema members, and required artifact existence without heuristics.

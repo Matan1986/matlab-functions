@@ -146,7 +146,8 @@ save_run_table(twAxisTbl, 'tw_axis.csv', run_output_dir);
 save_run_table(mapTbl, 'DeltaM_map.csv', run_output_dir);
 
 obsMatrixTbl = buildObservableMatrix(curves);
-writetable(obsMatrixTbl, fullfile(run_output_dir, 'observables.csv'));
+obsExportTbl = removevars(obsMatrixTbl, {'FM_step_mag'});
+writetable(obsExportTbl, fullfile(run_output_dir, 'observables.csv'));
 fprintf('Saved table: %s\n', fullfile(run_output_dir, 'observables.csv'));
 save_run_table(obsMatrixTbl, 'observable_matrix.csv', run_output_dir);
 

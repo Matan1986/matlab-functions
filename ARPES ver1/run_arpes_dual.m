@@ -58,7 +58,7 @@ valid = supportMask & ~isnan(Z_plot);
 vals = Z_plot(valid);
 
 clim_low  = prctile(vals, 1);
-clim_high = prctile(vals, 99);
+clim_high = prctile(vals, 99.7);
 
 % ===== fallback נכון =====
 if ~(isfinite(clim_low) && isfinite(clim_high) && clim_low < clim_high)
@@ -142,20 +142,16 @@ colormap(ax2,cmap_cut)
 caxis(ax2,[0 1])
 
 set(ax2,'FontSize',baseFont,'LineWidth',0.5,'TickDir','in','Box','on')
-set(ax2, 'ActivePositionProperty', 'position');
-set(ax2, 'PositionConstraint', 'innerposition');
-set(ax2, 'LooseInset', [0 0 0 0]);
 
 cb2 = colorbar(ax2);
 cb2.Location = 'eastoutside';
 cb2.Units = 'centimeters';
-drawnow;
-ax2.Position = [margin_cm, margin_cm, axWidth_cm, axHeight_cm];
 cb2.Position = [ ...
     margin_cm + axWidth_cm + gap_cm, ...
     margin_cm, ...
     cbWidth_cm, ...
     axHeight_cm];
+ax2.Position = [margin_cm, margin_cm, axWidth_cm, axHeight_cm];
 cb2.FontSize = ax2.FontSize;
 cb2.FontName = ax2.FontName;
 cb2.LineWidth = ax2.LineWidth;
@@ -201,18 +197,16 @@ axFS.XTickLabel = compose('%.1f', xt);
 axFS.YTickLabel = compose('%.1f', yt);
 grid(axFS,'off');
 set(axFS, 'ActivePositionProperty', 'position');
-set(axFS, 'PositionConstraint', 'innerposition');
-set(axFS, 'LooseInset', [0 0 0 0]);
+axFS.Position = [margin_cm, margin_cm, axWidth_cm, axHeight_cm];
 cbFS = colorbar(axFS);
 cbFS.Location = 'eastoutside';
 cbFS.Units = 'centimeters';
-drawnow;
-axFS.Position = [margin_cm, margin_cm, axWidth_cm, axHeight_cm];
 cbFS.Position = [ ...
     margin_cm + axWidth_cm + gap_cm, ...
     margin_cm, ...
     cbWidth_cm, ...
     axHeight_cm];
+axFS.Position = [margin_cm, margin_cm, axWidth_cm, axHeight_cm];
 cbFS.FontSize = axFS.FontSize;
 cbFS.FontName = axFS.FontName;
 cbFS.LineWidth = axFS.LineWidth;
@@ -228,12 +222,6 @@ cbFS.TickLabels = compose('%.1f', ticks);
 cbFS.TickLength = 0;
 axFS.XAxis.Exponent = 0;
 axFS.YAxis.Exponent = 0;
-
-% Temporary debug check: CUT and FS axes positions should match
-ax2.Units = 'centimeters';
-axFS.Units = 'centimeters';
-disp(ax2.Position)
-disp(axFS.Position)
 
 %% ===== EXPORT =====
 if exportSVG
@@ -286,21 +274,20 @@ kx_max = max(Kx);
 ky_min = min(Ky);
 ky_max = max(Ky);
 
-cx = (kx_min + kx_max)/2;
-cy = (ky_min + ky_max)/2;
+kmin = max([kx_min, ky_min]);
+kmax = min([kx_max, ky_max]);
 
-halfRange = max([kx_max - kx_min, ky_max - ky_min]) / 2;
+dx = mean(diff(Ky));
+dy = mean(diff(Kx));
 
-xlim(ax, [cx - halfRange, cx + halfRange]);
-ylim(ax, [cy - halfRange, cy + halfRange]);
-
-axis(ax,'image')
-
-ax.PlotBoxAspectRatio = [1 1 1];
+xlim(ax, [kmin - dx/2, kmax + dx/2]);
+ylim(ax, [kmin - dy/2, kmax + dy/2]);
 
 % ===== VISUAL SETTINGS =====
 caxis(ax, clim_vals);
 colormap(ax, cmap)
+
+axis(ax,'equal')
 
 set(ax,'PositionConstraint','innerposition')
 set(ax,'LooseInset',[0 0 0 0])
@@ -348,14 +335,14 @@ xM = mean(xK);
 yM = mean(yK);
 
 % Gamma point
-plot(axFS, 0, 0, 'o', 'Color', bzColor, 'MarkerFaceColor', bzColor, 'MarkerEdgeColor', bzColor, 'LineWidth', 1, 'MarkerSize', 4)
+plot(axFS, 0, 0, 'o', 'Color', bzColor, 'MarkerFaceColor', bzColor, 'MarkerEdgeColor', bzColor, 'LineWidth', 1, 'MarkerSize', 6)
 text(axFS, 0, 0.05, '$\Gamma$', 'Interpreter', 'latex', ...
     'Color', bzColor, 'FontWeight', 'normal', 'FontSize', baseFont, 'HorizontalAlignment', 'center', 'VerticalAlignment', 'bottom');
 
 % Plot only lower-edge K-M-K cut markers and labels
-plot(axFS, xK(1), yK(1), 'o', 'Color', bzColor, 'MarkerFaceColor', bzColor, 'MarkerEdgeColor', bzColor, 'LineWidth', 1, 'MarkerSize', 4)
-plot(axFS, xM,   yM,   'o', 'Color', bzColor, 'MarkerFaceColor', bzColor, 'MarkerEdgeColor', bzColor, 'LineWidth', 1, 'MarkerSize', 4)
-plot(axFS, xK(2), yK(2), 'o', 'Color', bzColor, 'MarkerFaceColor', bzColor, 'MarkerEdgeColor', bzColor, 'LineWidth', 1, 'MarkerSize', 4)
+plot(axFS, xK(1), yK(1), 'o', 'Color', bzColor, 'MarkerFaceColor', bzColor, 'MarkerEdgeColor', bzColor, 'LineWidth', 1, 'MarkerSize', 6)
+plot(axFS, xM,   yM,   'o', 'Color', bzColor, 'MarkerFaceColor', bzColor, 'MarkerEdgeColor', bzColor, 'LineWidth', 1, 'MarkerSize', 6)
+plot(axFS, xK(2), yK(2), 'o', 'Color', bzColor, 'MarkerFaceColor', bzColor, 'MarkerEdgeColor', bzColor, 'LineWidth', 1, 'MarkerSize', 6)
 
 labelOffsetY = 0.06;
 text(axFS, xK(1), yK(1) - labelOffsetY, '$K$', 'Interpreter', 'latex', ...
@@ -370,7 +357,7 @@ text(axFS, xK(2), yK(2) - labelOffsetY, '$K$', 'Interpreter', 'latex', ...
 K0_x = x_hex_outer(K0_idx);
 K0_y = y_hex_outer(K0_idx);
 
-plot(axFS, K0_x, K0_y, 'o', 'Color', bzColor, 'MarkerFaceColor', bzColor, 'MarkerEdgeColor', bzColor, 'LineWidth', 1, 'MarkerSize', 4)
+plot(axFS, K0_x, K0_y, 'o', 'Color', bzColor, 'MarkerFaceColor', bzColor, 'MarkerEdgeColor', bzColor, 'LineWidth', 1, 'MarkerSize', 6)
 text(axFS, K0_x - 0.10, K0_y - 0.10, '$K_{0}$', 'Interpreter', 'latex', ...
     'Color', bzColor, 'FontWeight', 'normal', 'FontSize', baseFont, 'HorizontalAlignment', 'center');
 

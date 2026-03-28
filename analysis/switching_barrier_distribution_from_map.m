@@ -3,7 +3,7 @@
 % Estimate an effective switching-threshold distribution from a saved
 % switching map S(I,T) by taking dS/dI at each temperature.
 %
-% Outputs (default: active run dir if available, otherwise tmp debug path):
+% Outputs (default: repo root):
 %   barrier_distribution_series.csv
 %   barrier_distribution_plots.png
 %   barrier_distribution_report.md
@@ -20,8 +20,7 @@ addpath(fullfile(repoRoot, 'tools'));
 addpath(fullfile(repoRoot, 'Switching', 'utils'), '-begin');
 
 cfg = applyDefaults(cfg, repoRoot);
-cfg.outputDir = resolveOutputDir(cfg, repoRoot);
-source = resolveSwitchingSource(cfg, repoRoot);
+source = resolveSwitchingSource(cfg);
 [temps, currents, Smap, source] = loadSwitchingMap(source);
 
 results = computeDistributionSeries(temps, currents, Smap);
@@ -44,52 +43,17 @@ function cfg = applyDefaults(cfg, repoRoot)
 cfg = setDefaultField(cfg, 'switchRunDir', "");
 cfg = setDefaultField(cfg, 'switchRunName', "");
 cfg = setDefaultField(cfg, 'switchLabelHint', "alignment_audit");
-cfg = setDefaultField(cfg, 'outputDir', "");
+cfg = setDefaultField(cfg, 'outputDir', repoRoot);
 cfg = setDefaultField(cfg, 'usePositiveDerivativeOnly', true);
 end
 
-function outputDir = resolveOutputDir(cfg, repoRoot)
-if strlength(string(cfg.outputDir)) > 0
-    outputDir = char(string(cfg.outputDir));
-    return;
-end
-
-% Prefer active run output directory when a run context exists.
-if exist('getRunOutputDir', 'file') == 2
-    try
-        runOutputDir = getRunOutputDir();
-        if exist(runOutputDir, 'dir') == 7
-            outputDir = runOutputDir;
-            return;
-        end
-    catch
-        % Fall back to debug output path when no active run context exists.
-    end
-end
-
-stamp = char(datetime('now', 'Format', 'yyyy_MM_dd_HHmmss'));
-preferred = fullfile(repoRoot, 'tmp', 'debug_outputs', 'switching_barrier_distribution_from_map', stamp);
-fallback = fullfile(repoRoot, 'tmp_debug_outputs', 'switching_barrier_distribution_from_map', stamp);
-
-try
-    if exist(preferred, 'dir') ~= 7
-        mkdir(preferred);
-    end
-    outputDir = preferred;
-catch
-    if exist(fallback, 'dir') ~= 7
-        mkdir(fallback);
-    end
-    outputDir = fallback;
-end
-end
-function source = resolveSwitchingSource(cfg, repoRoot)
+function source = resolveSwitchingSource(cfg)
 if strlength(string(cfg.switchRunDir)) > 0
     runDir = char(string(cfg.switchRunDir));
 elseif strlength(string(cfg.switchRunName)) > 0
-    runDir = fullfile(repoRoot, 'results', 'switching', 'runs', char(string(cfg.switchRunName)));
+    runDir = fullfile(cfg.outputDir, 'results', 'switching', 'runs', char(string(cfg.switchRunName)));
 else
-    runDir = findLatestSwitchingRunWithMap(repoRoot, string(cfg.switchLabelHint));
+    runDir = findLatestSwitchingRunWithMap(cfg.outputDir, string(cfg.switchLabelHint));
 end
 
 if exist(runDir, 'dir') ~= 7
@@ -442,5 +406,3 @@ else
 end
 values = values(:);
 end
-
-

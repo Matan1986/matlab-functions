@@ -57,6 +57,7 @@ sourceManifestTbl = buildSourceManifestTable(source);
 clockTablePath = save_run_table(clockTbl, 'table_clock_ratio.csv', runDir);
 summaryPath = save_run_table(summaryTbl, 'correlation_summary.csv', runDir);
 manifestPath = save_run_table(sourceManifestTbl, 'source_run_manifest.csv', runDir);
+observablesPath = exportClockRatioObservables(runDir, run.run_id, clockTbl, source);
 
 figDip = makeTauTemperatureFigure(clockTbl.Tp, clockTbl.tau_dip_seconds, cfg.colors.dip, ...
     '\tau_{dip} (s)', 'Dip-sector clock vs stopping temperature', cfg.crossoverTemperatureK);
@@ -88,6 +89,7 @@ appendText(run.notes_path, sprintf('Cross-over interpretation: %s\n', char(ratio
 appendText(run.log_path, sprintf('[%s] clock table: %s\n', stampNow(), clockTablePath));
 appendText(run.log_path, sprintf('[%s] summary table: %s\n', stampNow(), summaryPath));
 appendText(run.log_path, sprintf('[%s] source manifest: %s\n', stampNow(), manifestPath));
+appendText(run.log_path, sprintf('[%s] observables: %s\n', stampNow(), observablesPath));
 appendText(run.log_path, sprintf('[%s] report: %s\n', stampNow(), reportPath));
 appendText(run.log_path, sprintf('[%s] zip: %s\n', stampNow(), zipPath));
 
@@ -106,6 +108,7 @@ out.fitStats = fitStats;
 out.ratioStats = ratioStats;
 out.tablePath = string(clockTablePath);
 out.summaryPath = string(summaryPath);
+out.observablesPath = string(observablesPath);
 out.reportPath = string(reportPath);
 out.zipPath = string(zipPath);
 out.figures = struct( ...
@@ -113,6 +116,22 @@ out.figures = struct( ...
     'tau_FM', string(figFmPaths.png), ...
     'ratio', string(figRatioPaths.png), ...
     'loglog', string(figLogLogPaths.png));
+end
+
+function outPath = exportClockRatioObservables(runDir, runId, clockTbl, source)
+sampleName = "aging_clock_ratio_" + string(source.dipRunName) + "__" + string(source.fmRunName);
+n = height(clockTbl);
+obsTbl = table( ...
+    repmat("aging", n, 1), ...
+    repmat(sampleName, n, 1), ...
+    clockTbl.Tp(:), ...
+    repmat("R", n, 1), ...
+    clockTbl.R_tau_FM_over_tau_dip(:), ...
+    repmat("unitless", n, 1), ...
+    repmat("observable", n, 1), ...
+    repmat(string(runId), n, 1), ...
+    'VariableNames', {'experiment', 'sample', 'temperature', 'observable', 'value', 'units', 'role', 'source_run'});
+outPath = export_observables('aging', runDir, obsTbl);
 end
 
 function cfg = applyDefaults(cfg, repoRoot)

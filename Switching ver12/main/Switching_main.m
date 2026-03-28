@@ -20,9 +20,10 @@ if detectAmpTempSwitchingMap(dir)
     swapAxes = true;       
     useMathLabels = true;   % ← I,T,S
     showOverlay = true;
+    ridge_vis_mode = 'smooth_map';   % 'raw' | 'smooth_map' | 'refined'
     plotAmpTempSwitchingMap_switchCh( ...
         dir, ampTempMetric, ChannesToPlotAmpTemp, plotAmpTempMode, ...
-        FC_amp_subset, swapAxes, useMathLabels,showOverlay);
+        FC_amp_subset, swapAxes, useMathLabels,showOverlay,ridge_vis_mode);
     return;
 end
 %% -------------------------------------------------

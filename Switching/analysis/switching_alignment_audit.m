@@ -2179,11 +2179,14 @@ copyfile(char(string(srcPath)), char(string(dstPath)));
 end
 
 function obsTblLong = buildSwitchingObservableLongTable(temps, S_peak, Ipeak, halfwidth_diff_norm, width_I, asym, sampleName)
-obsNames = ["S_peak", "I_peak", "halfwidth_diff_norm", "width_I", "asym"];
-obsRoles = ["coordinate", "coordinate", "coordinate", "observable", "observable"];
-obsUnits = ["percent", "mA", "unitless", "mA", "unitless"];
-obsValues = [S_peak(:), Ipeak(:), halfwidth_diff_norm(:), width_I(:), asym(:)];
-
+X = NaN(size(Ipeak(:)));
+denom = width_I(:) .* S_peak(:);
+validX = isfinite(Ipeak(:)) & isfinite(width_I(:)) & isfinite(S_peak(:)) & abs(denom) > eps;
+X(validX) = Ipeak(validX) ./ denom(validX);
+obsNames = ["S_peak", "I_peak", "halfwidth_diff_norm", "width_I", "asym", "X"];
+obsRoles = ["coordinate", "coordinate", "coordinate", "observable", "observable", "observable"];
+obsUnits = ["percent", "mA", "unitless", "mA", "unitless", "unitless"];
+obsValues = [S_peak(:), Ipeak(:), halfwidth_diff_norm(:), width_I(:), asym(:), X(:)];
 nT = numel(temps);
 nObs = numel(obsNames);
 nRows = nT * nObs;
@@ -2577,50 +2580,4 @@ catch
     colormap(ax, cmap);
 end
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
