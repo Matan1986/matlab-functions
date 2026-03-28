@@ -62,9 +62,9 @@ Ipeak = fillByInterp(T, Ipeak);
 width = fillByInterp(T, width);
 Speak = fillByInterp(T, Speak);
 
-denom = width .* Speak;
-denomSafe = max(denom, eps);
-X = Ipeak ./ denomSafe;
+[canonicalT, canonicalX] = get_canonical_X();
+% X is loaded from canonical run to avoid drift from duplicated implementations
+X = interp1(canonicalT, canonicalX, T, 'linear', NaN);
 X = fillByInterp(T, X);
 
 [dX_raw, dX, X_smooth, derivativeMethod] = derivativeProfiles(T, X, cfg);

@@ -1,3 +1,8 @@
+% NOTE:
+% R_relax = time-dependent relaxation (-dM/dlog t)
+% R_age   = aging scalar (tau ratio)
+% These MUST NOT be confused
+
 % switching_alignment_audit
 % Safe analysis-layer audit for switching alignment structure.
 % This script does not modify the legacy Switching pipeline.

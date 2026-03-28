@@ -244,8 +244,9 @@ for i = 1:numel(required)
 end
 
 if ~ismember('X', tbl.Properties.VariableNames)
-    denom = double(tbl.width_mA(:)) .* double(tbl.S_peak(:));
-    tbl.X = double(tbl.I_peak_mA(:)) ./ max(denom, eps);
+    [canonicalT, canonicalX] = get_canonical_X();
+    % X is loaded from canonical run to avoid drift from duplicated implementations
+    tbl.X = interp1(canonicalT, canonicalX, double(tbl.T_K(:)), 'linear', NaN);
 end
 
 tbl = sortrows(tbl, 'T_K');

@@ -139,7 +139,9 @@ S_peak = double(tbl.(cols.S_peak)(:));
 I_peak = double(tbl.(cols.I_peak)(:));
 width = double(tbl.(cols.width)(:));
 
-X = I_peak ./ (width .* S_peak);
+[canonicalT, canonicalX] = get_canonical_X();
+% X is loaded from canonical run to avoid drift from duplicated implementations
+X = interp1(canonicalT, canonicalX, T, 'linear', NaN);
 
 valid = isfinite(T) & isfinite(S_peak) & isfinite(I_peak) & isfinite(width) & isfinite(X) ...
     & T > 0 & S_peak > 0 & I_peak > 0 & width > 0 & X > 0;
@@ -310,7 +312,9 @@ T = double(tbl.(cols.T)(:));
 S_peak = double(tbl.(cols.S_peak)(:));
 I_peak = double(tbl.(cols.I_peak)(:));
 width = double(tbl.(cols.width)(:));
-X = I_peak ./ (width .* S_peak);
+[canonicalT, canonicalX] = get_canonical_X();
+% X is loaded from canonical run to avoid drift from duplicated implementations
+X = interp1(canonicalT, canonicalX, T, 'linear', NaN);
 
 valid = isfinite(T) & isfinite(S_peak) & isfinite(I_peak) & isfinite(width) & isfinite(X) ...
     & T > 0 & S_peak > 0 & I_peak > 0 & width > 0 & X > 0;

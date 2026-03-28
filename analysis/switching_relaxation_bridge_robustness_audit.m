@@ -211,7 +211,9 @@ bridgeTbl.A_interp = interp1(relax.T, relax.A, T, char(caseCfg.interp_method), N
 bridgeTbl.S_peak = switching.S(:);
 bridgeTbl.I_peak_mA = selectISeries(switching, motion, caseCfg.I_source);
 bridgeTbl.width_mA = selectWidthSeries(switching, caseCfg.width_source);
-bridgeTbl.X_bridge = bridgeTbl.I_peak_mA ./ (bridgeTbl.width_mA .* bridgeTbl.S_peak);
+[canonicalT, canonicalX] = get_canonical_X();
+% X is loaded from canonical run to avoid drift from duplicated implementations
+bridgeTbl.X_bridge = interp1(canonicalT, canonicalX, T, char(caseCfg.interp_method), NaN);
 bridgeTbl.case_name = repmat(string(caseCfg.case_name), height(bridgeTbl), 1);
 bridgeTbl.interp_method = repmat(string(caseCfg.interp_method), height(bridgeTbl), 1);
 bridgeTbl.width_source = repmat(string(caseCfg.width_source), height(bridgeTbl), 1);

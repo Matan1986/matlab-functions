@@ -283,7 +283,9 @@ aligned.Smap = switching.Smap(mask, :);
 aligned.I_peak_mA = switching.I_peak(mask);
 aligned.width_mA = switching.width(mask);
 aligned.S_peak = switching.S_peak(mask);
-aligned.X = aligned.I_peak_mA ./ (aligned.width_mA .* aligned.S_peak);
+[canonicalT, canonicalX] = get_canonical_X();
+% X is loaded from canonical run to avoid drift from duplicated implementations
+aligned.X = interp1(canonicalT, canonicalX, aligned.T_K, cfg.interpMethod, NaN);
 aligned.A_interp = A(mask);
 aligned.R_interp = R(mask);
 aligned.I2_peak = aligned.I_peak_mA .^ 2;
@@ -1084,7 +1086,7 @@ lines(end + 1) = sprintf('- Latest figure-only wrapper around that collapse: `%s
 lines(end + 1) = sprintf('- Relaxation anchor run used for the A-X relation: `%s`, verified from `%s`.', char(source.relaxRunName), char(source.axRunName));
 lines(end + 1) = sprintf('- `S(I,T)` originates from `%s` because the full-scaling run points back to that immutable alignment-map source in its config snapshot.', fullfile(char(source.alignRunName), 'alignment_audit', 'switching_alignment_samples.csv'));
 lines(end + 1) = sprintf('- `I_peak(T)`, `width(T)`, and `S_peak(T)` originate from `%s`.', fullfile(char(source.switchRunName), 'tables', 'switching_full_scaling_parameters.csv'));
-lines(end + 1) = sprintf('- `X(T) = I_peak / (width * S_peak)` was recomputed directly from that full-scaling parameter table on the saved switching temperature grid `%s`.', formatTemperatureList(aligned.T_K));
+lines(end + 1) = sprintf('- `X(T)` was loaded from the canonical switching X export on the saved switching temperature grid `%s`.', formatTemperatureList(aligned.T_K));
 lines(end + 1) = sprintf('- `A(T)` and `R(T)` originate from `%s` via columns `A_T` and `R_T`, interpolated onto the switching grid with `%s`.', fullfile(char(source.relaxRunName), 'tables', 'temperature_observables.csv'), cfg.interpMethod);
 if prior.hasDedicatedHeatingRun
     lines(end + 1) = sprintf('- Existing heating/Joule-labelled runs already exist: `%s`.', strjoin([prior.switchHeatingRuns; prior.crossHeatingRuns], '`, `'));
