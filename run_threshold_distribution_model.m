@@ -12,6 +12,7 @@
 repoRoot = pwd;
 addpath(genpath(fullfile(repoRoot, 'tools')));
 addpath(genpath(fullfile(repoRoot, 'Switching', 'utils')));
+addpath(fullfile(repoRoot, 'Aging', 'utils'));
 
 %% Setup
 source_run_dir = fullfile(repoRoot, 'results', 'switching', 'runs', 'run_2026_03_10_112659_alignment_audit');
@@ -23,17 +24,17 @@ samples_csv = fullfile(alignment_audit_dir, 'switching_alignment_samples.csv');
 assert(isfile(obs_csv), 'Missing observables file: %s', obs_csv);
 assert(isfile(samples_csv), 'Missing samples file: %s', samples_csv);
 
-% Create run directory
-run_timestamp = datetime('now', 'Format', 'yyyyMMdd_HHmmss');
-run_label = 'threshold_distribution_model';
-run_output_dir = fullfile(repoRoot, 'results', 'switching', 'runs', ...
-    sprintf('run_%s_%s', run_timestamp, run_label));
+runCfg = struct();
+runCfg.runLabel = 'threshold_distribution_model';
+runCfg.dataset = sprintf('alignment_audit:%s', source_run_dir);
+runCtx = createRunContext('switching', runCfg);
+run_output_dir = runCtx.run_dir;
 
-% Create artifact subdirectories
-mkdir_safe(fullfile(run_output_dir, 'figures'));
-mkdir_safe(fullfile(run_output_dir, 'tables'));
-mkdir_safe(fullfile(run_output_dir, 'reports'));
-mkdir_safe(fullfile(run_output_dir, 'review'));
+fidNotes = fopen(runCtx.notes_path, 'a', 'n', 'UTF-8');
+if fidNotes > 0
+    fprintf(fidNotes, 'Source run: %s\nAlignment audit dir: %s\n', source_run_dir, alignment_audit_dir);
+    fclose(fidNotes);
+end
 
 fprintf('Output directory: %s\n', run_output_dir);
 
@@ -463,15 +464,20 @@ report_lines = {
 };
 
 report_text = strjoin(report_lines, newline);
-write_text_file(fullfile(run_output_dir, 'reports', 'analysis_summary.md'), report_text);
+save_run_report(report_text, 'analysis_summary.md', run_output_dir);
 
 fprintf('Report written to %s/reports/analysis_summary.md\n', run_output_dir);
 
 %% Create ZIP Archive
 fprintf('\n=== CREATING ZIP ARCHIVE ===\n');
 
-zip_name_base = sprintf('%s_package.zip', run_label);
-zip_path = fullfile(run_output_dir, 'review', zip_name_base);
+review_dir = fullfile(run_output_dir, 'review');
+if ~isfolder(review_dir)
+    mkdir(review_dir);
+end
+
+zip_name_base = sprintf('%s_package.zip', runCfg.runLabel);
+zip_path = fullfile(review_dir, zip_name_base);
 
 try
     zip(zip_path, fullfile(run_output_dir, '*'));
@@ -489,17 +495,3 @@ fprintf('Report saved to: reports/\n');
 fprintf('Archive saved to: review/\n');
 
 %% Helper Functions
-function mkdir_safe(dir_path)
-    if ~isfolder(dir_path)
-        mkdir(dir_path);
-    end
-end
-
-function write_text_file(file_path, text_content)
-    fid = fopen(file_path, 'w');
-    if fid < 0
-        error('Could not open file for writing: %s', file_path);
-    end
-    fprintf(fid, '%s', text_content);
-    fclose(fid);
-end
