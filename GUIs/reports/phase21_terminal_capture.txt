@@ -1,4 +1,4 @@
-﻿[INFO] ScientificColourMaps8: Not found (optional)
+[INFO] ScientificColourMaps8: Not found (optional)
 [CONFIG] Total colormaps available: 81
 Validating style consistency...
  SMART: nx=3 | Panel = 2.33 x 1.87 inch
@@ -10,7 +10,7 @@ Validating style consistency...
 
 matlab : {Phase21ValidationFailed
 At line:1 char:92
-+ ... t -Force }; matlab -batch "cd('GUIs'); results = phase21_validation() ...
++ ... t -Force }; tools/run_matlab_safe.bat "cd('GUIs'); results = phase21_validation(); exit; ...
 +                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     + CategoryInfo          : NotSpecified: ({Phase21ValidationFailed:String) 
     [], RemoteException

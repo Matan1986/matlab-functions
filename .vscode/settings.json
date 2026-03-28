@@ -106,6 +106,27 @@
         "/^\\$targets = @\\('results/switching/runs/run_20\\*/tables/\\*\\.csv','results/relaxation/runs/run_20\\*/tables/\\*\\.csv','results/aging/runs/run_20\\*/tables/\\*\\.csv','results/cross_experiment/runs/run_20\\*/tables/\\*\\.csv'\\); foreach \\(\\$pat in \\$targets\\) \\{ Get-ChildItem -Path \\$pat -ErrorAction SilentlyContinue \\| ForEach-Object \\{ \\$h = \\(Get-Content -Path \\$_\\.FullName -TotalCount 1\\); if \\(\\$h -match 'T\\|Tp\\|Ipeak\\|width\\|S_peak\\|X\\|A\\|tau\\|chi\\|a1\\|curvature\\|kappa\\|ridge'\\) \\{ \"\\{0\\}`t\\{1\\}\" -f \\$_\\.FullName,\\$h \\} \\} \\} \\| Out-String -Width 4096$/": {
             "approve": true,
             "matchCommandLine": true
+        },
+        "New-Object": true,
+        "mkdir": true,
+        "md": true,
+        "Compress-Archive": true,
+        "/^powershell -NoProfile -ExecutionPolicy Bypass -File \"tools/check_io_consistency\\.ps1\" -ManifestPath \"snapshot_scientific_v3/00_entrypoints/snapshot_manifest\\.json\"$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^\\$script = Join-Path \\$PWD 'run_activation_signature_wrapper\\.m'; \\$ro = 'results\\\\switching\\\\runs\\\\dummy\\\\a\\.txt;results\\\\switching\\\\runs\\\\dummy\\\\b\\.txt'; powershell -NoProfile -ExecutionPolicy Bypass -File tools\\\\run_fingerprint\\.ps1 \\$script \\$ro ; powershell -NoProfile -ExecutionPolicy Bypass -File tools\\\\run_fingerprint\\.ps1 \\$script \\$ro ; Get-ChildItem runs\\\\fingerprints \\| Sort-Object LastWriteTime -Descending \\| Select-Object -First 2 Name,Length,LastWriteTime \\| Format-Table -AutoSize \\| Out-String$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "/^powershell -NoProfile -ExecutionPolicy Bypass -File tools\\\\run_fingerprint\\.ps1 \"C:\\\\nope\\\\missing_script\\.m\" \"results\\\\x\\\\a\\.txt\" ; \\$LASTEXITCODE$/": {
+            "approve": true,
+            "matchCommandLine": true
+        },
+        "Invoke-ScriptAnalyzer": true,
+        "/^try \\{ powershell -NoProfile -ExecutionPolicy Bypass -File \"tools/check_io_consistency\\.ps1\" -ManifestPath \"snapshot_scientific_v3/00_entrypoints/snapshot_manifest\\.json\"; Write-Output \"EXIT_OK\" \\} catch \\{ Write-Output \\$_\\.Exception\\.Message; Write-Output \"EXIT_FAIL\" \\}$/": {
+            "approve": true,
+            "matchCommandLine": true
         }
     },
     "chat.agent.maxRequests": 100
