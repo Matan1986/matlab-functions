@@ -1,0 +1,4 @@
+"pair","rmse_before","rmse_scale","rmse_affine","reduction_scale","reduction_affine","dominant_region","dominant_temperature_range"
+"xy_over_xx vs baseline_aware","2.23606797904315","2.17660710631741","2.17635280479071","0.0265917106648895","0.0267054377649077","low_signal","30-34 K"
+"raw_xy_delta vs xy_over_xx","3.21001325952952","3.16443453486916","2.51973965559562","0.0141989209935691","0.215037617643697","near_peak","4-6 K"
+"raw_xy_delta vs baseline_aware","3.9120562565815","3.91190807660539","3.36121179176038","3.78777723011408E-05","0.140806887399536","near_peak","4-34 K"

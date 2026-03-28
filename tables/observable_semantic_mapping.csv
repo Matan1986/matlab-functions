@@ -1,0 +1,18 @@
+latent_variable,observable_proxy,human_name,physical_category,replacement_quality,spread_skew_width_of_what,primary_domain,notes
+PT_backbone,spread90_50,upper tail spread of barrier PDF in I,barrier_geometry,PARTIAL — scalar summary,spread of I under PT PMF,PT,Full backbone not one number
+PT_backbone,tail_width_q90_q50_PT,PT q90-q50 tail in I,barrier_tail,PARTIAL,spread of I under PT PMF,PT,Joint with S_peak for kappa1 story
+PT_backbone,median_I_mA,median barrier current in I,barrier_location,PARTIAL,location not spread,PT,Context for spreads
+kappa1,tail_width_q90_q50_PT + S_peak_mA,barrier tail spread plus map scale,deformation_amplitude,PARTIAL,spread PT in I plus map peak scalar,map+PT,NOT raw map q90-q50 alone
+kappa1,S_peak_mA,map scale on switching axis,map_scale,PARTIAL — correlates highly,peak of map signal not spread,map,0.97 rho n=14
+kappa2,I_peak_mA,ridge peak current in I,ridge_location,PARTIAL,peak on map,map,LOOCV competitive vs mixes
+alpha,skew_pt_weighted + width_mA,PT skew of barrier PMF plus map ridge width,mode_coupling_geometry,PARTIAL,skew of I under PT PMF; width of map ridge,map+PT,22-24K residual
+alpha,asymmetry_PT + spread90_50,PT asymmetry plus tail spread,barrier_shape,PARTIAL,asymmetry of PT PMF in I; spread PT,PT,alpha_from_PT baselines
+phi1,N_A_prose,broad symmetric ridge correction vs backbone,dominant_residual_shape,CAN_REPLACE_IN_PAPER_ONLY,map pattern along ridge after backbone,fit+map,No single number
+phi2,phi2 structure metrics,width_slope bump and shoulders,subleading_residual_shape,PARTIAL — metrics not one scalar,shape energy splits on Phi2 not I histogram,fit_map_metrics,PHI2_STABLE caveats
+R_T_interp_model,Tier1 g(P_T) + kappa1,aging R baseline PT plus first mode amplitude,aging_closure_canonical,FULL_LINEAR_FORM_documented,spread PT in I plus fit amplitude,cross+PT+fit,Canonical baseline n=11 LOOCV 10.981; n=10 Agent 24B LOOCV 11.915
+R_T_interp_model,Tier2 g(P_T) + kappa1 + alpha,aging R minimal physical model deformation ratio,aging_closure_deformation,MINIMAL_PHYSICAL_MODEL_n11,spread PT plus kappa1 plus kappa2/kappa1,cross+PT+fit,LOOCV 6.988 n=11 — core interpretable step; not global best LOOCV
+R_T_interp_model,Tier3 g(P_T) + kappa1 + alpha + kappa1*alpha,aging R amplitude-deformation coupling,aging_closure_interaction,BEST_LOOCV_N11,product of fit amplitudes on shared ladder,cross+PT+fit,LOOCV 5.682 n=11 aging_hermetic_closure_models; aging_meta_audit rank 1
+R_T_interp_model,Tier4 g(P_T) + kappa1 + alpha + abs(alpha_res),aging R residual reorganization term,aging_closure_hermetic,BEST_HERMETIC_PROJECT_RULE,abs residual magnitude near 22-24K window,cross+PT+fit,LOOCV 6.352 n=11; transition metric vs Tier2 ref per meta-audit
+alpha_res,residual deformation component,reorganization amplitude,reorganization,PARTIAL,N/A — residual scalar not map spread,cross+fit,dominant near transition; Tier4 term
+"kappa1*alpha",interaction term,amplitude–deformation coupling,nonlinear_coupling,PARTIAL,N/A — product of latent scalars,cross+fit,improves global RMSE; Tier3 term
+A_T_interp,cheb_m2_z + pt_svd_score1,barrier shape scores,relaxation_from_barrier,PARTIAL_snapshot,PT shape in I not map spread,PT,24A PT sufficient STATE_IMPROVES_A NO

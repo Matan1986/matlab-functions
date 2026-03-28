@@ -1,0 +1,107 @@
+# Relaxation raw run candidates
+
+**EXECUTION_STATUS:** SUCCESS
+**N_FILES:** 101
+**VALID_RELAXATION_FOUND:** NO
+**BEST_CANDIDATE:** ``
+
+## Candidate variables
+| file_path | variable_name | has_time_axis | has_signal | time_length | signal_shape | is_valid_relaxation |
+|---|---|:--:|:--:|---:|---|:--:|
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260223_093325/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260223_093628/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260223_100632/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260223_101312/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260223_101805/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260223_102319/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260223_121046/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260223_121300/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260223_232412/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260223_233951/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260223_235148/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260223_235318/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260223_235451/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260223_235729/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260223_235739/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260223_235755/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260223_235809/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260223_235824/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260223_235838/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260223_235853/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_000324/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_001959/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_002638/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_002731/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_002811/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_002943/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_003312/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_003546/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_003657/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_004516/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_004632/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_004814/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_004914/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_005119/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_005315/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_005548/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_005708/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_005824/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_011853/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_013216/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_083013/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_224027/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_224858/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_225013/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_225238/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_225631/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_225817/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_230105/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_230234/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_230301/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_230318/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_230421/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_230646/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_231124/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_233621/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_233756/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_233958/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_234229/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_234345/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_234940/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260224_235202/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260225_011039/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260225_011455/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260225_011812/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260225_012405/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260225_014207/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260225_014957/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260225_062621/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260226_231405/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260226_231544/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260226_231622/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260226_231736/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260227_102753/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260304_203209/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260304_211321/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260304_220024/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260304_220046/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260304_221439/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260304_222002/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260304_222215/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260304_222725/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260304_224828/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260304_230334/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260304_230934/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260304_231526/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260306_134327/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260306_150249/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260306_150302/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260306_150317/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/aging/runs/run_legacy_debug_runs/20260306_150331/debug_metrics.mat` | `cfg_snapshot` | NO | YES | 0 | `[1 1]` | NO |
+| `C:/Dev/matlab-functions/results/relaxation/runs/run_2026_03_10_151424_geometry_observables/svd_data.mat` | `svdData` | NO | YES | 0 | `struct` | NO |
+| `C:/Dev/matlab-functions/results/switching/runs/run_2026_03_09_145524_switching_alignment_audit/switching_alignment_core_data.mat` | `Smap` | NO | YES | 0 | `[16 7]` | NO |
+| `C:/Dev/matlab-functions/results/switching/runs/run_2026_03_09_145524_switching_alignment_audit/switching_alignment_svd_data.mat` | `S` | NO | YES | 0 | `[7 7]` | NO |
+| `C:/Dev/matlab-functions/results/switching/runs/run_2026_03_09_222702_alignment_audit/switching_alignment_core_data.mat` | `Smap` | NO | YES | 0 | `[16 7]` | NO |
+| `C:/Dev/matlab-functions/results/switching/runs/run_2026_03_09_222702_alignment_audit/switching_alignment_svd_data.mat` | `S` | NO | YES | 0 | `[7 7]` | NO |
+| `C:/Dev/matlab-functions/results/switching/runs/run_2026_03_10_112659_alignment_audit/switching_alignment_core_data.mat` | `Smap` | NO | YES | 0 | `[16 7]` | NO |
+| `C:/Dev/matlab-functions/results/switching/runs/run_2026_03_10_112659_alignment_audit/switching_alignment_svd_data.mat` | `S` | NO | YES | 0 | `[7 7]` | NO |

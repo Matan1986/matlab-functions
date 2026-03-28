@@ -1,0 +1,3 @@
+comparison,rmse_relative_improvement,corr_delta
+M2_vs_M1,0.809783206635046,NaN
+M3_vs_M2,0.363441281272279,0.0227745908204247

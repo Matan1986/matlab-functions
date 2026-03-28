@@ -1,0 +1,2 @@
+"n_points","corr_kappa1_kappa2","partial_corr_kappa2_PT_given_kappa1","model_intercept","model_beta_kappa1","model_beta_PT","model_r2","model_adj_r2","MODES_INDEPENDENT","COUPLING_STRUCTURE_SIMPLE"
+"11","-0.672659919045759","-0.757600431200474","1.01187166071253","-0.110208881476276","-0.0349048949976493","0.766730032331394","0.708412540414243","NO","YES"

@@ -1,0 +1,7 @@
+file_path,time_column,signal_column,n_points,is_monotonic,is_log_axis,valid_relaxation
+C:\Dev\matlab-functions\results\relaxation\runs\run_2026_03_10_143906_timelaw_observables\observables.csv,,,0,NO,NO,NO
+C:\Dev\matlab-functions\results\relaxation\runs\run_2026_03_10_143906_timelaw_observables\tables\time_fit_residuals.csv,log10_t_s,v1_data,360,YES,YES,YES
+C:\Dev\matlab-functions\results\relaxation\runs\run_2026_03_10_143906_timelaw_observables\tables\time_fit_results.csv,param_tau,best_model,0,YES,NO,NO
+C:\Dev\matlab-functions\results\relaxation\runs\run_2026_03_10_133938_time_mode_analysis\tables\barrier_scaling_metrics.csv,,,0,NO,NO,NO
+C:\Dev\matlab-functions\results\relaxation\runs\run_2026_03_10_133938_time_mode_analysis\tables\collapse_metrics.csv,,,0,NO,NO,NO
+C:\Dev\matlab-functions\results\relaxation\runs\run_2026_03_10_133938_time_mode_analysis\tables\time_mode_fits.csv,,,0,NO,NO,NO

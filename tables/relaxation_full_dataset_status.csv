@@ -1,0 +1,2 @@
+EXECUTION_STATUS,N_TEMPERATURES,N_POINTS_PER_T,PIPELINE_USED,ERROR_MESSAGE
+SUCCESS,19,360,run_relaxation_observable_stability_audit: resolveLatestCompleteSourceRun + loadMapMatrix,

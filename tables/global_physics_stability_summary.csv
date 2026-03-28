@@ -1,0 +1,3 @@
+metric,value,threshold,verdict
+phi_shape_corr,0.999794275225,>=0.90,YES
+kappa_corr,0.999953848545,>=0.90,YES

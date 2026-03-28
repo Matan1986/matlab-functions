@@ -1,0 +1,2 @@
+median_rmse_tangent_lowT,median_rmse_rank2_lowT,median_corr_tangent_lowT,median_corr_rank2_lowT,corr_deltaI_kappa2_lowT,corr_deltaI_alpha_lowT,loocv_mean_abs_corr_deltaI_kappa2
+0.0673552926133843,0.01623450450273,-0.476008318178037,0.984439080401222,NaN,NaN,NaN
