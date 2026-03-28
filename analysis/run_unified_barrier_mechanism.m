@@ -1,4 +1,4 @@
-﻿function out = run_unified_barrier_mechanism(cfg)
+function out = run_unified_barrier_mechanism(cfg)
 %RUN_UNIFIED_BARRIER_MECHANISM Build a unified barrier mechanism map.
 %   This script reads existing Relaxation, Switching, and Aging outputs,
 %   projects the requested observables onto an inferred barrier axis, and
@@ -9,9 +9,36 @@ if nargin < 1 || ~isstruct(cfg)
 end
 
 repoRoot = fileparts(fileparts(mfilename('fullpath')));
+addpath(fullfile(repoRoot, 'tools'));
+addpath(fullfile(repoRoot, 'Aging', 'utils'));
+
 cfg = applyDefaults(cfg);
 paths = resolveInputs(repoRoot, cfg);
-run = createRun(paths, repoRoot);
+
+runCfg = struct();
+runCfg.runLabel = 'unified_barrier_mechanism';
+runCfg.dataset = sprintf('unified_barrier|relax:%s|switch:%s', ...
+    paths.relaxRunDir, paths.switchRunDir);
+runCtx = createRunContext('cross_experiment', runCfg);
+runDir = runCtx.run_dir;
+run = struct();
+run.runDir = runDir;
+run.tablesDir = fullfile(runDir, 'tables');
+run.figuresDir = fullfile(runDir, 'figures');
+run.reportsDir = fullfile(runDir, 'reports');
+run.reviewDir = fullfile(runDir, 'review');
+
+notesLines = {
+    ['Relaxation input: ' paths.relaxRunDir]
+    ['Switching input: ' paths.switchRunDir]
+    ['Aging observable input: ' paths.agingObservableRunDir]
+    ['Aging shape input: ' paths.agingShapeRunDir]
+    };
+fidNotes = fopen(runCtx.notes_path, 'a', 'n', 'UTF-8');
+if fidNotes > 0
+    fprintf(fidNotes, '%s\n\n', strjoin(notesLines, newline));
+    fclose(fidNotes);
+end
 
 relaxTbl = readtable(paths.relaxTemperatureObservables);
 relaxSummary = readtable(paths.relaxSummaryObservables);
@@ -29,27 +56,23 @@ clusterMeta = assignClusters(gridTbl, cfg.numClusters);
 gridTbl.cluster_id = clusterMeta.clusterId;
 gridTbl.cluster_label = clusterMeta.clusterLabel;
 
-projectionCsv = fullfile(run.tablesDir, 'observable_barrier_projections.csv');
-regionCsv = fullfile(run.tablesDir, 'barrier_region_classification.csv');
-writetable(projectionTbl, projectionCsv);
-writetable(gridTbl, regionCsv);
+projectionCsv = save_run_table(projectionTbl, 'observable_barrier_projections.csv', runDir);
+regionCsv = save_run_table(gridTbl, 'barrier_region_classification.csv', runDir);
 
-fig1 = fullfile(run.figuresDir, 'unified_barrier_landscape.png');
-fig2 = fullfile(run.figuresDir, 'observable_projections_on_barrier_axis.png');
-fig3 = fullfile(run.figuresDir, 'mobile_vs_pinned_channels.png');
-fig4 = fullfile(run.figuresDir, 'barrier_mechanism_map.png');
-makeUnifiedLandscapeFigure(gridTbl, regionSummary, barrier, fig1);
-makeObservableProjectionFigure(relaxTbl, agingWide, switchDerived, barrier, fig2);
-makeMobilePinnedFigure(gridTbl, regionSummary, fig3);
-makeMechanismMapFigure(gridTbl, clusterMeta, fig4);
+makeUnifiedLandscapeFigure(gridTbl, regionSummary, barrier, runDir);
+makeObservableProjectionFigure(relaxTbl, agingWide, switchDerived, barrier, runDir);
+makeMobilePinnedFigure(gridTbl, regionSummary, runDir);
+makeMechanismMapFigure(gridTbl, clusterMeta, runDir);
 
 reportText = buildReport(paths, run, barrier, relaxSummary, agingWide, switchDerived, regionSummary, clusterMeta);
-reportPath = fullfile(run.reportsDir, 'unified_barrier_landscape_report.md');
-writeText(reportPath, reportText);
+reportPath = save_run_report(reportText, 'unified_barrier_landscape_report.md', runDir);
 
 bundlePath = fullfile(run.reviewDir, 'unified_barrier_landscape_bundle.zip');
 if exist(bundlePath, 'file') == 2
     delete(bundlePath);
+end
+if ~isfolder(run.reviewDir)
+    mkdir(run.reviewDir);
 end
 zip(bundlePath, {'tables', 'figures', 'reports'}, run.runDir);
 
@@ -63,7 +86,7 @@ manifest.barrier_reference_time_s = barrier.referenceTime_s;
 manifest.barrier_attempt_time_s = barrier.attemptTime_s;
 manifest.barrier_ln_factor = barrier.logFactor;
 manifest.generated_at = char(datetime('now', 'Format', 'yyyy-MM-dd HH:mm:ss'));
-writeText(fullfile(run.runDir, 'manifest.json'), jsonencode(manifest, 'PrettyPrint', true));
+writeText(fullfile(run.tablesDir, 'unified_barrier_input_manifest.json'), jsonencode(manifest, 'PrettyPrint', true));
 
 fprintf('Unified barrier mechanism run created at:\n%s\n', run.runDir);
 fprintf('Projection table: %s\n', projectionCsv);
@@ -119,41 +142,6 @@ for i = 1:numel(required)
 end
 
 paths.cfg = cfg;
-end
-
-function run = createRun(paths, repoRoot)
-timestamp = char(datetime('now', 'Format', 'yyyy_MM_dd_HHmmss'));
-runName = ['run_' timestamp '_unified_barrier_mechanism'];
-runDir = fullfile(repoRoot, 'results', 'cross_experiment', 'runs', runName);
-if exist(runDir, 'dir') == 7
-    error('Run directory already exists unexpectedly: %s', runDir);
-end
-
-tablesDir = fullfile(runDir, 'tables');
-figuresDir = fullfile(runDir, 'figures');
-reportsDir = fullfile(runDir, 'reports');
-reviewDir = fullfile(runDir, 'review');
-
-mkdir(runDir);
-mkdir(tablesDir);
-mkdir(figuresDir);
-mkdir(reportsDir);
-mkdir(reviewDir);
-
-run = struct();
-run.runDir = runDir;
-run.tablesDir = tablesDir;
-run.figuresDir = figuresDir;
-run.reportsDir = reportsDir;
-run.reviewDir = reviewDir;
-
-notes = {
-    ['Relaxation input: ' paths.relaxRunDir]
-    ['Switching input: ' paths.switchRunDir]
-    ['Aging observable input: ' paths.agingObservableRunDir]
-    ['Aging shape input: ' paths.agingShapeRunDir]
-    };
-writeText(fullfile(runDir, 'run_notes.txt'), strjoin(notes, newline));
 end
 
 function barrier = buildBarrierMapping(relaxSummary, cfg)
@@ -406,8 +394,9 @@ for i = 1:numel(regionIds)
 end
 end
 
-function makeUnifiedLandscapeFigure(gridTbl, regionSummary, barrier, outPath)
-fig = figure('Visible', 'off', 'Color', 'w', 'Position', [100 100 1200 650]);
+function makeUnifiedLandscapeFigure(gridTbl, regionSummary, barrier, runDir)
+fig = figure('Visible', 'off', 'Color', 'w', 'Position', [100 100 1200 650], ...
+    'Name', 'unified_barrier_landscape', 'NumberTitle', 'off');
 ax = axes(fig);
 hold(ax, 'on');
 box(ax, 'on');
@@ -426,12 +415,13 @@ title(ax, {'Unified barrier landscape', barrier.label}, 'FontWeight', 'bold');
 legend(ax, 'Location', 'northoutside', 'NumColumns', 3);
 ylim(ax, [0 1.08]);
 
-saveFigure(fig, outPath);
+save_run_figure(fig, 'unified_barrier_landscape', runDir);
 close(fig);
 end
 
-function makeObservableProjectionFigure(relaxTbl, agingWide, switchDerived, barrier, outPath)
-fig = figure('Visible', 'off', 'Color', 'w', 'Position', [80 80 1280 850]);
+function makeObservableProjectionFigure(relaxTbl, agingWide, switchDerived, barrier, runDir)
+fig = figure('Visible', 'off', 'Color', 'w', 'Position', [80 80 1280 850], ...
+    'Name', 'observable_projections_on_barrier_axis', 'NumberTitle', 'off');
 tl = tiledlayout(fig, 3, 2, 'Padding', 'compact', 'TileSpacing', 'compact');
 
 nexttile(tl);
@@ -453,12 +443,13 @@ nexttile(tl);
 plotProjected(switchDerived.temperature_K, switchDerived.motion, barrier, 'motion(T)', 'mA/K');
 
 title(tl, 'Observable projections on the reconstructed barrier axis', 'FontWeight', 'bold');
-saveFigure(fig, outPath);
+save_run_figure(fig, 'observable_projections_on_barrier_axis', runDir);
 close(fig);
 end
 
-function makeMobilePinnedFigure(gridTbl, regionSummary, outPath)
-fig = figure('Visible', 'off', 'Color', 'w', 'Position', [110 110 1200 760]);
+function makeMobilePinnedFigure(gridTbl, regionSummary, runDir)
+fig = figure('Visible', 'off', 'Color', 'w', 'Position', [110 110 1200 760], ...
+    'Name', 'mobile_vs_pinned_channels', 'NumberTitle', 'off');
 tl = tiledlayout(fig, 2, 1, 'Padding', 'compact', 'TileSpacing', 'compact');
 
 ax1 = nexttile(tl);
@@ -484,12 +475,13 @@ xlabel(ax2, 'Effective barrier E_{eff} (meV)');
 ylabel(ax2, 'mobile - pinned');
 title(ax2, 'Positive values favor mobile sectors; negative values favor pinned sectors');
 
-saveFigure(fig, outPath);
+save_run_figure(fig, 'mobile_vs_pinned_channels', runDir);
 close(fig);
 end
 
-function makeMechanismMapFigure(gridTbl, clusterMeta, outPath)
-fig = figure('Visible', 'off', 'Color', 'w', 'Position', [90 90 1280 780]);
+function makeMechanismMapFigure(gridTbl, clusterMeta, runDir)
+fig = figure('Visible', 'off', 'Color', 'w', 'Position', [90 90 1280 780], ...
+    'Name', 'barrier_mechanism_map', 'NumberTitle', 'off');
 tl = tiledlayout(fig, 3, 1, 'Padding', 'compact', 'TileSpacing', 'compact');
 
 ax1 = nexttile(tl);
@@ -516,7 +508,7 @@ annotationText = sprintf('clusters: %s', strjoin(cellstr(clusterNames), ', '));
 annotation(fig, 'textbox', [0.12 0.91 0.8 0.05], 'String', annotationText, ...
     'FitBoxToText', 'on', 'EdgeColor', 'none', 'FontSize', 10);
 
-saveFigure(fig, outPath);
+save_run_figure(fig, 'barrier_mechanism_map', runDir);
 close(fig);
 end
 function reportText = buildReport(paths, run, barrier, relaxSummary, agingWide, switchDerived, regionSummary, clusterMeta)
@@ -581,6 +573,7 @@ lines(end + 1) = "- `figures/unified_barrier_landscape.png`";
 lines(end + 1) = "- `figures/observable_projections_on_barrier_axis.png`";
 lines(end + 1) = "- `figures/mobile_vs_pinned_channels.png`";
 lines(end + 1) = "- `figures/barrier_mechanism_map.png`";
+lines(end + 1) = "- `tables/unified_barrier_input_manifest.json`";
 lines(end + 1) = "- `review/unified_barrier_landscape_bundle.zip`";
 
 reportText = strjoin(cellstr(lines), newline);
@@ -617,11 +610,6 @@ box(ax, 'on');
 xlabel(ax, 'E_{eff} (meV)');
 ylabel(ax, yLabelText);
 title(ax, ttl);
-end
-
-function saveFigure(fig, outPath)
-drawnow;
-exportgraphics(fig, outPath, 'Resolution', 180);
 end
 
 function value = getFieldOr(s, fieldName, fallback)

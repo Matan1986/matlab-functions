@@ -2,13 +2,25 @@ function run_adversarial_observable_search()
 % Adversarial search over simple alternative observables using existing aligned tables only.
 
 repo_root = fileparts(fileparts(mfilename('fullpath')));
+addpath(fullfile(repo_root, 'tools'));
+addpath(fullfile(repo_root, 'Aging', 'utils'));
+
 composite_csv = fullfile(repo_root, 'results', 'cross_experiment', 'runs', ...
     'run_2026_03_13_071713_switching_composite_observable_scan', ...
     'tables', 'composite_observables_table.csv');
 r_canonical_csv = fullfile(repo_root, 'results', 'cross_experiment', 'runs', ...
     'run_2026_03_16_173307_R_X_reconciliation_analysis', ...
     'tables', 'R_X_canonical_overlap_table.csv');
-report_path = fullfile(repo_root, 'reports', 'adversarial_observable_report.md');
+
+assert(isfile(composite_csv), 'Missing composite table: %s', composite_csv);
+assert(isfile(r_canonical_csv), 'Missing R canonical table: %s', r_canonical_csv);
+
+runCfg = struct();
+runCfg.runLabel = 'adversarial_observable_search';
+runCfg.dataset = 'aligned_tables_only';
+runCtx = createRunContext('cross_experiment', runCfg);
+runDir = runCtx.run_dir;
+fprintf('Run directory: %s\n', runDir);
 
 tbl = readtable(composite_csv);
 tblR = readtable(r_canonical_csv);
@@ -150,7 +162,8 @@ for k = 1:numel(alt_idx)
     end
 end
 
-write_report(report_path, composite_csv, r_canonical_csv, base, res, top_idx, match_idx);
+reportText = compose_adversarial_report(composite_csv, r_canonical_csv, base, res, top_idx, match_idx);
+save_run_report(reportText, 'adversarial_observable_report.md', runDir);
 end
 
 function s = mkcand(name, family, params, yA, yR, rebuildA, rebuildR)
@@ -255,86 +268,99 @@ else
 end
 end
 
-function write_report(report_path, composite_csv, r_csv, base, res, top_idx, match_idx)
-fid = fopen(report_path, 'w');
-if fid < 0
-    error('Cannot open report for writing: %s', report_path);
-end
-cleanup = onCleanup(@() fclose(fid));
-
-fprintf(fid, '# Adversarial Observable Report\n\n');
-fprintf(fid, '## Scope\n\n');
-fprintf(fid, 'This report uses existing aligned datasets only. No raw recomputation and no new base observables were created.\n\n');
-fprintf(fid, 'Data sources:\n\n');
-fprintf(fid, '- `%s`\n', strrep(composite_csv, '\', '/'));
-fprintf(fid, '- `%s`\n\n', strrep(r_csv, '\', '/'));
-
-fprintf(fid, 'Primary baseline:\n\n');
-fprintf(fid, '- `X = I_{peak}/(w*S_{peak})`\n\n');
-
-fprintf(fid, '## Baseline Metrics (X)\n\n');
-fprintf(fid, '| Metric | Value |\n');
-fprintf(fid, '| --- | ---: |\n');
-fprintf(fid, '| Pearson(A, X) | %.4f |\n', base.pearsonA);
-fprintf(fid, '| Spearman(A, X) | %.4f |\n', base.spearmanA);
-fprintf(fid, '| Power fit `A ~ X^beta`: beta | %.4f |\n', base.beta_power);
-fprintf(fid, '| Power fit `A ~ X^beta`: R^2 | %.4f |\n', base.R2_power);
-fprintf(fid, '| Peak offset `|T_peak(X)-T_peak(A)|` (K) | %.0f |\n', base.dT_peak_A);
-fprintf(fid, '| Pearson(R, X) | %.4f |\n', base.pearsonR);
-fprintf(fid, '| Spearman(R, X) | %.4f |\n\n', base.spearmanR);
-
-fprintf(fid, '## Best-performing Alternatives\n\n');
-fprintf(fid, '| Candidate | Family | Pearson(A,Y) | R^2 (`A~Y^beta`) | Peak offset (K) | Pearson(R,Y) | Stability |\n');
-fprintf(fid, '| --- | --- | ---: | ---: | ---: | ---: | ---: |\n');
+function reportText = compose_adversarial_report(composite_csv, r_csv, base, res, top_idx, match_idx)
+lines = strings(0, 1);
+lines(end + 1) = "# Adversarial Observable Report";
+lines(end + 1) = "";
+lines(end + 1) = "## Scope";
+lines(end + 1) = "";
+lines(end + 1) = "This report uses existing aligned datasets only. No raw recomputation and no new base observables were created.";
+lines(end + 1) = "";
+lines(end + 1) = "Data sources:";
+lines(end + 1) = "";
+lines(end + 1) = sprintf('- `%s`', strrep(composite_csv, '\', '/'));
+lines(end + 1) = sprintf('- `%s`', strrep(r_csv, '\', '/'));
+lines(end + 1) = "";
+lines(end + 1) = "Primary baseline:";
+lines(end + 1) = "";
+lines(end + 1) = "- `X = I_{peak}/(w*S_{peak})`";
+lines(end + 1) = "";
+lines(end + 1) = "## Baseline Metrics (X)";
+lines(end + 1) = "";
+lines(end + 1) = "| Metric | Value |";
+lines(end + 1) = "| --- | ---: |";
+lines(end + 1) = sprintf('| Pearson(A, X) | %.4f |', base.pearsonA);
+lines(end + 1) = sprintf('| Spearman(A, X) | %.4f |', base.spearmanA);
+lines(end + 1) = sprintf('| Power fit `A ~ X^beta`: beta | %.4f |', base.beta_power);
+lines(end + 1) = sprintf('| Power fit `A ~ X^beta`: R^2 | %.4f |', base.R2_power);
+lines(end + 1) = sprintf('| Peak offset `|T_peak(X)-T_peak(A)|` (K) | %.0f |', base.dT_peak_A);
+lines(end + 1) = sprintf('| Pearson(R, X) | %.4f |', base.pearsonR);
+lines(end + 1) = sprintf('| Spearman(R, X) | %.4f |', base.spearmanR);
+lines(end + 1) = "";
+lines(end + 1) = "## Best-performing Alternatives";
+lines(end + 1) = "";
+lines(end + 1) = "| Candidate | Family | Pearson(A,Y) | R^2 (`A~Y^beta`) | Peak offset (K) | Pearson(R,Y) | Stability |";
+lines(end + 1) = "| --- | --- | ---: | ---: | ---: | ---: | ---: |";
 for i = 1:numel(top_idx)
     r = res(top_idx(i));
-    fprintf(fid, '| %s | %s | %.4f | %.4f | %.0f | %.4f | %s |\n', ...
+    lines(end + 1) = sprintf('| %s | %s | %.4f | %.4f | %.0f | %.4f | %s |', ...
         r.name, r.family, r.pearsonA, safe0(r.R2_power), r.dT_peak_A, r.pearsonR, fmt_stability(r.stability_score));
 end
-fprintf(fid, '\n');
-
-fprintf(fid, '## Full Candidate Comparison vs X\n\n');
-fprintf(fid, '| Candidate | Family | d|Pearson(A)| vs X | dR^2 vs X | dPeak(K) vs X | d|Pearson(R)| vs X | Stability |\n');
-fprintf(fid, '| --- | --- | ---: | ---: | ---: | ---: | ---: |\n');
+lines(end + 1) = "";
+lines(end + 1) = "## Full Candidate Comparison vs X";
+lines(end + 1) = "";
+lines(end + 1) = "| Candidate | Family | d|Pearson(A)| vs X | dR^2 vs X | dPeak(K) vs X | d|Pearson(R)| vs X | Stability |";
+lines(end + 1) = "| --- | --- | ---: | ---: | ---: | ---: | ---: |";
 for i = 1:numel(res)
     r = res(i);
-    fprintf(fid, '| %s | %s | %+0.4f | %+0.4f | %+0.0f | %+0.4f | %s |\n', ...
+    lines(end + 1) = sprintf('| %s | %s | %+0.4f | %+0.4f | %+0.0f | %+0.4f | %s |', ...
         r.name, r.family, r.dPearsonA_vsX, safe0(r.dR2_vsX), r.dPeak_vsX, r.dPearsonR_vsX, fmt_stability(r.stability_score));
 end
-fprintf(fid, '\n');
-
-fprintf(fid, '## Where Alternatives Fail\n\n');
-fprintf(fid, '### Alignment\n\n');
-fprintf(fid, '- Multiple ratio/linear candidates improve or match one correlation axis but introduce nonzero peak offsets.\n');
-fprintf(fid, '- Nonlinear transforms of X preserve rank structure, but cannot improve peak alignment beyond `0 K` already achieved by X.\n\n');
-
-fprintf(fid, '### Aging consistency\n\n');
-fprintf(fid, '- Candidates that are strong for `A(T)` often lose consistency against canonical `R(T)`.\n');
-fprintf(fid, '- Aging overlap has only 4 temperatures; several alternatives show inflated sensitivity or unstable sign/magnitude in `Pearson(R,Y)` under perturbation.\n\n');
-
-fprintf(fid, '### Stability\n\n');
-fprintf(fid, '- Parametric alternatives with additive denominator terms (`S + beta w`) show larger metric drift under small parameter perturbations.\n');
-fprintf(fid, '- Simple power transforms of X remain stable but do not provide a simultaneous gain across all criteria.\n\n');
-
-fprintf(fid, '### Interpretability\n\n');
-fprintf(fid, '- Hybrids can score well numerically but become harder to interpret physically compared with the compact multiplicative structure of X.\n');
-fprintf(fid, '- Linear normalized sums are easy to tune but less mechanistic and less transferable across experiments.\n\n');
-
-fprintf(fid, '## Final Adversarial Verdict\n\n');
+lines(end + 1) = "";
+lines(end + 1) = "## Where Alternatives Fail";
+lines(end + 1) = "";
+lines(end + 1) = "### Alignment";
+lines(end + 1) = "";
+lines(end + 1) = "- Multiple ratio/linear candidates improve or match one correlation axis but introduce nonzero peak offsets.";
+lines(end + 1) = "- Nonlinear transforms of X preserve rank structure, but cannot improve peak alignment beyond `0 K` already achieved by X.";
+lines(end + 1) = "";
+lines(end + 1) = "### Aging consistency";
+lines(end + 1) = "";
+lines(end + 1) = "- Candidates that are strong for `A(T)` often lose consistency against canonical `R(T)`.";
+lines(end + 1) = "- Aging overlap has only 4 temperatures; several alternatives show inflated sensitivity or unstable sign/magnitude in `Pearson(R,Y)` under perturbation.";
+lines(end + 1) = "";
+lines(end + 1) = "### Stability";
+lines(end + 1) = "";
+lines(end + 1) = "- Parametric alternatives with additive denominator terms (`S + beta w`) show larger metric drift under small parameter perturbations.";
+lines(end + 1) = "- Simple power transforms of X remain stable but do not provide a simultaneous gain across all criteria.";
+lines(end + 1) = "";
+lines(end + 1) = "### Interpretability";
+lines(end + 1) = "";
+lines(end + 1) = "- Hybrids can score well numerically but become harder to interpret physically compared with the compact multiplicative structure of X.";
+lines(end + 1) = "- Linear normalized sums are easy to tune but less mechanistic and less transferable across experiments.";
+lines(end + 1) = "";
+lines(end + 1) = "## Final Adversarial Verdict";
+lines(end + 1) = "";
 if isempty(match_idx)
-    fprintf(fid, 'No constructed alternative matched `X` across all critical criteria (A-scaling quality, peak alignment, cross-experiment aging consistency, and local stability).\n\n');
+    lines(end + 1) = "No constructed alternative matched `X` across all critical criteria (A-scaling quality, peak alignment, cross-experiment aging consistency, and local stability).";
+    lines(end + 1) = "";
 else
-    fprintf(fid, 'A small set of alternatives matched X under the operational thresholds used here:\n\n');
+    lines(end + 1) = "A small set of alternatives matched X under the operational thresholds used here:";
+    lines(end + 1) = "";
     for i = 1:numel(match_idx)
-        fprintf(fid, '- `%s`\n', res(match_idx(i)).name);
+        lines(end + 1) = sprintf('- `%s`', res(match_idx(i)).name);
     end
-    fprintf(fid, '\nEven these remain tradeoff-equivalent rather than clearly superior across all axes.\n\n');
+    lines(end + 1) = "";
+    lines(end + 1) = "Even these remain tradeoff-equivalent rather than clearly superior across all axes.";
+    lines(end + 1) = "";
 end
+lines(end + 1) = "## Method Notes";
+lines(end + 1) = "";
+lines(end + 1) = "- Candidate set was deliberately compact and physically simple (no brute-force global search).";
+lines(end + 1) = "- Scaling model enforced: `A(T) ~ Y(T)^beta` (log-log fit with residual diagnostics).";
+lines(end + 1) = "- Stability score = worst local metric change under small parameter perturbations (Pearson(A), Pearson(R), and `R^2`).";
 
-fprintf(fid, '## Method Notes\n\n');
-fprintf(fid, '- Candidate set was deliberately compact and physically simple (no brute-force global search).\n');
-fprintf(fid, '- Scaling model enforced: `A(T) ~ Y(T)^beta` (log-log fit with residual diagnostics).\n');
-fprintf(fid, '- Stability score = worst local metric change under small parameter perturbations (Pearson(A), Pearson(R), and `R^2`).\n');
+reportText = char(strjoin(lines, newline));
 end
 
 function y = build_x(I, w, S)
