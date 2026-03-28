@@ -130,3 +130,13 @@ matlab_prefs_agent/
 *_stdout*.txt
 *_stderr*.txt
 *_probe*.txt
+
+# status artifacts
+*status*.csv
+
+# kappa2 intermediate
+kappa2_phen_inputs.mat
+
+# debug / cleanup
+*cleanup*.csv
+*VERIFICATION*.txt
