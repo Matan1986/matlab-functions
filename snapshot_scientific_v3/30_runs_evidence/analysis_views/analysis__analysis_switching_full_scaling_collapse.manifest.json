@@ -1,0 +1,19 @@
+﻿{
+    "report_ids":  [
+                       "report_switching_full_scaling_collapse"
+                   ],
+    "analysis_id":  "analysis_switching_full_scaling_collapse",
+    "family":  "collapse",
+    "claim_ids":  "X_canonical_coordinate",
+    "status":  "robust",
+    "bundle_type":  "analysis",
+    "run_ids":  [
+                    "run_2026_03_12_234016_switching_full_scaling_collapse"
+                ],
+    "observables":  [
+                        "S_peak",
+                        "I_peak",
+                        "width_I",
+                        "X"
+                    ]
+}

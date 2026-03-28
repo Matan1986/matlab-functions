@@ -1,0 +1,101 @@
+﻿{
+    "schema_version":  "1.0",
+    "claims":  [
+                   {
+                       "status":  "strong",
+                       "claim_id":  "X_canonical_coordinate",
+                       "short_explanation":  "Canonical X is supported by AX relation, reconciliation, and basin stability evidence.",
+                       "key_reports":  [
+                                           "report_ax_functional_relation",
+                                           "report_r_x_reconciliation",
+                                           "report_dimensionless_constrained_basin",
+                                           "report_global_observable_search"
+                                       ],
+                       "primary_runs":  [
+                                            "run_2026_03_13_115401_AX_functional_relation_analysis",
+                                            "run_2026_03_16_173307_R_X_reconciliation_analysis",
+                                            "run_2026_03_22_091808_dimensionless_constrained_basin_scan"
+                                        ]
+                   },
+                   {
+                       "status":  "strong",
+                       "claim_id":  "X_scaling_relation",
+                       "short_explanation":  "A vs X scaling holds with robustness checks and consistent cross-run evidence.",
+                       "key_reports":  [
+                                           "report_ax_functional_relation",
+                                           "report_ax_temperature_robustness",
+                                           "report_global_functional_form_scan"
+                                       ],
+                       "primary_runs":  [
+                                            "run_2026_03_13_115401_AX_functional_relation_analysis",
+                                            "run_2026_03_13_123230_AX_scaling_temperature_robustness",
+                                            "run_2026_03_13_082753_switching_relaxation_bridge_robustness_a"
+                                        ]
+                   },
+                   {
+                       "status":  "supported",
+                       "claim_id":  "X_peak_alignment",
+                       "short_explanation":  "Peak alignment near crossover temperature appears consistently in linked analyses.",
+                       "key_reports":  [
+                                           "report_ax_functional_relation",
+                                           "report_global_observable_search"
+                                       ],
+                       "primary_runs":  [
+                                            "run_2026_03_13_115401_AX_functional_relation_analysis",
+                                            "run_2026_03_16_173307_R_X_reconciliation_analysis"
+                                        ]
+                   },
+                   {
+                       "status":  "supported",
+                       "claim_id":  "X_pareto_nondominated",
+                       "short_explanation":  "No globally dominating alternative found across evaluation metrics.",
+                       "key_reports":  [
+                                           "report_global_observable_search",
+                                           "report_global_functional_form_scan"
+                                       ],
+                       "primary_runs":  [
+                                            "run_2026_03_22_091808_dimensionless_constrained_basin_scan",
+                                            "run_2026_03_13_082753_switching_relaxation_bridge_robustness_a"
+                                        ]
+                   },
+                   {
+                       "status":  "supported",
+                       "claim_id":  "X_broad_basin",
+                       "short_explanation":  "Constrained basin scans indicate non-fine-tuned stable region around X.",
+                       "key_reports":  [
+                                           "report_dimensionless_constrained_basin",
+                                           "report_global_functional_form_scan"
+                                       ],
+                       "primary_runs":  [
+                                            "run_2026_03_22_091808_dimensionless_constrained_basin_scan"
+                                        ]
+                   },
+                   {
+                       "status":  "supported",
+                       "claim_id":  "X_adversarial_robustness",
+                       "short_explanation":  "Adversarial observable alternatives do not dominate X across criteria.",
+                       "key_reports":  [
+                                           "report_switching_effective_observables",
+                                           "report_global_observable_search"
+                                       ],
+                       "primary_runs":  [
+                                            "run_2026_03_13_152008_switching_effective_observables"
+                                        ]
+                   },
+                   {
+                       "status":  "supported",
+                       "claim_id":  "X_not_temperature_reparameterization",
+                       "short_explanation":  "Temperature-only parameterizations fail to match evidence quality of X-linked mapping.",
+                       "key_reports":  [
+                                           "report_ax_temperature_robustness",
+                                           "report_relaxation_temperature_scaling",
+                                           "report_global_temperature_null"
+                                       ],
+                       "primary_runs":  [
+                                            "run_2026_03_13_123230_AX_scaling_temperature_robustness",
+                                            "run_2026_03_16_080603_relaxation_temperature_scaling_test"
+                                        ]
+                   }
+               ],
+    "generated_at":  "2026-03-23T11:01:33.1900550+02:00"
+}

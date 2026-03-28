@@ -1,0 +1,19 @@
+﻿{
+    "report_ids":  [
+                       "report_r_x_reconciliation",
+                       "report_aging_clock_ratio_temperature_scaling"
+                   ],
+    "analysis_id":  "analysis_r_x_reconciliation",
+    "family":  "reconciliation",
+    "claim_ids":  "X_canonical_coordinate",
+    "status":  "robust",
+    "bundle_type":  "analysis",
+    "run_ids":  [
+                    "run_2026_03_16_173307_R_X_reconciliation_analysis",
+                    "run_2026_03_16_023652_aging_clock_ratio_temperature_scaling"
+                ],
+    "observables":  [
+                        "R",
+                        "X"
+                    ]
+}

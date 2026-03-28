@@ -1,0 +1,25 @@
+﻿{
+    "surveys":  [
+                    {
+                        "survey_id":  "aging_dynamics",
+                        "path":  "surveys/aging_dynamics/rolling_survey.md"
+                    },
+                    {
+                        "survey_id":  "switching_dynamics",
+                        "path":  "surveys/switching_dynamics/rolling_survey.md"
+                    },
+                    {
+                        "survey_id":  "relaxation_dynamics",
+                        "path":  "surveys/relaxation_dynamics/rolling_survey.md"
+                    },
+                    {
+                        "survey_id":  "cross_experiment",
+                        "path":  "surveys/cross_experiment/rolling_survey.md"
+                    },
+                    {
+                        "survey_id":  "project_synthesis",
+                        "path":  "surveys/project_synthesis/rolling_survey.md"
+                    }
+                ],
+    "schema_version":  "1.0"
+}

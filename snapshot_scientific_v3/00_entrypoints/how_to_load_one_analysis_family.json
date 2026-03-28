@@ -1,0 +1,9 @@
+﻿{
+    "required_files":  [
+                           "40_analysis_catalog/analysis_families.json",
+                           "40_analysis_catalog/analysis_registry.json",
+                           "70_evidence_index/evidence_edges_analysis_to_run.jsonl",
+                           "30_runs_evidence/run_index.json"
+                       ],
+    "workflow":  "load_one_analysis_family"
+}

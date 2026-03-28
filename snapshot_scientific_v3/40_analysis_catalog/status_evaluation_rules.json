@@ -1,0 +1,43 @@
+﻿{
+    "schema_version":  "1.0",
+    "updated_at":  "2026-03-23T11:00:46.3070572+02:00",
+    "robust":  {
+                   "cross_experiment_requirements":  [
+                                                         "required only if analysis declares multi-experiment scope"
+                                                     ],
+                   "minimum_evidence_requirements":  [
+                                                         "\u003e=2 independent runs",
+                                                         "\u003e=1 quantitative report with explicit metrics",
+                                                         "all linked evidence edges resolve"
+                                                     ],
+                   "cross_run_consistency_requirements":  [
+                                                              "core conclusion consistent across runs",
+                                                              "no unresolved contradiction in authoritative reports"
+                                                          ]
+               },
+    "canonical":  {
+                      "cross_experiment_requirements":  [
+                                                            "for cross-experiment analyses: evidence from \u003e=2 experiment roots with explicit observable mapping"
+                                                        ],
+                      "minimum_evidence_requirements":  [
+                                                            "\u003e=3 runs including \u003e=1 robustness/null-test run",
+                                                            "\u003e=1 global synthesis report and \u003e=1 run-local report",
+                                                            "\u003e=1 linked claim with supported/strong status"
+                                                        ],
+                      "cross_run_consistency_requirements":  [
+                                                                 "stable conclusion under sensitivity/robustness checks",
+                                                                 "conflict precedence resolves without contradiction"
+                                                             ]
+                  },
+    "exploratory":  {
+                        "cross_experiment_requirements":  [
+                                                              "not required"
+                                                          ],
+                        "minimum_evidence_requirements":  [
+                                                              "\u003e=1 run with run_manifest.json and \u003e=1 report"
+                                                          ],
+                        "cross_run_consistency_requirements":  [
+                                                                   "not required"
+                                                               ]
+                    }
+}

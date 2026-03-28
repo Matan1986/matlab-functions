@@ -1,0 +1,7 @@
+﻿{
+    "bundle_type":  "experiment",
+    "experiment":  "relaxation",
+    "run_ids":  [
+                    "run_2026_03_16_080603_relaxation_temperature_scaling_test"
+                ]
+}

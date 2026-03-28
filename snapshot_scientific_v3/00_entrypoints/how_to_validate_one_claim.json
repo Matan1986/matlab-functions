@@ -1,0 +1,10 @@
+﻿{
+    "required_files":  [
+                           "60_claims_surveys/claim_index.json",
+                           "70_evidence_index/evidence_summary.json",
+                           "70_evidence_index/evidence_edges_claim_to_run.jsonl",
+                           "30_runs_evidence/run_index.json",
+                           "70_evidence_index/evidence_edges_claim_to_report.jsonl"
+                       ],
+    "workflow":  "validate_one_claim"
+}

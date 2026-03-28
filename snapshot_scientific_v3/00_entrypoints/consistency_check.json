@@ -1,0 +1,17 @@
+﻿{
+    "checked_at":  "2026-03-23T11:03:48.2290054+02:00",
+    "checks":  {
+                   "analysis_to_run_edges_checked":  5,
+                   "claim_to_run_edges_checked":  5,
+                   "example_run_ids_in_run_index":  10,
+                   "observable_to_analysis_edges_checked":  5,
+                   "report_paths_checked":  13,
+                   "question_to_claim_edges_checked":  3,
+                   "claim_ids_checked":  7,
+                   "claim_to_report_edges_checked":  5
+               },
+    "issues":  [
+
+               ],
+    "passed":  true
+}

@@ -1,0 +1,5 @@
+﻿{"weight":0.9,"run_id":"run_2026_03_13_082753_switching_relaxation_bridge_robustness_a","claim_id":"X_scaling_relation","source":"claims/X_scaling_relation.json","relation":"supports"}
+{"weight":1,"run_id":"run_2026_03_13_115401_AX_functional_relation_analysis","claim_id":"X_scaling_relation","source":"claims/X_scaling_relation.json","relation":"supports"}
+{"weight":0.95,"run_id":"run_2026_03_13_123230_AX_scaling_temperature_robustness","claim_id":"X_scaling_relation","source":"claims/X_scaling_relation.json","relation":"supports"}
+{"weight":0.9,"run_id":"run_2026_03_13_115401_AX_functional_relation_analysis","claim_id":"X_canonical_coordinate","source":"claims/X_canonical_coordinate.json","relation":"supports"}
+{"weight":0.85,"run_id":"run_2026_03_16_173307_R_X_reconciliation_analysis","claim_id":"X_canonical_coordinate","source":"claims/X_canonical_coordinate.json","relation":"supports"}

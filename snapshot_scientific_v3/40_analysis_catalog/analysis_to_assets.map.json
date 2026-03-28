@@ -1,0 +1,56 @@
+﻿{
+    "mappings":  [
+                     {
+                         "analysis_id":  "analysis_ax_scaling",
+                         "report_ids":  [
+                                            "report_ax_functional_relation",
+                                            "report_ax_temperature_robustness",
+                                            "report_global_functional_form_scan"
+                                        ],
+                         "run_ids":  [
+                                         "run_2026_03_13_115401_AX_functional_relation_analysis",
+                                         "run_2026_03_13_123230_AX_scaling_temperature_robustness",
+                                         "run_2026_03_13_082753_switching_relaxation_bridge_robustness_a"
+                                     ],
+                         "claim_ids":  [
+                                           "X_scaling_relation",
+                                           "X_canonical_coordinate"
+                                       ]
+                     },
+                     {
+                         "analysis_id":  "analysis_switching_full_scaling_collapse",
+                         "report_ids":  [
+                                            "report_switching_full_scaling_collapse"
+                                        ],
+                         "run_ids":  [
+                                         "run_2026_03_12_234016_switching_full_scaling_collapse"
+                                     ],
+                         "claim_ids":  "X_canonical_coordinate"
+                     },
+                     {
+                         "analysis_id":  "analysis_relaxation_temperature_scaling",
+                         "report_ids":  [
+                                            "report_relaxation_temperature_scaling"
+                                        ],
+                         "run_ids":  [
+                                         "run_2026_03_16_080603_relaxation_temperature_scaling_test"
+                                     ],
+                         "claim_ids":  {
+
+                                       }
+                     },
+                     {
+                         "analysis_id":  "analysis_r_x_reconciliation",
+                         "report_ids":  [
+                                            "report_r_x_reconciliation",
+                                            "report_aging_clock_ratio_temperature_scaling"
+                                        ],
+                         "run_ids":  [
+                                         "run_2026_03_16_173307_R_X_reconciliation_analysis",
+                                         "run_2026_03_16_023652_aging_clock_ratio_temperature_scaling"
+                                     ],
+                         "claim_ids":  "X_canonical_coordinate"
+                     }
+                 ],
+    "schema_version":  "1.0"
+}

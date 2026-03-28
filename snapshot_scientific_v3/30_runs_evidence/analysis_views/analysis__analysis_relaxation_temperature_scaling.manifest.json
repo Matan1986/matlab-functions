@@ -1,0 +1,18 @@
+﻿{
+    "report_ids":  [
+                       "report_relaxation_temperature_scaling"
+                   ],
+    "analysis_id":  "analysis_relaxation_temperature_scaling",
+    "family":  "null_test",
+    "claim_ids":  {
+
+                  },
+    "status":  "exploratory",
+    "bundle_type":  "analysis",
+    "run_ids":  [
+                    "run_2026_03_16_080603_relaxation_temperature_scaling_test"
+                ],
+    "observables":  [
+                        "A"
+                    ]
+}

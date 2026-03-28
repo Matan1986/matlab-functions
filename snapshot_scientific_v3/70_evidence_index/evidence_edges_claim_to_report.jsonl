@@ -1,0 +1,5 @@
+﻿{"authority_scope":"run_local_report","claim_id":"X_scaling_relation","relation":"primary_evidence","report_id":"report_ax_functional_relation"}
+{"authority_scope":"global_synthesis_report","claim_id":"X_scaling_relation","relation":"supporting_evidence","report_id":"report_global_observable_search"}
+{"authority_scope":"global_synthesis_report","claim_id":"X_scaling_relation","relation":"supporting_evidence","report_id":"report_global_functional_form_scan"}
+{"authority_scope":"run_local_report","claim_id":"X_canonical_coordinate","relation":"supporting_evidence","report_id":"report_r_x_reconciliation"}
+{"authority_scope":"run_local_report","claim_id":"X_canonical_coordinate","relation":"supporting_evidence","report_id":"report_dimensionless_constrained_basin"}

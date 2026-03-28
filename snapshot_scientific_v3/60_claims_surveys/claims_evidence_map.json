@@ -1,0 +1,74 @@
+﻿{
+    "mappings":  [
+                     {
+                         "claim_id":  "X_adversarial_robustness",
+                         "run_ids":  [
+
+                                     ],
+                         "report_ids":  [
+
+                                        ]
+                     },
+                     {
+                         "claim_id":  "X_broad_basin",
+                         "run_ids":  [
+
+                                     ],
+                         "report_ids":  [
+
+                                        ]
+                     },
+                     {
+                         "claim_id":  "X_canonical_coordinate",
+                         "run_ids":  [
+                                         "run_2026_03_13_115401_AX_functional_relation_analysis",
+                                         "run_2026_03_16_173307_R_X_reconciliation_analysis"
+                                     ],
+                         "report_ids":  [
+                                            "report_r_x_reconciliation",
+                                            "report_dimensionless_constrained_basin"
+                                        ]
+                     },
+                     {
+                         "claim_id":  "X_not_temperature_reparameterization",
+                         "run_ids":  [
+
+                                     ],
+                         "report_ids":  [
+
+                                        ]
+                     },
+                     {
+                         "claim_id":  "X_pareto_nondominated",
+                         "run_ids":  [
+
+                                     ],
+                         "report_ids":  [
+
+                                        ]
+                     },
+                     {
+                         "claim_id":  "X_peak_alignment",
+                         "run_ids":  [
+
+                                     ],
+                         "report_ids":  [
+
+                                        ]
+                     },
+                     {
+                         "claim_id":  "X_scaling_relation",
+                         "run_ids":  [
+                                         "run_2026_03_13_082753_switching_relaxation_bridge_robustness_a",
+                                         "run_2026_03_13_115401_AX_functional_relation_analysis",
+                                         "run_2026_03_13_123230_AX_scaling_temperature_robustness"
+                                     ],
+                         "report_ids":  [
+                                            "report_ax_functional_relation",
+                                            "report_global_observable_search",
+                                            "report_global_functional_form_scan"
+                                        ]
+                     }
+                 ],
+    "schema_version":  "1.0"
+}

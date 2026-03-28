@@ -1,0 +1,12 @@
+﻿{
+    "families":  [
+                     "scaling",
+                     "collapse",
+                     "robustness",
+                     "null_test",
+                     "reconciliation",
+                     "observable_identification",
+                     "geometry"
+                 ],
+    "schema_version":  "1.0"
+}

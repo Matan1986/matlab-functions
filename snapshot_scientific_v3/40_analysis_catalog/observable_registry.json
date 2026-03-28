@@ -1,0 +1,29 @@
+﻿{
+    "observables":  [
+                        {
+                            "observable_id":  "X",
+                            "supporting_analysis_ids":  [
+                                                            "analysis_ax_scaling",
+                                                            "analysis_switching_full_scaling_collapse",
+                                                            "analysis_r_x_reconciliation"
+                                                        ],
+                            "description":  "dimensionless switching coordinate"
+                        },
+                        {
+                            "observable_id":  "A",
+                            "supporting_analysis_ids":  [
+                                                            "analysis_ax_scaling",
+                                                            "analysis_relaxation_temperature_scaling"
+                                                        ],
+                            "description":  "relaxation activity/timescale anchor"
+                        },
+                        {
+                            "observable_id":  "R",
+                            "supporting_analysis_ids":  [
+                                                            "analysis_r_x_reconciliation"
+                                                        ],
+                            "description":  "aging clock ratio"
+                        }
+                    ],
+    "schema_version":  "1.0"
+}

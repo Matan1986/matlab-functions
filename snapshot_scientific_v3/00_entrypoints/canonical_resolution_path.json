@@ -1,0 +1,48 @@
+﻿{
+    "schema_version":  "1.0",
+    "deterministic_steps":  [
+                                {
+                                    "output":  "claim object",
+                                    "step":  1,
+                                    "files":  [
+                                                  "60_claims_surveys/claim_index.json"
+                                              ],
+                                    "action":  "Resolve claim metadata"
+                                },
+                                {
+                                    "output":  "run_ids + report_ids",
+                                    "step":  2,
+                                    "files":  [
+                                                  "70_evidence_index/evidence_edges_claim_to_run.jsonl",
+                                                  "70_evidence_index/evidence_edges_claim_to_report.jsonl"
+                                              ],
+                                    "action":  "Resolve claim evidence"
+                                },
+                                {
+                                    "output":  "runpack paths",
+                                    "step":  3,
+                                    "files":  [
+                                                  "30_runs_evidence/run_index.json"
+                                              ],
+                                    "action":  "Resolve runpacks"
+                                },
+                                {
+                                    "output":  "run-local reports/tables/figures",
+                                    "step":  4,
+                                    "files":  [
+                                                  "30_runs_evidence/runpacks/runpack__\u003cexperiment\u003e__\u003crun_id\u003e__v\u003csnapshot_version\u003e.zip"
+                                              ],
+                                    "action":  "Load run evidence"
+                                },
+                                {
+                                    "output":  "code entrypoints for the evidence run",
+                                    "step":  5,
+                                    "files":  [
+                                                  "30_runs_evidence/run_index.json",
+                                                  "20_code_workflow/code_core_dynamics.zip"
+                                              ],
+                                    "action":  "Resolve matching code"
+                                }
+                            ],
+    "official_path":  "claim_id -\u003e evidence -\u003e run_ids -\u003e runpack -\u003e code"
+}

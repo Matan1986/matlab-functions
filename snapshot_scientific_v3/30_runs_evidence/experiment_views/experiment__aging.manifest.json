@@ -1,0 +1,8 @@
+﻿{
+    "bundle_type":  "experiment",
+    "experiment":  "aging",
+    "run_ids":  [
+                    "run_2026_03_12_223709_aging_timescale_extraction",
+                    "run_2026_03_16_023652_aging_clock_ratio_temperature_scaling"
+                ]
+}

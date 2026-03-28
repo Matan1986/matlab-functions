@@ -1,0 +1,15 @@
+﻿{
+    "schema_version":  "1.0",
+    "precedence":  [
+                       "run_local_report",
+                       "global_synthesis_report",
+                       "claim_statement",
+                       "survey_conclusion"
+                   ],
+    "authority_by_scope":  {
+                               "claim":  "claim_statement",
+                               "cross_run":  "global_synthesis_report",
+                               "survey":  "survey_conclusion",
+                               "run_level":  "run_local_report"
+                           }
+}

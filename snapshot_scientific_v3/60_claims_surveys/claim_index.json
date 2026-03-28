@@ -1,0 +1,56 @@
+﻿{
+    "schema_version":  "1.0",
+    "generated_at":  "2026-03-23T11:00:07.9034629+02:00",
+    "claim_count":  7,
+    "claims":  [
+                   {
+                       "claim_id":  "X_adversarial_robustness",
+                       "status":  "supported",
+                       "role":  "supporting",
+                       "confidence":  "high",
+                       "claim_path":  "claims/X_adversarial_robustness.json"
+                   },
+                   {
+                       "claim_id":  "X_broad_basin",
+                       "status":  "supported",
+                       "role":  "supporting",
+                       "confidence":  "high",
+                       "claim_path":  "claims/X_broad_basin.json"
+                   },
+                   {
+                       "claim_id":  "X_canonical_coordinate",
+                       "status":  "supported",
+                       "role":  "core",
+                       "confidence":  "high",
+                       "claim_path":  "claims/X_canonical_coordinate.json"
+                   },
+                   {
+                       "claim_id":  "X_not_temperature_reparameterization",
+                       "status":  "supported",
+                       "role":  "supporting",
+                       "confidence":  "high",
+                       "claim_path":  "claims/X_not_temperature_reparameterization.json"
+                   },
+                   {
+                       "claim_id":  "X_pareto_nondominated",
+                       "status":  "supported",
+                       "role":  "supporting",
+                       "confidence":  "high",
+                       "claim_path":  "claims/X_pareto_nondominated.json"
+                   },
+                   {
+                       "claim_id":  "X_peak_alignment",
+                       "status":  "supported",
+                       "role":  "core",
+                       "confidence":  "high",
+                       "claim_path":  "claims/X_peak_alignment.json"
+                   },
+                   {
+                       "claim_id":  "X_scaling_relation",
+                       "status":  "supported",
+                       "role":  "supporting",
+                       "confidence":  "high",
+                       "claim_path":  "claims/X_scaling_relation.json"
+                   }
+               ]
+}

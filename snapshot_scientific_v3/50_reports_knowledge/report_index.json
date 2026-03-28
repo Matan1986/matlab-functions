@@ -1,0 +1,98 @@
+﻿{
+    "schema_version":  "1.0",
+    "generated_at":  "2026-03-23T10:59:49.3695576+02:00",
+    "report_count":  13,
+    "reports":  [
+                    {
+                        "report_id":  "report_switching_full_scaling_collapse",
+                        "path":  "results/switching/runs/run_2026_03_12_234016_switching_full_scaling_collapse/reports/switching_full_scaling_collapse.md",
+                        "scope":  "run_local",
+                        "run_id":  "run_2026_03_12_234016_switching_full_scaling_collapse",
+                        "authoritative":  true
+                    },
+                    {
+                        "report_id":  "report_ax_functional_relation",
+                        "path":  "results/cross_experiment/runs/run_2026_03_13_115401_AX_functional_relation_analysis/reports/AX_functional_relation_analysis.md",
+                        "scope":  "run_local",
+                        "run_id":  "run_2026_03_13_115401_AX_functional_relation_analysis",
+                        "authoritative":  true
+                    },
+                    {
+                        "report_id":  "report_ax_temperature_robustness",
+                        "path":  "results/cross_experiment/runs/run_2026_03_13_123230_AX_scaling_temperature_robustness/reports/AX_scaling_temperature_robustness.md",
+                        "scope":  "run_local",
+                        "run_id":  "run_2026_03_13_123230_AX_scaling_temperature_robustness",
+                        "authoritative":  true
+                    },
+                    {
+                        "report_id":  "report_switching_relaxation_bridge_robustness",
+                        "path":  "results/cross_experiment/runs/run_2026_03_13_082753_switching_relaxation_bridge_robustness_a/reports/switching_relaxation_bridge_robustness_audit.md",
+                        "scope":  "run_local",
+                        "run_id":  "run_2026_03_13_082753_switching_relaxation_bridge_robustness_a",
+                        "authoritative":  true
+                    },
+                    {
+                        "report_id":  "report_r_x_reconciliation",
+                        "path":  "results/cross_experiment/runs/run_2026_03_16_173307_R_X_reconciliation_analysis/reports/R_X_reconciliation_analysis.md",
+                        "scope":  "run_local",
+                        "run_id":  "run_2026_03_16_173307_R_X_reconciliation_analysis",
+                        "authoritative":  true
+                    },
+                    {
+                        "report_id":  "report_relaxation_temperature_scaling",
+                        "path":  "results/relaxation/runs/run_2026_03_16_080603_relaxation_temperature_scaling_test/reports/relaxation_temperature_scaling_report.md",
+                        "scope":  "run_local",
+                        "run_id":  "run_2026_03_16_080603_relaxation_temperature_scaling_test",
+                        "authoritative":  true
+                    },
+                    {
+                        "report_id":  "report_aging_timescale_extraction",
+                        "path":  "results/aging/runs/run_2026_03_12_223709_aging_timescale_extraction/reports/aging_timescale_extraction_report.md",
+                        "scope":  "run_local",
+                        "run_id":  "run_2026_03_12_223709_aging_timescale_extraction",
+                        "authoritative":  true
+                    },
+                    {
+                        "report_id":  "report_aging_clock_ratio_temperature_scaling",
+                        "path":  "results/aging/runs/run_2026_03_16_023652_aging_clock_ratio_temperature_scaling/reports/aging_clock_ratio_temperature_scaling_report.md",
+                        "scope":  "run_local",
+                        "run_id":  "run_2026_03_16_023652_aging_clock_ratio_temperature_scaling",
+                        "authoritative":  true
+                    },
+                    {
+                        "report_id":  "report_dimensionless_constrained_basin",
+                        "path":  "results/cross_experiment/runs/run_2026_03_22_091808_dimensionless_constrained_basin_scan/reports/dimensionless_constrained_basin_scan.md",
+                        "scope":  "run_local",
+                        "run_id":  "run_2026_03_22_091808_dimensionless_constrained_basin_scan",
+                        "authoritative":  true
+                    },
+                    {
+                        "report_id":  "report_switching_effective_observables",
+                        "path":  "results/switching/runs/run_2026_03_13_152008_switching_effective_observables/reports/switching_effective_observables.md",
+                        "scope":  "run_local",
+                        "run_id":  "run_2026_03_13_152008_switching_effective_observables",
+                        "authoritative":  true
+                    },
+                    {
+                        "report_id":  "report_global_observable_search",
+                        "path":  "reports/observable_search_report.md",
+                        "scope":  "global",
+                        "run_id":  null,
+                        "authoritative":  true
+                    },
+                    {
+                        "report_id":  "report_global_temperature_null",
+                        "path":  "reports/temperature_null_test_report.md",
+                        "scope":  "global",
+                        "run_id":  null,
+                        "authoritative":  true
+                    },
+                    {
+                        "report_id":  "report_global_functional_form_scan",
+                        "path":  "reports/functional_form_scan_report.md",
+                        "scope":  "global",
+                        "run_id":  null,
+                        "authoritative":  true
+                    }
+                ]
+}

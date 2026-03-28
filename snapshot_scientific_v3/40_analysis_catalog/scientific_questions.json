@@ -1,0 +1,46 @@
+﻿{
+    "questions":  [
+                      {
+                          "analysis_ids":  [
+                                               "analysis_ax_scaling"
+                                           ],
+                          "question_id":  "question_validate_x_scaling_relation",
+                          "text":  "Does A scale with X robustly across temperature and analyses?",
+                          "claim_ids":  [
+                                            "X_scaling_relation",
+                                            "X_canonical_coordinate"
+                                        ]
+                      },
+                      {
+                          "analysis_ids":  [
+                                               "analysis_relaxation_temperature_scaling"
+                                           ],
+                          "question_id":  "question_relaxation_behavior",
+                          "text":  "What is the relaxation behavior as a function of temperature?",
+                          "claim_ids":  [
+
+                                        ]
+                      },
+                      {
+                          "analysis_ids":  [
+                                               "analysis_switching_full_scaling_collapse"
+                                           ],
+                          "question_id":  "question_switching_collapse_mechanism",
+                          "text":  "How robust is switching full scaling collapse?",
+                          "claim_ids":  [
+                                            "X_canonical_coordinate"
+                                        ]
+                      },
+                      {
+                          "analysis_ids":  [
+                                               "analysis_r_x_reconciliation"
+                                           ],
+                          "question_id":  "question_cross_experiment_bridge",
+                          "text":  "How are aging and switching connected through R and X?",
+                          "claim_ids":  [
+                                            "X_canonical_coordinate"
+                                        ]
+                      }
+                  ],
+    "schema_version":  "1.0"
+}

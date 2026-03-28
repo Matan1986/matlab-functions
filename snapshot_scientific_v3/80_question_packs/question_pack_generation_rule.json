@@ -1,0 +1,26 @@
+﻿{
+    "update_propagation":  [
+                               "new run in run_index updates analysis membership via edges",
+                               "updated claim edges propagate to question pack claim/report sections",
+                               "analysis registry status changes propagate to question pack metadata"
+                           ],
+    "required_inputs":  [
+                            "40_analysis_catalog/scientific_questions.json",
+                            "40_analysis_catalog/analysis_registry.json",
+                            "70_evidence_index/evidence_edges_question_to_claim.jsonl",
+                            "70_evidence_index/evidence_edges_analysis_to_run.jsonl",
+                            "30_runs_evidence/run_index.json",
+                            "50_reports_knowledge/report_index.json",
+                            "60_claims_surveys/claim_index.json"
+                        ],
+    "generation_principle":  "Question packs are generated strictly from indices and evidence maps",
+    "schema_version":  "1.0",
+    "generation_steps":  [
+                             "Resolve question_id to analysis_ids and claim_ids",
+                             "Resolve analysis_ids to run_ids via analysis edges",
+                             "Resolve claim_ids to report_ids/run_ids via claim edges",
+                             "Resolve run_ids to runpack paths via run_index",
+                             "Emit question manifest containing references only"
+                         ],
+    "no_manual_duplication_allowed":  true
+}

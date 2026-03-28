@@ -1,0 +1,41 @@
+﻿{
+    "schema_version":  "1.0",
+    "generated_at":  "2026-03-23T11:00:07.9397739+02:00",
+    "claim_status":  [
+                         {
+                             "claim_id":  "X_canonical_coordinate",
+                             "status":  "strong",
+                             "reason":  "multiple supporting runs and synthesis reports"
+                         },
+                         {
+                             "claim_id":  "X_scaling_relation",
+                             "status":  "strong",
+                             "reason":  "AX scaling analysis plus robustness support"
+                         },
+                         {
+                             "claim_id":  "X_adversarial_robustness",
+                             "status":  "supported",
+                             "reason":  "adversarial search reports show no global dominator"
+                         },
+                         {
+                             "claim_id":  "X_broad_basin",
+                             "status":  "supported",
+                             "reason":  "constrained basin scans and stability reports"
+                         },
+                         {
+                             "claim_id":  "X_not_temperature_reparameterization",
+                             "status":  "supported",
+                             "reason":  "temperature null and functional-form tests"
+                         },
+                         {
+                             "claim_id":  "X_pareto_nondominated",
+                             "status":  "supported",
+                             "reason":  "pareto defense and adversarial comparison"
+                         },
+                         {
+                             "claim_id":  "X_peak_alignment",
+                             "status":  "supported",
+                             "reason":  "cross-experiment peak alignment reports"
+                         }
+                     ]
+}

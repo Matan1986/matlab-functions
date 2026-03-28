@@ -1,0 +1,31 @@
+﻿{
+    "schema_version":  "1.0",
+    "claim":  {
+                  "where_to_go":  [
+                                      "60_claims_surveys/claim_index.json",
+                                      "70_evidence_index/evidence_summary.json",
+                                      "70_evidence_index/evidence_edges_claim_to_run.jsonl",
+                                      "30_runs_evidence/run_index.json"
+                                  ]
+              },
+    "analysis":  {
+                     "where_to_go":  [
+                                         "40_analysis_catalog/analysis_registry.json",
+                                         "30_runs_evidence/analysis_views/analysis__\u003canalysis_id\u003e.manifest.json",
+                                         "70_evidence_index/evidence_edges_analysis_to_run.jsonl"
+                                     ]
+                 },
+    "run":  {
+                "where_to_go":  [
+                                    "30_runs_evidence/run_index.json",
+                                    "30_runs_evidence/runpacks/runpack__\u003cexperiment\u003e__\u003crun_id\u003e__v\u003csnapshot_version\u003e.zip"
+                                ]
+            },
+    "observable":  {
+                       "where_to_go":  [
+                                           "40_analysis_catalog/observable_registry.json",
+                                           "70_evidence_index/evidence_edges_observable_to_analysis.jsonl",
+                                           "40_analysis_catalog/analysis_registry.json"
+                                       ]
+                   }
+}

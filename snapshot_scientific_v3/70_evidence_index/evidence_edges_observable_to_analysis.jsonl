@@ -1,0 +1,5 @@
+﻿{"observable_id":"X","analysis_id":"analysis_ax_scaling","relation":"supports"}
+{"observable_id":"A","analysis_id":"analysis_ax_scaling","relation":"supports"}
+{"observable_id":"A","analysis_id":"analysis_relaxation_temperature_scaling","relation":"tests"}
+{"observable_id":"R","analysis_id":"analysis_r_x_reconciliation","relation":"supports"}
+{"observable_id":"X","analysis_id":"analysis_switching_full_scaling_collapse","relation":"supports"}

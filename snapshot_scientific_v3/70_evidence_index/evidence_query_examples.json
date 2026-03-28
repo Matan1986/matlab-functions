@@ -1,0 +1,22 @@
+﻿{
+    "examples":  [
+                     {
+                         "query":  "validate X_scaling_relation",
+                         "steps":  [
+                                       "load claim_index",
+                                       "resolve claim-\u003erun edges",
+                                       "load run_index rows",
+                                       "open linked runpacks",
+                                       "open code bundle"
+                                   ]
+                     },
+                     {
+                         "query":  "find analyses supporting observable A",
+                         "steps":  [
+                                       "load observable-\u003eanalysis edges",
+                                       "load analysis_registry",
+                                       "resolve analysis-\u003erun"
+                                   ]
+                     }
+                 ]
+}

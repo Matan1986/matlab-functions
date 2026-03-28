@@ -1,0 +1,64 @@
+﻿{
+    "workflows":  [
+                      {
+                          "minimal_files":  [
+                                                "00_entrypoints/quick_start.json",
+                                                "10_context_state/context_bundle_full.zip",
+                                                "40_analysis_catalog/analysis_registry.json",
+                                                "60_claims_surveys/proven_status_map.json",
+                                                "70_evidence_index/evidence_summary.json"
+                                            ],
+                          "name":  "understand_project",
+                          "exact_steps":  [
+                                              "Read context_bundle_full",
+                                              "Read analysis_registry",
+                                              "Read proven_status_map",
+                                              "Read evidence_summary"
+                                          ]
+                      },
+                      {
+                          "minimal_files":  [
+                                                "60_claims_surveys/claim_index.json",
+                                                "70_evidence_index/evidence_summary.json",
+                                                "70_evidence_index/evidence_edges_claim_to_run.jsonl",
+                                                "30_runs_evidence/run_index.json",
+                                                "70_evidence_index/evidence_edges_claim_to_report.jsonl"
+                                            ],
+                          "name":  "validate_claim",
+                          "exact_steps":  [
+                                              "Select claim_id",
+                                              "Get primary_runs/key_reports",
+                                              "Resolve runpacks via run_index",
+                                              "Open run/report evidence"
+                                          ]
+                      },
+                      {
+                          "minimal_files":  [
+                                                "30_runs_evidence/run_index.json",
+                                                "30_runs_evidence/runpacks/runpack__\u003cexperiment\u003e__\u003crun_id\u003e__v\u003csnapshot_version\u003e.zip",
+                                                "20_code_workflow/code_core_dynamics.zip"
+                                            ],
+                          "name":  "debug_run",
+                          "exact_steps":  [
+                                              "Resolve run_id in run_index",
+                                              "Open runpack RUN_META+REPORTS",
+                                              "Map to code bundle entrypoints"
+                                          ]
+                      },
+                      {
+                          "minimal_files":  [
+                                                "40_analysis_catalog/analysis_registry.json",
+                                                "30_runs_evidence/analysis_views/analysis__\u003canalysis_id\u003e.manifest.json",
+                                                "30_runs_evidence/run_index.json",
+                                                "70_evidence_index/evidence_edges_analysis_to_run.jsonl"
+                                            ],
+                          "name":  "load_one_analysis",
+                          "exact_steps":  [
+                                              "Select analysis_id",
+                                              "Resolve participating runs",
+                                              "Load runpacks and mapped reports"
+                                          ]
+                      }
+                  ],
+    "schema_version":  "1.0"
+}

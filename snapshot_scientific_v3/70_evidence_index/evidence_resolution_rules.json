@@ -1,0 +1,15 @@
+﻿{
+    "schema_version":  "1.0",
+    "conflict_rules":  [
+                           "authority_scope_precedence",
+                           "latest_snapshot_version",
+                           "source_modified_at"
+                       ],
+    "resolution_order":  [
+                             "claim_index",
+                             "evidence_edges_claim_to_run",
+                             "run_index",
+                             "runpack",
+                             "code_bundle"
+                         ]
+}
