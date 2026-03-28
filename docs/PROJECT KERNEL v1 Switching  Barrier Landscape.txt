@@ -1,0 +1,107 @@
+# 🚀 PROJECT KERNEL v1 — Switching / Barrier Landscape
+
+## 1. Minimal model
+
+S(I,T) ≈ S_peak(T)·CDF(P_T)(I) + κ(T)·Φ(x),
+x = (I − I_peak)/w
+
+---
+
+## 2. Core structure
+
+* Switching governed by barrier distribution P_T ✔
+* Residual is low-dimensional and rank-1 ✔
+* Decomposition into CDF-sector + residual-sector is robust ✔
+
+---
+
+## 3. X coordinate
+
+X = I_peak / (w·S_peak)
+
+* Robust emergent coordinate ✔
+* Links switching ↔ relaxation A(T) ↔ aging R(T) ✔
+* Not unique optimum, but constrained physical representation ✔
+
+---
+
+## 4. Two sectors (critical)
+
+* **CDF / barrier sector** → P_T, switching structure
+* **κ-sector (residual amplitude)** → rigidity / non-CDF effects
+
+These are **distinct physical sectors**.
+
+---
+
+## 5. Φ(x) — current status
+
+* Robust, low-dimensional mode ✔
+* Mostly even (~87.5%) ✔
+* Not:
+
+  * ∂T CDF kernel
+  * shift / width kernel
+  * asymmetric kernel
+
+👉 Φ = **symmetric deformation mode of the landscape (unidentified physically)**
+
+---
+
+## 6. Asymmetry
+
+* Exists in data ✔
+* Correlates with κ (|corr| ~0.5–0.7) ✔
+* Belongs to κ-sector, not Φ ✔
+
+👉 Likely due to current-induced energy tilt
+
+---
+
+## 7. Width problem
+
+* Symmetric width is not stable ❌
+* Likely because P_T is not symmetric
+
+👉 Need asymmetric / shape-aware observable
+
+---
+
+## 8. Aging & relaxation
+
+* Two distinct clocks:
+
+  * τ_dip(T_p) (memory sector)
+  * τ_FM(T_p) (FM-like sector)
+
+👉 Do NOT assume a single shared clock
+
+---
+
+## 9. Physical goal (next step)
+
+Extract effective barrier parameters from P_T
+→ test if they quantitatively explain:
+
+* A(T)
+* R(T)
+
+👉 turn X from correlation → mechanism
+
+---
+
+## 10. Current status
+
+* Switching mechanism: strong ✔
+* Structure: solid ✔
+* Φ: not yet identified physically ⚠️
+* Width: inadequate observable ⚠️
+
+---
+
+# 🔥 Guiding principle
+
+We are no longer testing if the model works.
+We are identifying the physical meaning of its components.
+
+---
