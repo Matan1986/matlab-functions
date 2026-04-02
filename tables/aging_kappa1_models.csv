@@ -1,5 +1,0 @@
-model,category,n,loocv_rmse,pearson_y_yhat,spearman_y_yhat
-R ~ 1,baseline,4,51.500750647923,-1,-1
-R ~ kappa1,linear,4,73.4961456172445,-0.425112647197127,-0.2
-R ~ kappa1 + kappa1^2,quadratic,4,170.740056666821,-0.0131939188341125,0.4
-R ~ isotonic(kappa1),monotonic,4,90.7620350881702,-0.196400709407243,0.4

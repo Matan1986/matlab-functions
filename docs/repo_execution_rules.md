@@ -223,3 +223,45 @@ Rules:
 * Any scalar aging quantity MUST be named R_age
 * Using plain "R" in NEW code is FORBIDDEN
 * Legacy code using "R" is allowed but must be explicitly clarified
+
+---
+
+### MANDATORY MATLAB SCRIPT TEMPLATE
+
+All runnable MATLAB scripts MUST:
+
+1. Start from:
+   `docs/templates/matlab_run_template.m`
+
+2. Include:
+   - `createRunContext(...)`
+   - `runDir` usage
+
+3. MUST write:
+   - `execution_status.csv`
+   - at least one CSV result table
+   - at least one `.md` report
+
+4. MUST use:
+   `catch ME`
+   `rethrow(ME);`
+   `end`
+
+5. MUST NOT include:
+   - silent catch
+   - debug prints left in final form
+   - interactive input
+   - fallback logic
+
+Violation of ANY rule:
+
+-> SCRIPT INVALID
+-> WILL FAIL VALIDATOR
+-> MUST NOT BE USED
+
+All future agent prompts MUST include:
+
+Start from:
+`docs/templates/matlab_run_template.m`
+
+Any script not based on template is invalid by definition.

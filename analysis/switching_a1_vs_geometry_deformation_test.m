@@ -258,6 +258,8 @@ source = struct();
 source.a1RunName     = string(cfg.a1RunName);
 source.switchRunName = string(cfg.switchRunName);
 
+source.phi1Guard = enforce_canonical_phi1_source({source.a1RunName}, 'switching_a1_vs_geometry_deformation_test');
+
 source.a1RunDir     = fullfile(repoRoot, 'results', 'switching', 'runs', char(source.a1RunName));
 source.switchRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', char(source.switchRunName));
 

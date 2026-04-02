@@ -163,6 +163,8 @@ source = struct();
 source.dynamicShapeRunId = string(cfg.dynamicShapeRunId);
 source.fullScalingRunId = string(cfg.fullScalingRunId);
 
+source.phi1Guard = enforce_canonical_phi1_source({source.dynamicShapeRunId}, 'switching_ridge_susceptibility_test');
+
 source.dynamicShapeRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', ...
     char(source.dynamicShapeRunId));
 source.dynamicAmplitudePath = fullfile(source.dynamicShapeRunDir, 'tables', ...

@@ -1,11 +1,11 @@
 # Map RMSE Closure Summary
 
-Input file missing: tables/map_pair_metrics.csv
+Input: tables/map_pair_metrics.csv
 
-Scale-only assessment: UNKNOWN
-Structural mismatch assessment: UNKNOWN
-Canonical map closure verdict: UNKNOWN
+Are differences scale-only? NO (scale_only_flag=YES for 1 of 3 pairs).
+Is structure preserved? YES (structural_flag=YES for 0 of 3 pairs).
 
-Notes:
-- Missing required input file; no synthetic values were created.
-- All verdicts set to UNKNOWN per safe-mode rule.
+Status table values:
+- RMSE_IS_SCALE_ONLY: NO
+- STRUCTURAL_MISMATCH_PRESENT: NO
+- CANONICAL_MAP_CLOSURE: NO

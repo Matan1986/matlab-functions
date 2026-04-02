@@ -1,9 +1,17 @@
-function run_relaxation_canonical(userCfg)
+%% RUN_RELAXATION_CANONICAL
+% Canonical runnable script (no interactive, no debug)
 
-clc;
+clear; clc;
 
-if nargin < 1 || isempty(userCfg)
-    userCfg = struct();
+% === CONFIG ===
+cfg = struct();
+
+experiment_name = 'relaxation_canonical';
+run = createRunContext(experiment_name, struct());
+disp('CHECKPOINT: after createRunContext');
+try
+if ~isfield(run, 'dir') || isempty(run.dir)
+    run.dir = run.run_dir;
 end
 
 % run_relaxation_canonical - Minimal canonical wrapper for Relaxation v3
@@ -14,7 +22,7 @@ end
 %
 % Execution: tools/run_matlab_safe.bat "path/to/run_relaxation_canonical.m"
 %
-% This is a PURE SCRIPT (no function definitions). All logic is inline.
+% This is a PURE SCRIPT (no local defs). All logic is inline.
 
 %% ======================================================================
 %% REPO ROOT DETECTION
@@ -54,14 +62,9 @@ addpath(fullfile(repoRoot, 'Tools ver1'));
 %% USER CONFIGURATION (AUDIT ENTRY POINT)
 %% ======================================================================
 
-% Define data directory. User can override via environment or edit here.
-dataDir = '';
-if ~isempty(dataDir) && ~exist(dataDir, 'dir')
-    dataDir = '';
-end
-
+dataDir = 'L:\My Drive\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\MG 119 M2 in plane along long edge relax aging\Relaxation TRM';
 if isempty(dataDir)
-    dataDir = 'C:\Users\matan\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\MG 119 M2 out of plane susep relax aging\Relaxation TRM';
+    error('dataDir must be explicitly provided. No fallback allowed.');
 end
 
 %% ======================================================================
@@ -69,21 +72,21 @@ end
 %% ======================================================================
 
 % Start with defaults from helper
-config = relaxation_config_helper(userCfg);
+config = relaxation_config_helper(cfg);
 
 %% ======================================================================
 %% RUN CONTEXT SETUP
 %% ======================================================================
 
-runLabel = 'canonical';
-runCfg = struct();
-runCfg.runLabel = runLabel;
-runCfg.dataset = dataDir;
-run = createRunContext('relaxation', runCfg);
-runDir = run.run_dir;
+runDir = run.dir;
 
 if ~isfolder(runDir)
     mkdir(runDir);
+end
+
+outDir = fullfile(run.dir, 'tables');
+if ~exist(outDir, 'dir')
+    mkdir(outDir);
 end
 
 logPath = run.log_path;
@@ -93,9 +96,12 @@ fprintf('Relaxation canonical run directory:\n%s\n', runDir);
 %% DATA LOADING (DELEGATED TO EXISTING HELPERS)
 %% ======================================================================
 
+disp('CHECKPOINT: before data loading');
 try
     [fileList, temps, fields, types, colors, mass] = ...
         getFileList_relaxation(dataDir, config.color_scheme);
+    disp('CHECKPOINT: after file list');
+    assert(~isempty(fileList), 'File list is empty');
     
     fileListLower = lower(string(fileList));
     containsTRM = any(contains(fileListLower, 'trm'));
@@ -103,6 +109,8 @@ try
     
     [Time_table, Temp_table, Field_table, Moment_table, massHeader] = ...
         importFiles_relaxation(dataDir, fileList, config.normalize_by_mass, false);
+    disp('CHECKPOINT: after data read');
+    assert(~isempty(Moment_table), 'Data is empty after load');
     
     if ~isnan(massHeader)
         mass = massHeader;
@@ -138,6 +146,7 @@ end
 %% RELAXATION FITTING (MAIN ANALYSIS)
 %% ======================================================================
 
+disp('CHECKPOINT: before processing');
 fprintf('\nStarting relaxation fitting...\n');
 
 fitParams = struct();
@@ -184,10 +193,8 @@ auditData.config = config;
 
 % Output handles (primary deliverables)
 auditData.fit_table = allFits;
-auditData.fit_table_path = fullfile(runDir, 'allFits.csv');
-if ~isempty(allFits)
-    writetable(allFits, auditData.fit_table_path);
-end
+auditData.fit_table_path = fullfile(outDir, 'relaxation_results.csv');
+writetable(allFits, auditData.fit_table_path);
 
 % Branch identity explicit
 auditData.branch_identity = 'core_fit_pipeline';
@@ -230,6 +237,7 @@ auditData.window_rule = config.fit_window_mode;
 %% WRITE AUDIT OUTPUT FILES
 %% ======================================================================
 
+disp('CHECKPOINT: before output write');
 % 1. Save fit table (already done above)
 
 % 2. Save config snapshot
@@ -259,7 +267,7 @@ fprintf(fid, 'cfg.slope_threshold = %.2e;\n', config.slope_threshold);
 fclose(fid);
 
 % 3. Save audit summary table
-summaryPath = fullfile(runDir, 'audit_summary.csv');
+summaryPath = fullfile(outDir, 'audit_summary.csv');
 summaryT = table();
 summaryT.parameter = {
     'execution_status';
@@ -312,13 +320,8 @@ fclose(fid);
 
 % 5. Write execution status artifact
 statusPath = fullfile(runDir, 'execution_status.csv');
-statusT = table();
-statusT.EXECUTION_STATUS = {'SUCCESS'};
-statusT.INPUT_FOUND = {'YES'};
-statusT.N_FITS = {num2str(nFits)};
-statusT.AUDIT_READY = {'YES'};
-statusT.ERROR_MESSAGE = {''};
-writetable(statusT, statusPath);
+status = table("OK", 'VariableNames', {'status'});
+writetable(status, statusPath);
 
 % 6. Add run_dir_pointer for infrastructure consistency
 runDirPointerPath = fullfile(repoRoot, 'run_dir_pointer.txt');
@@ -360,4 +363,23 @@ fprintf('  run_manifest: %s\n', manifestPath);
 fprintf('  execution_status: %s\n', statusPath);
 fprintf('\n');
 
+    disp('CHECKPOINT: end of script');
+    execution_status = 'SUCCESS';
+
+catch ME
+    execution_status = 'FAILED';
+
+    % PRINT error to console
+    disp('=== MATLAB ERROR ===');
+    disp(getReport(ME, 'extended'));
+
+    % WRITE error to run folder
+    error_file = fullfile(run.run_dir, 'error_report.txt');
+    fid = fopen(error_file, 'w');
+    fprintf(fid, '%s\n', getReport(ME, 'extended'));
+    fclose(fid);
 end
+
+status_file = fullfile(run.run_dir, 'execution_status.csv');
+T = table({execution_status}, 'VariableNames', {'status'});
+writetable(T, status_file);

@@ -302,6 +302,8 @@ source.a1RunId   = string(cfg.a1RunId);
 source.geomRunId = string(cfg.geomRunId);
 source.mapRunId  = string(cfg.mapRunId);
 
+source.phi1Guard = enforce_canonical_phi1_source({source.a1RunId}, 'switching_ridge_temperature_susceptibility_test');
+
 runsRoot = fullfile(repoRoot, 'results', 'switching', 'runs');
 
 source.a1RunDir   = fullfile(runsRoot, char(source.a1RunId));

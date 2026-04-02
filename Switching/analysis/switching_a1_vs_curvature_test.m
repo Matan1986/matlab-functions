@@ -147,6 +147,8 @@ source = struct();
 source.a1RunId = string(cfg.a1RunId);
 source.curvaturePreferredRunId = string(cfg.curvaturePreferredRunId);
 
+source.phi1Guard = enforce_canonical_phi1_source({source.a1RunId}, 'switching_a1_vs_curvature_test');
+
 source.a1RunDir = fullfile(repoRoot, 'results', 'switching', 'runs', char(source.a1RunId));
 source.a1Path = fullfile(source.a1RunDir, 'tables', 'switching_dynamic_shape_mode_amplitudes.csv');
 assert(exist(source.a1Path, 'file') == 2, 'Required a1 source file missing: %s', source.a1Path);

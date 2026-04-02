@@ -226,6 +226,8 @@ source = struct();
 source.a1RunName    = string(cfg.a1RunName);
 source.speakRunName = string(cfg.speakRunName);
 
+source.phi1Guard = enforce_canonical_phi1_source({source.a1RunName}, 'switching_a1_integral_consistency_test');
+
 runsRoot = fullfile(repoRoot, 'results', 'switching', 'runs');
 
 source.a1Path = fullfile(runsRoot, char(source.a1RunName), ...

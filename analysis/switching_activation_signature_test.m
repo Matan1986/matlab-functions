@@ -375,6 +375,8 @@ source = struct();
 source.a1RunName   = string(cfg.a1RunName);
 source.geomRunName = string(cfg.geomRunName);
 
+source.phi1Guard = enforce_canonical_phi1_source({source.a1RunName}, 'switching_activation_signature_test');
+
 source.a1RunDir   = fullfile(repoRoot, 'results', 'switching', 'runs', char(source.a1RunName));
 source.geomRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', char(source.geomRunName));
 
