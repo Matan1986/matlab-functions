@@ -1,0 +1,7 @@
+﻿"script_name","violation_type","path_accessed","conflict_detected","run_valid"
+"Switching/analysis/analyze_phi_kappa_canonical_space.m","ROOT_DEPENDENCY_READ","C:\Dev\matlab-functions\tables\phi_kappa_stability_summary.csv","YES","NO"
+"Switching/analysis/analyze_phi_kappa_canonical_space.m","ROOT_DEPENDENCY_READ","C:\Dev\matlab-functions\tables\phi_kappa_stability_status.csv","YES","NO"
+"Switching/analysis/analyze_phi_kappa_canonical_space.m","CONCURRENT_RW_CONFLICT","C:\Dev\matlab-functions\tables\canonical_migration_readiness.csv","YES","NO"
+"Switching/analysis/analyze_phi_kappa_canonical_space.m","CONCURRENT_RW_CONFLICT","C:\Dev\matlab-functions\tables\canonical_migration_blockers.csv","YES","NO"
+"Switching/analysis/analyze_phi_kappa_canonical_space.m","CONCURRENT_RW_CONFLICT","C:\Dev\matlab-functions\tables\canonical_migration_strategy_status.csv","YES","NO"
+"Switching/analysis/analyze_phi_kappa_canonical_space.m","CONCURRENT_RW_CONFLICT","C:\Dev\matlab-functions\reports\canonical_migration_strategy_audit.md","YES","NO"

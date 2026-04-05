@@ -1,0 +1,8 @@
+KEY,VALUE,EVIDENCE
+SYSTEM_RUNNABLE_FOR_NEW_SCRIPTS,NO,"Mandatory template fails validator; root run scripts precheck pass 4/30 and validator pass 6/30."
+PRECHECK_TOO_STRICT,YES,"Precheck fails 26/30 root run scripts; rejects writecell CSV flows due hard writetable requirement."
+VALIDATOR_BLOCKING_WORKFLOW,YES,"Validator fails 24/30 root run scripts; top blockers CHECK_RUN_CONTEXT/REQUIRED_OUTPUTS/CHECK_DRIFT/CHECK_HEADER."
+OUTPUTS_RESEARCH_USEFUL,NO,"0/692 runs contain status+csv+md+figures(or figure manifest) together; recent 30 runs also 0."
+FIGURES_GENERATED_BY_DEFAULT,NO,"Status-producing runs: 65 total, 0 with figures; figure manifest count is 0/692."
+MAIN_FRICTION_POINT,"Template-contract mismatch plus strict precheck/validator gate combo","Mandatory template is invalid under validator and helper/wrapper scripts are commonly mistaken as runnable entries."
+READY_FOR_PRODUCTIVE_WORK,NO,"Core execution can run in narrow cases, but default script authoring and output completeness are not reliable for smooth research workflow."

@@ -1,0 +1,9 @@
+verdict,value,criterion,evidence
+RELAXATION_MEASUREMENT_STABLE,false,overall thresholds,median_nRMSE=0.0085; max_nRMSE=17.9678; median_corr=1.0000
+T0_SENSITIVE,true,axis thresholds,median_nRMSE=0.5496; max_nRMSE=0.6451; median_corr=0.4606
+WINDOW_SENSITIVE,true,axis thresholds,median_nRMSE=0.0000; max_nRMSE=0.0000; median_corr=1.0000
+BASELINE_SENSITIVE,false,axis thresholds,median_nRMSE=0.0011; max_nRMSE=0.0023; median_corr=1.0000
+NORMALIZATION_SENSITIVE,true,axis thresholds,median_nRMSE=9.9077; max_nRMSE=17.9678; median_corr=1.0000
+SMOOTHING_SENSITIVE,false,axis thresholds,median_nRMSE=0.0085; max_nRMSE=0.0499; median_corr=0.9996
+RELAXATION_OBSERVABLE_PHYSICAL,false,shape + descriptor checks,amp=0.0304331; t_half=454.09; slope=-0.0124159; monotonic_fraction=1.000
+SAFE_TO_PROCEED_TO_PARAMETER_ROBUSTNESS,false,physical + support checks,physical=false; all_nonbaseline_supported=true

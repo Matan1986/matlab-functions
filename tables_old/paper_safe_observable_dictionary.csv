@@ -1,0 +1,10 @@
+preferred_term,avoid_saying,replaces_latent,confidence,example_sentence
+upper-threshold spread (q90 minus q50) on the barrier map,latent tail coordinate,PT scalar summaries; tracks part of kappa1 story,high,The upper-threshold spread tightens with temperature and co-varies with the dominant correction strength.
+map scale (S_peak) and peak current (I_peak),singular value amplitude,kappa1 scale pieces,high,The switching map scale and peak current move together with the fitted first correction amplitude.
+ridge width on the switching map,residual sector width,width_mA; part of alpha geometry,medium,Increasing ridge width enters the same geometry family that predicts the deformation ratio.
+PT skew of the threshold distribution,latent skew direction,alpha geometry component,medium,PT skew captures much of the systematic trend in the kappa2/kappa1 ratio before the 22–24 K remainder.
+symmetric ridge-shape correction vs the PDF backbone,first singular vector,Phi1 in prose,high,After subtracting the threshold PDF backbone the leading mismatch is a broad symmetric adjustment along the ridge.
+secondary width/slope bump on the ridge,second singular vector,Phi2 in prose,medium,The next mismatch looks like a mix of steepening and width changes near the ridge rather than a pure shift.
+clock ratio R(T) on the shared grid,abstract aging coordinate,R(T),high,The aging clock ratio on the aligned temperature grid follows barrier spread once a map-scale state term is included.
+relaxation time A(T) via barrier shape,hidden relaxation latent,A(T) from switching descriptors,high,Relaxation time tracks low-dimensional barrier shape scores without needing decomposition coefficients in the 24A cohort.
+deformation ratio (kappa2/kappa1) with regime footnote,mode coupling ratio,alpha,medium,Call it a regime-sensitive deformation ratio; note a residual near 22–24 K not captured by PT skew/width alone.

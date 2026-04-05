@@ -1,0 +1,4 @@
+"variant_pair","map_corr","normalized_rmse","ridge_alignment_fraction","affine_flag"
+"raw_xy_delta|xy_over_xx","0.999599580259184","0.299295513408634","1","NO"
+"raw_xy_delta|baseline_aware","0.999499501619738","0.299295880330733","0.9375","NO"
+"xy_over_xx|baseline_aware","0.999957957140286","0.0023570809506192","0.9375","YES"

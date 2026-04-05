@@ -1,0 +1,4 @@
+file_path,category,action_taken,modified,risk_level,logic_changed,notes
+docs/templates/matlab_run_template.m,template,"Rebuilt template as pure runnable script; fixed createRunContext API usage; added default output bundle (execution_status.csv, CSV table, report.md, figure plus figures_manifest.csv); kept try/catch with rethrow.",YES,LOW,NO,"Validator PASS confirmed without MATLAB execution."
+tools/run_matlab_safe.bat,wrapper,"Replaced fixed 300-second timeout with configurable MATLAB_TIMEOUT_SECONDS; default is 0 (no timeout) to allow long runs.",YES,LOW,NO,"Other wrapper flow intentionally left unchanged."
+run_*.m,script,"Optional bulk backfill skipped to avoid accidental scientific logic or pipeline behavior changes.",NO,HIGH,NO,"Per request: surgical stabilization only; no broad refactor."

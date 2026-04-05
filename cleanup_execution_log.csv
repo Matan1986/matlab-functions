@@ -1,0 +1,143 @@
+﻿artifact_path,original_classification,action_taken,new_location
+tables/canonical_reconstruction_summary.csv,canonical,PROTECTED,ACTIVE
+tables/canonical_reconstruction_metrics.csv,canonical,PROTECTED,ACTIVE
+tables/canonical_reconstruction_status.csv,canonical,PROTECTED,ACTIVE
+reports/canonical_reconstruction.md,canonical,PROTECTED,ACTIVE
+tables/phi1_enforcement_status.csv,canonical,PROTECTED,ACTIVE
+reports/phi1_enforcement.md,canonical,PROTECTED,ACTIVE
+tables/phi_kappa_canonical_verdict.csv,canonical,PROTECTED,ACTIVE
+reports/phi_kappa_canonical_verdict.md,canonical,PROTECTED,ACTIVE
+tables/parameter_robustness_stage1_canonical_summary.csv,canonical,PROTECTED,ACTIVE
+reports/parameter_robustness_stage1_canonical_report.md,canonical,PROTECTED,ACTIVE
+tables/relaxation_measurement_canonical_self_audit.csv,canonical,PROTECTED,ACTIVE
+reports/relaxation_measurement_canonical_self_audit.md,canonical,PROTECTED,ACTIVE
+tables/relaxation_canonical_definition.csv,canonical,PROTECTED,ACTIVE
+reports/relaxation_canonical_definition.md,canonical,PROTECTED,ACTIVE
+tables/relaxation_canonical_implementation_check.csv,canonical,PROTECTED,ACTIVE
+reports/relaxation_canonical_implementation_check.md,canonical,PROTECTED,ACTIVE
+tables/switching_pipeline_stability_post_enforcement_status.csv,canonical,PROTECTED,ACTIVE
+reports/switching_pipeline_stability_post_enforcement.md,canonical,PROTECTED,ACTIVE
+tables/kappa1_from_PT.csv,canonical,PROTECTED,ACTIVE
+reports/kappa1_from_PT_report.md,canonical,PROTECTED,ACTIVE
+tables/kappa1_from_PT_aligned.csv,canonical,PROTECTED,ACTIVE
+reports/kappa1_from_PT_aligned_report.md,canonical,PROTECTED,ACTIVE
+reports/phi1_phi2_observable_closure_fixed.md,canonical,PROTECTED,ACTIVE
+tables/phi1_phi2_observable_closure_fixed.csv,canonical,PROTECTED,ACTIVE
+tables/phi1_phi2_observable_closure_fixed_status.csv,canonical,PROTECTED,ACTIVE
+tables/phi2_reconciliation_same_input_tests.csv,canonical,PROTECTED,ACTIVE
+reports/phi2_reconciliation_canonical_summary.md,canonical,PROTECTED,ACTIVE
+reports/phi2_reconciliation_report.md,canonical,PROTECTED,ACTIVE
+tables/PT_kappa_relaxation_mapping.csv,canonical,PROTECTED,ACTIVE
+reports/PT_kappa_relaxation_mapping.md,canonical,PROTECTED,ACTIVE
+tables/PT_to_relaxation_mapping.csv,canonical,PROTECTED,ACTIVE
+reports/PT_to_relaxation_mapping.md,canonical,PROTECTED,ACTIVE
+tables/relaxation_full_dataset.csv,canonical,PROTECTED,ACTIVE
+reports/relaxation_full_dataset.md,canonical,PROTECTED,ACTIVE
+tables/tau_extracted.csv,canonical,PROTECTED,ACTIVE
+reports/tau_extracted.md,canonical,PROTECTED,ACTIVE
+tables/relaxation_measurement_focused_t0_norm_window_summary.csv,canonical,PROTECTED,ACTIVE
+reports/relaxation_measurement_focused_t0_norm_window.md,canonical,PROTECTED,ACTIVE
+tables/phi2_deformation_fit.mat,canonical,PROTECTED,ACTIVE
+tables/phi2_extended_deformation_basis.csv,canonical,PROTECTED,ACTIVE
+reports/phi2_extended_deformation_basis.md,canonical,PROTECTED,ACTIVE
+tables/phi2_reconciliation_verdicts.csv,canonical,PROTECTED,ACTIVE
+tables/phi2_reconciliation_sources.csv,canonical,PROTECTED,ACTIVE
+tables/kappa2_phenomenological_audit.csv,canonical,PROTECTED,ACTIVE
+reports/kappa2_phenomenological_audit.md,canonical,PROTECTED,ACTIVE
+tables/kappa2_operational_signature.csv,canonical,PROTECTED,ACTIVE
+reports/kappa2_operational_signature.md,canonical,PROTECTED,ACTIVE
+tables/phi1_audit.csv,canonical,PROTECTED,ACTIVE
+reports/phi1_audit.md,canonical,PROTECTED,ACTIVE
+tables/kappa1_phi1_local_v2_status.csv,stale,ARCHIVED,archive/stale/tables/kappa1_phi1_local_v2_status.csv
+reports/kappa1_phi1_local_v2.md,stale,ARCHIVED,archive/stale/reports/kappa1_phi1_local_v2.md
+tables/kappa1_phi1_local_v2_20260329_234400.csv,stale,ARCHIVED,archive/stale/tables/kappa1_phi1_local_v2_20260329_234400.csv
+reports/kappa1_phi1_local_v2_20260329_234400.md,stale,ARCHIVED,archive/stale/reports/kappa1_phi1_local_v2_20260329_234400.md
+tables/kappa1_phi1_local_v2_20260329_234420.csv,stale,ARCHIVED,archive/stale/tables/kappa1_phi1_local_v2_20260329_234420.csv
+reports/kappa1_phi1_local_v2_20260329_234420.md,stale,ARCHIVED,archive/stale/reports/kappa1_phi1_local_v2_20260329_234420.md
+tables/phi1_instability_analysis.csv,stale,ARCHIVED,archive/stale/tables/phi1_instability_analysis.csv
+reports/phi1_instability_analysis.md,stale,ARCHIVED,archive/stale/reports/phi1_instability_analysis.md
+tables/phi1_instability_status.csv,stale,ARCHIVED,archive/stale/tables/phi1_instability_status.csv
+tables/alpha_observable_debug.csv,stale,ARCHIVED,archive/stale/tables/alpha_observable_debug.csv
+tables/alpha_observable_debug_full.csv,stale,ARCHIVED,archive/stale/tables/alpha_observable_debug_full.csv
+reports/alpha_observable_search.md,stale,ARCHIVED,archive/stale/reports/alpha_observable_search.md
+tables/alpha_observable_models.csv,stale,ARCHIVED,archive/stale/tables/alpha_observable_models.csv
+tables/alpha_observable_status.csv,stale,ARCHIVED,archive/stale/tables/alpha_observable_status.csv
+tables/kappa1_bridge_comparison_v2.csv,stale,ARCHIVED,archive/stale/tables/kappa1_bridge_comparison_v2.csv
+tables/kappa1_bridge_comparison_v2_20260329_235900.csv,stale,ARCHIVED,archive/stale/tables/kappa1_bridge_comparison_v2_20260329_235900.csv
+tables/phi1_bridge_metrics_v2.csv,stale,ARCHIVED,archive/stale/tables/phi1_bridge_metrics_v2.csv
+tables/phi1_bridge_metrics_v2_20260329_235900.csv,stale,ARCHIVED,archive/stale/tables/phi1_bridge_metrics_v2_20260329_235900.csv
+reports/representation_bridge_v2.md,stale,ARCHIVED,archive/stale/reports/representation_bridge_v2.md
+tables/representation_bridge_status_v2.csv,stale,ARCHIVED,archive/stale/tables/representation_bridge_status_v2.csv
+tables/representation_bridge_status_v2_20260329_235900.csv,stale,ARCHIVED,archive/stale/tables/representation_bridge_status_v2_20260329_235900.csv
+tables/kappa1_projection_test.csv,partial,ISOLATED,ACTIVE (MARKED)
+tables/kappa1_projection_test_status.csv,partial,ISOLATED,ACTIVE (MARKED)
+reports/kappa1_projection_test.md,partial,ISOLATED,ACTIVE (MARKED)
+tables/cleanup_kappa1_projection_attempt.csv,partial,ISOLATED,ACTIVE (MARKED)
+reports/cleanup_kappa1_projection_attempt.md,partial,ISOLATED,ACTIVE (MARKED)
+tables/switching_migration_pilot.csv,partial,ISOLATED,ACTIVE (MARKED)
+tables/switching_migration_pilot_status.csv,partial,ISOLATED,ACTIVE (MARKED)
+reports/switching_migration_pilot.md,partial,ISOLATED,ACTIVE (MARKED)
+tables/switching_migration_pilot_v2.csv,partial,ISOLATED,ACTIVE (MARKED)
+tables/switching_migration_pilot_v2_status.csv,partial,ISOLATED,ACTIVE (MARKED)
+reports/switching_migration_pilot_v2.md,partial,ISOLATED,ACTIVE (MARKED)
+tables/aging_measurement_definition_audit.csv,invalid,ARCHIVED,archive/invalid/tables/aging_measurement_definition_audit.csv
+tables/aging_measurement_definition_audit_status.csv,invalid,ARCHIVED,archive/invalid/tables/aging_measurement_definition_audit_status.csv
+reports/aging_measurement_definition_audit.md,invalid,ARCHIVED,archive/invalid/reports/aging_measurement_definition_audit.md
+tables/aging_alpha_closure_best_model.csv,invalid,ARCHIVED,archive/invalid/tables/aging_alpha_closure_best_model.csv
+tables/aging_alpha_closure_master_table.csv,invalid,ARCHIVED,archive/invalid/tables/aging_alpha_closure_master_table.csv
+tables/aging_alpha_closure_models.csv,invalid,ARCHIVED,archive/invalid/tables/aging_alpha_closure_models.csv
+tables/aging_alpha_closure_residual_audit.csv,invalid,ARCHIVED,archive/invalid/tables/aging_alpha_closure_residual_audit.csv
+reports/aging_alpha_closure_report.md,invalid,ARCHIVED,archive/invalid/reports/aging_alpha_closure_report.md
+tables/aging_hermetic_closure_models.csv,invalid,ARCHIVED,archive/invalid/tables/aging_hermetic_closure_models.csv
+tables/aging_hermetic_closure_residuals.csv,invalid,ARCHIVED,archive/invalid/tables/aging_hermetic_closure_residuals.csv
+reports/aging_hermetic_closure_report.md,invalid,ARCHIVED,archive/invalid/reports/aging_hermetic_closure_report.md
+tables/aging_kappa1_kappa2_models.csv,invalid,ARCHIVED,archive/invalid/tables/aging_kappa1_kappa2_models.csv
+tables/aging_kappa1_kappa2_status.csv,invalid,ARCHIVED,archive/invalid/tables/aging_kappa1_kappa2_status.csv
+tables/aging_kappa1_loocv.csv,invalid,ARCHIVED,archive/invalid/tables/aging_kappa1_loocv.csv
+tables/aging_kappa1_models.csv,invalid,ARCHIVED,archive/invalid/tables/aging_kappa1_models.csv
+reports/aging_kappa1_prediction.md,invalid,ARCHIVED,archive/invalid/reports/aging_kappa1_prediction.md
+tables/aging_kappa2_best_model.csv,invalid,ARCHIVED,archive/invalid/tables/aging_kappa2_best_model.csv
+tables/aging_kappa2_master_table.csv,invalid,ARCHIVED,archive/invalid/tables/aging_kappa2_master_table.csv
+tables/aging_kappa2_models.csv,invalid,ARCHIVED,archive/invalid/tables/aging_kappa2_models.csv
+tables/aging_kappa2_residuals.csv,invalid,ARCHIVED,archive/invalid/tables/aging_kappa2_residuals.csv
+reports/aging_kappa2_report.md,invalid,ARCHIVED,archive/invalid/reports/aging_kappa2_report.md
+tables/aging_kappa_comparison.csv,invalid,ARCHIVED,archive/invalid/tables/aging_kappa_comparison.csv
+tables/aging_kappa_comparison_status.csv,invalid,ARCHIVED,archive/invalid/tables/aging_kappa_comparison_status.csv
+reports/aging_kappa_comparison.md,invalid,ARCHIVED,archive/invalid/reports/aging_kappa_comparison.md
+tables/aging_meta_audit_model_ranking.csv,invalid,ARCHIVED,archive/invalid/tables/aging_meta_audit_model_ranking.csv
+tables/aging_meta_audit_result_inventory.csv,invalid,ARCHIVED,archive/invalid/tables/aging_meta_audit_result_inventory.csv
+reports/aging_meta_audit_verdict_summary.md,invalid,ARCHIVED,archive/invalid/reports/aging_meta_audit_verdict_summary.md
+reports/aging_meta_audit_latest_results.md,invalid,ARCHIVED,archive/invalid/reports/aging_meta_audit_latest_results.md
+tables/aging_model_comparison_strict.csv,invalid,ARCHIVED,archive/invalid/tables/aging_model_comparison_strict.csv
+tables/aging_prediction_ablation.csv,invalid,ARCHIVED,archive/invalid/tables/aging_prediction_ablation.csv
+tables/aging_prediction_best_model.csv,invalid,ARCHIVED,archive/invalid/tables/aging_prediction_best_model.csv
+tables/aging_prediction_models.csv,invalid,ARCHIVED,archive/invalid/tables/aging_prediction_models.csv
+reports/aging_prediction_report.md,invalid,ARCHIVED,archive/invalid/reports/aging_prediction_report.md
+tables/aging_relaxation_confusion_audit.csv,invalid,ARCHIVED,archive/invalid/tables/aging_relaxation_confusion_audit.csv
+tables/aging_relaxation_confusion_audit_status.csv,invalid,ARCHIVED,archive/invalid/tables/aging_relaxation_confusion_audit_status.csv
+reports/aging_relaxation_confusion_audit.md,invalid,ARCHIVED,archive/invalid/reports/aging_relaxation_confusion_audit.md
+reports/integrity_invalid_artifacts_audit.md,invalid,ARCHIVED,archive/invalid/reports/integrity_invalid_artifacts_audit.md
+tables/integrity_invalid_artifacts_audit.csv,invalid,ARCHIVED,archive/invalid/tables/integrity_invalid_artifacts_audit.csv
+tables/integrity_invalid_artifacts_status.csv,invalid,ARCHIVED,archive/invalid/tables/integrity_invalid_artifacts_status.csv
+reports/io_consistency_20260327_151634.md,invalid,ARCHIVED,archive/invalid/reports/io_consistency_20260327_151634.md
+reports/io_consistency_20260327_151752.md,invalid,ARCHIVED,archive/invalid/reports/io_consistency_20260327_151752.md
+reports/io_consistency_20260327_151818.md,invalid,ARCHIVED,archive/invalid/reports/io_consistency_20260327_151818.md
+reports/io_consistency_20260327_151857.md,invalid,ARCHIVED,archive/invalid/reports/io_consistency_20260327_151857.md
+reports/io_consistency_20260327_151919.md,invalid,ARCHIVED,archive/invalid/reports/io_consistency_20260327_151919.md
+reports/io_consistency_20260327_151934.md,invalid,ARCHIVED,archive/invalid/reports/io_consistency_20260327_151934.md
+reports/io_consistency_20260327_154227.md,invalid,ARCHIVED,archive/invalid/reports/io_consistency_20260327_154227.md
+reports/io_consistency_20260327_155921.md,invalid,ARCHIVED,archive/invalid/reports/io_consistency_20260327_155921.md
+reports/io_consistency_20260327_161503.md,invalid,ARCHIVED,archive/invalid/reports/io_consistency_20260327_161503.md
+tables/estimator_design_status.csv,partial,ISOLATED,ACTIVE (MARKED)
+tables/estimator_design_width_comparison.csv,partial,ISOLATED,ACTIVE (MARKED)
+tables/estimator_design_width_comparison_local_20260329_222628.csv,partial,ISOLATED,ACTIVE (MARKED)
+tables/estimator_design_kappa1_comparison.csv,partial,ISOLATED,ACTIVE (MARKED)
+tables/estimator_design_kappa1_comparison_local_20260329_222628.csv,partial,ISOLATED,ACTIVE (MARKED)
+reports/estimator_design_proposal.md,partial,ISOLATED,ACTIVE (MARKED)
+reports/estimator_design_proposal_local_20260329_222628.md,partial,ISOLATED,ACTIVE (MARKED)
+tables/global_physics_stability_status.csv,partial,ISOLATED,ACTIVE (MARKED)
+reports/global_physics_stability_summary.md,partial,ISOLATED,ACTIVE (MARKED)
+tables/kappa2_kww_shape_test_status.csv,partial,ISOLATED,ACTIVE (MARKED)
+reports/kappa2_kww_shape_test.md,partial,ISOLATED,ACTIVE (MARKED)
+reports/relaxation_outlier_audit.md,canonical,PROTECTED,ACTIVE
+tables/relaxation_outlier_audit_status.csv,canonical,PROTECTED,ACTIVE

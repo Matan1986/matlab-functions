@@ -1,0 +1,7 @@
+verdict,value,criterion,evidence
+T0_DEFINITION_PHYSICAL,YES,t0 must be signal-defined and exclude switch/transient regime,Uses normalized field-derivative plus magnetization-curvature settling with persistence and sign coherence
+WINDOW_DEFINITION_PHYSICAL,YES,Window must start at physical t0 and end before noise-dominated tail,Start uses post-t0 resolvable tau_min and end uses R_relax SNR-to-tail-noise criterion
+OBSERVABLE_WELL_DEFINED,YES,One explicit scalar with unambiguous formula,Single output is R_relax_canonical from robust fit slope in M vs ln(tau)
+OBSERVABLE_PHYSICAL,YES,Observable must correspond to relaxation physics,Represents mean magnetic viscosity in the post-transient relaxation regime
+DEFINITION_SELF_CONSISTENT,YES,t0 window and observable must use the same physical time origin and regime,All rules are defined on tau=t-t0 with one coherent onset and one coherent end condition
+READY_FOR_IMPLEMENTATION,YES,Rules are mathematically explicit and algorithmically executable,All required quantities are defined from measured t H M without arbitrary index choices

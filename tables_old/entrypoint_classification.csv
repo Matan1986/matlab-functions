@@ -1,0 +1,2 @@
+﻿"script_name","classification","reason"
+"Switching/analysis/analyze_phi_kappa_canonical_space.m","downstream","Depends on root-level precomputed tables (non-hermetic) and encountered concurrent read/write conflict on shared tables/reports paths; attempted run marked invalid."

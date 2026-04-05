@@ -1,0 +1,2 @@
+EXECUTION_STATUS,INPUT_FOUND,ERROR_MESSAGE,N_T,MAIN_RESULT_SUMMARY,NEW_SYSTEM_RUN_COMPLETED,RUN_COMPLETED,EXECUTION_VALID,MAP_PRESERVED,PHI1_PRESERVED,KAPPA1_PRESERVED,RECONSTRUCTION_PRESERVED,PHYSICS_PRESERVED
+FAILED,YES,"Wrapper command for tmp_switching_migration_pilot_v2_run.m did not complete in-session (active terminal remained running; no pilot outputs materialized).",0,"Minimal v2 pilot execution did not complete; verdicts are invalid.",NO,NO,NO,INVALID,INVALID,INVALID,INVALID,INVALID

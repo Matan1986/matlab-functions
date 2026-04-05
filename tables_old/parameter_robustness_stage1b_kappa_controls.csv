@@ -1,0 +1,11 @@
+row_type,case_id,entry_id,description,corr_vs_canonical,median_rel_dev,worst_rel_dev,rmse_abs,n_overlap,valid_temperature_count,n_pairs
+variant,ALL,kappa_canonical,,1,0,0,0,15,NaN,NaN
+variant,ALL,kappa_ip_max_parabolic_local,,0.735743331175725,0.371413976923601,59.8520997554896,0.150072176594284,14,NaN,NaN
+variant,ALL,kappa_w_fwhm_nearest,,0.674118974051107,0.544080318630137,5.5067412025551,0.194692571581377,8,NaN,NaN
+variant,ALL,kappa_w_fwhm_fine_interp,,0.998826038421645,0.0147588881854702,16.0818540714274,0.0229559935815099,15,NaN,NaN
+variant,ALL,kappa_sp_max_parabolic_local,,0.999546462298493,0.0241442809519542,0.0935978199718751,0.0225030486178357,15,NaN,NaN
+variant,ALL,kappa_ip_sp_parabolic_w_canonical,,0.740075859877476,0.386421547737764,59.2521877999254,0.148226983872107,14,NaN,NaN
+case_aggregate,A,aggregate,Stage1 pipeline,0.674118974051107,0.0263954648015014,59.8520997554896,NaN,NaN,15,52
+case_aggregate,B,aggregate,Width fixed canonical; vary peaks,0.735743331175725,0.0418615973618095,59.8520997554896,NaN,NaN,15,43
+case_aggregate,C,aggregate,Width+I fixed; S only,0.999546462298493,0.0241442809519542,0.0935978199718751,NaN,NaN,15,15
+case_aggregate,D,aggregate,Width only,0.674118974051107,0.0169045853493796,16.0818540714274,NaN,NaN,15,23

@@ -1,0 +1,9 @@
+item,status,evidence
+TEMPLATE_ENTRY_SIGNAL_ADDED,YES,"docs/templates/matlab_run_template.m writes execution_probe_top.txt at script top"
+TEMPLATE_COMPLETION_SIGNAL_ADDED,YES,"docs/templates/matlab_run_template.m writes execution_probe_bottom.txt at script end"
+WRAPPER_ENTRY_SIGNAL_ENFORCEMENT_ADDED,YES,"tools/run_matlab_safe.bat checks C:\Dev\matlab-functions\execution_probe_top.txt after MATLAB"
+WRAPPER_STATUS_ARTIFACT_ENFORCEMENT_ADDED,YES,"tools/run_matlab_safe.bat checks execution_status.csv in resolved RUN_DIR"
+VALIDATION_COMMAND_EXECUTED_ONCE,YES,"tools/run_matlab_safe.bat C:\Dev\matlab-functions\Switching\analysis\run_switching_canonical.m"
+VALIDATION_ENTRY_SIGNAL_PRESENT,NO,"ENTRY_SIGNAL_FOUND=NO in tables/execution_signaling_wrapper_run.log"
+VALIDATION_STATUS_ARTIFACT_PRESENT,YES,"STATUS_ARTIFACT_FOUND=YES in tables/execution_signaling_wrapper_run.log"
+VALIDATION_WRAPPER_PASS_BY_ARTIFACTS,NO,"WRAPPER_EXIT_CODE=9 due missing entry signal"

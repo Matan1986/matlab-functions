@@ -1,0 +1,2 @@
+EXECUTION_STATUS,INPUT_FOUND,ERROR_MESSAGE,MAIN_RESULT_SUMMARY
+FAILURE,YES,The logical indices contain a true value outside of the array bounds.,Estimator design execution failed; see error_message.

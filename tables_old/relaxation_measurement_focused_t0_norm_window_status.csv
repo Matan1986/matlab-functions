@@ -1,0 +1,7 @@
+verdict,value,criterion,evidence
+STABLE_SUBREGION_EXISTS,true,exists if >=1 combination passes all thresholds,stable_combo_count=2 of 27
+CANONICAL_T0_IDENTIFIED,YES,identified only when stable subregion exists,candidate_t0=earliest_valid_start
+CANONICAL_NORMALIZATION_IDENTIFIED,YES,identified only when stable subregion exists,candidate_normalization=none
+CANONICAL_WINDOW_IDENTIFIED,YES,identified only when stable subregion exists,candidate_window=full_usable_window
+RELAXATION_MEASUREMENT_CAN_BE_STABILIZED,true,true only if stable subregion exists,best_combo=combo_01; stable=true; score=0.00000; corr_med=1.0000; nrmse_med=0.0000; nrmse_worst=0.0000; slope_med=1.0000
+SAFE_TO_DEFINE_NEW_CANONICAL_MEASUREMENT,true,true only if best candidate is actually stable (not least bad),best_combo=combo_01; stable=true; score=0.00000; corr_med=1.0000; nrmse_med=0.0000; nrmse_worst=0.0000; slope_med=1.0000

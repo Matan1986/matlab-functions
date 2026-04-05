@@ -1,0 +1,9 @@
+flag,value,evidence
+DATA_SELECTION_DIFFERENCE,YES,"Legacy primary decision used no_22K; new canonical verdict uses full 4..30 K including 22 K."
+RESIDUAL_DEFINITION_DIFFERENCE,NO,"Both old/new canonical analyses use deltaS=S-S_CDF from switching_residual_decomposition_analysis."
+DEFORMATION_TEST_DIFFERENCE,YES,"Old strict basis-closure criteria fail while new correlation threshold marks deformation as YES."
+SIGNIFICANCE_THRESHOLD_DIFFERENCE,YES,"Legacy mode2-real narrative from RMSE/correlation differs from new hard gate mode2Var>=0.05."
+MODE_NORMALIZATION_DIFFERENCE,YES,"Old tests mixed max-abs and unit-L2 normalization; new final verdict does not require strict unit-RMSE closure."
+PURE_LABELING_DIFFERENCE,YES,"Legacy mode2 stability values match mode-1 LOO numbers from source table."
+GENUINE_PHYSICS_CONTRADICTION,NO,"Same canonical matrix reproduces old metrics; verdict flip is methodological/labeling, not data-level contradiction."
+PRIMARY_CAUSE,SIGNIFICANCE_THRESHOLD_DIFFERENCE,"Primary flip: mode2 variance 0.025<0.05 in new gate despite substantial rank2 RMSE gain."

@@ -1,0 +1,7 @@
+verdict,value,criterion,evidence
+CANONICAL_DEFINITION_IMPLEMENTABLE,false,YES only if canonical rules produce usable outputs for representative subset,success=0/5;frac_ok=0.000
+T0_DETECTION_STABLE,false,YES only if t0 is reproducible and not dominated by derivative noise,stable_t0=0/5;t0_cv=NaN;fail_unstable_t0=5
+WINDOW_DETECTION_STABLE,false,YES only if start/end boundaries remain physical and non-empty,stable_window=0/5;win_cv=NaN;fail_short=0
+OBSERVABLE_IMPLEMENTATION_STABLE,false,YES only if R_relax_canonical is finite and robust across subset,stable_observable=0/5;obs_cv=NaN
+SMALL_REFINEMENT_REQUIRED,true,YES if implementation ambiguities/failure modes need narrow clarifications,noisy_derivative=0;unstable_t0=5;ambiguous_snr=0;short_window=0;boundary_variability=0
+SAFE_FOR_BROADER_ROLLOUT,false,YES only if all core stability verdicts are YES and no blocking ambiguity remains,implementable=false;t0=false;window=false;obs=false;refine=true

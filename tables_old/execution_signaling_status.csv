@@ -1,0 +1,6 @@
+key,value,detail
+ENTRY_SIGNAL_WRITTEN,FAIL,"execution_probe_top.txt missing after validation run"
+COMPLETION_SIGNAL_WRITTEN,FAIL,"execution_probe_bottom.txt missing after validation run"
+WRAPPER_ENFORCES_SIGNAL,PASS,"wrapper emits hard failure when entry signal is missing"
+RUN_VERIFIED_BY_ARTIFACTS,FAIL,"validation run not verified because entry signal artifact absent"
+FIX_SCOPE_MINIMAL,PASS,"only docs/templates/matlab_run_template.m and tools/run_matlab_safe.bat modified"

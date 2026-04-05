@@ -1,0 +1,8 @@
+﻿"component","exists","valid_physics","contaminated_by_relaxation_logic","usable_for_next_stage"
+"aging_core_pipeline","YES","YES","NO","YES"
+"structured_map_decomposition","YES","YES","NO","YES"
+"dip_and_clock_extraction","YES","YES","NO","YES"
+"slope_t0_audit_lineage","YES","NO","YES","NO"
+"archived_invalid_cross_fit_aging_lineage","YES","NO","YES","NO"
+"aging_run_history_manifests","YES","YES","NO","YES"
+"junk_trace_structure_attempts","YES","NO","NO","NO"

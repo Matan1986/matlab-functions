@@ -1,0 +1,3 @@
+﻿"script_path","has_createRunContext","writes_execution_status","uses_resolver","uses_direct_load","references_relaxation","references_aging","references_legacy_run","keyword_flags","activity_signal","candidate_score"
+"Switching/analysis/analyze_phi_kappa_canonical_space.m","YES","YES","NO","NO","NO","NO","NO","none","appears_in_recent_runs=NO;referenced_by_other_scripts=NO","2"
+"Switching/analysis/run_minimal_canonical.m","YES","YES","NO","NO","NO","YES","NO","none","appears_in_recent_runs=YES;referenced_by_other_scripts=NO","1"

@@ -1,0 +1,147 @@
+artifact_path,category,classification,reason,recommended_action
+tables/canonical_reconstruction_summary.csv,phi1,canonical,Part of canonical hermetic LOTO reconstruction with validation,keep
+tables/canonical_reconstruction_metrics.csv,phi1,canonical,Canonical reconstruction execution metrics,keep
+tables/canonical_reconstruction_status.csv,phi1,canonical,Canonical reconstruction SUCCESS with full validation,keep
+reports/canonical_reconstruction.md,phi1,canonical,Official canonical reconstruction LOTO protocol and results,keep
+tables/phi1_enforcement_status.csv,phi1,canonical,PHI1 canonical source enforcement active across pipelines,keep
+reports/phi1_enforcement.md,phi1,canonical,Phi1 enforcement policy and evidence,keep
+tables/phi_kappa_canonical_verdict.csv,phi1,canonical,Final canonical verdict on phi-kappa system,keep
+reports/phi_kappa_canonical_verdict.md,phi1,canonical,Phi-kappa canonical verdict narrative,keep
+tables/parameter_robustness_stage1_canonical_summary.csv,phi1,canonical,Stage-1 robustness analysis for canonical implementation,keep
+reports/parameter_robustness_stage1_canonical_report.md,phi1,canonical,Parameter robustness canonical implementation report,keep
+tables/relaxation_measurement_canonical_self_audit.csv,phi1,canonical,Canonical relaxation measurement self-audit results,keep
+reports/relaxation_measurement_canonical_self_audit.md,phi1,canonical,Canonical relaxation measurement self-audit narrative,keep
+tables/relaxation_canonical_definition.csv,phi1,canonical,Canonical definition of relaxation measurement,keep
+reports/relaxation_canonical_definition.md,phi1,canonical,Relaxation canonical definition protocol,keep
+tables/relaxation_canonical_implementation_check.csv,phi1,canonical,Canonical implementation verification,keep
+reports/relaxation_canonical_implementation_check.md,phi1,canonical,Relaxation canonical implementation check results,keep
+tables/switching_pipeline_stability_post_enforcement_status.csv,phi1,canonical,Post-enforcement pipeline stability confirmed,keep
+reports/switching_pipeline_stability_post_enforcement.md,phi1,canonical,Switching pipeline stability post phi1 enforcement,keep
+tables/kappa1_from_PT.csv,kappa1,canonical,Kappa1 extracted from canonical PT reconstruction,keep
+reports/kappa1_from_PT_report.md,kappa1,canonical,Kappa1 extraction from PT with projection method,keep
+tables/kappa1_from_PT_aligned.csv,kappa1,canonical,Aligned kappa1 extraction following canonical protocol,keep
+reports/kappa1_from_PT_aligned_report.md,kappa1,canonical,Kappa1 alignment report post-extraction,keep
+reports/phi1_phi2_observable_closure_fixed.md,phi1,canonical,Post-fix phi1/phi2 observable closure analysis,keep
+tables/phi1_phi2_observable_closure_fixed.csv,phi1,canonical,Fixed observable closure metrics,keep
+tables/phi1_phi2_observable_closure_fixed_status.csv,phi1,canonical,Fixed observable closure execution status,keep
+tables/phi2_reconciliation_same_input_tests.csv,phi1,canonical,Same-input replay for phi2 canonical reconciliation,keep
+reports/phi2_reconciliation_canonical_summary.md,phi1,canonical,Canonical phi2 reconciliation summary after same-input replay,keep
+reports/phi2_reconciliation_report.md,phi1,canonical,Full phi2 reconciliation analysis across sources,keep
+tables/PT_kappa_relaxation_mapping.csv,phi1,canonical,PT to kappa1 mapping for relaxation pipelines,keep
+reports/PT_kappa_relaxation_mapping.md,phi1,canonical,PT-kappa mapping protocol and validation,keep
+tables/PT_to_relaxation_mapping.csv,phi1,canonical,Mapping from PT reconstruction to relaxation parameters,keep
+reports/PT_to_relaxation_mapping.md,phi1,canonical,PT to relaxation mapping with validation,keep
+tables/relaxation_full_dataset.csv,phi1,canonical,Full dataset of relaxation measurements at canonical definition,keep
+reports/relaxation_full_dataset.md,phi1,canonical,Complete relaxation dataset report,keep
+tables/tau_extracted.csv,phi1,canonical,Extracted canonical tau relaxation times,keep
+reports/tau_extracted.md,phi1,canonical,Tau extraction from canonical data,keep
+tables/relaxation_measurement_focused_t0_norm_window_summary.csv,phi1,canonical,Focused t0 norm window relaxation audit summary,keep
+reports/relaxation_measurement_focused_t0_norm_window.md,phi1,canonical,Focused relaxation measurement window analysis,keep
+tables/php2_deformation_fit.csv,phi1,canonical,Canonical phi2 deformation basis fit,keep
+tables/phi2_deformation_fit.mat,phi1,canonical,Canonical MATLAB deformation data structure,keep
+tables/phi2_extended_deformation_basis.csv,phi1,canonical,Extended canonical deformation basis,keep
+reports/phi2_extended_deformation_basis.md,phi1,canonical,Extended deformation basis analysis,keep
+tables/phi2_reconciliation_verdicts.csv,phi1,canonical,Phi2 reconciliation verdict table,keep
+tables/phi2_reconciliation_sources.csv,phi1,canonical,Phi2 reconciliation source tracking,keep
+tables/canonical_state_freeze.csv,other,canonical,Canonical state snapshot at freeze point,keep
+reports/canonical_state_freeze.md,other,canonical,Narrative of canonical state freeze,keep
+tables/kappa2_phenomenological_audit.csv,kappa1,canonical,Kappa2 phenomenological audit under canonical scope,keep
+reports/kappa2_phenomenological_audit.md,kappa1,canonical,Kappa2 phenomenological audit narrative,keep
+tables/kappa2_operational_signature.csv,kappa1,canonical,Operational signature of kappa2 in canonical system,keep
+reports/kappa2_operational_signature.md,kappa1,canonical,Operational signature analysis,keep
+tables/phi1_audit.csv,phi1,canonical,Phi1 evidence and source audit,keep
+reports/phi1_audit.md,phi1,canonical,Comprehensive phi1 audit report,keep
+tables/kappa1_phi1_local_v2_status.csv,phi1,stale,Failed local phi1 variant (not canonical),mark_stale
+reports/kappa1_phi1_local_v2.md,phi1,stale,Non-canonical local phi1 variant attempt,archive
+tables/kappa1_phi1_local_v2_20260329_234400.csv,phi1,stale,Timestamped variant of failed local phi1,archive
+reports/kappa1_phi1_local_v2_20260329_234400.md,phi1,stale,Dated variant of non-canonical phi1 report,archive
+tables/kappa1_phi1_local_v2_20260329_234420.csv,phi1,stale,Another timestamped variant of failed local phi1,archive
+reports/kappa1_phi1_local_v2_20260329_234420.md,phi1,stale,Another variant of non-canonical phi1 report,archive
+tables/phi1_instability_analysis.csv,phi1,stale,Analysis of phi1 instability in non-canonical variant,archive
+reports/phi1_instability_analysis.md,phi1,stale,Non-canonical phi1 instability narrative,archive
+tables/phi1_instability_status.csv,phi1,stale,Local phi1 shows coarse intersection grid mismatch with canonical,archive
+tables/alpha_observable_debug.csv,phi1,stale,Pre-enforcement alpha observable debugging,archive
+tables/alpha_observable_debug_full.csv,phi1,stale,Extended pre-enforcement alpha debugging,archive
+reports/alpha_observable_search.md,phi1,stale,Legacy alpha observable search (pre-enforcement),archive
+tables/alpha_observable_models.csv,phi1,stale,Alpha models from legacy observable search,archive
+tables/alpha_observable_status.csv,phi1,stale,Status of legacy alpha observable analysis,archive
+tables/kappa1_bridge_comparison_v2.csv,phi1,stale,Non-canonical kappa1 bridge comparison (v2),archive
+tables/kappa1_bridge_comparison_v2_20260329_235900.csv,phi1,stale,Timestamped variant of non-canonical bridge comparison,archive
+reports/kappa1_phi1_local_v2_20260329_235900.md,phi1,stale,Dated variant of non-canonical kappa1-phi1 analysis,archive
+tables/phi1_bridge_metrics_v2.csv,phi1,stale,Non-canonical phi1 bridge metrics (v2),archive
+tables/phi1_bridge_metrics_v2_20260329_235900.csv,phi1,stale,Timestamped non-canonical phi1 bridge metrics,archive
+reports/representation_bridge_v2.md,phi1,stale,Non-canonical bridge representation (v2),archive
+tables/representation_bridge_status_v2.csv,phi1,stale,Status of non-canonical bridge representation,archive
+tables/representation_bridge_status_v2_20260329_235900.csv,phi1,stale,Timestamped variant of non-canonical bridge status,archive
+tables/kappa1_projection_test.csv,kappa1,partial,Kappa1 projection validation attempt incomplete,ignore
+tables/kappa1_projection_test_status.csv,kappa1,partial,Projection test EXECUTION_VALID=NO execution failed,ignore
+reports/kappa1_projection_test.md,kappa1,partial,Incomplete kappa1 projection validation narrative,ignore
+tables/cleanup_kappa1_projection_attempt.csv,kappa1,partial,Cleanup attempt record for failed projection,ignore
+reports/cleanup_kappa1_projection_attempt.md,kappa1,partial,Narrative of failed kappa1 projection cleanup,ignore
+tables/switching_migration_pilot.csv,migration,partial,Migration pilot v1 execution invalid,ignore
+tables/switching_migration_pilot_status.csv,migration,partial,Migration pilot v1 EXECUTION_VALID=NO (timeout),ignore
+reports/switching_migration_pilot.md,migration,partial,Migration pilot v1 narrative (incomplete),ignore
+tables/switching_migration_pilot_v2.csv,migration,partial,Migration pilot v2 execution invalid,ignore
+tables/switching_migration_pilot_v2_status.csv,migration,partial,Migration pilot v2 EXECUTION_VALID=NO (no completion),ignore
+reports/switching_migration_pilot_v2.md,migration,partial,Migration pilot v2 narrative (incomplete),ignore
+tables/aging_measurement_definition_audit.csv,other,invalid,Contains DEFINITION_CONTAMINATION marker for aging,archive
+tables/aging_measurement_definition_audit_status.csv,other,invalid,Status file with VALID_FOR_AGING=NO marker,archive
+reports/aging_measurement_definition_audit.md,other,invalid,Report explicitly marked INVALID FOR AGING,archive
+tables/aging_alpha_closure_best_model.csv,phi1,invalid,Derived from contaminated aging definition,archive
+tables/aging_alpha_closure_master_table.csv,phi1,invalid,Derived from contaminated aging definition,archive
+tables/aging_alpha_closure_models.csv,phi1,invalid,Derived from contaminated aging definition,archive
+tables/aging_alpha_closure_residual_audit.csv,phi1,invalid,Derived from contaminated aging definition,archive
+reports/aging_alpha_closure_report.md,phi1,invalid,Derived from contaminated aging definition,archive
+tables/aging_hermetic_closure_models.csv,phi1,invalid,Derived from contaminated aging definition,archive
+tables/aging_hermetic_closure_residuals.csv,phi1,invalid,Derived from contaminated aging definition,archive
+reports/aging_hermetic_closure_report.md,phi1,invalid,Derived from contaminated aging definition,archive
+tables/aging_kappa1_kappa2_models.csv,kappa1,invalid,Derived from contaminated aging definition,archive
+tables/aging_kappa1_kappa2_status.csv,kappa1,invalid,Derived from contaminated aging definition,archive
+tables/aging_kappa1_loocv.csv,kappa1,invalid,Derived from contaminated aging definition,archive
+tables/aging_kappa1_models.csv,kappa1,invalid,Derived from contaminated aging definition,archive
+reports/aging_kappa1_prediction.md,kappa1,invalid,Derived from contaminated aging definition,archive
+tables/aging_kappa2_best_model.csv,kappa1,invalid,Derived from contaminated aging definition,archive
+tables/aging_kappa2_master_table.csv,kappa1,invalid,Derived from contaminated aging definition,archive
+tables/aging_kappa2_models.csv,kappa1,invalid,Derived from contaminated aging definition,archive
+tables/aging_kappa2_residuals.csv,kappa1,invalid,Derived from contaminated aging definition,archive
+reports/aging_kappa2_report.md,kappa1,invalid,Derived from contaminated aging definition,archive
+tables/aging_kappa_comparison.csv,kappa1,invalid,Derived from contaminated aging definition,archive
+tables/aging_kappa_comparison_status.csv,kappa1,invalid,Derived from contaminated aging definition,archive
+reports/aging_kappa_comparison.md,kappa1,invalid,Derived from contaminated aging definition,archive
+tables/aging_meta_audit_model_ranking.csv,phi1,invalid,Aging meta-audit derived from contaminated definition,archive
+tables/aging_meta_audit_result_inventory.csv,phi1,invalid,Aging meta-audit derived from contaminated definition,archive
+reports/aging_meta_audit_verdict_summary.md,phi1,invalid,Aging meta-audit verdict derived from contaminated definition,archive
+reports/aging_meta_audit_latest_results.md,phi1,invalid,Aging meta-audit narrative derived from contaminated definition,archive
+tables/aging_model_comparison_strict.csv,phi1,invalid,Aging comparison derived from contaminated definition,archive
+tables/aging_prediction_ablation.csv,phi1,invalid,Aging prediction derived from contaminated definition,archive
+tables/aging_prediction_best_model.csv,phi1,invalid,Aging prediction derived from contaminated definition,archive
+tables/aging_prediction_models.csv,phi1,invalid,Aging prediction derived from contaminated definition,archive
+reports/aging_prediction_report.md,phi1,invalid,Aging prediction derived from contaminated definition,archive
+tables/aging_relaxation_confusion_audit.csv,migration,invalid,Cross-domain confusion artifact from contaminated aging,archive
+tables/aging_relaxation_confusion_audit_status.csv,migration,invalid,Status of contamination-derived confusion artifact,archive
+reports/aging_relaxation_confusion_audit.md,migration,invalid,Narrative of contamination-derived confusion,archive
+reports/integrity_invalid_artifacts_audit.md,other,invalid,Master audit report explicitly documenting invalidity markers,keep
+tables/integrity_invalid_artifacts_audit.csv,other,invalid,Master audit table of all invalid artifacts,keep
+tables/integrity_invalid_artifacts_status.csv,other,invalid,Validation status of integrity audit itself,keep
+reports/io_consistency_20260327_151634.md,other,invalid,IO consistency diagnostics from snapshot (NO outputs),archive
+reports/io_consistency_20260327_151752.md,other,invalid,IO consistency diagnostics from snapshot,archive
+reports/io_consistency_20260327_151818.md,other,invalid,IO consistency diagnostics from snapshot,archive
+reports/io_consistency_20260327_151857.md,other,invalid,IO consistency diagnostics from snapshot,archive
+reports/io_consistency_20260327_151919.md,other,invalid,IO consistency diagnostics from snapshot,archive
+reports/io_consistency_20260327_151934.md,other,invalid,IO consistency diagnostics from snapshot,archive
+reports/io_consistency_20260327_154227.md,other,invalid,IO consistency diagnostics from snapshot,archive
+reports/io_consistency_20260327_155921.md,other,invalid,IO consistency diagnostics from snapshot,archive
+reports/io_consistency_20260327_161503.md,other,invalid,IO consistency diagnostics from snapshot,archive
+tables/estimator_design_status.csv,other,partial,Estimator design execution FAILURE,ignore
+tables/estimator_design_width_comparison.csv,other,partial,Incomplete estimator design analysis,ignore
+tables/estimator_design_width_comparison_local_20260329_222628.csv,other,partial,Local variant of failed estimator design,ignore
+tables/estimator_design_kappa1_comparison.csv,other,partial,Incomplete kappa1 estimator design analysis,ignore
+tables/estimator_design_kappa1_comparison_local_20260329_222628.csv,other,partial,Local variant of failed kappa1 estimator design,ignore
+reports/estimator_design_proposal.md,other,partial,Estimator design proposal with failed execution,ignore
+reports/estimator_design_proposal_local_20260329_222628.md,other,partial,Local variant of failed estimator design proposal,ignore
+tables/global_physics_stability_status.csv,phi1,partial,PARTIAL execution with missing required inputs,ignore
+reports/global_physics_stability_summary.md,phi1,partial,Global physics stability with partial/missing inputs,ignore
+tables/kappa2_kww_shape_test_status.csv,kappa1,partial,Marked PARTIAL even though execution SUCCESS,ignore
+reports/kappa2_kww_shape_test.md,kappa1,partial,KWW shape test marked as PARTIAL capability,ignore
+reports/relaxation_outlier_audit.md,phi1,canonical,Relaxation outlier audit under canonical definition,keep
+tables/relaxation_outlier_audit_status.csv,phi1,canonical,Outlier audit status with execution context,keep

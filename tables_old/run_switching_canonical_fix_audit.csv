@@ -1,0 +1,15 @@
+ITEM,VALUE
+SCRIPT,Switching/analysis/run_switching_canonical.m
+MODIFIED_LINE_1,"1: clear; clc;"
+MODIFIED_LINE_2,"2: fid = fopen('execution_probe_top.txt','w'); fclose(fid);"
+MODIFIED_LINE_3,"49: ctx = createRunContext('Switching', cfg);"
+MODIFIED_LINE_4,"50: run = ctx;"
+REMOVED_BLOCK,"save(... switching_canonical_artifacts.mat ...) block removed"
+VALIDATION_COMMAND,"tools/run_matlab_safe.bat ""C:\Dev\matlab-functions\Switching\analysis\run_switching_canonical.m"""
+VALIDATION_RUN_COUNT,1
+VALIDATION_RESULT,FAIL
+WRAPPER_REASON_1,"CHECK_HEADER: First executable line must be exactly 'clear; clc;'."
+WRAPPER_REASON_2,"CHECK_DRIFT: output mismatch expected vs actual files"
+ENTRY_SIGNAL_FILE_PRESENT_AFTER_RUN,NO
+RUN_DIR_POINTER_PRESENT_AFTER_RUN,NO
+RUN_DIR_CREATED,NA

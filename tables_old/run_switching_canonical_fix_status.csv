@@ -1,0 +1,6 @@
+CHECK,STATUS,DETAIL
+ENTRY_SIGNAL_PRESENT,YES,"Line 2 contains fid = fopen(''execution_probe_top.txt'',''w''); fclose(fid);"
+RUN_CONTEXT_CREATED,YES,"Lines 49-50 set ctx = createRunContext(''Switching'', cfg); run = ctx;"
+EXECUTION_STATUS_WRITTEN,YES,"Script writes execution_status.csv to fullfile(run_dir,''execution_status.csv'')"
+ROOT_DEPENDENCY_REMOVED,YES,"No root execution_status.csv write; status writes target run_dir/runDirForStatus only"
+CANONICAL_COMPLIANT,NO,"Single required run failed wrapper validator before MATLAB execution (CHECK_HEADER/CHECK_DRIFT)"

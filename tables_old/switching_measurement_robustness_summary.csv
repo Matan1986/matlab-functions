@@ -1,0 +1,6 @@
+"observable","pairwise_pearson_min","pairwise_spearman_min","pairwise_nrmse_max","pairwise_max_rel_dev","trend_consistent","extra_check","verdict","notes"
+"I_peak","0.846676","0.783013","0.125000","0.333333","YES","ridge_delta_T=18.000000","UNSTABLE",""
+"width","1.000000","1.000000","0.000000","0.000000","YES","scale_stability_check","STABLE",""
+"S_peak","0.999499","0.991176","0.541525","0.972626","YES","amplitude_stability_check","UNSTABLE",""
+"kappa1","-1.000000","-1.000000","0.675358","1.999544","NO","sign_consistency_min=0.000000","UNSTABLE",""
+"collapse_score","1.000000","NaN","1.000000","0.012463","YES","collapse_conclusion_stability_check","UNSTABLE",""

@@ -1,0 +1,5 @@
+key,value,evidence_basis
+CANONICAL_NO_W_COLLAPSE_FOUND,YES,"Full-scaling report identifies prior canonical reference as I/I_peak alignment."
+W_FULLY_REMOVED,NO,"Not fully removed across no-w variants: filtered no-w run uses width in temperature-selection logic."
+W_PRESENT_IMPLICITLY,YES,"Filtered no-w run decision table includes width_missing and width-based exclusion conditions."
+COLLAPSE_DEFINITION_UNAMBIGUOUS,YES,"Canonical no-w axis pair is consistently S/S_peak vs I/I_peak in alignment and filtered collapse artifacts."

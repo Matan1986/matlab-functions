@@ -1,0 +1,2 @@
+PHYSICS_STRUCTURE_STABLE,PHYSICS_AMPLITUDE_STABLE,PHYSICS_SHAPE_STABLE,PHYSICS_COLLAPSE_STABLE,DATA_COMPLETENESS,PHYSICS_INVARIANT_TO_READOUT,EXECUTION_STATUS,NOTES
+NO,YES,NO,NO,PARTIAL,UNKNOWN,SUCCESS,"missing_input=tables/map_pair_metrics.csv|tables/observable_pair_by_temperature.csv|tables/collapse_kappa_phi_pair_metrics.csv; structure_requires=map_corr+ridge_alignment_fraction+I_peak_agreement+width_correlation; shape_requires=phi_shape_corr+residual_structure_corr; collapse_requires=collapse_rmse_ratio; available_metrics=phi_shape_corr,kappa_corr"

@@ -1,0 +1,46 @@
+instance_id,location,classification,reason,safe_rename
+1,reports/kappa1_phi1_local_v2_20260329_234420.md,MISLABELED,"Uses 'Local Phi1' naming; local/coarse pipeline with different normalization (S_norm) and N_I=6.",reports/non_canonical_phi1_v2_20260329_234420.md
+2,reports/kappa1_phi1_local_v2_20260329_234400.md,MISLABELED,"Uses 'Local Phi1' naming for non-canonical construction variant.",reports/non_canonical_phi1_v2_20260329_234400.md
+3,reports/kappa1_phi1_local_v2.md,MISLABELED,"Uses 'Local Phi1' naming for non-canonical construction variant.",reports/non_canonical_phi1_v2.md
+4,reports/phi1_physical_synthesis.md,CANONICAL,"Explicitly framed as canonical synthesis; Phi1 retained as dominant rank-1 residual mode.",
+5,reports/phi1_phi2_observable_closure_fixed.md,NON_CANONICAL,"Observable closure artifact; derived proxy pipeline, not canonical Phi1 construction.",
+6,reports/phi1_phi2_observable_closure.md,NON_CANONICAL,"Observable closure artifact; derived proxy pipeline, not canonical Phi1 construction.",
+7,reports/phi1_observable_failure_analysis.md,NON_CANONICAL,"Evaluates Phi1-only observable convention; derived/fallback analysis.",
+8,reports/phi1_map_observable_search.md,NON_CANONICAL,"Uses Phi1-only reconstructed deltaS caveat; not canonical reconstruction pipeline.",
+9,reports/phi1_instability_analysis.md,NON_CANONICAL,"Documents mixed canonical vs local pipelines and non-equivalence.",
+10,reports/phi1_from_pt_shape_test.md,CANONICAL,"Tests PT-only generation against canonical Phi1 baseline shape.",
+11,reports/phi1_curvature_generator_test.md,CANONICAL,"Curvature/generator test uses canonical Phi1 reference shape.",
+12,reports/run_phi1_observable_phi2_driver_test.md,NON_CANONICAL,"Driver-level observable artifact; not canonical Phi1 construction.",
+13,tables/kappa1_phi1_local_v2_20260329_234420.csv,MISLABELED,"Local Phi1 table from non-canonical pipeline.",tables/kappa1_non_canonical_phi1_v2_20260329_234420.csv
+14,tables/kappa1_phi1_local_v2_20260329_234400.csv,MISLABELED,"Local Phi1 table from non-canonical pipeline.",tables/kappa1_non_canonical_phi1_v2_20260329_234400.csv
+15,tables/kappa1_phi1_local_v2.csv,MISLABELED,"Local Phi1 table from non-canonical pipeline.",tables/kappa1_non_canonical_phi1_v2.csv
+16,tables/phi1_local_shape_v2_20260329_234400.csv,MISLABELED,"Column phi1_local on coarse/local grid; not canonical Phi1 field.",tables/non_canonical_phi1_shape_v2_20260329_234400.csv
+17,tables/phi1_local_shape_v2.csv,MISLABELED,"Column phi1_local on coarse/local grid; not canonical Phi1 field.",tables/non_canonical_phi1_shape_v2.csv
+18,tables/phi1_instability_analysis.csv,NON_CANONICAL,"Instability diagnosis dataset centered on mixed pipeline incompatibility.",
+19,tables/phi1_from_pt_shape_test.csv,CANONICAL,"Canonical Phi1 baseline comparison metrics for PT-only generation test.",
+20,tables/phi1_evidence_summary.csv,CANONICAL,"Aggregates canonical rank-1 improvement and residual-mode evidence.",
+21,tables/phi1_curvature_generator_test.csv,CANONICAL,"Canonical Phi1 structural test metrics.",
+22,tables/phi1_bridge_metrics_v2_20260329_235900.csv,NON_CANONICAL,"Bridge metrics show local-vs-legacy mismatch (cosine 0.696; explained variance 0.417).",
+23,tables/phi1_bridge_metrics_v2.csv,NON_CANONICAL,"Bridge metrics show local-vs-legacy mismatch (cosine 0.696; explained variance 0.417).",
+24,tables/phi1_phi2_driver_metrics.csv,NON_CANONICAL,"Phi1/Phi2 driver analysis artifact; not canonical Phi1 construction.",
+25,tables/phi1_phi2_driver_by_temperature.csv,NON_CANONICAL,"Per-T driver metrics artifact; not canonical Phi1 construction.",
+26,tables/phi1_observable_mapping.csv,NON_CANONICAL,"Observable mapping/proxy analysis; derived semantic layer.",
+27,tables/phi1_observable_failure_by_T.csv,NON_CANONICAL,"Per-temperature observable failure artifact; derived/fallback analysis.",
+28,tables/phi1_map_observable_candidates.csv,NON_CANONICAL,"Candidate observable list from Phi1-derived map functionals.",
+29,tables/phi1_local_shape_v2_20260329_234420.csv,MISLABELED,"Column phi1_local on coarse/local grid; not canonical Phi1 field.",tables/non_canonical_phi1_shape_v2_20260329_234420.csv
+30,tables/phi1_phi2_observable_closure_fixed.csv,NON_CANONICAL,"Observable closure table; derived proxy pipeline.",
+31,tables/phi1_phi2_observable_closure.csv,NON_CANONICAL,"Observable closure table; derived proxy pipeline.",
+32,tables/phi1_phi2_driver_verdicts.csv,NON_CANONICAL,"Driver verdict artifact for observable pipeline.",
+33,Switching/analysis/run_phi1_phi2_observable_closure_test.m,NON_CANONICAL,"Runs Phi1/Phi2 observable closure test, not canonical Phi1 extraction.",
+34,Switching/analysis/run_phi1_phi2_observable_closure_fixed.m,NON_CANONICAL,"Runs fixed observable closure test, not canonical Phi1 extraction.",
+35,Switching/analysis/run_phi1_observable_phi2_driver_test.m,NON_CANONICAL,"Runs observable driver test, not canonical Phi1 extraction.",
+36,Switching/analysis/phi1_phi2_driver_helpers.m,NON_CANONICAL,"Helper library for observable driver pipeline, not canonical Phi1 extraction.",
+37,tables/_phi1_from_pt_shape_test_diary.txt,CANONICAL,"Diary artifact associated with canonical Phi1-from-PT test.",
+38,tools/run_phi1_from_pt_shape_test.m,CANONICAL,"Script explicitly tests canonical Phi1 against PT-derived candidates.",
+39,tools/run_phi1_curvature_generator_test.m,CANONICAL,"Script explicitly tests canonical Phi1 curvature/generator structure.",
+40,figures/phi1_phi2_in_experimental_language.png,NON_CANONICAL,"Communication figure; semantic translation artifact, not canonical construction.",
+41,reports/canonical_reconstruction.md:23,CANONICAL,"PHI1_IMPROVES_RECONSTRUCTION=YES under strict LOTO holdout protocol.",
+42,Switching/analysis/switching_residual_decomposition_analysis.m:4,CANONICAL,"Defines residual decomposition with canonical interpretation window T<=30 K.",
+43,reports/reconstruction_v1.md:17,NON_CANONICAL,"PT_PLUS_LOCAL worsens RMSE; LOCAL_IMPROVES_OVER_PT=NO.",
+44,reports/representation_bridge_v2.md:55,NON_CANONICAL,"SAFE_TO_PROCEED_TO_RECONSTRUCTION=NO for local-vs-legacy continuity bridge.",
+45,reports/switching_pipeline_stability.md:24,NON_CANONICAL,"Explicit conflict between canonical and local Phi1 outcomes (PHI1_STABLE=NO).",

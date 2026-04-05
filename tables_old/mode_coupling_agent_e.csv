@@ -1,0 +1,14 @@
+metric,value
+corr_pearson_kappa1_alpha,0.0169571484449567
+corr_spearman_kappa1_alpha,-0.525274725274725
+n_kappa1_alpha,14
+corr_pearson_kappa2_alpha,0.961535857308288
+corr_spearman_kappa2_alpha,0.951648351648352
+n_kappa2_alpha,14
+corr_pearson_alpha_res_kappa1,-0.212886720963724
+corr_spearman_alpha_res_kappa1,-0.356643356643357
+n_alpha_res_kappa1,12
+loocv_rmse_alpha_res_PT_only,0.555861217619107
+loocv_rmse_alpha_res_kappa1_only,0.504521597202686
+loocv_rmse_alpha_res_kappa1_PT,0.685443384634033
+MODE_COUPLING_PRESENT,YES

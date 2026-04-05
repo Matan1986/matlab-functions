@@ -1,0 +1,8 @@
+physical_concept,candidate_observables,status,primary_evidence
+"landscape accessibility / threshold distribution shape","PT quantiles (q50,q75,q90); spread90_50; asymmetry; skew_pt_weighted; mean/median_I; barrier_descriptors asym_q; std_threshold",LOCKED_as_multivariate_OPEN_as_single_scalar,"Aging 24B (spread90_50); alpha_from_PT 20B; kappa2 report barrier joins"
+"collective response amplitude","kappa1; kappa1_hat from PT+S_peak; r = hypot(kappa1,kappa2) in master tables",PARTIAL,"closure_report; full_prediction trajectory; collective_state 19C"
+"second-mode / deformation amplitude","kappa2; rel_orth_leftover_norm; beta1 beta2 in deformation_closure_metrics",PARTIAL,"kappa2_state_geometry 19A; deformation_closure 19E; rank2_report"
+"reorganization strength / path in state space","delta_theta_rad; delta_theta_smoothed_rad; ds_step; kappa_curve; arc_length_cumulative; bend angle 22–24 K",PARTIAL,"R_trajectory 23B; collective_state 19C; full_prediction 24C negligible S gain"
+"instability proximity / regime marker","T_K; 22–24 K band; alpha_res magnitude; spike in kappa2 at 22 K (19C narrative)",OPEN,"alpha_decomposition 21A; collective_state 19C; alpha_structure 19F"
+"cross-experiment switching–relaxation bridge","X = I_peak/(w*S_peak); S_peak (partial)",PARTIAL,"speak_vs_x_cross_experiment_report"
+"cross-experiment switching–aging bridge","R_T_interp; spread90_50 + kappa1; pt_svd scores",PARTIAL,"aging_prediction 24B; R_trajectory 23B; R_state 23A"

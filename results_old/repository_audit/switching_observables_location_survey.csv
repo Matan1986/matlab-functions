@@ -1,0 +1,5 @@
+"run_id","location","classification"
+"run_2026_03_09_132236_switching_alignment_audit","tables/observables.csv","historical_transition"
+"run_2026_03_09_141041_switching_alignment_audit","tables/observables.csv","historical_transition"
+"run_2026_03_09_145524_switching_alignment_audit","tables/observables.csv","historical_transition"
+"run_2026_03_09_222702_alignment_audit","observables.csv","current_policy"

@@ -1,0 +1,2 @@
+timestamp,target_script,wrapper,batch_command_before,batch_command_after,diagnostic_token_seen,diagnostic_seen_location,script_body_entered,run_dir,execution_status,next_blocker_layer
+2026-04-02 11:49:46,C:\Dev\matlab-functions\Switching\analysis\run_switching_canonical.m,tools\run_matlab_safe.bat,"eval(fileread('<absolute_script_path>')); exit;","disp('BATCH_ENTRY_OK'); eval(fileread('<absolute_script_path>')); exit;",NO,NONE,YES,C:\Dev\matlab-functions\results\switching\runs\run_2026_04_02_114946_switching_canonical,SUCCESS,"MATLAB stdout/stderr capture path in wrapper"

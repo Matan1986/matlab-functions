@@ -1,0 +1,5 @@
+﻿"script_name","HERMETIC_VIOLATION","ROOT_DEPENDENCY_DETECTED","CONCURRENT_RW_CONFLICT","RUN_VALID","read_paths","conflicting_writes","noted_at"
+"Switching/analysis/analyze_phi_kappa_canonical_space.m","YES","YES","YES","NO","C:\Dev\matlab-functions\tables\phi_kappa_stability_summary.csv | C:\Dev\matlab-functions\tables\phi_kappa_stability_status.csv","C:\Dev\matlab-functions\tables\canonical_migration_readiness.csv @ 2026-04-02 10:46:01 +03:00
+C:\Dev\matlab-functions\tables\canonical_migration_blockers.csv @ 2026-04-02 10:46:01 +03:00
+C:\Dev\matlab-functions\tables\canonical_migration_strategy_status.csv @ 2026-04-02 10:46:01 +03:00
+C:\Dev\matlab-functions\reports\canonical_migration_strategy_audit.md @ 2026-04-02 10:46:01 +03:00","2026-04-02 10:46:07 +03:00"

@@ -1,0 +1,10 @@
+metric,value,evidence
+EXECUTION_STATUS,SUCCESS,"Audit completed from existing repository artifacts; no MATLAB rerun performed."
+INPUT_FOUND,YES,"Phi1 references found across reports, tables, scripts, and helper files."
+TOTAL_PHI1_INSTANCES,45,"tables/phi1_audit.csv rows"
+CANONICAL_COUNT,12,"tables/phi1_audit.csv classification == CANONICAL"
+NON_CANONICAL_COUNT,24,"tables/phi1_audit.csv classification == NON_CANONICAL"
+MISLABELED_COUNT,9,"tables/phi1_audit.csv classification == MISLABELED"
+PHI1_MIXING_DETECTED,YES,"reports/phi1_instability_analysis.md and reports/switching_pipeline_stability.md"
+CANONICAL_PHI1_ENFORCED,YES,"reports/canonical_reconstruction.md + tables/canonical_reconstruction_status.csv"
+MAIN_RESULT_SUMMARY,"Canonical Phi1 is enforced in the main hermetic reconstruction, while a separate local/non-canonical pipeline exists and causes conflicting outcomes.","See reports/phi1_audit.md"

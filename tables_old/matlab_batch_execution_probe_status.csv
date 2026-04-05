@@ -1,0 +1,7 @@
+CHECK,VERDICT,EVIDENCE
+MATLAB_PROCESS_LAUNCHED,YES,"Wrapper run reached MATLAB launch and generated run artifacts in results/switching/runs/run_2026_04_02_114946_switching_canonical"
+BATCH_COMMAND_INJECTED,YES,"tools/run_matlab_safe.bat batch command now starts with disp(''BATCH_ENTRY_OK'');"
+MATLAB_EXECUTES_BATCH_STRING,YES,"Target script artifacts were produced (execution_probe_status.csv and execution_status.csv in run_2026_04_02_114946_switching_canonical), which requires MATLAB executing the -batch command string"
+MATLAB_OUTPUT_VISIBLE_TO_WRAPPER,NO,"Diagnostic token BATCH_ENTRY_OK was not observed in wrapper console output, run log, or workspace search"
+SCRIPT_BODY_ENTERED,YES,"execution_status.csv shows SUCCESS and execution_probe_status.csv shows WRITE_SUCCESS=YES in run_2026_04_02_114946_switching_canonical"
+NEXT_BLOCKER_LAYER,"MATLAB output capture boundary","MATLAB -batch appears to execute commands, but disp/stdout is not surfaced through current wrapper Start-Process capture path"

@@ -1,0 +1,2 @@
+timestamp,target_script,wrapper,old_entry_method,new_entry_method,focused_rerun_count,script_body_entered,run_dir_created,execution_status_written,exact_stop_point,next_blocker
+2026-04-02 11:47:24,C:\Dev\matlab-functions\Switching\analysis\run_switching_canonical.m,tools\run_matlab_safe.bat,"cd('<scriptDir>'); run('<scriptName>'); exit;","eval(fileread('<absolute_script_path>')); exit;",1,NO,NO,NO,MATLAB_CALLED_BUT_SCRIPT_NOT_INVOKED_OR_PRE_ENTRY_EVAL_FAIL,"MATLAB -batch command reached launch but no earliest script artifacts were produced"

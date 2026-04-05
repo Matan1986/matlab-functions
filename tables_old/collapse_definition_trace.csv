@@ -1,0 +1,5 @@
+run_id,x_definition,y_definition,uses_w_explicit,uses_w_implicit,pure_shift_alignment,amplitude_normalization,notes
+run_2026_03_10_112659_alignment_audit::energy_scale,"x = I / I_peak(T)","y = S(T,I) / S_peak(T)",NO,NO,NO,YES,"Defined in switching_alignment_audit energy-scale collapse plot construction; only I_peak and S_peak are required for curve inclusion."
+run_2026_03_10_112659_alignment_audit::threshold_shift,"x = I - I_peak(T)","y = S(T,I)",NO,NO,YES,NO,"Defined in switching_alignment_audit threshold-collapse test (shift only, no width and no amplitude normalization)."
+run_2026_03_12_231143_switching_energy_scale_collapse_filtered,"x = I / I_peak(T)","y = S(T,I) / S_peak(T)",NO,YES,NO,YES,"Collapse axes are width-free, but temperature inclusion uses width_missing and peak-at-lowest-current rules from decision table."
+run_2026_03_12_234016_switching_full_scaling_collapse,"x = (I - I_peak(T)) / width(T)","y = S(T,I) / S_peak(T)",YES,YES,NO,YES,"Width is explicit in the axis and computed by FWHM with sigma fallback before interpolation and metric evaluation."

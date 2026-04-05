@@ -1,0 +1,8 @@
+verdict,value,criterion,evidence
+EARLIEST_T0_IS_AFTER_FIELD_REMOVAL,false,true only if earliest start is low-field and no in-window field transition,p_lowH=0.000;p_transition=1.000;delay=457.361s
+EARLIEST_T0_CONTAINS_TRANSIENT,true,true if early segment has transient-like jump/slope discontinuity or field transition,jump_ratio=1.000;slope_ratio=10.928;p_transition=1.000
+NO_NORMALIZATION_IS_PHYSICALLY_MEANINGFUL,false,true only if absolute scale appears physically consistent and not dominated by scaling artifact,corr_span_temp=-0.044;scale_ratio_med=616.647;scale_ratio_iqr=422.661
+FULL_WINDOW_IS_PHYSICALLY_VALID,false,true only if early and late segments are physically usable for relaxation,contains_transient=true;late_noise=0.000;monotonic=0.524
+STABLE_CHOICE_IS_ALSO_PHYSICAL,false,true only if all physical checks pass,earliest_after_field_removal=false;no_norm_phys=false;full_window_valid=false
+CANONICAL_CHOICE_CONFIRMED,false,true only if stable choice is also physical,stable_also_physical=false
+REQUIRES_REVISED_CANONICAL_DEFINITION,true,true if any physical check fails or is uncertain,revised=true

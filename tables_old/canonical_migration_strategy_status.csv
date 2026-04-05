@@ -1,0 +1,8 @@
+"check_name","status","evidence"
+"ENTRYPOINT_READY","NO","entrypoint depends on precomputed root tables and unresolved helper-path assumptions for createRunContext"
+"CANONICAL_RUN_FEASIBLE","NO","single-run canonical source cannot be established cleanly from a root-table-dependent entrypoint"
+"SWITCHING_ONLY_SCOPE_CLEAN","NO","cross_pipeline_dependency=YES in 72 of 82 scanned scripts"
+"MINIMAL_MIGRATION_STRATEGY_VALID","NO","load-layer-only migration is not strategy-safe until entrypoint and scope blockers are removed"
+"OLD_SWITCHING_ANALYSES_MOSTLY_MIGRATABLE","YES","switching_only scripts=10, migratable among switching_only=9"
+"HIDDEN_DEPENDENCY_RISK_ACCEPTABLE","NO","hidden_input_risk=YES in 69 scripts"
+"FINAL_VERDICT","NOT_YET_EXECUTABLE","entrypoint is not currently clean canonical source and cross-pipeline contamination is high"

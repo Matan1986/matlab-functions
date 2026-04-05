@@ -1,0 +1,8 @@
+KEY,VALUE,EVIDENCE
+TEMPLATE_FIXED,YES,"docs/templates/matlab_run_template.m now passes validator and writes required bundle artifacts."
+WRAPPER_TIMEOUT_FIXED,YES,"tools/run_matlab_safe.bat now uses MATLAB_TIMEOUT_SECONDS with default 0 (no timeout)."
+OUTPUT_BUNDLE_ENFORCED,YES,"Template now writes execution_status.csv + CSV table + report.md + figure + figures_manifest.csv."
+SCRIPTS_TOUCHED,0,"No existing run_*.m scientific entry scripts were modified (optional backfill skipped for safety)."
+HIGH_RISK_SKIPPED,30,"Bulk edits across root run_*.m were intentionally skipped to avoid scientific/pipeline risk."
+LOGIC_CHANGED,NO,"No scientific computations or analysis logic were edited; only structural system files were changed."
+SYSTEM_READY_FOR_RUNS,YES,"New scripts based on fixed template can pass validation, run long jobs, and emit usable output bundles."

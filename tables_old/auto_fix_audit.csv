@@ -1,0 +1,2 @@
+script_path,classification,fix_applied,safe_to_run_after_fix,violations_found,changes_made,logic_changed,needs_manual_review,notes,fail_reasons
+tools/export_observables.m,INVALID_TARGET,NO,NO,"missing execution_status.csv; no .md output; missing createRunContext",none,NO,NO,"Precheck target is a helper function API (contains function definitions and helper-only behavior), not a runnable script under docs/repo_execution_rules.md. Skipped by safety rule SKIP > WRONG FIX.","missing execution_status.csv; no .md output; missing createRunContext"

@@ -1,0 +1,6 @@
+key,value,detail
+EXECUTION_CONTRACT_DEFINED,PASS,"Execution Signaling Contract section exists in repo_execution_rules.md"
+RULES_UPDATED,PASS,"repo_execution_rules.md updated with explicit validity criteria and invalid indicators"
+TEMPLATE_DOCUMENTED,PASS,"matlab_run_template.m includes a top documentation block explaining execution signals"
+NO_LOGIC_CHANGE,PASS,"only comments and documentation were modified"
+FIX_SCOPE_MINIMAL,PASS,"only docs/repo_execution_rules.md and docs/templates/matlab_run_template.m were modified"

@@ -1,0 +1,7 @@
+CHECK,VERDICT,EVIDENCE
+WRAPPER_REACHES_MATLAB,YES,"Wrapper run output reached '[MATLAB WRAPPER] Running script: C:\Dev\matlab-functions\Switching\analysis\run_switching_canonical.m' and precheck refreshed at 2026-04-02 11:47:24 in tables/wrapper_soft_gate_status.csv"
+MATLAB_ENTRY_METHOD_CHANGED,YES,"tools/run_matlab_safe.bat entry changed from cd('<scriptDir>'); run('<scriptName>'); exit; to eval(fileread('<absolute_script_path>')); exit;"
+SCRIPT_BODY_ENTERED_AFTER_FIX,NO,"No C:\Dev\matlab-functions\execution_probe_top.txt found after the focused rerun"
+RUN_DIR_CREATED_AFTER_FIX,NO,"No new run directory detected under results/switching/runs and no C:\Dev\matlab-functions\run_dir_pointer.txt"
+EXECUTION_STATUS_WRITTEN_AFTER_FIX,NO,"No execution_status.csv found under results/switching/runs/**/execution_status.csv"
+FIX_SCOPE_MINIMAL,YES,"Single code file changed: tools/run_matlab_safe.bat; no scientific/pipeline scripts modified"

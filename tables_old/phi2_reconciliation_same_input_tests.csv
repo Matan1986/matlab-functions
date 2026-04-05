@@ -1,0 +1,7 @@
+test_name,old_logic_result,new_logic_result,same_input_used,notes
+RANK2_SIGNIFICANCE_LEGACY_REPORT_STYLE,YES,NO,YES,"Same canonical matrix; legacy no_22K metrics reproduce historical values (gain=0.075052, best|corr|=0.926461) while new mode2 variance=0.025487 < 0.05."
+RANK2_STRUCTURE_OLD_AUDIT_THRESHOLD,WEAK,NO,YES,"Old explicit audit rule uses mode2 variance and best-corr (ev2=0.024465, best|corr|=0.926461)."
+STABILITY_LEGACY_LABEL_VS_TRUE_PHI2_LOO,STABLE (legacy field min cosine=0.999339),UNSTABLE (phi2 LOO min cosine=0.139600),YES,"Legacy mode2 stability value numerically matches mode-1 LOO quantity (labeling mismatch)."
+DEFORMATION_BASIS_CLOSURE_AGENT19E,NO,YES,YES,"Old basis closure: cosSpan=0.413899, rmseSpan=0.061374, meanRMSE(C/B)=0.006557/0.005668."
+STRICT_FIRST_PLUS_SECOND_CLOSURE,NO,YES,YES,"Old strict threshold uses cosine>=0.90 and rmse_unit<=0.02; measured cosine=0.930049, rmse_unit=0.025001."
+SECOND_MODE_PHYSICAL_COMPOSITE,YES,NO,YES,"Legacy narrative combined MODE2_REAL + landscape linkage; new requires explicit significance gate plus deformation and reconstruction gates."

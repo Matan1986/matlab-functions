@@ -1,0 +1,5 @@
+item,status,evidence
+RULES_SECTION_ADDED,YES,"docs/repo_execution_rules.md now contains 'Execution Signaling Contract'"
+TEMPLATE_DOC_BLOCK_ADDED,YES,"docs/templates/matlab_run_template.m now contains execution signaling comment block"
+EXECUTION_TRUTH_EXPLICIT,YES,"valid run requires execution_probe_top.txt, execution_status.csv, and run_dir"
+NO_LOGIC_CHANGED,YES,"documentation-only edits; no executable MATLAB logic changed"

@@ -1,0 +1,7 @@
+row_type,model,n_rows,rmse,pearson,spearman,notes
+profile_reconstruction,w_recon_vs_w_obs,19,0,1,1,same width method
+loocv_model,w ~ const,19,0.0424876556247498,-1,-1,target is observed profile width
+loocv_model,w ~ PT,19,0.00698459410847871,0.986183086473588,0.992091771434779,target is observed profile width
+loocv_model,w ~ kappa1,19,0.043704041160165,-0.888124423682935,-0.919156769637536,target is observed profile width
+loocv_model,w ~ PT + kappa1,19,0.00714880689408872,0.985312121322114,0.993849241357604,target is observed profile width
+loocv_model,w ~ PT + kappa1 + PT*kappa1,19,0.00756841138943496,0.983309856293909,0.989455566550541,target is observed profile width

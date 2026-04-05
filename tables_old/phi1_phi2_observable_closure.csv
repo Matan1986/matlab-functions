@@ -1,0 +1,4 @@
+o2_candidate,o2_available,scalar_kappa1_loocv_rmse,scalar_kappa1_pearson,scalar_kappa1_spearman,twoD_kappa1_loocv_rmse,twoD_kappa1_pearson,twoD_kappa1_spearman,twoD_kappa2_loocv_rmse,twoD_kappa2_pearson,twoD_kappa2_spearman,kappa1_rmse_improvement_abs,kappa1_rmse_improvement_ratio,notes
+antisymmetric_integral,0,0.000219218714820738,0.999991751619672,1,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,O2 column missing in aligned tables
+slope_difference,0,0.000219218714820738,0.999991751619672,1,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,O2 column missing in aligned tables
+local_curvature_window,0,0.000219218714820738,0.999991751619672,1,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,O2 column missing in aligned tables

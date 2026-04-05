@@ -1,0 +1,2 @@
+EXECUTION_STATUS,INPUT_FOUND,REUSED_RESULTS_ONLY,MISSING_TESTS_RERUN,CANONICAL_EVIDENCE_CHECKED,CONFLICT_FOUND,ERROR_MESSAGE,MAIN_RESULT_SUMMARY
+SUCCESS,YES,YES,NO,YES,YES,,Pipeline consolidated from existing canonical outputs; conflicts in phi1/reconstruction force NO on consistency and overall stability

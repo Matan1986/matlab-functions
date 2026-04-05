@@ -1,0 +1,6 @@
+"observable","coherent_group","pearson","spearman","nrmse","max_relative_deviation","trend_consistent","extra_check","verdict"
+"I_peak","raw_xy_delta_vs_baseline_aware","0.846676","0.783013","0.125000","0.333333","YES","ridge_delta_T=18.000000","UNSTABLE"
+"width","raw_xy_delta_vs_baseline_aware","1.000000","1.000000","0.000000","0.000000","YES","scale_stability_check","STABLE"
+"S_peak","raw_xy_delta_vs_baseline_aware","0.999499","0.991176","0.541525","0.970451","YES","amplitude_stability_check","UNSTABLE"
+"kappa1","raw_xy_delta_vs_baseline_aware","-0.999957","-1.000000","0.675358","1.996065","NO","sign_consistency=0.000000","UNSTABLE"
+"collapse_score","raw_xy_delta_vs_baseline_aware","NaN","NaN","1.000000","0.012014","YES","collapse_consistency_check","UNSTABLE"

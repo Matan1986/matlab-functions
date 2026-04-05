@@ -1,0 +1,4 @@
+"observable","mean_rel_diff","max_rel_diff","pearson_corr","spearman_corr","trend_preserved","trend_stable","relation_stable","sign_preserved"
+"I_peak","0.020000","0.480000","0.897784","0.855342","YES","YES","YES","YES"
+"width","0.000000","0.000000","1.000000","1.000000","YES","YES","YES","YES"
+"S_peak","1.807946","5.652945","0.999675","0.994118","YES","YES","NO","YES"
