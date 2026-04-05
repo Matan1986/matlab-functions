@@ -1,0 +1,7 @@
+file_path,function_name,TYPE,DOES_IT_LOAD_DATASETS,DOES_IT_TOUCH_AGING_PIPELINE,DOES_IT_INTRODUCE_SHARED_STATE,DOES_IT_WRITE_OUTSIDE_RUN_DIR,DOES_IT_CHANGE_SWITCHING_RESULTS,CLASSIFICATION
+Aging/utils/createRunContext.m,createRunContext,INFRASTRUCTURE,NO,NO,YES,CONDITIONAL,NO,SAFE_INFRASTRUCTURE_DEPENDENCY
+Aging/utils/createRunContext.m,setRunContextAppdata (called inside),INFRASTRUCTURE,NO,NO,YES,NO,NO,SAFE_INFRASTRUCTURE_DEPENDENCY
+Aging/utils/getResultsDir.m,getResultsDir,INFRASTRUCTURE,NO,NO,YES,YES legacy path if no run context,UNKNOWN,BORDERLINE_DEPENDENCY
+Aging/utils/safeCorr.m,safeCorr,PHYSICS_LOGIC,NO,NO,NO,NO,UNKNOWN,SAFE_INFRASTRUCTURE_DEPENDENCY
+Switching/analysis/run_switching_canonical.m,(calls only createRunContext from utils on path),INFRASTRUCTURE,N/A,N/A,N/A,N/A,N/A,SAFE_INFRASTRUCTURE_DEPENDENCY
+Switching/analysis/switching_full_scaling_collapse.m,addpath(genpath(Aging)),INFRASTRUCTURE,N/A,YES path pollution,N/A,N/A,N/A,BORDERLINE_DEPENDENCY

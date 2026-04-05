@@ -1,0 +1,7 @@
+field,value
+AGING_UTILS_CONTAMINATES_SWITCHING,PARTIAL
+CREATE_RUN_CONTEXT_SAFE,CONDITIONAL
+AGING_UTILS_ALLOWED,RESTRICTED
+PRIMARY_REASON,"createRunContext is repo-root-relative and experiment-scoped; does not load Aging science data (inspected Aging/utils/createRunContext.m L1-96)"
+CONTAMINATION_MECHANISM,"genpath(Aging) in some Switching scripts puts non-utils Aging code on path (e.g. switching_full_scaling_collapse.m L12); risks name shadowing and implicit coupling—not createRunContext itself"
+DOES_USING_AGING_UTILS_CONTAMINATE_FOR_RUN_SWITCHING_CANONICAL,NO

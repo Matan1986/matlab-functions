@@ -1,0 +1,11 @@
+RULE_ID,REQUIREMENT
+SINGLE_SIGNAL,"execution_status.csv is the sole authoritative execution outcome; logs, file existence, and stdout are not contract signals."
+SCHEMA_FIXED,"execution_status.csv contains exactly five columns in order: EXECUTION_STATUS, INPUT_FOUND, ERROR_MESSAGE, N_T, MAIN_RESULT_SUMMARY."
+ENUM_ENFORCED,"EXECUTION_STATUS may be only PARTIAL, SUCCESS, or FAILED."
+SINGLE_FINAL_STATE,"A completed run ends with exactly one final row: SUCCESS or FAILED. PARTIAL is for checkpoints only and must not be the final state."
+WRITE_PARTIAL,"PARTIAL rows may be written multiple times; each write overwrites the file (no append)."
+WRITE_FINAL,"Final SUCCESS or FAILED is written once per call using a temp file and atomic replace; it must be the last signaling write for that run."
+FAILURE_SIGNAL,"On failure, EXECUTION_STATUS=FAILED and ERROR_MESSAGE is non-empty."
+SUCCESS_SIGNAL,"On success, EXECUTION_STATUS=SUCCESS and ERROR_MESSAGE is empty."
+NO_AMBIGUITY,"Writer rejects empty EXECUTION_STATUS, invalid enum, SUCCESS with non-empty error text, and PARTIAL as a final write."
+SINGLE_WRITER,"All writes to execution_status.csv in the Switching module go through Switching/utils/writeSwitchingExecutionStatus.m only."

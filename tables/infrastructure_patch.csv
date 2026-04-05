@@ -1,0 +1,16 @@
+area,change,file,notes
+wrapper_truth,Document matlab -batch run() as canonical; add batch comments,tools/run_matlab_safe.bat,Aligns with implementation
+wrapper_truth,Replace eval(fileread) references with run() via wrapper,docs/AGENT_RULES.md,Non-blocking validator language
+wrapper_truth,Same + optional validator,docs/repo_execution_rules.md,Preflight no longer mandatory in wrapper
+execution_status,Unified columns per docs/run_system.md section 3,Switching/analysis/run_switching_canonical.m,PARTIAL/SUCCESS/FAILED lifecycle
+execution_status,Single schema reference doc,docs/execution_status_schema.md,Pointer to run_system
+run_dir_pointer,Removed writer,Switching/analysis/run_minimal_canonical.m,Parallel-safe; use manifest
+run_dir_pointer,Removed writer,docs/templates/matlab_run_template.m,No repo-root shared file
+run_dir_pointer,Deprecated in normative contract,docs/run_system.md,Section 6 rewritten
+run_dir_only,Failure status uses createRunContext or results/Switching/runs fallback,Switching/analysis/run_switching_canonical.m,No repoRoot status sink
+hardcoded_paths,Removed C:/Dev probe; bootstrap repo root from mfilename,Switching/analysis/run_switching_canonical.m,
+hardcoded_paths,Template repo root from script path,docs/templates/matlab_run_template.m,
+doc_sync,Rewrote pipeline to match minimal batch,docs/repo_context_infra.md,Removed stale fingerprint/pointer steps
+doc_sync,Run discovery without pointer,docs/repo_map.md,
+doc_pruning,Exclude list for agent prompts,docs/agent_prompt_exclude.md,15 paths; linked from repo_context_minimal
+doc_pruning,Precedence entry,docs/AGENT_RULES.md,Item 6 agent_prompt_exclude

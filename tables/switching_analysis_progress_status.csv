@@ -1,0 +1,11 @@
+SURVEY_COMPLETE,YES
+LAST_STAGE_COMPLETED,B_core_reconstruction_RMSE_map_evaluation
+FIRST_INCOMPLETE_STAGE,C_Phi1_irreducibility_tests
+ROBUSTNESS_STAGE_STATUS,PARTIAL
+CORE_RECONSTRUCTION_STATUS,COMPLETE
+PHI1_STATUS,PARTIAL
+KAPPA1_STATUS,PARTIAL
+CONFIDENCE_LEVEL,MEDIUM
+SURVEY_EVIDENCE_INDEX,"tables/switching_analysis_progress_survey.csv; reports/switching_analysis_progress_survey.md"
+STABLE_TRUSTED_CANONICAL_RUNS,"run_2026_04_03_000147_switching_canonical; run_2026_04_03_000008_switching_canonical; run_2026_04_02_234844_switching_canonical per tables/switching_run_trust_classification.csv"
+EXCLUDED_UNSTABLE,"results/switching/runs/run_2026_04_04_*_post_entry_runtime_fail (runtime fail label; not used for science conclusions); run_2026_04_02_213408_phi_kappa_canonical_space_analysis UNVERIFIED per trust table"

@@ -1,0 +1,104 @@
+﻿analysis_name,missing_canonical_run,legacy_dependency,uses_tables_old,missing_artifacts,gap_notes
+analyze_phi_kappa_canonical_space,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+checkNoDuplicateTemps,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+computeMetrics,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+debug_fix_o2_pipeline,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+ensureDir,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+run_switching_physical_baseline_model,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_switching_raw_baseline_correction_and_comparison,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+find_relaxation_time_series,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+formatNum,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+getVarByCandidates,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+inspect_relaxation_data_structure,YES,YES,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | Legacy or cross-module path references | No absolute tables/reports literals in script; verify run_dir outputs
+leaveOneOutPredict,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+locate_relaxation_raw_runs,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+pearsonCorrelation,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+phi1_phi2_driver_helpers,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+phi2_deformation_helpers,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+phi2_shape_helpers,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+relImprovement,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+run_aging_collapse_kappa1_kappa2,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_aging_kappa_comparison,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_aging_nonlinear_law_test,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_alpha_observable_search,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+run_alpha_physical_validity_test,YES,YES,NO,YES,Cannot replay with TRUSTED_CANONICAL Switching inputs only | Legacy or cross-module path references | Hardcoded repo tables/reports outputs missing
+run_asymmetric_spread_analysis,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+run_build_relaxation_dataset,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_build_relaxation_dataset_from_pipeline,YES,YES,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | Legacy or cross-module path references | No absolute tables/reports literals in script; verify run_dir outputs
+run_collapse_failure_mode_test,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_extract_tau_from_relaxation,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_kappa2_kww_shape_test,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_kappa2_opening_test,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+run_kappa2_operational_signature_test,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_kappa2_physical_necessity,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+run_minimal_canonical,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+run_parameter_robustness_switching_canonical,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+run_phi_asymmetry_link,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_phi_even_deformation_test,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_phi_physical_identification,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_phi_physical_structure_test,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_phi_pt_independence_test,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_phi_pt_restricted_deformation,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+run_phi_pt_restricted_deformation_5_1,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+run_phi_pt_restricted_deformation_stable,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+run_phi_temperature_derivative_test,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_phi1_observable_phi2_driver_test,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_phi1_phi2_observable_closure_fixed,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+run_phi1_phi2_observable_closure_test,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+run_phi2_deformation_structure_test,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_phi2_extended_deformation_basis_test,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_phi2_kappa2_canonical_residual_mode,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_phi2_second_order_deformation_test,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_phi2_shape_physics_test,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_prediction_falsification_test,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_pt_deformation_mode_test,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_pt_energy_extraction_robustness_audit,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_PT_kappa_relaxation_mapping,YES,YES,NO,YES,Cannot replay with TRUSTED_CANONICAL Switching inputs only | Legacy or cross-module path references | Hardcoded repo tables/reports outputs missing
+run_PT_to_relaxation_mapping,YES,YES,NO,YES,Cannot replay with TRUSTED_CANONICAL Switching inputs only | Legacy or cross-module path references | Hardcoded repo tables/reports outputs missing
+run_pt_width_spread_observable_analysis,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+run_relaxation_deep_search,YES,YES,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | Legacy or cross-module path references | No absolute tables/reports literals in script; verify run_dir outputs
+run_relaxation_extraction_from_known_runs,YES,YES,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | Legacy or cross-module path references | No absolute tables/reports literals in script; verify run_dir outputs
+run_relaxation_outlier_audit,YES,NO,NO,YES,Cannot replay with TRUSTED_CANONICAL Switching inputs only | Hardcoded repo tables/reports outputs missing
+run_relaxation_outlier_audit_no_toolbox,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_residual_decomposition_22k_failure_audit,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_residual_rank2_audit,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+run_residual_sector_robustness,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_residual_temperature_structure_test,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_switching_canonical,NO,NO,NO,NO,
+run_switching_peak_jump_audit,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_tail_ablation_test,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+run_trajectory_geometry_aging_test,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+run_validate_relaxation_dataset,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+run_width_decomposition_test,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+run_width_interaction_closure_test,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+run_width_interaction_closure_test_v2,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+sanitizeMD,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+spearmanCorrelation,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+switching_a1_vs_curvature_test,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+switching_alignment_audit,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+switching_dynamic_shape_geometry_match_analysis,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+switching_dynamic_shape_mode_analysis,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+switching_effective_observables,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+switching_energy_mapping_analysis,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+switching_energy_scale_collapse_filtered,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+switching_full_scaling_collapse,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+switching_full_scaling_collapse_figure_repair,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+switching_geometry_diagnostics,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+switching_mechanism_followup,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+switching_mechanism_survey,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+switching_mode23_analysis,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+switching_observable_basis_test,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+switching_observable_stability_survey,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+switching_residual_collapse_verification_analysis,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+switching_residual_decomposition_analysis,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+switching_ridge_curvature_analysis,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+switching_ridge_susceptibility_analysis,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+switching_ridge_susceptibility_test,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+switching_second_coordinate_duel,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+switching_second_structural_observable_search,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+switching_shape_rank_analysis,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+switching_translation_mode_test,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+switching_XI_Xshape_analysis,YES,NO,NO,UNKNOWN,Cannot replay with TRUSTED_CANONICAL Switching inputs only | No absolute tables/reports literals in script; verify run_dir outputs
+tiedRankLocal,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+toDoubleColumn,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs
+yesno,NO,NO,NO,UNKNOWN,No absolute tables/reports literals in script; verify run_dir outputs

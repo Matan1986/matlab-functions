@@ -1,0 +1,7 @@
+unit_id,read_pattern,write_pattern,io_risk,contention_flag,notes
+S0-U01,dir_listing_parentDir_read_only,none_to_legacy,IO_SAFE,FALSE,metadata_only
+S1-U01,read_single_folder_glob_*.dat,none,IO_SAFE,FALSE, disjoint folders disjoint files
+S1-U02,per_file_importdata_fullfile_directory_dat,none_disk_workspace_only,IO_CONTENTION_RISK,TRUE_if_parallel_same_volume,"Heavy_sequential_reads_io_behavior_map;_no_shared_output_files_between_folders"
+S1-U03,reads_from_stored_data_cells_in_memory,none_disk_typically,IO_SAFE,FALSE,unless_debug_plots_write_UNKNOWN
+S1-U04,memory_only_vectors,none_disk_in_loop,IO_SAFE,FALSE,
+S1-U05,memory_table_sortrows,none_heavy_disk_yet,IO_SAFE,FALSE,downstream_S2_computes_in_memory

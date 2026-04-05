@@ -1,0 +1,2 @@
+file,location,violation_type,requires_fix,fix_applied,notes
+tools/write_execution_marker.m,"lines 35-50 (removed): fallback branch mkdir+append to repo tables/",GLOBAL_WRITE_OUTSIDE_RUN_DIR,YES,YES,"Previously when run_dir was empty or directory missing, appended to tables/runtime_execution_markers_fallback.txt (shared across runs; not manifest-tracked). Canonical Switching path calls write_execution_marker only after createSwitchingRunContext sets appdata and after run_dir exists, or passes runDirOverride on FAILED; removing fallback does not alter CSV/math outputs."

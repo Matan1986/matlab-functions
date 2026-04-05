@@ -1,0 +1,35 @@
+FILE,TYPE,SEVERITY,DESCRIPTION
+Switching/analysis/run_parameter_robustness_switching_canonical.m,DIRECT,HIGH,readtable from repo tables (e.g. switching_run_trust_classification.csv) and canonical run under results; cross-run dependency on selected canonical run id.
+Switching/analysis/analyze_phi_kappa_canonical_space.m,DIRECT,HIGH,readtable from tables/ under baseFolder for phi_kappa stability summary/status CSVs.
+Switching/analysis/run_phi1_phi2_observable_closure_fixed.m,DIRECT,HIGH,readtable fullfile(repoRoot tables) for o2_observables_aligned closure_metrics_per_temperature; writes back to repo tables/reports.
+Switching/analysis/run_phi1_phi2_observable_closure_test.m,DIRECT,HIGH,Hardcoded C:/Dev/matlab-functions/tables reads for multiple inputs.
+Switching/analysis/debug_fix_o2_pipeline.m,DIRECT,HIGH,read/write repo tables and scans results/switching/runs for candidate CSVs.
+Switching/analysis/run_phi2_extended_deformation_basis_test.m,DIRECT,HIGH,fullfile(repoRoot tables) reads/writes including phi2_deformation_fit reference.
+Switching/analysis/run_kappa2_operational_signature_test.m,DIRECT,HIGH,default kappa table path under repo tables.
+Switching/analysis/run_phi1_observable_phi2_driver_test.m,DIRECT,HIGH,readtable repo tables/phi1_observable_failure_by_T.csv.
+Switching/analysis/run_width_interaction_closure_test_v2.m,DIRECT,MEDIUM,repo tables paths for closure tests.
+Switching/analysis/run_kappa2_kww_shape_test.m,DIRECT,MEDIUM,repo tables usage.
+Switching/analysis/run_width_decomposition_test.m,DIRECT,MEDIUM,repo tables usage.
+Switching/analysis/run_kappa2_physical_necessity.m,DIRECT,MEDIUM,repo tables usage.
+Switching/analysis/run_kappa2_opening_test.m,DIRECT,MEDIUM,repo tables usage.
+Switching/analysis/run_phi2_second_order_deformation_test.m,DIRECT,MEDIUM,repo tables read/write.
+Switching/analysis/run_phi2_shape_physics_test.m,DIRECT,MEDIUM,repo tables read/write.
+Switching/analysis/run_phi2_deformation_structure_test.m,DIRECT,MEDIUM,repo tables read/write.
+Switching/analysis/run_phi2_kappa2_canonical_residual_mode.m,DIRECT,HIGH,repo tables directory for outputs; report references tables/.
+Switching/analysis/experimental/run_switching_physical_baseline_model.m,DIRECT,MEDIUM,repo tables/reports read/write.
+Switching/analysis/experimental/run_switching_raw_baseline_correction_and_comparison.m,DIRECT,HIGH,repo tables; scans glob under results/switching/runs.
+Switching/analysis/run_PT_to_relaxation_mapping.m,DIRECT,CRITICAL,Hardcoded absolute paths to repo tables/ reports/ and cross-experiment results (Relaxation).
+Switching/analysis/run_PT_kappa_relaxation_mapping.m,DIRECT,CRITICAL,Same pattern: repo tables + alpha_structure + cross-pipeline run paths.
+Switching/analysis/run_relaxation_*.m (multiple under Switching/analysis),DIRECT,CRITICAL,Reads/writes repo tables/ and reports/; cross-domain despite Switching folder location.
+Switching/analysis/run_alpha_*.m,DIRECT,CRITICAL,Repo tables reads; cross-domain inputs.
+Switching/analysis/run_aging_*.m under Switching/analysis,DIRECT,HIGH,Repo tables and cross-experiment paths (Aging) from Switching tree.
+Switching/analysis/locate_relaxation_raw_runs.m,DIRECT,HIGH,Repo tables/reports outputs.
+Switching/analysis/run_extract_tau_from_relaxation.m,DIRECT,HIGH,Repo tables/reports.
+Switching/analysis/find_relaxation_time_series.m,DIRECT,HIGH,Repo tables/reports.
+Switching/analysis/inspect_relaxation_data_structure.m,DIRECT,HIGH,Repo tables/reports.
+Switching/analysis/run_build_relaxation_dataset*.m,DIRECT,HIGH,Repo tables and pipeline reads.
+Switching/analysis/run_validate_relaxation_dataset.m,DIRECT,MEDIUM,Repo tables.
+tools/switching_canonical_run_closure.m,INDIRECT,HIGH,When executed writes tables/ and reports/ at repo root; selects runs by folder glob *_switching_canonical (policy tension with manifest-only IS_CANONICAL rule in docs/switching_backend_definition.md).
+tools/resolve_results_input_dir.m used from Switching analysis scripts,INDIRECT,MEDIUM,Resolves latest CANONICAL prior run under results (not repo tables) but creates cross-run dependency ordering.
+tools/switching_canonical_control_scan.ps1,INDIRECT,LOW,Reads Switching/analysis for violation patterns; writes tables/*.csv (meta-leakage into aggregate tables by design).
+Switching/analysis/run_switching_canonical.m,LEAKAGE_FREE_ENTRYPOINT,INFO,Does not read repo-root tables/ or reports/ for inputs; consumes raw data via parsed Switching_main parentDir and ver12 pipeline only.

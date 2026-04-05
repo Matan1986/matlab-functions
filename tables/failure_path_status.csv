@@ -1,0 +1,2 @@
+FAILURE_PATH_ENFORCED,FAILURE_RUN_ALWAYS_EXISTS,FAILURE_STATUS_WRITTEN,SINGLE_FINAL_STATUS,NO_SILENT_FAILURES,STRUCTURE_CANONICAL,MANIFEST_VALID_ON_FAILURE,NO_PARTIAL_CORRUPTION,SCOPE_NOTE
+YES,YES,YES,YES,YES,YES,YES,YES,"Enforced for Switching canonical runner run_switching_canonical.m and Switching/utils helpers; other Switching analysis scripts unchanged in this phase."

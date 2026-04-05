@@ -1,0 +1,13 @@
+ASSUMPTION_ID,DATA_SOURCE_ID,DESCRIPTION,ASSUMPTION_EXPLICIT
+A01,SW_LEGACY_MAIN,"Switching_main.m exists at fixed relative path under repo (Switching ver12/main).",YES
+A02,SW_LEGACY_MAIN,"Legacy file contains a line matching regexp dir\s*=\s*""([^""]+)"" with a usable absolute parent path.",NO
+A03,SW_EXTERNAL_RAW_PARENT,"Parsed parentDir exists and is readable on the execution host.",NO
+A04,SW_EXTERNAL_RAW_PARENT,"At least one immediate subfolder name starts with ""Temp Dep"" (case-insensitive); other dependence folders (e.g. Amp Dep) are ignored by canonical script.",NO
+A05,SW_RAW_DAT,"Each used folder yields finite meta.Current_mA from folder name token (see getFileListSwitching); canonical errors if missing.",PARTIAL
+A06,SW_RAW_DAT,"File names and dep_type (from extract_dep_type_from_folder) allow sorting regex in getFileListSwitching for Temperature sweeps.",NO
+A07,SW_RAW_DAT,"processFilesSwitching expects importdata-readable .dat with numeric matrix; column 1 = time; LI channels in columns 5,7,9,11 when non-NaN.",NO
+A08,SW_RAW_DAT,"analyzeSwitchingStability returns global switching channel in {1,2,3,4} with nonempty tableData.chN for that channel.",NO
+A09,SW_RAW_DAT,"After filtering, some (T_K, current) samples exist; grid non-empty for temps and currents.",NO
+A10,SW_PHI_KAPPA_SUMMARY,"CSV includes columns: pair, phi_shape_corr, kappa_corr, abs_kappa_corr, kappa_sign, PHI_PAIR_STABLE, KAPPA_PAIR_STABLE, KAPPA_SIGN_STATUS; pair format includes "" vs "" for filtering.",NO
+A11,SW_PHI_KAPPA_SUMMARY,"Canonical variant filter uses literal names xy_over_xx and baseline_aware in pair strings.",NO
+A12,SW_PHI_KAPPA_STATUS,"No semantic dependency: file is read but variable status_table is never used.",NO

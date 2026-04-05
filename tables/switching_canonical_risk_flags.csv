@@ -1,0 +1,7 @@
+risk_id,title,detail,severity,classification
+R1,"External raw path in Switching_main.m","Raw parentDir is an absolute L: Google Drive path embedded in legacy file; reproducibility across machines depends on that file and drive availability","LOW","NONCANONICAL_RISK"
+R2,"Legacy processing stack","S definition is fully determined by Switching ver12 functions not duplicated in Switching/analysis; scientific interpretation ties to their behavior","LOW","LEGACY_HARMLESS"
+R3,"createRunContext under Aging/utils","Execution identity utility lives outside Switching tree; strict which() check prevents wrong copy","LOW","LEGACY_HARMLESS"
+R4,"Optional preset normalization","normalize_to may change if resolve_preset/select_preset behavior or filenames change","LOW","NONCANONICAL_RISK"
+R5,"CHECK_NO_PRECOMPUTED_INPUTS heuristic","Flags precomputed if any input path ends with .csv/.mat or contains \\results\\; false negatives/positives possible if paths unusual","LOW","UNKNOWN"
+R6,"PHI/KAPPA gates vs physics","CANONICAL_PIPELINE_CONFIRMED uses RMSE/cosine/Spearman thresholds; descriptive of fit not independent validation","LOW","NONCANONICAL_RISK"

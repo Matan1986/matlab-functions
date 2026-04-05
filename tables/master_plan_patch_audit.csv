@@ -1,0 +1,16 @@
+REQUIREMENT_ID,DOCUMENT,ACTION_SUMMARY,AUTHORITATIVE_AUDIT_ANCHOR
+R1_PHASE4_SCOPE,docs/system_master_plan.md,CREATED Section 3: Phase 4 defined as Execution Trust Closure only; explicit exclusions (canonical isolation cross-module enforcement repo-wide contamination),reports/plan_realign_audit.md
+R1_PHASE4_SCOPE,docs/infrastructure_laws.md,ADDED PART 7 pointer: Phase 4 does not substitute for Phase 4.5,reports/plan_realign_audit.md
+R2_PHASE45_FORMAL,docs/system_master_plan.md,CREATED Section 4: Phase 4.5 mandatory scope (isolation verification module status cross-module policy enforcement alignment false-safety),reports/system_closure_audit.md
+R3_CROSS_MODULE_LAW,docs/infrastructure_laws.md,ADDED PART 7 binding cross-module participation law with operational caveat (normative not yet closed),reports/isolation_feasibility_audit.md
+R3_CROSS_MODULE_LAW,docs/system_master_plan.md,CREATED Section 6 duplicate law statement per task,reports/isolation_feasibility_audit.md
+R4_MODULE_MODEL,docs/system_master_plan.md,CREATED Section 5: Type A vs Type B; Switching Relaxation Aging as Type A,reports/plan_realign_audit.md
+R5_GATES,docs/system_master_plan.md,CREATED Section 7: Phase 5 requires Phase 4 and 4.5; Phase 6 cross-module rules; Switching-only vs parallel canonicalization,reports/system_closure_audit.md
+R6_TRUST_TERMS,docs/system_master_plan.md,CREATED Section 2: execution vs system vs isolation trust,reports/system_closure_audit.md
+R6_TRUST_TERMS,docs/repo_context_infra.md,REPLACED Section 5 with trust domains and wrapper/manifest caveats,reports/system_closure_audit.md
+R7_FALSE_CLOSURE,docs/system_master_plan.md,CREATED Section 8: reinterpret DONE for Phases 0-4; full system closure not achieved; Phase 4.5 rationale,reports/system_closure_audit.md
+DOC_PRECEDENCE,docs/AGENT_RULES.md,ADDED precedence 1b for system_master_plan.md,MASTER_PLAN_PATCH
+DOC_POINTER,docs/repo_consolidation_plan.md,ADDED principle bullet cross-module and pointer to system_master_plan and infra PART 7,MASTER_PLAN_PATCH
+DOC_POINTER,docs/repo_map.md,ADDED bullet for system_master_plan.md,MASTER_PLAN_PATCH
+DOC_POINTER,docs/repo_execution_rules.md,ADDED bullet under Infrastructure laws for system_master_plan,MASTER_PLAN_PATCH
+DOC_POINTER,docs/repo_context_infra.md,ADDED related doc line for system_master_plan,MASTER_PLAN_PATCH

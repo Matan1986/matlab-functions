@@ -1,0 +1,4 @@
+script_identifier,reason,risk,allowed_usage
+Switching/analysis/run_minimal_canonical.m,"Minimal wiring only; not the full canonical Switching pipeline as locked for agents.","Misleading if used as the canonical Switching entrypoint; different contract than run_switching_canonical.m.",TESTING_ONLY
+Switching ver12/main/Switching_main.m,"Backend implementation entry; not the registered Switching run entrypoint.","Direct usage bypasses canonical script; run context and artifact contract may not match registered system.",NO
+"Any script using addpath(genpath(Aging))","Broad Aging path breaks the restricted utils-only boundary (see docs/switching_dependency_boundary.md).","Path contamination; shadowing; unintended coupling to non-audited Aging code.",NO

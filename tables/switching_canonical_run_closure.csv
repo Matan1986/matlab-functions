@@ -1,0 +1,7 @@
+run_id,status,matches_source,classification
+run_2026_04_02_234844_switching_canonical,LEGACY_OK,YES,DUPLICATE
+run_2026_04_03_000008_switching_canonical,LEGACY_OK,YES,DUPLICATE
+run_2026_04_03_000147_switching_canonical,LEGACY_OK,YES,DUPLICATE
+run_2026_04_03_091018_switching_canonical,LEGACY_OK,YES,DUPLICATE
+run_2026_04_04_095928_switching_canonical,OTHER,NO,DRIFTED
+run_2026_04_04_100107_switching_canonical,SUCCESS,YES,SOURCE

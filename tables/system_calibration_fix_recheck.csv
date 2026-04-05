@@ -1,0 +1,6 @@
+test_id,expected_behavior,observed_behavior,matlab_launched,script_entered,run_dir_created,execution_status_written,classification_clear,verdict,notes
+R1_invalid_path,Exit 2 no MATLAB PRE_EXECUTION_INVALID_SCRIPT log,PRE_EXECUTION_GUARD=FAIL stderr file_not_found ERRORLEVEL=2 row in tables/pre_execution_failure_log.csv,NO,NO,NO,N/A,YES,PASS,cmd.exe /v:on verified ERRORLEVEL=2 2026-04-04
+R2_validator_missing,WARN + NOT_PASS no OK line for missing file,WARN FILE_NOT_FOUND then RESULT=NOT_PASS only,N/A,N/A,N/A,N/A,YES,PASS,PowerShell validate_matlab_runnable.ps1
+R3_validator_soft,PASS on run_minimal_canonical.m,CHECK_* PASS then RESULT=PASS and OK line,N/A,N/A,N/A,N/A,YES,PASS,existing script path
+R4_runtime_partial,Script catch writes FAILED status,N/A not executed in this fix,N/A,N/A,N/A,N/A,N/A,NOT_EXECUTED,No MATLAB run required for infra sign-off; prior code review unchanged
+R5_success_matlab,N/A not executed,N/A not executed,N/A,N/A,N/A,N/A,N/A,NOT_EXECUTED,Deferred to avoid long MATLAB batch in audit

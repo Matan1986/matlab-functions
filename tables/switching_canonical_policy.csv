@@ -1,0 +1,10 @@
+rule_id,rule_text
+
+1,ONLY run_2026_04_03_000147_switching_canonical is allowed for load_run and downstream consumption (see tables/switching_canonical_identity.csv CANONICAL_RUN_ID).
+
+2,DUPLICATES listed in tables/switching_canonical_duplicates.csv are READ_ONLY_DUPLICATE: archival or audit display only; must not be used for computation or as a primary load target.
+
+3,INVALID runs listed in tables/switching_invalid_runs.csv are excluded from all operational loads, merges, and automation targets.
+
+4,Any new Switching canonical run must satisfy execution_status=SUCCESS, artifact_ok=YES, and presence of core CSVs switching_canonical_phi1.csv, switching_canonical_observables.csv, switching_canonical_validation.csv under run_dir/tables/ before promotion.
+

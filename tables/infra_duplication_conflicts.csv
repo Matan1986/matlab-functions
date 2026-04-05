@@ -1,0 +1,6 @@
+CONCEPT,MULTIPLE_DEFINITIONS,CONFLICT,DESCRIPTION,SEVERITY
+RUN_ID,YES,YES,RUN_ID is assigned in createRunContext and stored in run_manifest.json but the scan and operators also treat the folder basename as authoritative without mandatory JSON equality check; desync or legacy folders could disagree.,MEDIUM
+PARENT_RUN_ID,YES,YES,No parent field in standard run_manifest.json; L2 and L3 bundle CSVs use different keys and live outside the unified manifest schema; two parallel parent concepts.,MEDIUM
+INPUT_SOURCE,YES,YES,"Same phrase maps to pipeline variables in run_switching_canonical.m scan policy column INPUT_SOURCE trusted id and doc trust list; meanings overlap only informally.",HIGH
+FINGERPRINT,YES,YES,"Execution fingerprint fields exist only in run_manifest.json; control scan output run_fingerprint.csv omits hash fields and reuses the word fingerprint for a different row shape; risk of operators conflating outputs.",MEDIUM
+EXECUTION_STATUS,YES,YES,"Semantic status rows are written only by the canonical runner; validator infers compliance from source text; scan only checks file existence so PARTIAL vs SUCCESS vs missing content can diverge in interpretation.",LOW

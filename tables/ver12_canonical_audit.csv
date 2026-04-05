@@ -1,0 +1,8 @@
+﻿component,uses_raw_only,uses_precomputed_data,preprocessing_present,preprocessing_controlled,external_dependency,deterministic,VALID_FOR_CANONICAL
+Switching ver12/main/Switching_main.m,NO,YES,YES,NO,YES,NO,NO
+Switching ver12/getFileListSwitching.m,YES,NO,NO,YES,NO,YES,YES
+Switching ver12/main/processFilesSwitching.m,YES,NO,YES,NO,YES,YES,NO
+Switching ver12/main/analyzeSwitchingStability.m,NO,NO,YES,NO,YES,NO,NO
+Switching ver12/parsing/*.m,YES,NO,YES,NO,NO,YES,NO
+Switching ver12/plots/plotAmpTempSwitchingMap_switchCh.m (reachable from main),NO,YES,YES,NO,YES,NO,NO
+Switching ver12/plots/plotSwitchingPanelF.m,NO,YES,YES,NO,YES,NO,NO

@@ -1,0 +1,6 @@
+check_id,finding,parallel_safe,notes,evidence
+PS-01,Unique run_dir per createRunContext,YES,Under results/Switching/runs,Aging/utils/createRunContext.m
+PS-02,No repo-root run_dir_pointer in canonical path,YES,Deprecated removed prior patch,docs/run_system.md section 6
+PS-03,tools/temp_runner.m shared filename,PARTIAL,Race if two wrappers overlap same second,run_matlab_safe.bat L25-48
+PS-04,Failure run_dir fallback run_failure_* timestamp,PARTIAL,Second-level collision unlikely; not UUID,run_switching_canonical.m L608-615
+PS-05,rethrow after catch writes,YES,Does not write outside run_dir for status,run_switching_canonical.m L669

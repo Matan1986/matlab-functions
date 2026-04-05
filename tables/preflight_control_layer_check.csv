@@ -1,0 +1,9 @@
+CHECK,RESULT,NOTES
+Control script tools/switching_canonical_control_scan.ps1 is read-only on inputs (no MATLAB),PASS,Writes observability CSVs under tables/ only; does not modify Switching code or runs.
+INPUT_SOURCE derived only from manifest optional fields when present; empty otherwise,PASS,Matches docs/switching_backend_definition.md Section 7-9; no trusted-run-id fallback in current script body.
+PARENT_RUN_ID from canonicalization_manifest.csv or canonicalization_l2_manifest.csv keys only,PASS,Get-ParentRunId uses key-value lines only; returns empty if absent.
+IS_CANONICAL drift column uses manifest label switching_canonical only (UNDEFINED otherwise),PASS,Get-IsCanonicalFromManifestLabel; no folder-regex in drift stage.
+No git_commit or script_hash synthesis in scan output table,PASS,run_fingerprint.csv lists RUN_ID PARENT_RUN_ID INPUT_SOURCE TIMESTAMP HAS_EXECUTION_STATUS only; hash fields not fabricated in PS1.
+Violation scan flags repo-root tables/reports path patterns in Switching/analysis,PASS,Reporting-only regex scan; does not block execution.
+File name tables/run_fingerprint.csv vs semantic fingerprint in manifest,WARN,Backend doc Section 8 forbids treating this CSV as hash registry; name can mislead operators.
+Regex-based violation detection may miss dynamically built paths,LIMIT,Dynamic fullfile(repoRoot variables) still caught by many patterns; exhaustive proof requires full static analysis.

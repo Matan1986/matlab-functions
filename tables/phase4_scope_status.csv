@@ -1,0 +1,8 @@
+FLAG,VALUE
+PHASE4_SCOPE_LOCKED,YES
+SCOPE_DRIFT_ALLOWED,NO
+MODULE_SCOPE,Switching
+PHASE4_FIXES_ONLY_PHASE3_DOCUMENTED_NON_CANONICAL,YES
+PHASE3_SOURCE_OF_TRUTH,reports/phase3_system_reality_closure.md
+PHASE3_MACHINE_SUMMARY,tables/phase3_system_reality_summary.csv
+PHASE3_STATUS_TABLE,tables/phase3_closure_status.csv

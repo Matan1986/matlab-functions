@@ -1,0 +1,9 @@
+METRIC,VALUE,EVIDENCE
+SWITCHING_ONLY_OK,YES,"run_dir=results/switching/runs/run_2026_04_04_234548_switching_canonical; execution_status=SUCCESS; enforcement_status ENFORCEMENT_CHECKED=YES MODULES_USED=Switching"
+NON_CANONICAL_BLOCKED,YES,"MATLAB exit 1; error at assertModulesCanonical (run_switching_canonical line 57); failure run_dir=results/switching/runs/run_2026_04_04_235147_switching_canonical_failure; MODULES_USED=Switching,Aging"
+CANONICAL_ALLOWED,YES,"Temporary registry: Aging=CANONICAL; run_dir=results/switching/runs/run_2026_04_04_235812_switching_canonical; execution_status=SUCCESS; enforcement ENFORCEMENT_CHECKED=YES MODULES_USED=Switching,Aging; registry restored to Aging=NON_CANONICAL"
+ENFORCEMENT_CONDITIONAL_CORRECT,YES,"Static: run_switching_canonical.m calls assertModulesCanonical only when length(modules_used)>1; runtime: single-module baseline never hits assert; multi-module hits assert (failure and success runs)"
+NO_OVERREGULATION,YES,"Baseline without modules_used_input succeeded; grep shows modules_used only in run_switching_canonical.m (not propagated to createRunContext or other APIs)"
+NO_FALSE_DECISIONS,YES,"Non-canonical cross-module run FAILED with CrossModuleNotAllowed; both-canonical cross-module run SUCCESS; switching-only SUCCESS"
+PHASE45_VALIDATED,YES,"All required checks passed"
+NOTE_FAILURE_PATH_ENFORCEMENT_FLAG,INFO,"On assertModulesCanonical failure enforcement_checked remains false; enforcement_status.txt shows ENFORCEMENT_CHECKED=NO while MODULES_USED=Switching,Aging (assert did run)"

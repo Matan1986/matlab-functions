@@ -1,0 +1,7 @@
+boundary_item,blocks_before_matlab,blocks_after_matlab_launch,downgrades_to_warning,downgrades_to_partial,unjustified_blocker,dangerously_permissive,evidence
+ASCII / non-ASCII script,NO (wrapper),N/A (MATLAB may error),Agent policy STOP only,N/A,NO,YES if agent skips check,docs/repo_execution_rules.md L120-127
+Missing script file,NO,MATLAB run() fails,N/A,N/A,NO,YES (MATLAB still launched),829497.txt
+Validator failures,NO,N/A,WARN via FailValidation,N/A,NO,NO if not wired to wrapper,validate_matlab_runnable.ps1 L26-33
+createRunContext mkdir,NO,N/A error in MATLAB,N/A,N/A,NO,NO,Aging/utils/createRunContext.m
+run_switching_canonical business logic errors,NO,N/A catch writes status then rethrow,N/A,FAILED status YES,NO,NO,run_switching_canonical.m catch
+Shared temp_runner race,N/A,N/A,N/A,N/A,NO,YES under parallel,tools/run_matlab_safe.bat

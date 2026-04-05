@@ -1,0 +1,14 @@
+INITIAL_CANONICAL,1
+FINAL_CANONICAL,9
+FAILED_REMAINING,0
+L1_RESOLVED,4
+L2_RESOLVED,1
+L3_RESOLVED,7
+SYSTEM_CANONICAL_READY,YES
+SOURCE_OF_TRUTH_RUN_ID,run_2026_04_03_000147_switching_canonical
+CANONICAL_ENTRYPOINT,Switching/analysis/run_switching_canonical.m
+L3_RUN_PREFIX,run_2026_04_04_150000_canonicalization_l3_
+L2_MANIFEST_RUN,run_2026_04_04_150000_canonicalization_l2_trust_rebind_091018
+OUTPUT_TABLES,"tables/switching_analysis_deduplicated.csv;tables/switching_analysis_canonical_final.csv;tables/switching_run_trust_classification.csv"
+OUTPUT_REPORTS,reports/switching_canonicalization_execution.md
+NOTE,"L3 bundles copy switching_canonical_*.csv inputs from SOURCE_OF_TRUTH run only; analysis-specific tables copied from repo tables/; no algorithm changes."

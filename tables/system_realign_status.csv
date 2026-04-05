@@ -1,0 +1,11 @@
+KEY,VALUE
+SYSTEM_REALIGNMENT_SURVEY_COMPLETE,YES
+PLAN_UPDATE_REQUIRED,YES
+SYSTEM_LEVEL_CANONICAL_BOUNDARY,YES
+NEW_INVARIANT_INTRODUCED,YES
+CROSS_MODULE_ENFORCEMENT_COVERAGE,PARTIAL
+UNGUARDED_ENTRYPOINTS,"Switching/analysis/run_switching_canonical.m; all other Switching/analysis/*.m scripts (103 .m under Switching/analysis in surveyed snapshot, including experimental and Relaxation-bridge scripts); repo-root run_*_wrapper.m and analysis/cross_experiment orchestration; any path that addpath/genpaths non-Utils Aging or Relaxation without assertModulesCanonical matching modules_used"
+MODULE_CLASSIFICATION_REQUIRED,YES
+REENTRY_RULE_UPDATE_REQUIRED,YES
+FORMALIZATION_READINESS,FORMALIZATION_BLOCKED_PENDING_ALIGNMENT
+ALIGNMENT_RISK,MEDIUM

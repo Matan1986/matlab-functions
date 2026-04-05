@@ -1,0 +1,15 @@
+﻿component,issue,severity,blocking,fix_required
+wrapper,"MATLAB command executes temp runner (run('%RUNNER_ABS_PATH_MATLAB%')) instead of requested script path; script body is never entered",CRITICAL,YES,YES
+wrapper,"SCRIPT_PATH_MATLAB is computed but never used in the MATLAB command path",HIGH,YES,YES
+wrapper,"SCRIPT_EXISTS is informational only; missing or invalid script targets do not stop launch and can mask target-resolution failures",HIGH,YES,YES
+wrapper,"Empty ScriptArg resolves to current directory, which can produce misleading SCRIPT_EXISTS=YES for folders",MEDIUM,YES,YES
+wrapper,"No explicit post-launch NO_SCRIPT_ENTRY classification when entry marker is absent",HIGH,NO,YES
+wrapper,"Logging does not explicitly compare requested script path versus executed script path",MEDIUM,NO,YES
+validator,"Precondition checks (FILE_NOT_FOUND, PATH_NOT_ABSOLUTE, PATH_OUTSIDE_REPO_ROOT, INVALID_EXTENSION) are marked as blocking in internal state logic",MEDIUM,NO,NO
+validator,"FailValidation emits WARN and returns; validator exits PASS path and is effectively non-blocking",LOW,NO,NO
+validator,"CHECK_DRIFT can set block=true in canonical state, but currently surfaces as warning due non-terminating FailValidation",LOW,NO,NO
+validator,"Default VALIDATOR_STATE=canonical when docs/repo_state.md is missing increases strict-failure classification risk if external enforcement is added",MEDIUM,NO,YES
+script,"Top-of-file entry marker exists before clear/clc (SCRIPT_START_ROBUSTNESS and execution_probe_top.txt write)",LOW,NO,NO
+script,"Local function definitions are present; CHECK_FUNCTION would fail if validator blocking is enforced upstream",HIGH,NO,YES
+script,"Entry marker writes under pwd; working-directory mismatch can cause false NO_SCRIPT_ENTRY detection despite real entry",MEDIUM,NO,YES
+script,"No early exit before marker; pre-entry failure is not caused by script-body control flow",LOW,NO,NO

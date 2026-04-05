@@ -1,0 +1,2 @@
+verification_run_id,IDENTITY_MATCHES_ENTRYPOINT,EXECUTION_STILL_WORKS,MANIFEST_CORRECT,EXECUTION_TRUSTED,notes
+run_2026_04_04_141426_switching_canonical,YES,YES,YES,YES,"Manifest script_path matches tables/switching_canonical_entrypoint.csv; script_hash matches file SHA-256; execution_status SUCCESS (N_T=16). Intermediate debugging runs before explicit .m path may show empty hash; not used for verdict."

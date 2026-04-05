@@ -1,0 +1,67 @@
+path,level,classification,notes
+.,0,MIXED,Repository root: domain modules documentation execution tooling tabular outputs and miscellaneous root-level scripts
+.appdata,1,INFRASTRUCTURE,Application or agent local data directory
+.codex_matlab_prefs,1,INFRASTRUCTURE,Codex-related MATLAB preference cache
+.codex_tmp,1,INFRASTRUCTURE,Temporary Codex working files
+.git,1,GOVERNANCE,Git metadata and history
+.github,1,GOVERNANCE,GitHub workflows and repository automation
+.localappdata,1,INFRASTRUCTURE,Local application data cache
+.matlab_prefs,1,INFRASTRUCTURE,MATLAB preference directory copy or symlink
+.mwhome,1,INFRASTRUCTURE,MathWorks-related home or config stub
+.tmp_test,1,INFRASTRUCTURE,Temporary test scratch
+.vscode,1,INFRASTRUCTURE,VS Code or Cursor workspace settings
+AC HC MagLab ver8,1,MODULE,Experiment-specific MATLAB tree (AC HC MagLab)
+Aging,1,MODULE,Aging analysis pipeline and utilities
+Aging old,1,MODULE,Legacy or superseded Aging tree
+analysis,1,MODULE,Shared or cross-cutting analysis code
+archive,1,ARTIFACTS,Archived or quarantined material
+ARPES ver1,1,MODULE,ARPES experiment version tree
+claims,1,GOVERNANCE,Structured claims or assertions for the project
+docs,1,GOVERNANCE,Canonical documentation policies and templates
+FieldSweep ver3,1,MODULE,Field sweep experiment version tree
+figures,1,ARTIFACTS,Generated or collected figure outputs
+Fitting ver1,1,MODULE,Fitting routines version tree
+General ver2,1,MODULE,General-purpose experiment code
+github_repo,1,UNKNOWN,Purpose not inferred without reading contents
+GUIs,1,MODULE,MATLAB GUI code
+HC ver1,1,MODULE,HC experiment version tree
+junk,1,ARTIFACTS,Scratch or non-canonical material
+logs,1,ARTIFACTS,Execution or probe logs
+MathWorks,1,INFRASTRUCTURE,Vendor-related local files or stubs
+matlab_prefs_agent,1,INFRASTRUCTURE,Agent-specific MATLAB preferences
+MH ver1,1,MODULE,MH experiment version tree
+MT ver2,1,MODULE,MT experiment version tree
+probe_outputs,1,ARTIFACTS,Output from probes or diagnostics
+PS ver4,1,MODULE,PS experiment version tree
+Relaxation ver3,1,MODULE,Relaxation measurement pipeline and diagnostics
+reports,1,ARTIFACTS,Human-readable reports and summaries
+Resistivity MagLab ver1,1,MODULE,Resistivity MagLab experiment tree
+Resistivity ver6,1,MODULE,Resistivity experiment version tree
+results,1,ARTIFACTS,Run results and experiment outputs under canonical layout
+results_old,1,ARTIFACTS,Superseded or archived results
+review,1,GOVERNANCE,Review notes or audit material
+runs,1,MIXED,Run orchestration scripts and run metadata paths
+scripts,1,MODULE,Standalone or helper scripts
+snapshot_scientific_v3,1,ARTIFACTS,Snapshotted scientific outputs or state
+status,1,ARTIFACTS,Status files and execution signaling artifacts
+surveys,1,MIXED,Survey definitions or survey outputs
+Susceptibility ver1,1,MODULE,Susceptibility experiment version tree
+Switching,1,MODULE,Switching analysis entrypoints utilities and canonical wiring
+Switching ver12,1,MODULE,Switching backend implementation tree
+tables,1,ARTIFACTS,CSV tables registries and machine-readable status
+tables_old,1,ARTIFACTS,Superseded tables
+templates,1,INFRASTRUCTURE,Reusable templates including runnable script templates
+tests,1,INFRASTRUCTURE,Test harnesses and validation scripts
+tmp,1,INFRASTRUCTURE,Temporary workspace
+tmp_matlab_prefdir,1,INFRASTRUCTURE,Temporary MATLAB prefdir
+tmp_root_cleanup_quarantine,1,INFRASTRUCTURE,Quarantine during cleanup operations
+tools,1,INFRASTRUCTURE,Wrapper scripts guards loaders and MATLAB execution helpers
+Tools ver1,1,MODULE,Legacy or alternate Tools version tree
+zfAMR ver11,1,MODULE,zfAMR experiment version tree
+_legacy,1,MODULE,Legacy code retained for reference
+Switching/analysis,2,MODULE,Switching runnable analyses and experiments
+Switching/utils,2,MODULE,Switching run context helpers and canonical assertions
+docs/templates,2,GOVERNANCE,Runnable and documentation templates
+docs/reports,2,GOVERNANCE,Documentation-embedded reports
+Aging/utils,2,MODULE,Shared Aging utilities including run context helpers
+Relaxation ver3/diagnostics,2,MODULE,Relaxation diagnostic scripts

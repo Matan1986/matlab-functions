@@ -1,0 +1,9 @@
+FAILURE_MODE,MECHANISM,SEVERITY
+Silent wrong science from stale repo tables/,Analysis reads tables/*.csv not tied to a single run manifest; no version pin.,HIGH
+Cross-run contamination,Scripts embed fixed run ids or glob other experiments results paths.,HIGH
+IS_CANONICAL confusion,Operators use folder name or run_status.csv CANONICAL instead of manifest label.,MEDIUM
+run_fingerprint.csv misread as hash registry,Filename suggests cryptographic fingerprint; lacks git_commit script_hash columns.,MEDIUM
+Manifest vs folder RUN_ID drift,Hand-edited run_manifest.json could disagree with folder name; no validator in preflight.,MEDIUM
+PARTIAL execution_status interpreted as success,Schema allows PARTIAL; downstream may treat as complete without checking stage markers.,MEDIUM
+Wrapper dead temp runner code,Future edits might wire runner incorrectly; confusion during ops triage.,LOW
+createRunContext writeManifest skip if exists,Warning then return preserves first manifest; reruns in same run_dir could hide script change.,LOW

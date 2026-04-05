@@ -1,0 +1,8 @@
+RISK_AREA,ASSESSMENT,EVIDENCE
+Entrypoint selection,LOW_IF_RULES_FOLLOWED,docs/repo_execution_rules.md and switching_canonical_definition.md mandate tables/switching_canonical_entrypoint.csv; violation if agents guess run_*.m names.
+Heuristic closure and maps,HIGH,tools/switching_canonical_run_closure.m uses folder glob *_switching_canonical; contradicts manifest-only IS_CANONICAL policy for strict closure.
+Hardcoded developer paths,HIGH,Multiple Switching/analysis scripts use C:/Dev/matlab-functions/... absolute paths; agents on other machines fail or read wrong data silently if edited poorly.
+Aggregate repo tables as inputs,HIGH,Many analyses require pre-existing tables/*.csv; not described in single manifest per run; easy to use stale CSV.
+resolve_results_input_dir latest-run selection,MEDIUM,Depends on sorted run_* names and get_run_status_value; PARTIAL runs error; ordering assumptions may surprise agents.
+docs/repo_execution_rules innerjoin ban vs table operations in scripts,MEDIUM,Policy says manual T_K alignment; legacy scripts may still use table joins; agent may copy wrong pattern.
+Master policy no-helper-files vs repo template,MEDIUM,Contradictory instructions increase invalid script risk for new agents.

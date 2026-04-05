@@ -1,0 +1,5 @@
+check_name,status,evidence
+PROBE_WRITTEN,NO,"C:\Dev\matlab-functions\execution_probe_top.txt not found after required wrapper run"
+STATUS_WRITTEN,NO,"No execution_status.csv found in latest run_dir C:\Dev\matlab-functions\results\Switching\runs\run_2026_04_02_213408_phi_kappa_canonical_space_analysis"
+EXECUTION_STARTED,NO,"execution_status.csv missing; EXECUTION_STARTED field unavailable"
+WRITE_SUCCESS,NO,"execution_status.csv missing; WRITE_SUCCESS field unavailable"

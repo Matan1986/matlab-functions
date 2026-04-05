@@ -1,0 +1,27 @@
+zone,path,category,canonicalization_state,confidence,mixed_risk,notes
+Switching canonical entry and backend wiring,Switching/analysis/run_switching_canonical.m; docs/switching_backend_definition.md; tables/switching_canonical_entrypoint.csv,MODULE,CANONICAL,HIGH,NO,Registered sole Switching agent entrypoint; formal definition in docs; run_dir and signaling contract when executed via wrapper; wired to backend without heuristic selection.
+Switching analysis scripts (bulk),Switching/analysis/,ANALYSIS,IN_PROGRESS,HIGH,YES,Many runnable diagnostics; policy restricts ad-hoc entrypoints; only the registered script is canonical Switching execution per switching_canonical_definition.md.
+Switching utilities,Switching/utils/,MODULE,IN_PROGRESS,MEDIUM,NO,Supporting run-context and canonical assertions (per repo evolution); not themselves the science entrypoint.
+Aging run factory and pipeline core,Aging/utils/; Aging/pipeline/,MODULE,IN_PROGRESS,HIGH,NO,createRunContext originates here; staged pipeline is the unified-stack baseline per run_system.md and repo_map.md.
+Aging analysis and diagnostics,Aging/analysis/; Aging/diagnostics/; Aging/models/; Aging/plots/,ANALYSIS,IN_PROGRESS,MEDIUM,YES,Science and visualization scripts; not all guaranteed to follow the same runnable contract as template-based agents.
+Relaxation module,Relaxation ver3/,MODULE,IN_PROGRESS,MEDIUM,YES,Unified-stack member; diagnostics described as run-scoped in consolidation plan; root scripts and pilots coexist; not fully locked like Switching registry.
+Cross-experiment analysis,analysis/,ANALYSIS,IN_PROGRESS,HIGH,YES,Shared layer per system_registry; known local createRun patterns and mixed migration state in repo_consolidation_plan.md.
+Execution and run helpers,tools/,INFRA,CANONICAL,HIGH,NO,Single wrapper run_matlab_safe.bat; validators; manifest and observable helpers per infrastructure_laws.md and repo_context_infra.md.
+Policy and architecture documentation,docs/,INFRA,CANONICAL,HIGH,NO,Normative contracts; switching canonical definition; execution rules; infrastructure laws.
+Run-scoped results store,results/,ARTIFACT,CANONICAL,HIGH,NO,Canonical path pattern results/<experiment>/runs/run_<timestamp>_<label>/ per repo_map.md and infrastructure_laws.md.
+Repo-root global tables,tables/,ARTIFACT,NON_CANONICAL,HIGH,YES,Legacy and transitional global sink for many CSVs; registries here are authoritative for some policies but bulk tables conflict with run-scoped-only preference for new work.
+Repo-root global reports,reports/,ARTIFACT,IN_PROGRESS,HIGH,YES,Historical and active global narratives; tension with run-local reports documented in repo_map.md and canonical_state_freeze.md.
+Repo-root global figures,figures/,ARTIFACT,NON_CANONICAL,MEDIUM,YES,Global output area; new agent analyses should prefer run-scoped figures per infrastructure laws narrative.
+Scientific claims store,claims/,INFRA,CANONICAL,MEDIUM,NO,Claim JSON store labeled canonical in repo_map.md.
+Snapshot control plane,snapshot_scientific_v3/,ARTIFACT,CANONICAL,MEDIUM,NO,Indices and navigation layer per repo_map.md.
+Runs path shims and helpers,runs/,INFRA,IN_PROGRESS,MEDIUM,YES,Supporting; distinct from results/.../runs/; transitional per repo_map.md.
+Repository tests,tests/,INFRA,IN_PROGRESS,LOW,NO,Sparse test area per repository_structure.md; not primary execution-trust surface.
+Surveys,surveys/,INFRA,IN_PROGRESS,LOW,NO,Supporting synthesis per repo_map.md.
+GUIs,GUIs/,INFRA,NON_CANONICAL,MEDIUM,NO,Apps; not the batch agent execution stack.
+Scripts automation,scripts/,INFRA,IN_PROGRESS,LOW,NO,Context bundles and automation; supporting per repo_map.md.
+Legacy Switching pipeline tree,Switching ver12/,LEGACY,NON_CANONICAL,HIGH,NO,Explicit legacy per repository_structure.md; backend reached via canonical entry only for agents.
+Legacy Aging,Aging old/,LEGACY,NON_CANONICAL,HIGH,NO,Explicit legacy overlap per repository_structure.md.
+General visualization stack (deprecated),General ver2/,LEGACY,NON_CANONICAL,HIGH,NO,Deprecated for new figures per repo_map.md and AGENT_RULES references.
+Independent historical experiment packages,AC HC MagLab ver8/; ARPES ver1/; FieldSweep ver3/; MH ver1/; MT ver2/; PS ver4/; Resistivity MagLab ver1/; Resistivity ver6/; Susceptibility ver1/; zfAMR ver11/,LEGACY,NON_CANONICAL,HIGH,NO,Independent pipelines per system_registry.json; not Aging/Relaxation/Switching standard.
+Archive and cleanup staging,archive/,LEGACY,UNKNOWN,LOW,YES,Purpose varies; not classified as active canonical stack without explicit policy row.
+github_repo third-party bundle,github_repo/,INFRA,NON_CANONICAL,MEDIUM,NO,Bundled resources; not execution core.

@@ -1,0 +1,15 @@
+COMPONENT,TYPE,FILE,JUSTIFICATION
+CANONICAL_ENTRYPOINT,ENTRYPOINT,Switching/analysis/run_switching_canonical.m,Sole registered Switching entrypoint; defines canonical execution scope by invocation.
+RUN_CONTEXT,HELPER,Aging/utils/createRunContext.m,Creates run_dir run_manifest.json and run-scoped artifacts per docs/run_system.md; explicitly resolved in entry script.
+EXECUTION_MARKER,HELPER,tools/write_execution_marker.m,Append-only runtime markers under run_dir for observability.
+LEGACY_SWITCHING_MAIN_REFERENCE,HELPER,Switching ver12/main/Switching_main.m,Read only (fileread) to obtain raw data parent directory string; not executed as entrypoint.
+RAW_PROCESSING,CORE,Switching ver12/main/processFilesSwitching.m,Constructs per-file stored_data and channel metric tables from raw .dat inputs.
+STABILITY_METRICS,CORE,Switching ver12/main/analyzeSwitchingStability.m,Derives switching channel and stability metrics used to select channel for S(T,I).
+FILE_ENUMERATION,CORE,Switching ver12/getFileListSwitching.m,Discovers and sorts raw trace files and folder metadata for each Temp Dep folder.
+PARSING_HELPERS,CORE,Switching ver12/parsing/extract_dep_type_from_folder.m,Folder dep-type metadata for file list parsing.
+PARSING_HELPERS,CORE,Switching ver12/parsing/extractPulseSchemeFromFolder.m,Pulse scheme struct for processFilesSwitching and stability options.
+PARSING_HELPERS,CORE,Switching ver12/parsing/extract_delay_between_pulses_from_name.m,Timing parameter for plateau analysis.
+PARSING_HELPERS,CORE,Switching ver12/parsing/extract_num_of_pulses_from_name.m,Used by extractPulseSchemeFromFolder for pulse counts.
+PRESET_RESOLUTION,HELPER,General ver2/resolve_preset.m,Optional normalization preset when resolve_preset/select_preset exist on path.
+PRESET_RESOLUTION,HELPER,General ver2/select_preset.m,Optional preset selection paired with resolve_preset.
+NEG_P2P_OPTIONAL,HELPER,Switching ver12/resolveNegP2P.m,Optional sign flip for metric column when present on path.

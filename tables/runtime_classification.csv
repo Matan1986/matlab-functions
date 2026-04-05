@@ -1,0 +1,2 @@
+run_id,status,entry,completed,failed,artifact_ok
+run_2026_04_04_100107_switching_canonical,SUCCESS,YES,YES,NO,YES

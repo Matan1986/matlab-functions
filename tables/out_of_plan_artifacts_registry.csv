@@ -1,0 +1,2 @@
+artifact_path,artifact_type,reason,stage_violation,allowed_in_pipeline,allowed_in_context,timestamp
+reports/kappa1_pt_control_analysis.md,report,early kappa1<-PT analysis,Phi-tier not completed,NO,NO,2026-04-03T12:00:00Z

@@ -1,0 +1,6 @@
+change_id,file,description
+CHG-01,tools/pre_execution_guard.ps1,New: exit 2 on invalid path; append tables/pre_execution_failure_log.csv
+CHG-02,tools/run_matlab_safe.bat,Call guard before MATLAB; unique temp_runner name; exit 2 on guard fail
+CHG-03,tools/validate_matlab_runnable.ps1,FailValidation exits script after WARN; emit RESULT=NOT_PASS; no spurious PASS
+CHG-04,docs/execution_failure_classification.md,Calibration contract table
+CHG-05,docs/repo_execution_rules.md,Note pre-execution guard (minimal sentence)

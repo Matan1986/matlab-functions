@@ -1,0 +1,7 @@
+CHECK,RESULT,DETAIL
+Canonical entrypoint run_switching_canonical.m uses createRunContext and writes only under its run_dir,PASS,No shared mutable repo state; raw input from filesystem paths parsed from Switching ver12 Switching_main.m.
+Many Switching/analysis scripts read/write repo-root tables/ and reports/,FAIL,Breaks strict run_dir-only isolation for aggregate artifacts; cross-run and cross-experiment paths embedded.
+Hardcoded absolute paths (e.g. C:/Dev/matlab-functions/tables) in multiple Switching scripts,FAIL,Path-dependent and machine-bound; not portable; couples analysis to developer filesystem.
+Prior-run dependencies (fixed run_2026_* ids or registry-driven selection),FAIL,run_parameter_robustness_switching_canonical.m and mapping scripts bind to specific historical runs.
+resolve_results_input_dir chains latest CANONICAL run with required subfolder,FAIL,Implicit ordering on run_* sort; fails if PARTIAL run encountered; depends on prior analysis outputs under results/.
+Global MATLAB path state (restoredefaultpath addpath legacy Switching ver12),PASS_WITH_CAVEAT,Isolated per invocation; deterministic given same repo layout; genpath usage in switching_alignment_audit.m is broader than minimal addpath in canonical entrypoint.

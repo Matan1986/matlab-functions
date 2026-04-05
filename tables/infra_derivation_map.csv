@@ -1,0 +1,6 @@
+CONCEPT,DERIVED_IN_SCAN,SOURCE_OF_DERIVATION,SAFE_DERIVATION,NOTES
+RUN_ID,YES,Run folder basename from Get-ChildItem,NO,Should cross-check manifest.run_id for strict SSOT; scan does not.
+PARENT_RUN_ID,YES,Per-run canonicalization_manifest.csv or canonicalization_l2_manifest.csv,YES,Reads declared bundle fields only; does not invent parent when files absent.
+INPUT_SOURCE,YES,"trustedCanonicalInput constant plus Test-IsSwitchingCanonicalRun Get-InputSourceDisplay bundle CSV manifest script_path label run id fallback",NO,Introduces policy and naming heuristics not stored as a single manifest field; not pure reporting.
+FINGERPRINT,NO,N/A (scan does not emit git_commit or script_hash),N/A,Scan does not derive cryptographic or hash fingerprint; optional future: read manifest JSON fields only.
+EXECUTION_STATUS,YES,existence of execution_status.csv path,YES,Presence-only; does not redefine status semantics; safe as coarse signal.
