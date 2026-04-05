@@ -100,21 +100,15 @@ Optional field:
 
 No other required fields are allowed by this contract.
 
-## 6. Wrapper to run link (only allowed mechanism)
+## 6. Run identity and discovery (parallel-safe; no repo-root pointer)
 
-The executed script MUST write:
-
-run_dir_pointer.txt
-
-run_dir_pointer.txt content MUST be exactly one absolute path string to run_dir.
+Run identity MUST be established under `run_dir` only. **`run_dir_pointer.txt` at the repository root is not used** (deprecated; unsafe for parallel agents). Scripts MUST NOT write it.
 
 Rules:
 
-- run_dir_pointer.txt MUST be written before script termination.
-- Wrapper MUST read run_dir_pointer.txt after execution.
-- Wrapper run discovery MUST use only run_dir_pointer.txt.
-- Guessing run_dir is FORBIDDEN.
-- Directory scanning to discover run_dir is FORBIDDEN.
+- **Authoritative path:** `run_dir/run_manifest.json` records `run_dir`, `run_id`, and fingerprints.
+- **Discovery:** Use `run_manifest.json` under `results/<experiment>/runs/`, or repository tools (`tools/list_runs.m`, `tools/load_run_manifest.m`), not a shared root pointer file.
+- The batch wrapper (`tools/run_matlab_safe.bat`) does not read `run_dir_pointer.txt`.
 
 ## 7. Fingerprint contract (locked)
 
@@ -169,6 +163,6 @@ If any condition in sections 2 through 8 is false, the run is invalid.
 
 ## 10. Determinism and enforcement
 
-This contract contains no optional behavior and no implementation-defined behavior.
-Validator logic MUST evaluate explicit field presence, fixed filenames, fixed locations,
-fixed schema members, and required artifact existence without heuristics.
+Automated validators SHOULD evaluate explicit field presence, fixed filenames, fixed locations,
+fixed schema members, and required artifact existence without heuristics. Section 6 intentionally
+deprecates the root `run_dir_pointer.txt` mechanism in favor of run-scoped manifests (parallel-safe).

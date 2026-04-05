@@ -11,6 +11,7 @@
 - **Gradual alignment:** `docs/AGENT_RULES.md` forbids repository-wide refactors to force architecture; changes should land **when a file or module is already being edited**.
 - **Documentation precedence:** `AGENT_RULES` → `results_system` → `run_system` → `repository_structure` → `output_artifacts` for overlapping output/layout topics.
 - **Registry authority:** `docs/system_registry.json` defines **unified stack**, **independent pipelines**, **infrastructure**, and **active_modules** — do not treat every `* verX` folder as legacy by name alone (`AGENT_RULES`).
+- **System closure and cross-module work:** Phase model, gates (including Phase 4 vs 4.5), and the binding rule that cross-module analysis requires all participating modules to be canonical are in **`docs/system_master_plan.md`** and **`docs/infrastructure_laws.md` (PART 7)**. This consolidation map does not replace those documents; cross-experiment outputs under `results/cross_experiment/` remain subject to that participation policy when multiple modules are involved.
 
 ---
 

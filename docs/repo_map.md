@@ -36,8 +36,7 @@
 - **Run context factory:** `Aging/utils/createRunContext.m`
 - **Run manifest reader:** `tools/load_run_manifest.m`
 - **Run listing:** `tools/list_runs.m`
-- **Post-run pointer (wrapper contract):** repo root `run_dir_pointer.txt` (absolute `run_dir` line)
-- **Wrapper fingerprint store:** `runs/fingerprints/`
+- **Run discovery:** `run_dir/run_manifest.json` under `results/<experiment>/runs/` (do not use repo-root `run_dir_pointer.txt`; deprecated).
 - **Execution status export (wrapper):** `tables/run_status.csv`
 
 ---
@@ -71,6 +70,7 @@
 - **`docs/knowledge_system_architecture.md`** — scientific knowledge layers (A–F).  
 - **`docs/knowledge_system_inventory.md`** — read-only audit of overlapping systems.  
 - **`docs/repo_consolidation_plan.md`** — entrypoint inventory and migration **plan** (no mass refactors).  
+- **`docs/system_master_plan.md`** — program phases (0–6), phase-entry gates, cross-module canonical participation, trust terminology (execution / system / isolation).
 
 **This `repo_map.md`** is the **short operational map** tying those to **wrapper + results + legacy folders** in one view.
 

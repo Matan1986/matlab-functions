@@ -21,7 +21,7 @@ Use these rules for all analysis and diagnostic work in this repository.
 
 2. Canonical invocation format is script-path only.
    - Use `tools/run_matlab_safe.bat "<ABSOLUTE_PATH_TO_SCRIPT.m>"`.
-   - The wrapper validates the runnable script contract and executes it via `eval(fileread(...))`.
+   - The wrapper launches MATLAB with `-batch` and executes the script via `run('<ABSOLUTE_PATH_TO_SCRIPT.m>')` (see `tools/run_matlab_safe.bat`). Optional: run `tools/validate_matlab_runnable.ps1` separately for diagnostics; the wrapper does not block on it.
 
 3. No parallel infrastructure modifications are allowed.
    - This includes changes that alter execution behavior (MATLAB invocation method, wrapper/launcher, environment configuration, path setup, or related scripts).
@@ -47,9 +47,9 @@ Any runnable MATLAB script that is executed via `tools/run_matlab_safe.bat` must
 3. Runnable scripts must write outputs and explicit error/status artifacts.
    - Scripts should persist intended outputs and write clear status/error artifacts for failure diagnosis.
 
-4. Preflight validation is mandatory.
-   - `tools/run_matlab_safe.bat` must validate runnable script structure before launching MATLAB.
-   - Invalid runnable scripts must be blocked before execution.
+4. Optional preflight validation (non-blocking).
+   - Agents may run `tools/validate_matlab_runnable.ps1` before MATLAB for structured checks.
+   - The batch wrapper does not invoke the validator; failures there do not block the wrapper.
 
 ## Agent Types
 
@@ -72,10 +72,12 @@ When repository documents overlap, use this precedence order:
 
 1. docs/AGENT_RULES.md for agent behavior and repository safety limits.
 1a. docs/infrastructure_laws.md for infrastructure architecture only: canonical run roots, `run_manifest.json` and fingerprint fields, execution entrypoints (`run_matlab_safe.bat`), output ownership, drift violations, and consolidation gates. When this document conflicts with informal mentions elsewhere, infrastructure_laws wins for those topics.
+1b. docs/system_master_plan.md for program lifecycle phases (0–6), phase-entry gates, module Type A/B model, cross-module canonical participation rule, and trust terminology (execution vs system vs isolation). When narrative elsewhere implies "closure" or "safe to proceed" without a domain, defer to this document.
 2. docs/results_system.md for output locations and run artifact layout.
 3. docs/run_system.md for run creation and run-context invariants.
 4. docs/repository_structure.md for code placement and repository layout.
 5. docs/output_artifacts.md for artifact subfolder usage within a run.
+6. docs/agent_prompt_exclude.md lists documents that must **not** be bulk-loaded into agent prompts unless the task names them explicitly.
 
 - Versioned folders (for example `* verX`) must NOT be assumed legacy or inactive based on naming alone.
 

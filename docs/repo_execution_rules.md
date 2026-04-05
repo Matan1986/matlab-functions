@@ -12,6 +12,62 @@ This document is the canonical reference for **strict MATLAB execution behavior*
 
 - MATLAB execution must use `tools/run_matlab_safe.bat` to avoid startup hangs caused by MathWorks Service Host.
 
+## EXECUTION GUARDRAILS (FROM REAL FAILURES)
+
+These guardrails come from real Windows CMD + MATLAB failures. They preserve the **correct mental model** for agents and **do not** prescribe a different execution flow than the one already in use. When infrastructure is **INFRA_STABLE**, treat them as non-negotiable hygiene.
+
+### Explicit MATLAB invocation (Windows CMD)
+
+- Invoke MATLAB with a **fully explicit** path to `matlab.exe` and a **literal** `-batch` argument on the command line (example shape: `"C:\Program Files\MATLAB\R20xx\bin\matlab.exe" -batch "run('...');"`).
+- **Do not** execute the batch step by stuffing the whole `-batch` string into a `%VARIABLE%` and expanding it for the call in ways that obscure quoting.
+- **CMD parentheses pitfall:** Do not put MATLAB code that contains **`(` `)`** (e.g. `pause(1)`) inside **CMD-expanded** variables used to build the command line. Parentheses are special in `cmd.exe`; after `%VAR%` expansion, the line can be re-parsed incorrectly and MATLAB never receives the intended `-batch` command.
+
+### Debug layer order (procedure only)
+
+When **diagnosing** why a run failed, reason about evidence in this order:
+
+1. **MATLAB_ALIVE** — MATLAB starts and `-batch` actually runs (e.g. a trivial `disp`).
+2. **RUNNER_ENTERED** — Any minimal runner/probe used by the workflow runs and can prove disk I/O if applicable.
+3. **SCRIPT_ENTERED** — The intended script is entered (e.g. an explicit early `disp` in the canonical script).
+4. **WRITE_SUCCESS** — Required artifacts exist (e.g. `execution_status.csv`, `run_dir` per the signaling contract).
+
+### Do not debug deeper before the current layer is proven
+
+If MATLAB does not launch or `-batch` does not execute, fix invocation, path to `matlab.exe`, and quoting **before** investigating repo layout, runner files, or pipeline logic. If the canonical script never enters, fix entry and paths **before** debugging computations or observables. If writes do not occur, fix `run_dir` and status output **before** interpreting science results.
+
+### Layer verification vs. execution architecture
+
+**Layer verification is a DEBUG PROCEDURE, not an execution architecture.** It describes how to triage and narrate failures. It does **not** require multiple MATLAB processes, staged steps inside the wrapper, or extra orchestration layers in repository tooling.
+
+### Single-call wrapper (STRICT)
+
+The approved wrapper **MUST** remain a **single** MATLAB invocation per run, in the canonical form:
+
+`matlab.exe -batch "run('<ABSOLUTE_PATH_TO_SCRIPT.m>');"`
+
+- **Do not** add multi-stage execution inside `tools/run_matlab_safe.bat` (no chained MATLAB calls, no mandatory “probe then main” sequences in the batch file).
+- **Do not** turn the wrapper into an orchestrator for layered probes or staged execution.
+
+Agents must not “fix” ambiguity by adding wrapper orchestration; align documentation and debugging practice instead.
+
+## Execution Signaling Contract
+
+A MATLAB run is considered valid if and only if all of the following are true:
+
+1. `execution_probe_top.txt` exists and proves script entry.
+2. `execution_status.csv` exists and records the mandatory execution status artifact.
+3. `run_dir` is created and referenced, establishing run identity.
+
+The following are not valid indicators of execution:
+
+- MATLAB exit code
+- Console output or `disp()`
+- Wrapper completion
+
+Rule: `NO SIGNAL -> NO RUN -> NO PHYSICS`
+
+All runnable scripts must emit the entry signal at the top and write the required outputs before completion.
+
 1. All MATLAB execution MUST go through the approved repository wrapper.
    - Direct invocation of `matlab` is not allowed for automated/agent runs.
    - This includes direct `matlab -batch`, direct `matlab -r`, and inline command-string execution styles.

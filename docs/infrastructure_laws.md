@@ -154,6 +154,18 @@ Steps 1-4 are documentation and labeling; step 5 is deliberate code change **aft
 
 ---
 
+## PART 7 - Cross-module canonical participation (system law)
+
+**Binding rule (normative):** **Cross-module analysis is allowed only if all participating modules are canonical** for the scope of that analysis (canonical status, entrypoints, and dependency boundaries as defined by the program).
+
+**Operational caveat:** Until enforcement is **real** and **coverage-complete** across the relevant script surface, this rule is **normative** but **not operationally closed** — the repository must **follow** the rule in planning and documentation, but must **not** claim that cross-module participation is **fully enforced** by tooling alone.
+
+**Program context:** Phase model, phase-entry gates, module Type A/B model, and distinctions among **execution trust**, **system trust**, and **isolation trust** are defined in **`docs/system_master_plan.md`**. Phase **4** (execution trust) does **not** substitute for Phase **4.5** (canonical isolation alignment); see that document.
+
+**Related audits:** `reports/system_closure_audit.md`, `reports/plan_realign_audit.md`, `reports/isolation_feasibility_audit.md`, `reports/canonical_switching_isolation_audit.md`.
+
+---
+
 ## Appendix - Enforcement checklist (all future infra agents)
 
 Use before any merge of infrastructure work:
@@ -176,3 +188,4 @@ Use before any merge of infrastructure work:
 - `docs/output_artifacts.md` - Subfolder roles within a run.
 - `docs/repo_audit_report.md` - Observed drift and risks.
 - `docs/repo_consolidation_plan.md` - Staged consolidation map (no big-bang).
+- `docs/system_master_plan.md` - Program phases, phase-entry gates, cross-module participation law, trust terminology.
