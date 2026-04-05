@@ -1,4 +1,4 @@
-﻿function out = switching_ridge_susceptibility_test(cfg)
+function out = switching_ridge_susceptibility_test(cfg)
 % switching_ridge_susceptibility_test
 % Test hypothesis a1(T) proportional to dI_peak(T)/dT.
 

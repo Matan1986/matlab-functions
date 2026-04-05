@@ -13,32 +13,17 @@
 clear; clc;
 
 try
-    repoRoot = '';
-    probeDir = pwd;
-    for level = 1:15
-        if exist(fullfile(probeDir, 'README.md'), 'file') == 2 && ...
-           exist(fullfile(probeDir, 'Aging'), 'dir') == 7 && ...
-           exist(fullfile(probeDir, 'Switching'), 'dir') == 7
-            repoRoot = probeDir;
-            break;
-        end
-        parentDir = fileparts(probeDir);
-        if strcmp(parentDir, probeDir)
-            break;
-        end
-        probeDir = parentDir;
-    end
-    if isempty(repoRoot)
-        error('RepoRootNotFound:README', 'Could not resolve repository root from current directory.');
-    end
+    thisScript = mfilename('fullpath');
+    repoRoot = fileparts(fileparts(fileparts(fileparts(thisScript))));
 
     addpath(genpath(fullfile(repoRoot, 'Aging')));
     addpath(fullfile(repoRoot, 'tools'));
+    addpath(fullfile(repoRoot, 'Switching', 'utils'));
 
     cfg = struct();
     cfg.runLabel = 'switching_raw_baseline_correction';
     cfg.dataset = 'raw_vs_corrected_vs_normalized_same_trace_analysis';
-    runCtx = createRunContext('switching', cfg);
+    runCtx = createSwitchingRunContext(repoRoot, cfg);
     runDir = runCtx.run_dir;
 
     tablesRepo = fullfile(repoRoot, 'tables');
@@ -59,14 +44,14 @@ try
         mkdir(runReports);
     end
 
-    traceFiles = dir(fullfile(repoRoot, 'results', 'switching', 'runs', 'run_*', 'alignment_audit', 'switching_alignment_samples.csv'));
+    traceFiles = dir(fullfile(switchingCanonicalRunRoot(repoRoot), 'run_*', 'alignment_audit', 'switching_alignment_samples.csv'));
     if isempty(traceFiles)
         error('TraceInputNotFound:switching_alignment_samples', 'Could not locate switching alignment samples.');
     end
     [~, iTrace] = max([traceFiles.datenum]);
     tracePath = fullfile(traceFiles(iTrace).folder, traceFiles(iTrace).name);
 
-    normalizedFiles = dir(fullfile(repoRoot, 'results', 'switching', 'runs', 'run_*', 'physics_output_robustness', 'tables', 'variant_observables_xy_over_xx.csv'));
+    normalizedFiles = dir(fullfile(switchingCanonicalRunRoot(repoRoot), 'run_*', 'physics_output_robustness', 'tables', 'variant_observables_xy_over_xx.csv'));
     if isempty(normalizedFiles)
         error('NormalizedInputNotFound:xy_over_xx', 'Could not locate normalized variant table.');
     end
@@ -473,10 +458,9 @@ try
     copyfile(outReportRepo, outReportRun);
     copyfile(outReportRepo, outReportRootRun);
 
-    execTbl = table("SUCCESS", "YES", "", numel(commonTemps), "raw baseline correction and comparison complete", ...
-        'VariableNames', {'EXECUTION_STATUS','INPUT_FOUND','ERROR_MESSAGE','N_T','MAIN_RESULT_SUMMARY'});
     execPath = fullfile(runDir, 'execution_status.csv');
-    writetable(execTbl, execPath);
+    writeSwitchingExecutionStatus(runDir, {'SUCCESS'}, {'YES'}, {''}, numel(commonTemps), ...
+        {'raw baseline correction and comparison complete'}, true);
 
     manifest = struct();
     manifest.outputs = {outSummaryRun; outStatusRun; outReportRun; outReportRootRun; execPath};
@@ -535,9 +519,8 @@ catch ME
             if exist(runDir, 'dir') ~= 7
                 mkdir(runDir);
             end
-            execFail = table("FAIL", "NO", string(ME.message), 0, "raw baseline correction failed", ...
-                'VariableNames', {'EXECUTION_STATUS','INPUT_FOUND','ERROR_MESSAGE','N_T','MAIN_RESULT_SUMMARY'});
-            writetable(execFail, fullfile(runDir, 'execution_status.csv'));
+            writeSwitchingExecutionStatus(runDir, {'FAILED'}, {'NO'}, {char(string(ME.message))}, 0, ...
+                {'raw baseline correction failed'}, true);
 
             manifestFail = struct();
             manifestFail.outputs = {fullfile(runDir, 'execution_status.csv')};

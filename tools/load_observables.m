@@ -33,6 +33,14 @@ keep = false(numel(csvFiles), 1);
 for i = 1:numel(csvFiles)
     csvPath = fullfile(csvFiles(i).folder, csvFiles(i).name);
     try
+        runDir = fileparts(csvPath);
+        [runStatus, ~] = get_run_status_value(runDir);
+        if runStatus == "PARTIAL"
+            error('PARTIAL_RUN_NOT_ALLOWED');
+        end
+        if runStatus ~= "CANONICAL"
+            continue;
+        end
         tbl = readtable(csvPath, 'TextType', 'string');
         tbl = normalizeObservableTable(tbl, csvPath);
         chunks{i} = tbl;

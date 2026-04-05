@@ -1,4 +1,4 @@
-﻿function out = switching_energy_mapping_analysis(cfg)
+function out = switching_energy_mapping_analysis(cfg)
 % switching_energy_mapping_analysis
 % Convert P_T(I_th, T) from a prior switching run into P_T(E, T) with a
 % minimal no-fit mapping E = alpha * I_th and canonical T <= 30 K window.
@@ -23,7 +23,7 @@ runCfg = struct();
 runCfg.runLabel = cfg.runLabel;
 runCfg.dataset = sprintf('pt_source:%s', char(source.runId));
 runCfg.sourceRunId = char(source.runId);
-run = createRunContext('switching', runCfg);
+run = createSwitchingRunContext(repoRoot, runCfg);
 runDir = run.run_dir;
 ensureArtifactDirs(runDir);
 
@@ -137,7 +137,7 @@ cfg = setDefaultField(cfg, 'maxRepresentativeCurves', 6);
 end
 
 function source = resolvePTSourceRun(repoRoot, cfg)
-runsRoot = fullfile(repoRoot, 'results', 'switching', 'runs');
+runsRoot = switchingCanonicalRunRoot(repoRoot);
 if exist(runsRoot, 'dir') ~= 7
     error('switching_energy_mapping_analysis:MissingRunsRoot', 'Missing runs root: %s', runsRoot);
 end

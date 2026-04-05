@@ -21,6 +21,13 @@ ptPath = 'C:/Dev/matlab-functions/results/switching/runs/run_2026_03_25_013356_p
 rPath = 'C:/Dev/matlab-functions/results/relaxation/runs/run_legacy_derivative_smoothing/tables/S_time_cuts_values.csv';
 metaPath = 'C:/Dev/matlab-functions/results/relaxation/runs/run_legacy_derivative_smoothing/tables/S_time_cuts_meta.csv';
 
+directRunPaths = {ptPath, rPath, metaPath};
+for i = 1:numel(directRunPaths)
+    if contains(directRunPaths{i}, '/results/') && contains(directRunPaths{i}, '/runs/run_')
+        error('DIRECT_RUN_ACCESS_FORBIDDEN');
+    end
+end
+
 PT_EXPLAINS_RELAXATION_SHAPE = 'NO';
 PEAK_POSITION_MATCH = 'NO';
 WIDTH_MATCH = 'NO';

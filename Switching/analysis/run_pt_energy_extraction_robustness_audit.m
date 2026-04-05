@@ -28,7 +28,7 @@ runCfg.dataset = 'pt_extraction_robustness_audit';
 if isfield(cfg, 'sourceRunId') && strlength(string(cfg.sourceRunId)) > 0
     runCfg.dataset = sprintf('map_source:%s', char(string(cfg.sourceRunId)));
 end
-run = createRunContext('switching', runCfg);
+run = createSwitchingRunContext(repoRoot, runCfg);
 runDir = run.run_dir;
 ensureArtifactDirs(runDir);
 

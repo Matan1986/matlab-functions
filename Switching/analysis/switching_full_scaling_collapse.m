@@ -1,4 +1,4 @@
-﻿% switching_full_scaling_collapse
+% switching_full_scaling_collapse
 % Test the stronger shift-and-scale collapse hypothesis for switching curves.
 
 clearvars;
@@ -41,7 +41,7 @@ cfgRun.comparisonRunId = comparisonRunId;
 cfgRun.tempRange_K = tempRange_K;
 cfgRun.excludeTemps_K = excludeTemps_K;
 cfgRun.widthRule = 'Interpolated FWHM preferred; weighted local sigma fallback.';
-run = createRunContext('switching', cfgRun);
+run = createSwitchingRunContext(repoRoot, cfgRun);
 runDir = run.run_dir;
 
 fprintf('switching run directory:\n%s\n', runDir);
@@ -141,7 +141,7 @@ fprintf('Saved report: %s\n', reportOut);
 fprintf('Saved review ZIP: %s\n', zipOut);
 
 function [runDir, analysisDir, manifest] = resolveSourceAlignmentRun(repoRoot, sourceRunId)
-runsRoot = fullfile(repoRoot, 'results', 'switching', 'runs');
+runsRoot = switchingCanonicalRunRoot(repoRoot);
 runDir = fullfile(runsRoot, char(string(sourceRunId)));
 analysisDir = fullfile(runDir, 'alignment_audit');
 assert(exist(runDir, 'dir') == 7, 'Requested source run does not exist: %s', runDir);
@@ -156,7 +156,7 @@ end
 function info = loadPreviousCollapseMetric(repoRoot, comparisonRunId, defaultMetric)
 info = struct();
 info.run_id = char(string(comparisonRunId));
-info.run_dir = fullfile(repoRoot, 'results', 'switching', 'runs', char(string(comparisonRunId)));
+info.run_dir = fullfile(switchingCanonicalRunRoot(repoRoot), char(string(comparisonRunId)));
 info.common_range_min = NaN;
 info.common_range_max = NaN;
 info.mean_std = defaultMetric;

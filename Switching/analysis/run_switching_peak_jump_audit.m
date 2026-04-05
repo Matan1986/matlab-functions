@@ -23,11 +23,11 @@ excludeTemps_K = [32, 34];
 runCfg = struct();
 runCfg.runLabel = 'peak_jump_audit';
 runCfg.dataset = sprintf('I_peak trace vs %s | source %s', referenceScalingRunId, sourceRunId);
-run = createRunContext('switching', runCfg);
+run = createSwitchingRunContext(repoRoot, runCfg);
 runDir = run.run_dir;
 fprintf('Peak jump audit run directory:\n%s\n', runDir);
 
-runsRoot = fullfile(repoRoot, 'results', 'switching', 'runs');
+runsRoot = switchingCanonicalRunRoot(repoRoot);
 sourceRunDir = fullfile(runsRoot, char(sourceRunId));
 analysisDirAlign = fullfile(sourceRunDir, 'alignment_audit');
 samplesCsv = fullfile(analysisDirAlign, 'switching_alignment_samples.csv');

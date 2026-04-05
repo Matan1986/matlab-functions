@@ -34,6 +34,12 @@ targetDirs = { ...
     'C:/Dev/matlab-functions/results/relaxation/runs/run_2026_03_10_015246_coordinate_extraction'
     };
 
+for i = 1:numel(targetDirs)
+    if contains(targetDirs{i}, '/results/') && contains(targetDirs{i}, '/runs/run_')
+        error('DIRECT_RUN_ACCESS_FORBIDDEN');
+    end
+end
+
 VALID_RELAXATION_FOUND = 'NO';
 N_CANDIDATES = 0;
 BEST_CANDIDATE_PATH = '';

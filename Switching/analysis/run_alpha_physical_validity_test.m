@@ -11,6 +11,10 @@ scriptPath = 'C:/Dev/matlab-functions/Switching/analysis/run_alpha_physical_vali
 alphaPath = 'C:/Dev/matlab-functions/tables/alpha_structure.csv';
 clockRatioPath = 'C:/Dev/matlab-functions/results/aging/runs/run_2026_03_14_074613_aging_clock_ratio_analysis/tables/table_clock_ratio.csv';
 
+if contains(clockRatioPath, '/results/') && contains(clockRatioPath, '/runs/run_')
+    error('DIRECT_RUN_ACCESS_FORBIDDEN');
+end
+
 outTablePath = 'C:/Dev/matlab-functions/tables/alpha_stability_test.csv';
 outReportPath = 'C:/Dev/matlab-functions/reports/alpha_physical_validity.md';
 outStatusPath = 'C:/Dev/matlab-functions/tables/alpha_physical_validity_status.csv';

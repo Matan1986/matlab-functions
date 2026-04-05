@@ -13,14 +13,14 @@ addpath(fullfile(repoRoot, 'tools'));
 addpath(fullfile(repoRoot, 'tools', 'figures'));
 set(0, 'DefaultFigureVisible', 'off');
 
-auditRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', ...
+auditRunDir = fullfile(switchingCanonicalRunRoot(repoRoot), ...
     'run_2026_03_25_013346_pt_energy_robustness_audit');
 childMapPath = fullfile(auditRunDir, 'tables', 'pt_variant_child_runs.csv');
 assert(exist(childMapPath, 'file') == 2, 'Missing %s', childMapPath);
 
 runCfg = struct('runLabel', 'asymmetric_spread_analysis', ...
     'dataset', 'pt_robustness_audit_child_runs');
-run = createRunContext('switching', runCfg);
+run = createSwitchingRunContext(repoRoot, runCfg);
 runDir = run.run_dir;
 fprintf('Asymmetric spread analysis run directory:\n%s\n', runDir);
 

@@ -21,7 +21,7 @@ addpath(fullfile(repoRoot, 'tools'));
 
 cfgRun = struct();
 cfgRun.runLabel = 'observable_stability_survey';
-run = createRunContext('switching', cfgRun); %#ok<NASGU>
+run = createSwitchingRunContext(repoRoot, cfgRun); %#ok<NASGU>
 baseOutDir = getResultsDir('switching', 'alignment_audit');
 surveyOutDir = getResultsDir('switching', 'alignment_audit', 'stability_survey');
 if ~exist(baseOutDir, 'dir')

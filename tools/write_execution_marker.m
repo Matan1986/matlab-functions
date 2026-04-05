@@ -3,7 +3,7 @@ function write_execution_marker(markerName, runDirOverride)
 %
 % Resolves run_dir from createRunContext appdata when available; optional runDirOverride
 % forces the destination directory (e.g. failure path after catch resolves run_dir).
-% Otherwise appends to a repo-level fallback marker file under tables/. Never throws.
+% If run_dir cannot be resolved, skips writing (run-scoped only; no repo-root fallback). Never throws.
 
 if nargin < 1 || isempty(markerName)
     return;
@@ -30,23 +30,6 @@ try
             fclose(fid);
         end
         return;
-    end
-
-    repoRoot = fileparts(fileparts(mfilename('fullpath')));
-    if isempty(repoRoot) || exist(repoRoot, 'dir') ~= 7
-        return;
-    end
-
-    tablesDir = fullfile(repoRoot, 'tables');
-    if exist(tablesDir, 'dir') ~= 7
-        mkdir(tablesDir);
-    end
-
-    fbPath = fullfile(tablesDir, 'runtime_execution_markers_fallback.txt');
-    fid = fopen(fbPath, 'a');
-    if fid >= 0
-        fprintf(fid, '%s', line);
-        fclose(fid);
     end
 catch
 end

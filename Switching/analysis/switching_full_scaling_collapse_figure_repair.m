@@ -1,4 +1,4 @@
-﻿% switching_full_scaling_collapse_figure_repair
+% switching_full_scaling_collapse_figure_repair
 % Repair the archived full-scaling FIG into a cleaner publication export
 % without rerunning the underlying analysis.
 
@@ -22,7 +22,7 @@ if ~exist('sourceFigureName', 'var') || isempty(sourceFigureName)
     sourceFigureName = "switching_full_scaling_collapse.fig";
 end
 
-sourceRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', char(sourceRunId));
+sourceRunDir = fullfile(switchingCanonicalRunRoot(repoRoot), char(sourceRunId));
 sourceFigPath = fullfile(sourceRunDir, 'figures', char(sourceFigureName));
 assert(exist(sourceRunDir, 'dir') == 7, 'Source run not found: %s', sourceRunDir);
 assert(exist(sourceFigPath, 'file') == 2, 'Source FIG not found: %s', sourceFigPath);
@@ -39,7 +39,7 @@ cfgRun.dataset = getManifestField(sourceManifest, 'dataset', '');
 cfgRun.sourceRunId = getManifestField(sourceManifest, 'run_id', char(sourceRunId));
 cfgRun.sourceFigure = sourceFigPath;
 cfgRun.repairMode = 'fig_repair_only';
-run = createRunContext('switching', cfgRun);
+run = createSwitchingRunContext(repoRoot, cfgRun);
 runDir = run.run_dir;
 
 fprintf('switching run directory:\n%s\n', runDir);

@@ -27,7 +27,7 @@ addpath(fullfile(repoRoot, 'Switching', 'utils'), '-begin');
 %   - full scaling parameters (.csv)
 %   - PT matrix (.csv)
 baseRunId = "run_2026_03_25_012517_rsr_child_baseline";
-baseRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', char(baseRunId));
+baseRunDir = fullfile(switchingCanonicalRunRoot(repoRoot), char(baseRunId));
 srcPath = fullfile(baseRunDir, 'tables', 'residual_decomposition_sources.csv');
 assert(exist(srcPath, 'file') == 2, 'Missing sources: %s', srcPath);
 

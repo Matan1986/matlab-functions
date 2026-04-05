@@ -49,7 +49,7 @@ cfg = localSetDef(cfg, 'maxAlphaPerPerturb', 5);
 decompRunId = string(cfg.decompositionRunId);
 runDataset = sprintf('phi_pt_restricted_deformation_stable | decomp:%s | pt:%s', ...
     char(decompRunId), char(ptRunId));
-run = createRunContext('switching', struct('runLabel', cfg.runLabel, 'dataset', runDataset)); % FIRST STAGE: run created early
+run = createSwitchingRunContext(repoRoot, struct('runLabel', cfg.runLabel, 'dataset', runDataset)); % FIRST STAGE: run created early
 fprintf("RUN CREATED: %s\n", run.run_dir);
 
 appendText(run.log_path, sprintf('[%s] run_phi_pt_restricted_deformation_stable started\n', localStampNow()));

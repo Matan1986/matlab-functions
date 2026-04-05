@@ -19,7 +19,7 @@ addpath(fullfile(repoRoot, 'Switching', 'utils'), '-begin');
 cfg = applyDefaults(cfg);
 runDataset = sprintf('prediction_falsification | align:%s fs:%s pt:%s barrier:%s', ...
     cfg.alignmentRunId, cfg.fullScalingRunId, cfg.ptRunId, cfg.barrierRunId);
-run = createRunContext('cross_experiment', struct('runLabel', cfg.runLabel, 'dataset', runDataset));
+run = createSwitchingRunContext(repoRoot, struct('runLabel', cfg.runLabel, 'dataset', runDataset));
 runDir = run.run_dir;
 
 for s = ["figures", "tables", "reports", "review"]
@@ -206,9 +206,9 @@ cfg = setDefault(cfg, 'boundaryRmseInflation', 1.20);
 end
 
 function slice = loadCanonicalSlice(repoRoot, cfg)
-alignPath = fullfile(repoRoot, 'results', 'switching', 'runs', cfg.alignmentRunId, 'switching_alignment_core_data.mat');
-scalePath = fullfile(repoRoot, 'results', 'switching', 'runs', cfg.fullScalingRunId, 'tables', 'switching_full_scaling_parameters.csv');
-ptPath = fullfile(repoRoot, 'results', 'switching', 'runs', cfg.ptRunId, 'tables', 'PT_matrix.csv');
+alignPath = fullfile(switchingCanonicalRunRoot(repoRoot), cfg.alignmentRunId, 'switching_alignment_core_data.mat');
+scalePath = fullfile(switchingCanonicalRunRoot(repoRoot), cfg.fullScalingRunId, 'tables', 'switching_full_scaling_parameters.csv');
+ptPath = fullfile(switchingCanonicalRunRoot(repoRoot), cfg.ptRunId, 'tables', 'PT_matrix.csv');
 
 core = load(alignPath, 'Smap', 'temps', 'currents');
 [SmapAll, tempsAll, currents] = orientAndSortMap(core.Smap, core.temps(:), core.currents(:));
@@ -246,7 +246,7 @@ slice = struct('Smap', Smap, 'temps', temps, 'currents', currents, ...
 end
 
 function ptFeatures = loadPTFeatures(repoRoot, cfg, temps)
-ptSummaryPath = fullfile(repoRoot, 'results', 'switching', 'runs', cfg.ptRunId, 'tables', 'PT_summary.csv');
+ptSummaryPath = fullfile(switchingCanonicalRunRoot(repoRoot), cfg.ptRunId, 'tables', 'PT_summary.csv');
 if exist(ptSummaryPath, 'file') ~= 2
     error('Missing PT summary table: %s', ptSummaryPath);
 end

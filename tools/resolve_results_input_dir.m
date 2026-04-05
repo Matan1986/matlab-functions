@@ -19,7 +19,15 @@ if exist(runsRoot, 'dir') == 7
         [~, order] = sort({runDirs.name});
         runDirs = runDirs(order);
         for i = numel(runDirs):-1:1
-            candidate = fullfile(runsRoot, runDirs(i).name, analysisName);
+            runDir = fullfile(runsRoot, runDirs(i).name);
+            [runStatus, ~] = get_run_status_value(runDir);
+            if runStatus == "PARTIAL"
+                error('PARTIAL_RUN_NOT_ALLOWED');
+            end
+            if runStatus ~= "CANONICAL"
+                continue;
+            end
+            candidate = fullfile(runDir, analysisName);
             if exist(candidate, 'dir') == 7
                 dirPath = candidate;
                 return;

@@ -25,6 +25,13 @@ rPath = 'C:/Dev/matlab-functions/results/relaxation/runs/run_legacy_derivative_s
 metaPath = 'C:/Dev/matlab-functions/results/relaxation/runs/run_legacy_derivative_smoothing/tables/S_time_cuts_meta.csv';
 kappaPath = 'C:/Dev/matlab-functions/tables/alpha_structure.csv';
 
+directRunPaths = {ptPath, rPath, metaPath};
+for i = 1:numel(directRunPaths)
+    if contains(directRunPaths{i}, '/results/') && contains(directRunPaths{i}, '/runs/run_')
+        error('DIRECT_RUN_ACCESS_FORBIDDEN');
+    end
+end
+
 EXECUTION_STATUS = 'FAIL';
 KAPPA_FIXES_SHAPE = 'NO';
 KAPPA_FIXES_PEAK = 'NO';

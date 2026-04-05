@@ -1,4 +1,4 @@
-﻿function out = switching_translation_mode_test(cfg)
+function out = switching_translation_mode_test(cfg)
 % switching_translation_mode_test
 % Test whether dynamic shape mode phi_1(I) matches the ridge-translation mode.
 %
@@ -27,7 +27,7 @@ runCfg = struct();
 runCfg.runLabel = cfg.runLabel;
 runCfg.dataset = sprintf('dynamic_shape:%s | alignment:%s | full_scaling:%s', ...
     char(source.dynamicShapeRunId), char(source.alignmentRunId), char(source.fullScalingRunId));
-run = createRunContext('switching', runCfg);
+run = createSwitchingRunContext(repoRoot, runCfg);
 runDir = run.run_dir;
 
 fprintf('Switching translation-mode test run directory:\n%s\n', runDir);
@@ -214,11 +214,11 @@ source = struct();
 source.dynamicShapeRunId = string(cfg.dynamicShapeRunId);
 source.alignmentRunId = string(cfg.alignmentRunId);
 source.fullScalingRunId = string(cfg.fullScalingRunId);
-source.dynamicShapeRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', ...
+source.dynamicShapeRunDir = fullfile(switchingCanonicalRunRoot(repoRoot), ...
     char(source.dynamicShapeRunId));
-source.alignmentRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', ...
+source.alignmentRunDir = fullfile(switchingCanonicalRunRoot(repoRoot), ...
     char(source.alignmentRunId));
-source.fullScalingRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', ...
+source.fullScalingRunDir = fullfile(switchingCanonicalRunRoot(repoRoot), ...
     char(source.fullScalingRunId));
 
 source.dynamicPhiPath = fullfile(source.dynamicShapeRunDir, 'tables', ...

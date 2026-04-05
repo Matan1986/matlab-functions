@@ -43,7 +43,7 @@ runCfg          = struct();
 runCfg.runLabel = cfg.runLabel;
 runCfg.dataset  = sprintf('effObs:%s | a1:%s', ...
     char(source.effObsRunId), char(source.a1RunId));
-run    = createRunContext('switching', runCfg);
+run    = createSwitchingRunContext(repoRoot, runCfg);
 runDir = run.run_dir;
 
 fprintf('Ridge susceptibility analysis run directory:\n%s\n', runDir);
@@ -367,11 +367,11 @@ source = struct();
 source.effObsRunId = string(cfg.effObsRunId);
 source.a1RunId     = string(cfg.a1RunId);
 
-effObsDir      = fullfile(repoRoot, 'results', 'switching', 'runs', char(source.effObsRunId));
+effObsDir      = fullfile(switchingCanonicalRunRoot(repoRoot), char(source.effObsRunId));
 source.mapPath = fullfile(effObsDir, 'tables', 'switching_effective_switching_map.csv');
 source.obsPath = fullfile(effObsDir, 'tables', 'switching_effective_observables_table.csv');
 
-a1Dir          = fullfile(repoRoot, 'results', 'switching', 'runs', char(source.a1RunId));
+a1Dir          = fullfile(switchingCanonicalRunRoot(repoRoot), char(source.a1RunId));
 source.a1Path  = fullfile(a1Dir, 'tables', 'switching_dynamic_shape_mode_amplitudes.csv');
 
 required = {source.mapPath, source.obsPath, source.a1Path};

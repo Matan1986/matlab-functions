@@ -21,7 +21,7 @@ addpath(fullfile(repoRoot, 'Switching', 'utils'), '-begin');
 cfg = applyDefaults(cfg);
 
 runDataset = sprintf('phi_physical_structure | decomp_ref:%s', cfg.canonicalDecompositionRunId);
-run = createRunContext('switching', struct('runLabel', cfg.runLabel, 'dataset', runDataset));
+run = createSwitchingRunContext(repoRoot, struct('runLabel', cfg.runLabel, 'dataset', runDataset));
 runDir = run.run_dir;
 
 fprintf('Phi physical structure test run directory:\n%s\n', runDir);
@@ -645,11 +645,11 @@ set(ax, 'FontSize', 14, 'LineWidth', 1.0, 'TickDir', 'out', 'Box', 'off', 'Layer
 end
 
 function slice = localAlignmentSlice(repoRoot, decCfg)
-source.alignmentRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', char(decCfg.alignmentRunId));
-source.fullScalingRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', char(decCfg.fullScalingRunId));
+source.alignmentRunDir = fullfile(switchingCanonicalRunRoot(repoRoot), char(decCfg.alignmentRunId));
+source.fullScalingRunDir = fullfile(switchingCanonicalRunRoot(repoRoot), char(decCfg.fullScalingRunId));
 source.alignmentCorePath = fullfile(source.alignmentRunDir, 'switching_alignment_core_data.mat');
 source.fullScalingParamsPath = fullfile(source.fullScalingRunDir, 'tables', 'switching_full_scaling_parameters.csv');
-source.ptMatrixPath = fullfile(repoRoot, 'results', 'switching', 'runs', ...
+source.ptMatrixPath = fullfile(switchingCanonicalRunRoot(repoRoot), ...
     char(decCfg.ptRunId), 'tables', 'PT_matrix.csv');
 
 core = load(source.alignmentCorePath, 'Smap', 'temps', 'currents');

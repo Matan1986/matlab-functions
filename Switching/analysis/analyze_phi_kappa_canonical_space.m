@@ -6,18 +6,30 @@
 clear; clc;
 
 %% SETUP
-baseFolder = 'C:\Dev\matlab-functions';
+repoRoot = fileparts(fileparts(fileparts(mfilename('fullpath'))));
+baseFolder = repoRoot;
 addpath(genpath(fullfile(baseFolder, 'General ver2')));
 addpath(genpath(fullfile(baseFolder, 'Tools ver1')));
+addpath(fullfile(baseFolder, 'Aging', 'utils'));
+addpath(fullfile(baseFolder, 'Switching', 'utils'));
+
+assertModulesCanonical({'Switching'});
 
 tablesDir = fullfile(baseFolder, 'tables');
 
 %% CREATE RUN CONTEXT
-context = createRunContext('Switching', 'phi_kappa_canonical_space_analysis', ...
-    fullfile(baseFolder, 'results', 'switching', 'runs'));
+cfg = struct();
+cfg.runLabel = 'phi_kappa_canonical_space_analysis';
+context = createSwitchingRunContext(repoRoot, cfg);
 run_dir = context.run_dir;
-output_tables_dir = context.table_output_dir;
-output_reports_dir = context.report_output_dir;
+output_tables_dir = fullfile(run_dir, 'tables');
+output_reports_dir = fullfile(run_dir, 'reports');
+if exist(output_tables_dir, 'dir') ~= 7
+    mkdir(output_tables_dir);
+end
+if exist(output_reports_dir, 'dir') ~= 7
+    mkdir(output_reports_dir);
+end
 
 %% INPUT FILES
 summary_file = fullfile(baseFolder, 'tables', 'phi_kappa_stability_summary.csv');
@@ -188,19 +200,10 @@ end
 
 %% WRITE EXECUTION STATUS
 execution_status_file = fullfile(output_tables_dir, 'execution_status.csv');
-execution_status = table();
-execution_status.SCRIPT = {'analyze_phi_kappa_canonical_space.m'};
-execution_status.STATUS = {'SUCCESS'};
-execution_status.DESCRIPTION = {'Canonical normalized space verdict recompute'};
-execution_status.PHI_VERDICT = {phi_verdict};
-execution_status.KAPPA_VERDICT = {kappa_verdict};
-execution_status.PHI_INVARIANT = {phi_inv_verdict};
-execution_status.KAPPA_SIGN_CONSISTENT = {kappa_sign_verdict};
-execution_status.CANONICAL_PAIRS = {sprintf('%d', height(output_summary))};
-execution_status.TIMESTAMP = {datetime('now', 'Format', 'yyyy-MM-dd HH:mm:ss')};
-
+main_exec_summary = sprintf('canonical_space_verdicts phi=%s kappa=%s phi_inv=%s kappa_sign=%s pairs=%d', ...
+    phi_verdict, kappa_verdict, phi_inv_verdict, kappa_sign_verdict, height(output_summary));
 try
-    writetable(execution_status, execution_status_file);
+    writeSwitchingExecutionStatus(output_tables_dir, {'SUCCESS'}, {'YES'}, {''}, height(output_summary), {main_exec_summary}, true);
 catch ME
     rethrow(ME);
 end

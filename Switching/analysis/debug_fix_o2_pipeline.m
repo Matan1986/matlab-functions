@@ -42,7 +42,7 @@ try
     % --------------------------
     % Step 1 — Locate source data
     % --------------------------
-    runsRoot = fullfile(repoRoot, 'results', 'switching', 'runs');
+    runsRoot = switchingCanonicalRunRoot(repoRoot);
     if exist(runsRoot, 'dir') ~= 7
         error('debug_fix_o2_pipeline:MissingRunsRoot', 'Missing runs root: %s', runsRoot);
     end

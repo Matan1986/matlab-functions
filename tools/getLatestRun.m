@@ -41,12 +41,25 @@ valid = ~isnat(timestamps);
 if any(valid)
     validNames = names(valid);
     validTimestamps = timestamps(valid);
-    [~, idx] = max(validTimestamps);
-    run_id = char(validNames(idx));
+    [~, order] = sort(validTimestamps, 'descend');
+    validNames = validNames(order);
 else
-    names = sort(names, 'descend');
-    run_id = char(names(1));
+    validNames = sort(names, 'descend');
 end
+
+for i = 1:numel(validNames)
+    runDir = fullfile(runsRoot, char(validNames(i)));
+    [runStatus, ~] = get_run_status_value(runDir);
+    if runStatus == "PARTIAL"
+        error('PARTIAL_RUN_NOT_ALLOWED');
+    end
+    if runStatus == "CANONICAL"
+        run_id = char(validNames(i));
+        return;
+    end
+end
+
+error('No CANONICAL run directories found for experiment "%s".', experiment);
 end
 
 function repoRoot = resolveRepoRoot()

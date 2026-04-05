@@ -58,7 +58,7 @@ kappaTcol = localNumericColumnName(kappaTbl, kn, ["T", "T_K"]);
 kappaVals = double(kappaTbl.kappa(:));
 
 runDataset = sprintf('phi_pt_restricted_deformation | decomp:%s', cfg.decompositionRunId);
-run = createRunContext('switching', struct('runLabel', cfg.runLabel, 'dataset', runDataset));
+run = createSwitchingRunContext(repoRoot, struct('runLabel', cfg.runLabel, 'dataset', runDataset));
 runDir = run.run_dir;
 
 fprintf('Phi PT restricted deformation run directory:\n%s\n', runDir);
@@ -252,8 +252,8 @@ end
 function decDir = localResolveDecompositionTablesDir(repoRoot, runId)
 rid = char(string(runId));
 candidates = {
-    fullfile(repoRoot, 'results', 'switching', 'runs', rid, 'tables')
-    fullfile(repoRoot, 'results', 'switching', 'runs', ['_extract_' rid], rid, 'tables')
+    fullfile(switchingCanonicalRunRoot(repoRoot), rid, 'tables')
+    fullfile(switchingCanonicalRunRoot(repoRoot), ['_extract_' rid], rid, 'tables')
     };
 decDir = '';
 for i = 1:numel(candidates)
@@ -300,7 +300,7 @@ if strlength(scaleId) == 0
     scaleId = "run_2026_03_12_234016_switching_full_scaling_collapse";
 end
 if strlength(ptPath) == 0
-    ptPath = string(fullfile(repoRoot, 'results', 'switching', 'runs', ...
+    ptPath = string(fullfile(switchingCanonicalRunRoot(repoRoot), ...
         'run_2026_03_24_212033_switching_barrier_distribution_from_map', 'tables', 'PT_matrix.csv'));
 end
 
@@ -328,8 +328,8 @@ id = parts(idx + 1);
 end
 
 function slice = localLoadAlignmentScalingSlice(repoRoot, alignId, scaleId, ptMatrixPath)
-source.alignmentRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', char(alignId));
-source.fullScalingRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', char(scaleId));
+source.alignmentRunDir = fullfile(switchingCanonicalRunRoot(repoRoot), char(alignId));
+source.fullScalingRunDir = fullfile(switchingCanonicalRunRoot(repoRoot), char(scaleId));
 source.alignmentCorePath = fullfile(source.alignmentRunDir, 'switching_alignment_core_data.mat');
 source.fullScalingParamsPath = fullfile(source.fullScalingRunDir, 'tables', 'switching_full_scaling_parameters.csv');
 

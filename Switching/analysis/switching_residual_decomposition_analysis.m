@@ -29,12 +29,12 @@ if isfield(cfg, 'run') && isstruct(cfg.run) && isfield(cfg.run, 'run_id')
     if ~isfield(cfg.run, 'repo_root') || isempty(cfg.run.repo_root)
         cfg.run.repo_root = repoRoot;
     end
-    run = createRunContext('switching', cfg);
+    run = createSwitchingRunContext(repoRoot, cfg);
 else
     runCfg = struct();
     runCfg.runLabel = cfg.runLabel;
     runCfg.dataset = datasetStr;
-    run = createRunContext('switching', runCfg);
+    run = createSwitchingRunContext(repoRoot, runCfg);
 end
 runDir = run.run_dir;
 
@@ -238,8 +238,8 @@ source.alignmentRunId = string(cfg.alignmentRunId);
 source.fullScalingRunId = string(cfg.fullScalingRunId);
 source.ptRunId = string(cfg.ptRunId);
 
-source.alignmentRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', char(source.alignmentRunId));
-source.fullScalingRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', char(source.fullScalingRunId));
+source.alignmentRunDir = fullfile(switchingCanonicalRunRoot(repoRoot), char(source.alignmentRunId));
+source.fullScalingRunDir = fullfile(switchingCanonicalRunRoot(repoRoot), char(source.fullScalingRunId));
 source.alignmentCorePath = fullfile(source.alignmentRunDir, 'switching_alignment_core_data.mat');
 source.fullScalingParamsPath = fullfile(source.fullScalingRunDir, 'tables', 'switching_full_scaling_parameters.csv');
 
@@ -248,7 +248,7 @@ if strlength(source.ptRunId) == 0
     source.ptRunId = string(ptRunId);
     source.ptMatrixPath = string(ptPath);
 else
-    source.ptMatrixPath = string(fullfile(repoRoot, 'results', 'switching', 'runs', ...
+    source.ptMatrixPath = string(fullfile(switchingCanonicalRunRoot(repoRoot), ...
         char(source.ptRunId), 'tables', 'PT_matrix.csv'));
 end
 
@@ -267,7 +267,7 @@ end
 end
 
 function [runId, ptPath] = findLatestPTMatrix(repoRoot)
-runsRoot = fullfile(repoRoot, 'results', 'switching', 'runs');
+runsRoot = switchingCanonicalRunRoot(repoRoot);
 runDirs = dir(fullfile(runsRoot, 'run_*'));
 runDirs = runDirs([runDirs.isdir]);
 

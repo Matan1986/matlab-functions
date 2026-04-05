@@ -18,7 +18,7 @@ alignmentRunId = 'run_2026_03_10_112659_alignment_audit';
 fullScalingRunId = 'run_2026_03_12_234016_switching_full_scaling_collapse';
 ptRunId = 'run_2026_03_24_212033_switching_barrier_distribution_from_map';
 
-auditRun = createRunContext('switching', struct('runLabel', '22k_residual_failure_audit'));
+auditRun = createSwitchingRunContext(repoRoot, struct('runLabel', '22k_residual_failure_audit'));
 runDir = auditRun.run_dir;
 fprintf('22 K residual audit run directory:\n%s\n', runDir);
 
@@ -35,7 +35,7 @@ decCfg.fallbackSmoothWindow = 5;
 dec = switching_residual_decomposition_analysis(decCfg);
 
 tempsAudit = [20, 22, 24, 26];
-paramsPath = fullfile(repoRoot, 'results', 'switching', 'runs', fullScalingRunId, ...
+paramsPath = fullfile(switchingCanonicalRunRoot(repoRoot), fullScalingRunId, ...
     'tables', 'switching_full_scaling_parameters.csv');
 paramsTbl = readtable(paramsPath);
 

@@ -39,7 +39,7 @@ decompRunId = string(cfg.decompositionRunId);
 % Create the run folder early (before any heavy evidence loading) so the
 % filesystem reflects progress even if later steps take time.
 runDataset = sprintf('phi_pt_restricted_deformation | decomp:%s', char(decompRunId));
-run = createRunContext('switching', struct('runLabel', cfg.runLabel, 'dataset', runDataset));
+run = createSwitchingRunContext(repoRoot, struct('runLabel', cfg.runLabel, 'dataset', runDataset));
 runDir = run.run_dir;
 fprintf('Phi PT restricted deformation run directory:\n%s\n', runDir);
 

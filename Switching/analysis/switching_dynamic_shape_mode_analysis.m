@@ -1,4 +1,4 @@
-﻿function out = switching_dynamic_shape_mode_analysis(cfg)
+function out = switching_dynamic_shape_mode_analysis(cfg)
 % switching_dynamic_shape_mode_analysis
 % Identify dominant shape-evolution mode in dS/dT after removing ridge motion.
 %
@@ -29,7 +29,7 @@ runCfg = struct();
 runCfg.runLabel = cfg.runLabel;
 runCfg.dataset = sprintf('alignment:%s | full_scaling:%s', ...
     char(source.alignmentRunId), char(source.fullScalingRunId));
-run = createRunContext('switching', runCfg);
+run = createSwitchingRunContext(repoRoot, runCfg);
 runDir = run.run_dir;
 
 fprintf('Switching dynamic-shape-mode run directory:\n%s\n', runDir);
@@ -366,9 +366,9 @@ function source = resolveSourcePaths(repoRoot, cfg)
 source = struct();
 source.alignmentRunId = string(cfg.alignmentRunId);
 source.fullScalingRunId = string(cfg.fullScalingRunId);
-source.alignmentRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', ...
+source.alignmentRunDir = fullfile(switchingCanonicalRunRoot(repoRoot), ...
     char(source.alignmentRunId));
-source.fullScalingRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', ...
+source.fullScalingRunDir = fullfile(switchingCanonicalRunRoot(repoRoot), ...
     char(source.fullScalingRunId));
 source.alignmentCorePath = fullfile(source.alignmentRunDir, ...
     'switching_alignment_core_data.mat');

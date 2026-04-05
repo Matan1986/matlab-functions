@@ -11,6 +11,10 @@ scriptPath = 'C:/Dev/matlab-functions/Switching/analysis/run_alpha_observable_se
 alphaCsvPath = 'C:/Dev/matlab-functions/tables/alpha_structure.csv';
 switchingMapMatPath = 'C:/Dev/matlab-functions/results/switching/runs/run_2026_03_10_112659_alignment_audit/switching_alignment_core_data.mat';
 
+if contains(switchingMapMatPath, '/results/') && contains(switchingMapMatPath, '/runs/run_')
+    error('DIRECT_RUN_ACCESS_FORBIDDEN');
+end
+
 outModelsPath = 'C:/Dev/matlab-functions/tables/alpha_observable_models.csv';
 outReportPath = 'C:/Dev/matlab-functions/reports/alpha_observable_search.md';
 outStatusPath = 'C:/Dev/matlab-functions/tables/alpha_observable_status.csv';

@@ -23,7 +23,7 @@ addpath(fullfile(repoRoot, 'Switching', 'utils'), '-begin');
 cfg = applyLocalDefaults(cfg);
 
 runDataset = sprintf('phi_asymmetry_link | canon_decomp:%s', cfg.canonicalDecompositionRunId);
-run = createRunContext('switching', struct('runLabel', cfg.runLabel, 'dataset', runDataset));
+run = createSwitchingRunContext(repoRoot, struct('runLabel', cfg.runLabel, 'dataset', runDataset));
 runDir = run.run_dir;
 
 fprintf('Phi asymmetry link run directory:\n%s\n', runDir);
@@ -224,8 +224,8 @@ end
 end
 
 function slice = localAlignmentSlice(repoRoot, decCfg)
-source.alignmentRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', char(decCfg.alignmentRunId));
-source.fullScalingRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', char(decCfg.fullScalingRunId));
+source.alignmentRunDir = fullfile(switchingCanonicalRunRoot(repoRoot), char(decCfg.alignmentRunId));
+source.fullScalingRunDir = fullfile(switchingCanonicalRunRoot(repoRoot), char(decCfg.fullScalingRunId));
 source.alignmentCorePath = fullfile(source.alignmentRunDir, 'switching_alignment_core_data.mat');
 source.fullScalingParamsPath = fullfile(source.fullScalingRunDir, 'tables', 'switching_full_scaling_parameters.csv');
 
@@ -295,7 +295,7 @@ end
 end
 
 function [asymAudit, halfAudit] = localLoadAlignmentObservables(repoRoot, alignmentRunId, tempsDec)
-obsPath = fullfile(repoRoot, 'results', 'switching', 'runs', char(alignmentRunId), 'observables.csv');
+obsPath = fullfile(switchingCanonicalRunRoot(repoRoot), char(alignmentRunId), 'observables.csv');
 asymAudit = NaN(size(tempsDec));
 halfAudit = NaN(size(tempsDec));
 if exist(obsPath, 'file') ~= 2

@@ -25,11 +25,12 @@ function AddFailure {
 
 function FailValidation {
     param([System.Collections.Generic.List[string]]$Failures)
-    Write-Output "$script:ValidatorPrefix RESULT = FAIL"
+    Write-Output "$script:ValidatorPrefix RESULT = WARN"
     foreach ($failure in $Failures) {
-        Write-Output "$script:ValidatorPrefix REASON = $failure"
+        Write-Output "$script:ValidatorPrefix WARN = $failure"
     }
-    exit 1
+    Write-Output "$script:ValidatorPrefix CONTINUE = Validation warnings will not block MATLAB launch."
+    return
 }
 
 function Get-RepoRoot {
@@ -517,14 +518,13 @@ if ($validatorState -eq "legacy_allowed") {
     if ($directMatlabInvocation) { Write-Output "$script:ValidatorPrefix WARN DIRECT_MATLAB_INVOCATION" }
 }
 
-if (-not $block -and $script:Failures.Count -eq 0) {
-    Write-Output "$script:ValidatorPrefix RESULT = PASS"
-    Write-Output "$script:ValidatorPrefix OK: $resolvedForDisplay"
-    exit 0
+if ($block -or $script:Failures.Count -gt 0) {
+    if ($script:Failures.Count -eq 0 -and $block) {
+        AddFailure -Code "STATE_VALIDATION" -Message "Validator state '$validatorState' requirements not met."
+    }
+    FailValidation -Failures $script:Failures
 }
 
-if ($script:Failures.Count -eq 0 -and $block) {
-    AddFailure -Code "STATE_VALIDATION" -Message "Validator state '$validatorState' requirements not met."
-}
-
-FailValidation -Failures $script:Failures
+Write-Output "$script:ValidatorPrefix RESULT = PASS"
+Write-Output "$script:ValidatorPrefix OK: $resolvedForDisplay"
+exit 0

@@ -23,7 +23,7 @@ cfg = applyLocalDefaults(cfg);
 
 runDataset = sprintf('phi_pt_independence | sources align:%s fs:%s pt:%s', ...
     cfg.alignmentRunId, cfg.fullScalingRunId, cfg.ptRunId);
-run = createRunContext('switching', struct('runLabel', cfg.runLabel, 'dataset', runDataset));
+run = createSwitchingRunContext(repoRoot, struct('runLabel', cfg.runLabel, 'dataset', runDataset));
 runDir = run.run_dir;
 
 fprintf('Phi / PT independence test run directory:\n%s\n', runDir);
@@ -222,7 +222,7 @@ for qi = 1:numel(qLev)
     cc(end+1, 1) = localSafeCorr(phi, qv(:));
 end
 
-ptSumPath = fullfile(repoRoot, 'results', 'switching', 'runs', char(cfg.ptRunId), 'tables', 'PT_summary.csv');
+ptSumPath = fullfile(switchingCanonicalRunRoot(repoRoot), char(cfg.ptRunId), 'tables', 'PT_summary.csv');
 if exist(ptSumPath, 'file') == 2
     ptSum = readtable(ptSumPath);
     Tsum = localNumericFromTable(ptSum, 'T_K');
@@ -380,11 +380,11 @@ end
 end
 
 function slice = localAlignmentSlice(repoRoot, decCfg)
-source.alignmentRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', char(decCfg.alignmentRunId));
-source.fullScalingRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', char(decCfg.fullScalingRunId));
+source.alignmentRunDir = fullfile(switchingCanonicalRunRoot(repoRoot), char(decCfg.alignmentRunId));
+source.fullScalingRunDir = fullfile(switchingCanonicalRunRoot(repoRoot), char(decCfg.fullScalingRunId));
 source.alignmentCorePath = fullfile(source.alignmentRunDir, 'switching_alignment_core_data.mat');
 source.fullScalingParamsPath = fullfile(source.fullScalingRunDir, 'tables', 'switching_full_scaling_parameters.csv');
-source.ptMatrixPath = fullfile(repoRoot, 'results', 'switching', 'runs', ...
+source.ptMatrixPath = fullfile(switchingCanonicalRunRoot(repoRoot), ...
     char(decCfg.ptRunId), 'tables', 'PT_matrix.csv');
 
 core = load(source.alignmentCorePath, 'Smap', 'temps', 'currents');

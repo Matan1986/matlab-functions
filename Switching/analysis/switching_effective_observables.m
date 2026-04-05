@@ -1,4 +1,4 @@
-﻿function out = switching_effective_observables(cfg)
+function out = switching_effective_observables(cfg)
 % switching_effective_observables
 % Extract reduced switching observables from saved collapse-ready inputs.
 
@@ -22,7 +22,7 @@ runCfg = struct();
 runCfg.runLabel = cfg.runLabel;
 runCfg.dataset = sprintf('full_scaling:%s | alignment:%s', ...
     char(source.fullScalingRunId), char(source.alignmentRunId));
-run = createRunContext('switching', runCfg);
+run = createSwitchingRunContext(repoRoot, runCfg);
 runDir = run.run_dir;
 
 fprintf('Switching effective-observables run directory:\n%s\n', runDir);
@@ -215,8 +215,8 @@ function source = resolveSourceRuns(repoRoot, cfg)
 source = struct();
 source.fullScalingRunId = string(cfg.fullScalingRunId);
 source.alignmentRunId = string(cfg.alignmentRunId);
-source.fullScalingRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', char(source.fullScalingRunId));
-source.alignmentRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', char(source.alignmentRunId));
+source.fullScalingRunDir = fullfile(switchingCanonicalRunRoot(repoRoot), char(source.fullScalingRunId));
+source.alignmentRunDir = fullfile(switchingCanonicalRunRoot(repoRoot), char(source.alignmentRunId));
 source.fullScalingParamsPath = fullfile(char(source.fullScalingRunDir), 'tables', ...
     'switching_full_scaling_parameters.csv');
 source.alignmentAnalysisDir = fullfile(char(source.alignmentRunDir), 'alignment_audit');

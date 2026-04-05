@@ -1,4 +1,4 @@
-﻿function out = switching_residual_collapse_verification_analysis(cfg)
+function out = switching_residual_collapse_verification_analysis(cfg)
 % switching_residual_collapse_verification_analysis
 % Verify whether the residual after full collapse aligns with saved dynamic phi_1.
 
@@ -21,7 +21,7 @@ source = resolveSourcePaths(repoRoot, cfg);
 runCfg = struct();
 runCfg.runLabel = cfg.runLabel;
 runCfg.dataset = sprintf('dynamic_shape_source:%s', char(source.dynamicShapeRunId));
-run = createRunContext('switching', runCfg);
+run = createSwitchingRunContext(repoRoot, runCfg);
 runDir = run.run_dir;
 
 fprintf('Switching residual-collapse verification run directory:\n%s\n', runDir);
@@ -276,7 +276,7 @@ end
 function source = resolveSourcePaths(repoRoot, cfg)
 source = struct();
 source.dynamicShapeRunId = string(cfg.dynamicShapeRunId);
-source.dynamicShapeRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', ...
+source.dynamicShapeRunDir = fullfile(switchingCanonicalRunRoot(repoRoot), ...
     char(source.dynamicShapeRunId));
 source.dynamicSourcesPath = fullfile(source.dynamicShapeRunDir, 'tables', ...
     'switching_dynamic_shape_sources.csv');

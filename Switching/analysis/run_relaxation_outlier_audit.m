@@ -12,6 +12,10 @@ inFlagsPath = 'C:/Dev/matlab-functions/tables/relaxation_dataset_validation_stat
 inAlphaPath = 'C:/Dev/matlab-functions/tables/alpha_structure.csv';
 inSwitchingPath = 'C:/Dev/matlab-functions/results/switching/runs/run_2026_03_12_234016_switching_full_scaling_collapse/tables/switching_full_scaling_parameters.csv';
 
+if contains(inSwitchingPath, '/results/') && contains(inSwitchingPath, '/runs/run_')
+    error('DIRECT_RUN_ACCESS_FORBIDDEN');
+end
+
 outAuditPath = 'C:/Dev/matlab-functions/tables/relaxation_outlier_audit.csv';
 outStatusPath = 'C:/Dev/matlab-functions/tables/relaxation_outlier_audit_status.csv';
 outReportPath = 'C:/Dev/matlab-functions/reports/relaxation_outlier_audit.md';

@@ -28,7 +28,7 @@ cfg = applyDefaults(cfg);
 runCfg = struct();
 runCfg.runLabel = 'pt_width_spread_observable';
 runCfg.dataset = sprintf('postprocess:%s', char(string(cfg.auditRunId)));
-run = createRunContext('switching', runCfg);
+run = createSwitchingRunContext(repoRoot, runCfg);
 runDir = run.run_dir;
 ensureArtifactDirsLocal(runDir);
 
@@ -137,7 +137,7 @@ if ~isfield(cfg, 'auditRunDir') || strlength(string(cfg.auditRunDir)) == 0
     fd = fileparts(this);
     fd = fileparts(fd);
     repoRoot = fileparts(fd);
-    cfg.auditRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', ...
+    cfg.auditRunDir = fullfile(switchingCanonicalRunRoot(repoRoot), ...
         'run_2026_03_25_013346_pt_energy_robustness_audit');
 end
 cfg.auditRunDir = char(string(cfg.auditRunDir));

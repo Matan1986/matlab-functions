@@ -32,7 +32,7 @@ alignmentRunId = 'run_2026_03_10_112659_alignment_audit';
 fullScalingRunId = 'run_2026_03_12_234016_switching_full_scaling_collapse';
 ptRunIdCanon = 'run_2026_03_24_212033_switching_barrier_distribution_from_map';
 
-parentRun = createRunContext('switching', struct('runLabel', 'residual_sector_robustness'));
+parentRun = createSwitchingRunContext(repoRoot, struct('runLabel', 'residual_sector_robustness'));
 runDir = parentRun.run_dir;
 fprintf('Residual sector robustness (parent) run directory:\n%s\n', runDir);
 
@@ -46,7 +46,7 @@ childRunIds = strings(numel(variantDefs), 1);
 for k = 1:numel(variantDefs)
     vd = variantDefs(k);
     childLabel = sanitizeRunLabel(['rsr_child_' char(vd.id)]);
-    childRun = createRunContext('switching', struct('runLabel', childLabel));
+    childRun = createSwitchingRunContext(repoRoot, struct('runLabel', childLabel));
     childRunIds(k) = string(childRun.run_id);
 
     decCfg = struct();
@@ -64,7 +64,7 @@ for k = 1:numel(variantDefs)
     decOuts{k} = switching_residual_decomposition_analysis(decCfg);
 end
 
-createRunContext('switching', struct('run', parentRun));
+createSwitchingRunContext(repoRoot, struct('run', parentRun));
 
 baseIdx = 1;
 for ki = 1:numel(variantDefs)
@@ -199,7 +199,7 @@ defs(end+1) = struct('id', "cdf_fallback_only", ...
     'alignmentRunId', alignmentRunId, 'fullScalingRunId', fullScalingRunId, ...
     'ptRunId', "__no_pt_matrix__", 'canonicalMaxTemperatureK', 30, 'nXGrid', 220, 'fallbackSmoothWindow', 5);
 
-altAlign = fullfile(repoRoot, 'results', 'switching', 'runs', ...
+altAlign = fullfile(switchingCanonicalRunRoot(repoRoot), ...
     'run_2026_03_09_145524_switching_alignment_audit', 'switching_alignment_core_data.mat');
 if exist(altAlign, 'file') == 2
     defs(end+1) = struct('id', "alignment_run_2026_03_09_145524", ...

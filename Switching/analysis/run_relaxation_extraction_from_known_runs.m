@@ -15,6 +15,12 @@ runDirs = { ...
     'C:/Dev/matlab-functions/results/relaxation/runs/run_legacy_log_model' ...
     };
 
+for i = 1:numel(runDirs)
+    if contains(runDirs{i}, '/results/') && contains(runDirs{i}, '/runs/run_')
+        error('DIRECT_RUN_ACCESS_FORBIDDEN');
+    end
+end
+
 outExtracted = 'C:/Dev/matlab-functions/tables/relaxation_M_logt_extracted.csv';
 outDebug = 'C:/Dev/matlab-functions/tables/relaxation_extraction_debug.csv';
 outStatus = 'C:/Dev/matlab-functions/tables/relaxation_extraction_status.csv';

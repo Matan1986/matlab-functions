@@ -20,7 +20,7 @@ cfg = applyDefaults(cfg, repoRoot);
 runCfg = struct();
 runCfg.runLabel = 'tail_ablation_test';
 runCfg.dataset = 'derived:PT-kappa-R';
-run = createRunContext('switching', runCfg);
+run = createSwitchingRunContext(repoRoot, runCfg);
 runDir = run.run_dir;
 ensureArtifactDirs(runDir);
 
@@ -143,9 +143,9 @@ fprintf('tail_ablation_test complete\n%s\n', runDir);
 end
 
 function cfg = applyDefaults(cfg, repoRoot)
-cfg = setDefault(cfg, 'ptMatrixPath', fullfile(repoRoot, 'results', 'switching', 'runs', ...
+cfg = setDefault(cfg, 'ptMatrixPath', fullfile(switchingCanonicalRunRoot(repoRoot), ...
     'run_2026_03_25_013356_pt_robust_canonical', 'tables', 'PT_matrix.csv'));
-cfg = setDefault(cfg, 'kappaPath', fullfile(repoRoot, 'results', 'switching', 'runs', ...
+cfg = setDefault(cfg, 'kappaPath', fullfile(switchingCanonicalRunRoot(repoRoot), ...
     '_extract_run_2026_03_24_220314_residual_decomposition', ...
     'run_2026_03_24_220314_residual_decomposition', 'tables', 'kappa_vs_T.csv'));
 cfg = setDefault(cfg, 'rPath', fullfile(repoRoot, 'results', 'cross_experiment', 'runs', ...

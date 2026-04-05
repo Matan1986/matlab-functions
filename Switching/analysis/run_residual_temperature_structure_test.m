@@ -18,7 +18,7 @@ alignmentRunId = 'run_2026_03_10_112659_alignment_audit';
 fullScalingRunId = 'run_2026_03_12_234016_switching_full_scaling_collapse';
 ptRunId = 'run_2026_03_24_212033_switching_barrier_distribution_from_map';
 
-runCtx = createRunContext('switching', struct('runLabel', 'kappa_phi_temperature_structure_test'));
+runCtx = createSwitchingRunContext(repoRoot, struct('runLabel', 'kappa_phi_temperature_structure_test'));
 runDir = runCtx.run_dir;
 fprintf('Kappa/Phi temperature-structure test run directory:\n%s\n', runDir);
 
@@ -34,7 +34,7 @@ decCfg.fallbackSmoothWindow = 5;
 
 dec = switching_residual_decomposition_analysis(decCfg);
 
-paramsPath = fullfile(repoRoot, 'results', 'switching', 'runs', fullScalingRunId, ...
+paramsPath = fullfile(switchingCanonicalRunRoot(repoRoot), fullScalingRunId, ...
     'tables', 'switching_full_scaling_parameters.csv');
 paramsTbl = readtable(paramsPath);
 

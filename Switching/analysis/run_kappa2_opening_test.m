@@ -43,7 +43,7 @@ try
     % -----------------------------
     % Canonical source chain
     % -----------------------------
-    decompRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', ...
+    decompRunDir = fullfile(switchingCanonicalRunRoot(repoRoot), ...
         '_extract_run_2026_03_24_220314_residual_decomposition', ...
         'run_2026_03_24_220314_residual_decomposition');
     decompTablesDir = fullfile(decompRunDir, 'tables');
@@ -82,7 +82,7 @@ try
     end
 
     if strlength(string(ptPath)) == 0
-        ptPath = fullfile(repoRoot, 'results', 'switching', 'runs', ...
+        ptPath = fullfile(switchingCanonicalRunRoot(repoRoot), ...
             'run_2026_03_24_212033_switching_barrier_distribution_from_map', 'tables', 'PT_matrix.csv');
     end
     assert(exist(ptPath, 'file') == 2, 'Missing canonical PT matrix table: %s', ptPath);

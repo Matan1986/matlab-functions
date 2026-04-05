@@ -1,31 +1,12 @@
 clear; clc;
 
-% Robust repo root detection: search for README.md + known folders
-current_dir = pwd;
-temp_dir = current_dir;
-repoRoot = '';
-for level = 1:15 % Search up to 15 levels
-    if exist(fullfile(temp_dir, 'README.md'), 'file') && ...
-       exist(fullfile(temp_dir, 'Aging'), 'dir') && ...
-       exist(fullfile(temp_dir, 'Switching'), 'dir')
-        repoRoot = temp_dir;
-        break;
-    end
-    parent_dir = fileparts(temp_dir);
-    if strcmp(parent_dir, temp_dir) % Reached filesystem root
-        break;
-    end
-    temp_dir = parent_dir;
-end
-
-if isempty(repoRoot)
-    error('Could not detect repo root - README.md not found');
-end
+repoRoot = fileparts(fileparts(fileparts(mfilename('fullpath'))));
 
 addpath(fullfile(repoRoot, 'Aging', 'utils'));
+addpath(fullfile(repoRoot, 'Switching', 'utils'));
 
 cfg = struct('runLabel', 'minimal_canonical');
-run = createRunContext('switching', cfg);
+run = createSwitchingRunContext(repoRoot, cfg);
 rd = run.run_dir;
 
 % Ensure run_dir exists
@@ -44,9 +25,7 @@ fprintf(fid, '# Minimal canonical run\n\nOK\n');
 fclose(fid);
 
 nT = height(T);
-st = table({'SUCCESS'}, {'YES'}, {''}, nT, {'minimal canonical end-to-end proof'}, ...
-    'VariableNames', {'EXECUTION_STATUS','INPUT_FOUND','ERROR_MESSAGE','N_T','MAIN_RESULT_SUMMARY'});
-writetable(st, fullfile(rd, 'execution_status.csv'));
+writeSwitchingExecutionStatus(rd, {'SUCCESS'}, {'YES'}, {''}, nT, {'minimal canonical end-to-end proof'}, true);
 
 % Create run_manifest.json with outputs list
 manifest_path = fullfile(rd, 'run_manifest.json');

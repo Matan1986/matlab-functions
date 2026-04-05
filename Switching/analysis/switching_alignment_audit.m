@@ -2248,12 +2248,12 @@ if exist('createRunContext', 'file') == 2
     cfgRun.runLabel = char(string(label));
     cfgRun.dataset = char(string(parentDir));
     cfgRun.metricType = char(string(metricType));
-    run = createRunContext('switching', cfgRun);
+    run = createSwitchingRunContext(repoRoot, cfgRun);
     runDir = run.run_dir;
     return;
 end
 
-runsRoot = fullfile(repoRoot, 'results', 'switching', 'runs');
+runsRoot = switchingCanonicalRunRoot(repoRoot);
 if exist(runsRoot, 'dir') ~= 7
     mkdir(runsRoot);
 end

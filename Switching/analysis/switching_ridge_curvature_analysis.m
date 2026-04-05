@@ -36,7 +36,7 @@ runCfg = struct();
 runCfg.runLabel = cfg.runLabel;
 runCfg.dataset = sprintf('map:%s | X:%s | A:%s', ...
     char(source.switchMapRunId), char(source.switchXRunId), char(source.relaxRunId));
-run = createRunContext('switching', runCfg);
+run = createSwitchingRunContext(repoRoot, runCfg);
 runDir = run.run_dir;
 
 fprintf('Switching ridge-curvature analysis run directory:\n%s\n', runDir);
@@ -147,8 +147,8 @@ source.switchMapRunId = string(cfg.switchMapRunId);
 source.switchXRunId = string(cfg.switchXRunId);
 source.relaxRunId = string(cfg.relaxRunId);
 
-mapRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', char(source.switchMapRunId));
-xRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', char(source.switchXRunId));
+mapRunDir = fullfile(switchingCanonicalRunRoot(repoRoot), char(source.switchMapRunId));
+xRunDir = fullfile(switchingCanonicalRunRoot(repoRoot), char(source.switchXRunId));
 relaxRunDir = fullfile(repoRoot, 'results', 'relaxation', 'runs', char(source.relaxRunId));
 
 source.mapPath = fullfile(mapRunDir, 'tables', 'switching_effective_switching_map.csv');

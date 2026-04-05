@@ -23,7 +23,7 @@ addpath(fullfile(repoRoot, 'Switching', 'utils'), '-begin');
 cfg = applyLocalDefaults(cfg);
 
 runDataset = sprintf('phi_kernel_id | canon_decomp:%s', cfg.canonicalDecompositionRunId);
-run = createRunContext('switching', struct('runLabel', cfg.runLabel, 'dataset', runDataset));
+run = createSwitchingRunContext(repoRoot, struct('runLabel', cfg.runLabel, 'dataset', runDataset));
 runDir = run.run_dir;
 
 fprintf('Phi physical identification run directory:\n%s\n', runDir);
@@ -60,7 +60,7 @@ assert(isequal(size(Scdf), size(deltaS)));
 if isfield(cfg, 'canonicalPhiShapePath') && strlength(string(cfg.canonicalPhiShapePath)) > 0
     phiCanonPath = char(string(cfg.canonicalPhiShapePath));
 else
-    phiCanonPath = fullfile(repoRoot, 'results', 'switching', 'runs', ...
+    phiCanonPath = fullfile(switchingCanonicalRunRoot(repoRoot), ...
         '_extract_run_2026_03_24_220314_residual_decomposition', ...
         'run_2026_03_24_220314_residual_decomposition', 'tables', 'phi_shape.csv');
 end
@@ -251,11 +251,11 @@ end
 end
 
 function slice = localAlignmentSlice(repoRoot, decCfg)
-source.alignmentRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', char(decCfg.alignmentRunId));
-source.fullScalingRunDir = fullfile(repoRoot, 'results', 'switching', 'runs', char(decCfg.fullScalingRunId));
+source.alignmentRunDir = fullfile(switchingCanonicalRunRoot(repoRoot), char(decCfg.alignmentRunId));
+source.fullScalingRunDir = fullfile(switchingCanonicalRunRoot(repoRoot), char(decCfg.fullScalingRunId));
 source.alignmentCorePath = fullfile(source.alignmentRunDir, 'switching_alignment_core_data.mat');
 source.fullScalingParamsPath = fullfile(source.fullScalingRunDir, 'tables', 'switching_full_scaling_parameters.csv');
-source.ptMatrixPath = fullfile(repoRoot, 'results', 'switching', 'runs', ...
+source.ptMatrixPath = fullfile(switchingCanonicalRunRoot(repoRoot), ...
     char(decCfg.ptRunId), 'tables', 'PT_matrix.csv');
 
 core = load(source.alignmentCorePath, 'Smap', 'temps', 'currents');

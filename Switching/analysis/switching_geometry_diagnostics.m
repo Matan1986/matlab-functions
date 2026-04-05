@@ -43,7 +43,7 @@ cfgRun.derivativeSmoothingMethod = 'movmean';
 cfgRun.derivativeSmoothingWindow = derivativeSmoothingWindow;
 cfgRun.widthRule = getStructField(sourceCfg, 'widthRule', 'width_chosen_mA from scaling-parameter table');
 
-run = createRunContext('switching', cfgRun);
+run = createSwitchingRunContext(repoRoot, cfgRun);
 runDir = run.run_dir;
 
 fprintf('switching run directory:\n%s\n', runDir);
@@ -133,7 +133,7 @@ fprintf('Saved report: %s\n', reportOut);
 fprintf('Saved review ZIP: %s\n', zipOut);
 
 function [runDir, manifest, cfg] = resolveScalingRun(repoRoot, sourceScalingRunId)
-runsRoot = fullfile(repoRoot, 'results', 'switching', 'runs');
+runsRoot = switchingCanonicalRunRoot(repoRoot);
 runDir = fullfile(runsRoot, char(string(sourceScalingRunId)));
 assert(exist(runDir, 'dir') == 7, 'Requested scaling run does not exist: %s', runDir);
 

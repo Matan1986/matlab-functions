@@ -1,4 +1,4 @@
-﻿% switching_energy_scale_collapse_filtered
+% switching_energy_scale_collapse_filtered
 % Recompute the switching energy-scale collapse using only temperatures
 % that remain inside the active switching regime.
 
@@ -35,7 +35,7 @@ cfgRun.forcedRemoveTemps_K = forcedRemoveTemps_K;
 cfgRun.highTempBoundary_K = highTempBoundary_K;
 cfgRun.selectionRule = ['Remove forced temperatures plus high-temperature curves with unresolved width ' ...
     'and a peak at the lowest measured current.'];
-run = createRunContext('switching', cfgRun);
+run = createSwitchingRunContext(repoRoot, cfgRun);
 runDir = run.run_dir;
 
 fprintf('switching run directory:\n%s\n', runDir);
@@ -155,7 +155,7 @@ fprintf('Saved metrics table: %s\n', metricsOut);
 fprintf('Saved review ZIP: %s\n', zipOut);
 
 function [runDir, analysisDir, manifest] = resolveSourceAlignmentRun(repoRoot, sourceRunId)
-runsRoot = fullfile(repoRoot, 'results', 'switching', 'runs');
+runsRoot = switchingCanonicalRunRoot(repoRoot);
 manifest = struct();
 
 if nargin >= 2 && strlength(string(sourceRunId)) > 0

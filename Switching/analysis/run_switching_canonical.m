@@ -1,16 +1,18 @@
-clear; clc;
+clearvars -except modules_used_input
+clc
 
 % Repo root for catch-path createRunContext (no hardcoded drive paths).
 repoRootBootstrap = fileparts(fileparts(fileparts(mfilename('fullpath'))));
 addpath(fullfile(repoRootBootstrap, 'tools'));
-write_execution_marker('ENTRY');
 
 run = struct();
 repoRoot = '';
 run_dir = '';
 test_path = '';
-statusPath = '';
-statusCols = {'EXECUTION_STATUS', 'INPUT_FOUND', 'ERROR_MESSAGE', 'N_T', 'MAIN_RESULT_SUMMARY'};
+enforcement_checked = false;
+modules_used = {};
+% Signaling: column EXECUTION_STATUS in execution_status.csv is the sole authoritative final outcome
+% (SUCCESS / FAILED / PARTIAL). execution_probe* files and runtime_execution_markers.txt are auxiliary.
 
 implStatusPath = '';
 implReportPath = '';
@@ -29,6 +31,34 @@ try
     end
     addpath(fullfile(repoRoot, 'General ver2'));
     addpath(fullfile(switchingDir, 'utils'));
+
+    moduleRegistry = loadModuleCanonicalStatus(repoRoot);
+    idxSw = strcmp(cellstr(string(moduleRegistry.MODULE)), 'Switching');
+    if ~any(idxSw)
+        error('run_switching_canonical:RegistrySwitchingMissing', ...
+            'Switching is not listed in tables/module_canonical_status.csv');
+    end
+    rowSw = find(idxSw, 1);
+    stSw = moduleRegistry.STATUS(rowSw);
+    if iscell(stSw)
+        stSw = stSw{1};
+    end
+    stSw = char(string(stSw));
+    if ~strcmp(stSw, 'CANONICAL')
+        error('run_switching_canonical:RegistrySwitchingNotCanonical', ...
+            'Switching must be CANONICAL in tables/module_canonical_status.csv (found STATUS=%s).', stSw);
+    end
+
+    modules_used = {'Switching'};
+    if exist('modules_used_input', 'var')
+        modules_used = modules_used_input;
+    end
+    if length(modules_used) > 1
+        assertModulesCanonical(modules_used);
+        enforcement_checked = true;
+    else
+        enforcement_checked = true;   % explicitly mark evaluated
+    end
 
     legacyRoot = fullfile(switchingDir, '..', 'Switching ver12');
     if exist(legacyRoot, 'dir') ~= 7
@@ -55,7 +85,8 @@ try
     cfg = struct();
     cfg.runLabel = 'switching_canonical';
     cfg.dataset = 'raw_switching_dat_only';
-    ctx = createRunContext('Switching', cfg);
+    cfg.fingerprint_script_path = fullfile(fileparts(mfilename('fullpath')), [mfilename '.m']);
+    ctx = createSwitchingRunContext(repoRoot, cfg);
     run = ctx;
     run_dir = run.run_dir;
     if exist(run_dir, 'dir') ~= 7
@@ -63,9 +94,21 @@ try
     end
     write_execution_marker('ENTRY');
     runDir = run_dir;
-    statusPath = fullfile(runDir, 'execution_status.csv');
-    writetable(table({'PARTIAL'}, {'YES'}, {''}, 0, {'run_dir created'}, ...
-        'VariableNames', statusCols), statusPath);
+    writeSwitchingExecutionStatus(runDir, {'PARTIAL'}, {'YES'}, {''}, 0, {'run_dir created'}, false);
+    fidE = fopen(fullfile(runDir, 'enforcement_status.txt'), 'w');
+    if fidE >= 0
+        if enforcement_checked
+            fprintf(fidE, 'ENFORCEMENT_CHECKED=YES\n');
+        else
+            fprintf(fidE, 'ENFORCEMENT_CHECKED=NO\n');
+        end
+        if isempty(modules_used)
+            fprintf(fidE, 'MODULES_USED=\n');
+        else
+            fprintf(fidE, 'MODULES_USED=%s\n', strjoin(modules_used, ','));
+        end
+        fclose(fidE);
+    end
 
     fid = fopen(fullfile(run_dir, 'execution_probe_top.txt'), 'w');
     fclose(fid);
@@ -110,8 +153,21 @@ try
         'VariableNames', {'CREATE_RUN_CONTEXT_PATH', 'RUN_DIR', 'EXECUTION_PROBE_PATH', 'RUN_DIR_CREATED', 'WRITE_SUCCESS'});
     writetable(probeStatus, fullfile(run_dir, 'execution_probe_status.csv'));
 
-    writetable(table({'PARTIAL'}, {'YES'}, {''}, 0, {'probe write test passed'}, ...
-        'VariableNames', statusCols), statusPath);
+    writeSwitchingExecutionStatus(runDir, {'PARTIAL'}, {'YES'}, {''}, 0, {'probe write test passed'}, false);
+    fidE = fopen(fullfile(runDir, 'enforcement_status.txt'), 'w');
+    if fidE >= 0
+        if enforcement_checked
+            fprintf(fidE, 'ENFORCEMENT_CHECKED=YES\n');
+        else
+            fprintf(fidE, 'ENFORCEMENT_CHECKED=NO\n');
+        end
+        if isempty(modules_used)
+            fprintf(fidE, 'MODULES_USED=\n');
+        else
+            fprintf(fidE, 'MODULES_USED=%s\n', strjoin(modules_used, ','));
+        end
+        fclose(fidE);
+    end
 
     switchMainPath = fullfile(legacyRoot, 'main', 'Switching_main.m');
     if exist(switchMainPath, 'file') ~= 2
@@ -524,7 +580,7 @@ try
     fprintf(fidReport, '- CANONICAL_PIPELINE_CONFIRMED: `%s`\n', CANONICAL_PIPELINE_CONFIRMED);
     fprintf(fidReport, '\n## Minimal createRunContext isolation\n');
     fprintf(fidReport, '- Added only `Aging/utils` to path to access `createRunContext`.\n');
-    fprintf(fidReport, '- Run context itself is `Switching` and outputs are run-scoped.\n');
+    fprintf(fidReport, '- Run context uses experiment tag `switching` under `results/switching/runs`; outputs are run-scoped.\n');
     fclose(fidReport);
 
     implStatusTbl = table( ...
@@ -596,9 +652,26 @@ try
 
     write_execution_marker('STAGE_AFTER_OUTPUTS');
 
-    writetable(table({'SUCCESS'}, {'YES'}, {''}, nT, {'switching_canonical completed'}, ...
-        'VariableNames', statusCols), statusPath);
+    writeRunValidityClassification(runDir, repoRoot, enforcement_checked, modules_used, ...
+        strcmp(RUN_CONTEXT_IS_SWITCHING_ISOLATED, "YES"));
 
+    writeSwitchingExecutionStatus(runDir, {'SUCCESS'}, {'YES'}, {''}, nT, {'switching_canonical completed'}, true);
+    fidE = fopen(fullfile(runDir, 'enforcement_status.txt'), 'w');
+    if fidE >= 0
+        if enforcement_checked
+            fprintf(fidE, 'ENFORCEMENT_CHECKED=YES\n');
+        else
+            fprintf(fidE, 'ENFORCEMENT_CHECKED=NO\n');
+        end
+        if isempty(modules_used)
+            fprintf(fidE, 'MODULES_USED=\n');
+        else
+            fprintf(fidE, 'MODULES_USED=%s\n', strjoin(modules_used, ','));
+        end
+        fclose(fidE);
+    end
+
+    % Non-authoritative timeline marker; final status is EXECUTION_STATUS in execution_status.csv above.
     write_execution_marker('COMPLETED');
 
 catch ME
@@ -615,18 +688,17 @@ catch ME
             repoR = fileparts(fileparts(fileparts(mfilename('fullpath'))));
         end
         addpath(fullfile(repoR, 'Aging', 'utils'));
+        addpath(fullfile(repoR, 'Switching', 'utils'));
+        cfgFail = struct();
+        cfgFail.runLabel = 'switching_canonical_failure';
+        cfgFail.dataset = 'raw_switching_dat_only';
+        cfgFail.fingerprint_script_path = fullfile(repoR, 'Switching', 'analysis', 'run_switching_canonical.m');
         try
-            rf = createRunContext('Switching', struct('runLabel', 'switching_canonical_failure'));
+            rf = allocateSwitchingFailureRunContext(repoR, cfgFail);
             runDirForStatus = rf.run_dir;
-        catch
-            runsRoot = fullfile(repoR, 'results', 'Switching', 'runs');
-            if exist(runsRoot, 'dir') ~= 7
-                mkdir(runsRoot);
-            end
-            runDirForStatus = fullfile(runsRoot, ['run_failure_' datestr(now, 'yyyy_mm_dd_HHMMSS')]);
-            if exist(runDirForStatus, 'dir') ~= 7
-                mkdir(runDirForStatus);
-            end
+        catch ME_alloc
+            error('run_switching_canonical:FailureRunAllocation', ...
+                'Cannot allocate canonical failure run_dir (%s). Original error: %s', ME_alloc.message, ME.message);
         end
     end
 
@@ -639,18 +711,41 @@ catch ME
         mkdir(failReportsDir);
     end
 
-    statusPathFail = fullfile(runDirForStatus, 'execution_status.csv');
     inputFoundFail = 'YES';
     if isempty(run_dir) && (~isstruct(run) || ~isfield(run, 'run_dir') || isempty(run.run_dir))
         inputFoundFail = 'NO';
     end
-    writetable(table({'FAILED'}, {inputFoundFail}, {ME.message}, 0, {'run_switching_canonical failed'}, ...
-        'VariableNames', statusCols), statusPathFail);
+    writeSwitchingExecutionStatus(runDirForStatus, {'FAILED'}, {inputFoundFail}, {ME.message}, 0, {'run_switching_canonical failed'}, true);
+    fidE = fopen(fullfile(runDirForStatus, 'enforcement_status.txt'), 'w');
+    if fidE >= 0
+        if enforcement_checked
+            fprintf(fidE, 'ENFORCEMENT_CHECKED=YES\n');
+        else
+            fprintf(fidE, 'ENFORCEMENT_CHECKED=NO\n');
+        end
+        if isempty(modules_used)
+            fprintf(fidE, 'MODULES_USED=\n');
+        else
+            fprintf(fidE, 'MODULES_USED=%s\n', strjoin(modules_used, ','));
+        end
+        fclose(fidE);
+    end
+
+    repoRForValidity = repoRoot;
+    if isempty(repoRForValidity)
+        repoRForValidity = repoRootBootstrap;
+    end
+    if isempty(repoRForValidity)
+        repoRForValidity = fileparts(fileparts(fileparts(mfilename('fullpath'))));
+    end
+    runDirLowerFv = lower(strrep(runDirForStatus, '/', '\'));
+    switchingIsoFv = contains(runDirLowerFv, 'results\switching\runs') || contains(runDirLowerFv, 'results/switching/runs');
+    writeRunValidityClassification(runDirForStatus, repoRForValidity, enforcement_checked, modules_used, switchingIsoFv);
 
     implStatusFail = table( ...
         "NO", "NO", "NO", "NO", "NO", "NO", "NO", "NO", "NO", "NO", ...
         "NO", "NO", "NO", "NO", "NO", NaN, NaN, NaN, NaN, ...
-        string(which('createRunContext')), "FAILED", ...
+        string(which('createRunContext')), "N/A", ...
         string(""), string(runDirForStatus), ...
         'VariableNames', {'CANONICAL_SWITCHING_GENERATOR_CREATED', 'UPSTREAM_S_SOURCE_IDENTIFIED', ...
         'SP_DERIVED_FROM_S', 'IP_DERIVED_FROM_S', ...
@@ -674,7 +769,7 @@ catch ME
     
     if fidImplFail >= 0
         fprintf(fidImplFail, '# run_switching_canonical implementation\n\n');
-        fprintf(fidImplFail, '- STATUS: FAILED\n');
+        fprintf(fidImplFail, '- DIAGNOSTIC_NOTE: Authoritative outcome is EXECUTION_STATUS in execution_status.csv (this file is not the contract).\n');
         fprintf(fidImplFail, '- ERROR_MESSAGE: `%s`\n', ME.message);
         fprintf(fidImplFail, '- RUN_DIR: `%s`\n', runDirForStatus);
         fclose(fidImplFail);

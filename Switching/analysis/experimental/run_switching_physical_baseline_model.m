@@ -12,22 +12,8 @@
 
 clear; clc;
 
-repoRoot = '';
-probeDir = pwd;
-for level = 1:15
-    if exist(fullfile(probeDir, 'README.md'), 'file') == 2 && ...
-       exist(fullfile(probeDir, 'Aging'), 'dir') == 7 && ...
-       exist(fullfile(probeDir, 'Switching'), 'dir') == 7
-        repoRoot = probeDir;
-        break;
-    end
-    parentDir = fileparts(probeDir);
-    if strcmp(parentDir, probeDir)
-        break;
-    end
-    probeDir = parentDir;
-end
-assert(~isempty(repoRoot), 'Could not resolve repository root.');
+thisScript = mfilename('fullpath');
+repoRoot = fileparts(fileparts(fileparts(fileparts(thisScript))));
 
 legacyRoot = fullfile(repoRoot, 'Switching ver12');
 assert(isfolder(legacyRoot), 'Legacy Switching module not found: %s', legacyRoot);
@@ -41,7 +27,7 @@ addpath(fullfile(repoRoot, 'Switching', 'utils'), '-begin');
 cfg = struct();
 cfg.runLabel = 'switching_physical_baseline_model';
 cfg.dataset = 'pulse_plateau_physical_baseline_model';
-runCtx = createRunContext('switching', cfg);
+runCtx = createSwitchingRunContext(repoRoot, cfg);
 runDir = runCtx.run_dir;
 
 pointerPath = fullfile(repoRoot, 'run_dir_pointer.txt');
@@ -67,9 +53,9 @@ if exist(runReports, 'dir') ~= 7
     mkdir(runReports);
 end
 
-alignCfgFiles = dir(fullfile(repoRoot, 'results', 'switching', 'runs', 'run_*_alignment_audit', 'config_snapshot.m'));
+alignCfgFiles = dir(fullfile(switchingCanonicalRunRoot(repoRoot), 'run_*_alignment_audit', 'config_snapshot.m'));
 if isempty(alignCfgFiles)
-    alignCfgFiles = dir(fullfile(repoRoot, 'results', 'switching', 'runs', 'run_*alignment_audit*', 'config_snapshot.m'));
+    alignCfgFiles = dir(fullfile(switchingCanonicalRunRoot(repoRoot), 'run_*alignment_audit*', 'config_snapshot.m'));
 end
 assert(~isempty(alignCfgFiles), 'No alignment_audit config snapshots found.');
 [~, iCfg] = max([alignCfgFiles.datenum]);
@@ -532,10 +518,8 @@ copyfile(outStatusRepo, outStatusRun);
 copyfile(outReportRepo, outReportRun);
 copyfile(outReportRepo, outReportRootRun);
 
-execTbl = table("SUCCESS", "YES", "", height(summaryRows), "physical baseline model complete", ...
-    'VariableNames', {'EXECUTION_STATUS','INPUT_FOUND','ERROR_MESSAGE','N_T','MAIN_RESULT_SUMMARY'});
 execPath = fullfile(runDir, 'execution_status.csv');
-writetable(execTbl, execPath);
+writeSwitchingExecutionStatus(runDir, {'SUCCESS'}, {'YES'}, {''}, height(summaryRows), {'physical baseline model complete'}, true);
 
 manifest = struct();
 manifest.outputs = {outSummaryRun; outStatusRun; outReportRun; outReportRootRun; execPath};

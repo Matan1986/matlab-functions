@@ -10,6 +10,10 @@ function run = createRunContext(experiment, cfg)
 %     - config_snapshot.m
 %     - log.txt
 %     - run_notes.txt
+%
+% Optional cfg.beforeManifestWrite: function_handle run -> void, invoked after run paths
+% are fixed and before run_manifest.json is written (new run) or before reuse checks
+% (cfg.run branch). Used for Switching canonical enforcement.
 
 if nargin < 1 || isempty(experiment)
     error('createRunContext requires experiment name.');
@@ -44,6 +48,13 @@ if isfield(cfg, 'run') && isstruct(cfg.run) && isfield(cfg.run, 'run_id') && ~is
     end
 
     run = ensureRunFilePaths(run);
+    if isfield(cfg, 'beforeManifestWrite') && ~isempty(cfg.beforeManifestWrite)
+        feval(cfg.beforeManifestWrite, run);
+    end
+    if exist(run.manifest_path, 'file') == 2
+        error('createRunContext:ManifestExists', ...
+            'Run manifest already exists; refusing silent reuse of run_dir: %s', run.run_dir);
+    end
     ensureRunNotesFile(run);
 
     setRunContextAppdata(run);
@@ -69,9 +80,13 @@ run.experiment = experiment;
 run.label = runLabel;
 run.repo_root = repoRoot;
 run.run_dir = runDir;
-fingerprint = computeRunFingerprint(repoRoot);
+fingerprint = computeRunFingerprint(repoRoot, cfg);
 
 run = ensureRunFilePaths(run);
+
+if isfield(cfg, 'beforeManifestWrite') && ~isempty(cfg.beforeManifestWrite)
+    feval(cfg.beforeManifestWrite, run);
+end
 
 writeManifest(run, cfg, fingerprint);
 writeConfigSnapshot(run.config_snapshot_path, cfg, run);
@@ -159,8 +174,8 @@ end
 
 function writeManifest(run, cfg, fingerprint)
 if exist(run.manifest_path, 'file') == 2
-    warning('Run manifest already exists; preserving existing file: %s', run.manifest_path);
-    return;
+    error('createRunContext:ManifestImmutable', ...
+        'Run manifest already exists; will not overwrite: %s', run.manifest_path);
 end
 
 if nargin < 3 || ~isstruct(fingerprint)
@@ -232,10 +247,38 @@ cleanupObj = onCleanup(@() fclose(fid)); %#ok<NASGU>
 fprintf(fid, '%s\n', jsonText);
 end
 
-function fingerprint = computeRunFingerprint(repoRoot)
+function fingerprint = computeRunFingerprint(repoRoot, cfg)
+% Optional cfg.fingerprint_script_path: absolute path to the runnable entry script.
+% Used when the true caller is a script executed via run() (may not appear on dbstack).
 fingerprint = struct();
 fingerprint.git_commit = resolveGitCommit(repoRoot);
-fingerprint.script_path = resolveCallingScriptPath();
+scriptPath = '';
+if nargin >= 2 && isstruct(cfg) && isfield(cfg, 'fingerprint_script_path')
+    cand = cfg.fingerprint_script_path;
+    if ~isempty(cand)
+        cand = char(string(cand));
+        if exist(cand, 'file') ~= 2
+            candDotM = [cand '.m'];
+            if exist(candDotM, 'file') == 2
+                cand = candDotM;
+            end
+        end
+        if exist(cand, 'file') == 2
+            scriptPath = normalizeAbsolutePath(cand);
+        end
+    end
+end
+if isempty(scriptPath)
+    scriptPath = resolveCallingScriptPath();
+end
+% Stack paths for scripts may omit the .m extension; hashing requires an existing file path.
+if ~isempty(scriptPath) && exist(scriptPath, 'file') ~= 2
+    scriptPathDotM = [scriptPath '.m'];
+    if exist(scriptPathDotM, 'file') == 2
+        scriptPath = scriptPathDotM;
+    end
+end
+fingerprint.script_path = normalizeAbsolutePath(scriptPath);
 fingerprint.script_hash = computeFileSha256(fingerprint.script_path);
 fingerprint.matlab_version = version;
 fingerprint.host = getComputerName();
