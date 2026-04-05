@@ -24,8 +24,9 @@ test_verify_run.log
 # =========================================================
 # Temporary / output text
 # =========================================================
-**/*output*.txt
-*log*.txt
+# only runtime output
+*_debug_output.txt
+*_test_output.txt
 verification_test_output.txt
 diagnostic_output.txt
 output.txt
@@ -106,6 +107,14 @@ temp/
 # =========================================================
 _validation_tmp/
 **/runtime/
+# Runtime / debug tables only
+tables/*_log*
+tables/*_debug*
+tables/*_probe*
+tables/*_sentinel*
+tables/*_tmp*
+tables/*smoke*
+tables/_*
 
 # =========================================================
 # CRITICAL: repo pollution guards
@@ -126,17 +135,22 @@ matlab_prefs_agent/
 *.fig
 
 # debug txt (more aggressive)
-*_debug*.txt
+*_debug_runtime.txt
 *_stdout*.txt
 *_stderr*.txt
 *_probe*.txt
 
-# status artifacts
-*status*.csv
 
 # kappa2 intermediate
 kappa2_phen_inputs.mat
 
 # debug / cleanup
-*cleanup*.csv
+tables/*cleanup_debug*
 *VERIFICATION*.txt
+
+# =========================================================
+# NOTE:
+# tables/ are NOT globally ignored.
+# Only runtime/debug artifacts are excluded.
+# Canonical tables are part of the scientific system.
+# =========================================================
