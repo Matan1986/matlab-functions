@@ -1,5 +1,0 @@
-﻿model,predictors,n_T,LOOCV_RMSE,Pearson_r,Spearman_r,baseline_LOOCV_RMSE,delta_RMSE_vs_baseline
-baseline (LOOCV mean of log_tau),(constant),6,1.52392,-1,-1,1.52392,0
-log_tau ~ mean_E,mean_E,6,2.794544,-0.565901,-0.942857,1.52392,1.270624
-log_tau ~ std_E,std_E,6,3.810961,-0.498364,-0.942857,1.52392,2.287041
-log_tau ~ mean_E + std_E,mean_E,std_E,6,1.191213,0.419575,0.257143,1.52392,-0.332707

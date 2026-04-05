@@ -1,4 +1,0 @@
-"pair","phi_shape_corr","kappa_corr","abs_kappa_corr","kappa_sign","PHI_PAIR_STABLE","KAPPA_PAIR_STABLE","KAPPA_SIGN_STATUS"
-"raw_xy_delta vs baseline_aware","-0.999790044205","-0.999956956818","0.999956956818","-1","NO","YES","CONSISTENT"
-"raw_xy_delta vs xy_over_xx","-0.999998410901","-0.999999680089","0.999999680089","-1","NO","YES","CONSISTENT"
-"xy_over_xx vs baseline_aware","0.999794275225","0.999953848545","0.999953848545","+1","YES","YES","CONSISTENT"

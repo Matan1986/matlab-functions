@@ -1,2 +1,0 @@
-"EXECUTION_STATUS","INPUT_FOUND","ERROR_MESSAGE","N_T","MAIN_RESULT_SUMMARY","RMSE_IS_MOSTLY_SCALE","RMSE_IS_STRUCTURAL","RMSE_IS_LOW_SIGNAL_LOCALIZED","AFFINE_CLOSURE_NEEDED","STRUCTURE_PRESERVED_AFTER_RESCALING"
-"SUCCESS","YES","","3","pairs=3; median_scale_reduction=0.014199; median_affine_extra=0.140769; source=C:\Dev\matlab-functions\results\switching\runs\run_2026_03_28_212928_switching_physics_output_robustness_fast\physics_output_robustness\tables","NO","YES","NO","YES","NO"

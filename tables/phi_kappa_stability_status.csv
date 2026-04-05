@@ -1,2 +1,0 @@
-"EXECUTION_STATUS","PHI_STABLE","KAPPA_STABLE","PHI_VARIANT_INVARIANT","KAPPA_SIGN_CONSISTENT","NOTES"
-"SUCCESS","NO","YES","NO","YES","run=C:\Dev\matlab-functions\results\switching\runs; phi_stable_fraction=0.333; kappa_stable_fraction=1.000; sign_consistent_fraction=1.000; thresholds(phi>=0.90,|kappa|>=0.90,residual>=0.95_if_available)"

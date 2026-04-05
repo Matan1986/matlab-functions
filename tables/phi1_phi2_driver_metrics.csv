@@ -1,2 +1,0 @@
-n_temperatures,corr_error_kappa2,corr_error_alpha,kappa2_abs_median_split,n_high_kappa2,n_low_kappa2,mean_error_high_kappa2,mean_error_low_kappa2,error_ratio_high_over_low,error_delta_high_minus_low,rank_sum_pvalue
-14,-0.72574965119436,-0.726423065930576,0.0599804964016243,7,7,0.0117217903359454,0.00612810211878718,1.91279291838323,0.00559368821715821,0.0378787878787879

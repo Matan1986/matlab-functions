@@ -1,5 +1,0 @@
-MATLAB_ERROR:
-Invalid field name: 'CDF_PT_x + d_dx_CDF_PT_x'.
-
-Error in <a href="matlab:matlab.internal.language.introspective.errorDocCallback('run_phi1_from_pt_shape_test', 'C:\Dev\matlab-functions\tools\run_phi1_from_pt_shape_test.m', 163)" style="font-weight:bold">run_phi1_from_pt_shape_test</a> (<a href="matlab: opentoline('C:\Dev\matlab-functions\tools\run_phi1_from_pt_shape_test.m',163,0)">line 163</a>)
-        metricsByModel.(modelNames{mi}).(caseName) = struct( ...

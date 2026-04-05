@@ -1,7 +1,0 @@
-comparison,n,pearson_r,spearman_r
-switching_kappa_abs_vs_aging_loocv_residual,11,0.279744253395404,0.2
-switching_kappa_abs_vs_abs_aging_loocv_residual,11,-0.531607170729476,-0.472727272727273
-switching_kappa_abs_vs_alpha_res,11,-0.358586428389803,-0.163636363636364
-switching_kappa_vs_aging_loocv_residual,11,0.279744253395404,0.2
-switching_kappa_vs_abs_aging_loocv_residual,11,-0.531607170729476,-0.472727272727273
-switching_kappa_vs_alpha_res,11,-0.358586428389803,-0.163636363636364
