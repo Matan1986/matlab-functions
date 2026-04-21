@@ -43,7 +43,7 @@ See `tables/switching_noncanonical_scripts.csv` for explicit non-canonical ident
 - The backend remains canonical **despite legacy naming** (e.g. `Switching ver12`, `Switching_main.m`); stability and audit alignment take precedence over folder renaming.
 - Centralizing access through one entrypoint prevents duplicate execution paths and ambiguous artifact provenance.
 
-## 7. Source of Truth — Authoritative Definitions (Switching infrastructure)
+## 7. Source of Truth â€” Authoritative Definitions (Switching infrastructure)
 
 Normative table: `tables/infra_source_of_truth_definition.csv`. Scope: Switching runs under `results/switching/runs/` only.
 
@@ -78,7 +78,7 @@ Coverage of real runs (which artifacts exist per run): `tables/infra_source_of_t
 
 ## 9. Undefined Fields Policy
 
-- **Undefined is valid.** If the authoritative source does not define a value (missing file, missing field, or non-canonical `label`), infrastructure and agents must record **empty / UNDEFINED / NO** as appropriate — **never** fill gaps with naming heuristics or secondary tables.
+- **Undefined is valid.** If the authoritative source does not define a value (missing file, missing field, or non-canonical `label`), infrastructure and agents must record **empty / UNDEFINED / NO** as appropriate â€” **never** fill gaps with naming heuristics or secondary tables.
 - **INPUT_SOURCE** is **often undefined** in current manifests; that is expected until writers add an explicit manifest field.
 - **IS_CANONICAL** is **undefined** unless `run_manifest.json` exists and `label` is exactly `switching_canonical`.
 - Bundles that omit **`run_manifest.json`** leave **FINGERPRINT** and **IS_CANONICAL** undefined at the manifest layer until a manifest exists; **RUN_ID** remains the folder name under `results/switching/runs/`.
@@ -90,7 +90,7 @@ This section defines what counts as the **canonical Switching system** for agent
 ### 10.1 Authoritative entrypoint
 
 - **Canonical entrypoint (only):** `Switching/analysis/run_switching_canonical.m`
-- **Canonical is not** “any script under `Switching/analysis/`”, “anything named canonical”, “anything recently modified”, or “anything using `load_run()`”.
+- **Canonical is not** â€œany script under `Switching/analysis/`â€, â€œanything named canonicalâ€, â€œanything recently modifiedâ€, or â€œanything using `load_run()`â€.
 
 ### 10.2 What is included in the canonical system
 
@@ -112,11 +112,11 @@ A machine-readable **direct and sample indirect** call graph is in **`tables/can
 - Experimental, debug, and legacy runners listed or implied in **`tables/switching_noncanonical_scripts.csv`** and related tables.
 - **Repository-root** `tables/` and `reports/` as **inputs** to the canonical pipeline (the entrypoint does not use them).
 
-Non-canonical scripts **must not** be treated as part of canonical preflight, **must not** be “promoted” to canonical by cleanup, and **must not** be inferred to be canonical from folder names or filenames alone.
+Non-canonical scripts **must not** be treated as part of canonical preflight, **must not** be â€œpromotedâ€ to canonical by cleanup, and **must not** be inferred to be canonical from folder names or filenames alone.
 
 ### 10.4 Hard rule (closed set)
 
-**If a file is not reachable from the canonical entrypoint’s call graph, it is not part of the canonical Switching system.**
+**If a file is not reachable from the canonical entrypointâ€™s call graph, it is not part of the canonical Switching system.**
 
 Equivalently: under `Switching/analysis/`, **only** `run_switching_canonical.m` is canonical; all other scripts there are **non-canonical** unless and until the registered entrypoint is changed by explicit repository policy (not by local edits or heuristics).
 
@@ -124,8 +124,9 @@ Equivalently: under `Switching/analysis/`, **only** `run_switching_canonical.m` 
 
 | Artifact | Role |
 | --- | --- |
-| `tables/canonical_call_graph.csv` | Entrypoint → callees (depth and direct/indirect flags). |
+| `tables/canonical_call_graph.csv` | Entrypoint â†’ callees (depth and direct/indirect flags). |
 | `tables/switching_canonical_scope.csv` | Per-file CANONICAL vs NON_CANONICAL under `Switching/analysis/`. |
 | `tables/canonical_boundary_violations.csv` | Cross-boundary issues (canonical calling non-canonical analysis code, etc.). |
 | `tables/canonical_system_definition.csv` | Named components (entrypoint, core, helper). |
 | `tables/canonical_scope_status.csv` | Aggregate gate row for scope definition. |
+

@@ -229,7 +229,7 @@ SCRIPT COMPLEXITY RULE
 Start minimal.
 
 If a method is unstable:
-→ skip or fallback
+→ fail fast and surface errors explicitly (no fallback behavior)
 → do NOT block execution
 
 ========================
@@ -321,3 +321,39 @@ Start from:
 `docs/templates/matlab_run_template.m`
 
 Any script not based on template is invalid by definition.
+
+---
+
+## Phase 7 Closure — Canonical Execution and Failure Semantics
+
+Phase 7 is formally closed. Canonical execution and failure semantics are now locked as repository system truth.
+
+### Canonical execution lock
+
+- Canonical execution mode is **wrapper only**.
+- Canonical entrypoint is `tools/run_matlab_safe.bat`.
+- Non-wrapper automated execution is forbidden.
+
+### Allowed mode
+
+- Wrapper-mediated runnable script execution only.
+
+### Forbidden modes
+
+- direct `matlab -batch`
+- inline execution
+- `run()` outside wrapper
+
+### Failure semantics lock
+
+- Canonical failure semantics are: `catch -> write FAILED -> rethrow`.
+- Canonical runs must produce run-scoped `execution_status.csv` and a report (`.md`) artifact.
+- No silent success paths are permitted.
+
+### Closure status
+
+- `EXECUTION_MODE_LOCKED = YES`
+- `PIPELINE_AUDITED = YES`
+- `FAILURE_PROPAGATION_PROVEN = YES`
+- `PIPELINE_TRUSTWORTHY = YES`
+- `PHASE7_CLOSED = YES`

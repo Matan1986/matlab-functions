@@ -1,10 +1,15 @@
+﻿STATUS: DEPRECATED (not canonical)
+
+This file is outdated and does not represent the current canonical definition.
+Refer to canonical/xy_switching/ instead.
+
 # Switching Canonical Definition (v1.2)
 
 ## 0. Canonical execution system (locked)
 
 ### 0.1 Canonical entrypoint
 
-- **`Switching/analysis/run_switching_canonical.m`** — sole registered Switching entrypoint for agents and automation.
+- **`Switching/analysis/run_switching_canonical.m`** â€” sole registered Switching entrypoint for agents and automation.
 
 Registry: `tables/switching_canonical_entrypoint.csv`. Backend: `docs/switching_backend_definition.md`. Aging path rules: `docs/switching_dependency_boundary.md`.
 
@@ -12,10 +17,10 @@ Registry: `tables/switching_canonical_entrypoint.csv`. Backend: `docs/switching_
 
 When this entrypoint is used as intended with the repository wrapper (`tools/run_matlab_safe.bat`) and run-context helpers:
 
-- **Run-backed artifacts** — results are tied to a created `run_dir` and written per repository run rules; truth is established from those artifacts.
-- **No precomputed inputs** — the canonical Switching pipeline does not treat pre-baked analysis tables as required inputs for the core Switching construction (contrast with weak candidates that read fixed repo tables; see `tables/switching_canonical_entrypoint_candidates.csv`).
-- **Canonical pipeline execution** — Switching ver12 logic is reached only through the registered entrypoint wiring, not ad-hoc script selection.
-- **Switching-only context** — experiment and outputs are Switching-scoped; cross-pipeline runners (e.g. Relaxation-mapped scripts) are out of scope for this definition.
+- **Run-backed artifacts** â€” results are tied to a created `run_dir` and written per repository run rules; truth is established from those artifacts.
+- **No precomputed inputs** â€” the canonical Switching pipeline does not treat pre-baked analysis tables as required inputs for the core Switching construction (contrast with weak candidates that read fixed repo tables; see `tables/switching_canonical_entrypoint_candidates.csv`).
+- **Canonical pipeline execution** â€” Switching ver12 logic is reached only through the registered entrypoint wiring, not ad-hoc script selection.
+- **Switching-only context** â€” experiment and outputs are Switching-scoped; cross-pipeline runners (e.g. Relaxation-mapped scripts) are out of scope for this definition.
 
 ### 0.3 Strict rules (agents)
 
@@ -26,8 +31,8 @@ When this entrypoint is used as intended with the repository wrapper (`tools/run
 
 ### 0.4 Execution contract
 
-- **script → run_dir → artifacts → truth** — validity flows from the canonical script through run identity to persisted outputs; signaling follows `docs/repo_execution_rules.md` (Execution Signaling Contract).
-- **No artifacts = no result** — if mandatory run artifacts and status files are not produced, the run must not be interpreted as delivering canonical Switching results.
+- **script â†’ run_dir â†’ artifacts â†’ truth** â€” validity flows from the canonical script through run identity to persisted outputs; signaling follows `docs/repo_execution_rules.md` (Execution Signaling Contract).
+- **No artifacts = no result** â€” if mandatory run artifacts and status files are not produced, the run must not be interpreted as delivering canonical Switching results.
 
 ---
 
@@ -82,7 +87,7 @@ This normalization is internal to model construction and does NOT constitute coo
 
 ### Residual
 
-DeltaS = Smap − Scdf
+DeltaS = Smap âˆ’ Scdf
 
 ---
 
@@ -110,7 +115,7 @@ kappa1 = U(:,1) * Sigma(1,1)
 
 ### NOT USED:
 
-* (I − I_peak)
+* (I âˆ’ I_peak)
 * I / width
 * I scaling
 * shifting
@@ -165,7 +170,7 @@ NOT canonical:
 
 A coordinate scaling collapse of the form:
 
-S / S_peak  vs  (I − I_peak) / width
+S / S_peak  vs  (I âˆ’ I_peak) / width
 
 was tested using only TRUSTED_CANONICAL runs.
 
@@ -192,7 +197,7 @@ Scaling should be treated as:
 
 ---
 
-## 11. Phi–Kappa Canonical Stability
+## 11. Phiâ€“Kappa Canonical Stability
 
 The stability of the canonical decomposition was tested across canonical normalization variants.
 
@@ -203,8 +208,8 @@ KAPPA_STABLE_IN_CANONICAL_SPACE = YES
 
 Measured values:
 
-* phi_shape_corr ≈ 0.9998
-* abs_kappa_corr ≈ 0.9999
+* phi_shape_corr â‰ˆ 0.9998
+* abs_kappa_corr â‰ˆ 0.9999
 
 ### Interpretation
 
@@ -230,25 +235,25 @@ The dependence of kappa1 on observable quantities was tested using only TRUSTED_
 
 * kappa1 vs S_peak:
 
-  * Pearson ≈ 0.92
-  * Spearman ≈ 0.96
-  * R² ≈ 0.85
+  * Pearson â‰ˆ 0.92
+  * Spearman â‰ˆ 0.96
+  * RÂ² â‰ˆ 0.85
 
 * kappa1 vs I_peak:
 
-  * Pearson ≈ 0.80
-  * Spearman ≈ 0.88
-  * R² ≈ 0.64
+  * Pearson â‰ˆ 0.80
+  * Spearman â‰ˆ 0.88
+  * RÂ² â‰ˆ 0.64
 
 * Combined model:
   kappa1 ~ S_peak + I_peak:
 
-  * R² ≈ 0.956
+  * RÂ² â‰ˆ 0.956
 
 ### Additional Observations
 
 * kappa1 is not monotonic in temperature
-* regime change detected near 22–24 K
+* regime change detected near 22â€“24 K
 
 ---
 
@@ -294,3 +299,40 @@ SCALING_NOT_REQUIRED = YES
 PHI_STABLE = YES
 KAPPA_STABLE = YES
 STATE_SPACE_DEFINED = YES
+
+## Contract Completion (Explicit)
+
+### Pipeline (authoritative order)
+
+The Switching canonical pipeline MUST execute in the following order:
+
+1. Raw data loading (via canonical entrypoint only; no precomputed inputs)
+2. `processFilesSwitching` (signal extraction and preprocessing)
+3. `analyzeSwitchingStability` (stability analysis and canonical structure)
+4. Construction of canonical observables:
+   - S(I,T)
+   - observables table
+   - Î¦â‚ (phi1) and derived quantities
+5. Artifact writing to run directory (tables + reports + status)
+
+Execution order is strict and MUST NOT be altered.
+
+---
+
+### Required Outputs (non-negotiable)
+
+Each canonical Switching run MUST produce the following artifacts:
+
+- `switching_canonical_S_long.csv`
+- `switching_canonical_observables.csv`
+- `switching_canonical_phi1.csv`
+- `execution_status.csv`
+- At least one `.md` report file
+
+Rules:
+
+- Missing ANY required artifact â†’ INVALID RUN
+- "No artifacts = no result"
+- Outputs MUST be generated by the canonical entrypoint only
+- No downstream reconstruction or manual completion allowed
+

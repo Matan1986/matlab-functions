@@ -11,3 +11,4 @@
 Normative definitions: `docs/run_system.md` (section 3). Switching canonical runner: `Switching/analysis/run_switching_canonical.m`.
 
 `EXECUTION_STATUS` may be `SUCCESS`, `FAILED`, or `PARTIAL` (checkpoint before completion).
+
