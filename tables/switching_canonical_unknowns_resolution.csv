@@ -1,6 +1,0 @@
-original_id,source_artifact,original_label,forced_verdict,rationale,confidence
-U1,switching_canonical_dependencies.csv,Repo startup path UNKNOWN,LEGACY_HARMLESS,"Console message reflects MATLAB userpath/startup; run_switching_canonical.m does not call addpath(genpath(repo)) for that line; shadowing is generic MATLAB environment risk not Switching-specific logic",MEDIUM
-U2,switching_canonical_risk_flags.csv,R5 CHECK_NO_PRECOMPUTED_INPUTS heuristic UNKNOWN,NONCANONICAL_RISK,"String-based flag on inputPaths; can misclassify unusual paths; affects validation row only not internal Smap computation",MEDIUM
-U3,switching_canonical_dependencies.csv,IF_PRESENT for resolveNegP2P,LEGACY_HARMLESS,"Resolved: which('resolveNegP2P') in script; absent=no flip present=flip; behavior is deterministic per machine path",HIGH
-U4,prior audit narrative,createRunContext under Aging vs Switching exclusion,LEGACY_HARMLESS,"For Switching canonicality: technical only; which() locks single file; no Aging experiment code runs",HIGH
-U5,Switching ver12 split,code tree vs embedded path,SEPARATE_CLASSES,"Switching ver12 code tree classified CANONICAL_SUBSTRATE (see report); embedded L: path in Switching_main.m classified NONCANONICAL_RISK",HIGH

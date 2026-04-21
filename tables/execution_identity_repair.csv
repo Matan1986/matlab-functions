@@ -1,7 +1,0 @@
-step,topic,finding,action_taken
-1,assignment_location,"script_path and script_hash are set in Aging/utils/createRunContext.m inside computeRunFingerprint, then copied in writeManifest to run_manifest.json",confirmed by code read
-1,root_cause,"resolveCallingScriptPath() uses dbstack; scripts launched with run() often do not appear on the stack, so the loop falls back to mfilename inside createRunContext.m (helper file), not the runnable entry script",documented
-2,design,"Optional cfg.fingerprint_script_path supplies the absolute path to the true entry script; hash is SHA-256 of that file (existing computeFileSha256). Secondary: if stack paths omit .m, append .m before hashing.",minimal field + path normalization only
-3,implementation,"createRunContext.m: computeRunFingerprint(repoRoot,cfg); honor cfg.fingerprint_script_path when file exists; append .m when needed; run_switching_canonical.m: cfg.fingerprint_script_path = fullfile(fileparts(mfilename('fullpath')),[mfilename '.m'])",files touched: Aging/utils/createRunContext.m; Switching/analysis/run_switching_canonical.m
-4,verification_run,run_2026_04_04_141426_switching_canonical,"wrapper run; execution_status SUCCESS; run_manifest.json script_path ends with run_switching_canonical.m; script_hash matches PowerShell SHA256 of that file"
-5,cross_check_hash,"PowerShell Get-FileHash SHA256 of Switching/analysis/run_switching_canonical.m equals manifest script_hash for verification run",9576c05308774196d16ce8f845957c682b7492ee5daee7a84af57b0f125debae

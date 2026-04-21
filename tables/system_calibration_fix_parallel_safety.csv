@@ -1,5 +1,0 @@
-check_id,finding,verdict,evidence
-PS-G-1,temp_runner uses RANDOM twice per run,LOW_COLLISION,run_matlab_safe.bat RUNNER_FILE
-PS-G-2,pre_execution_failure_log.csv append-only shared file,ACCEPTABLE_RISK,parallel agents may interleave rows; no pointer file added
-PS-G-3,No new repo-root pointer,PASS,Only tables/*.csv append
-PS-G-4,Guard runs before MATLAB no run_dir,PASS,No cross-run dir contamination from failed launch

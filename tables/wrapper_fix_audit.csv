@@ -1,6 +1,0 @@
-﻿field,before,after,fixed
-matlab_command_assignment,"set ""MATLAB_COMMAND=run('%RUNNER_ABS_PATH_MATLAB%')""","set ""MATLAB_COMMAND=run('%SCRIPT_PATH_MATLAB%')""",YES
-matlab_command_full_echo,"echo MATLAB_COMMAND_FULL=matlab -batch ""%MATLAB_COMMAND%"" -> pointed to RUNNER path","echo MATLAB_COMMAND_FULL=matlab -batch ""%MATLAB_COMMAND%"" -> now points to SCRIPT path",YES
-actual_matlab_call,"matlab -batch ""%MATLAB_COMMAND%"" executed RUNNER target","matlab -batch ""%MATLAB_COMMAND%"" executes SCRIPT target",YES
-temp_runner_creation_behavior,"temp runner created and used for execution","temp runner still created but no longer used for execution",YES
-probe_validation,"SCRIPT entry not guaranteed (runner-target execution)","SCRIPT_START + PROBE_FORCE_RUN_v2 observed; execution_probe_top.txt created",YES

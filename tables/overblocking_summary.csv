@@ -1,6 +1,0 @@
-component,total_points,live_points,dead_points,overblocking_points,justified_points,ambiguity_points,overall_component_verdict
-tools/run_matlab_safe.bat,2,2,1,0,1,1,MIXED_dead_temp_runner_misleading_not_runtime_block
-tools/pre_execution_guard.ps1,4,4,0,0,4,0,LEAN_AND_JUSTIFIED
-tools/validate_matlab_runnable.ps1,5,0,0,2,0,5,GOVERNANCE_ONLY_OFF_LIVE_PATH_EXIT0_FALSE_PROTECTION
-Switching/analysis/run_switching_canonical.m,18,18,0,0,16,2,JUSTIFIED_HARD_STOPS_PLUS_FAILURE_OPTIONAL_AMBIGUITY
-Aging/utils/createRunContext.m,6,6,0,0,5,1,JUSTIFIED_PLUS_MANIFEST_SOFT_SKIP_AMBIGUITY

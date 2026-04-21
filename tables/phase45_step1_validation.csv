@@ -1,7 +1,0 @@
-METRIC,VALUE,EVIDENCE
-CANONICAL_RUN_SUCCESS,YES,"tools/run_matlab_safe.bat exit 0; run_dir results/switching/runs/run_2026_04_04_223618_switching_canonical; execution_status.csv EXECUTION_STATUS=SUCCESS"
-REGISTRY_VALIDATION_ACTIVE,YES,"Temporary CSV: missing Switching row -> error run_switching_canonical:RegistrySwitchingMissing exit 1; Switching NON_CANONICAL -> error RegistrySwitchingNotCanonical exit 1; registry file restored after tests"
-NO_BEHAVIOR_CHANGE,YES,"Registry read and Switching row check run only at entrypoint start; no edits to Switching ver12 backend or analysis helpers; successful run produced execution_status.csv tables reports execution_probe artifacts under run_dir"
-NO_COUPLING_INTRODUCED,YES,"grep: loadModuleCanonicalStatus only in tools/loadModuleCanonicalStatus.m and Switching/analysis/run_switching_canonical.m; no analysis loaders or backend reference module_canonical_status except pre-existing assertModulesCanonical.m"
-NO_FALSE_FAILURES,YES,"Canonical run completed with default registry; repoRoot derived from mfilename resolves tables/module_canonical_status.csv; no path or empty-repoRoot failure in success path"
-STEP1_VALIDATED,YES,"All validation rows satisfied"

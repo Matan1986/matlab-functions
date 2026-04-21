@@ -1,4 +1,0 @@
-﻿"file","line","snippet","call_chain","reachable_in_canonical_path","patched"
-"OVERLAY_RESULTS_DEPENDENCY_FOUND_BEFORE","-","YES","Switching_main.m set showOverlay=true, enabling overlay loader to read results/tables/csv","YES","NO"
-"OVERLAY_RESULTS_DEPENDENCY_REACHABLE_AFTER","-","NO","Switching_main.m now sets showOverlay=false in canonical branch; loader guard is not entered","NO","YES"
-"CANONICAL_PATH_RAW_ONLY_FOR_OVERLAY_LAYER","-","YES","Canonical branch bypasses loadCollapseOverlayObservables; no overlay-side results/tables/csv read is reachable","YES","YES"

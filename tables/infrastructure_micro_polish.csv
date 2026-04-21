@@ -1,9 +1,0 @@
-deliverable,file,purpose
-failure_classification,docs/execution_failure_classification.md,Single FAILURE_CLASS vocabulary and mapping from execution_status outcomes
-failure_classification,docs/repo_context_minimal.md,Updated with observability and template pointers
-warnings_log,tables/agent_warnings_log.csv,Append-only soft warnings; header row only
-runs_log,tables/agent_runs_log.csv,Append-only agent runs; header row only
-templates,docs/templates/run_template.md,Minimal RUN prompt; references repo_context_minimal
-templates,docs/templates/audit_template.md,Minimal AUDIT prompt; references repo_context_minimal
-templates,docs/templates/fix_template.md,Minimal FIX prompt; references repo_context_minimal
-templates,docs/templates/plan_template.md,Minimal PLAN prompt; references repo_context_minimal

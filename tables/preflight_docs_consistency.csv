@@ -1,8 +1,0 @@
-DOC_OR_RULE,INTENDED,ACTUAL_BEHAVIOR,MISMATCH
-docs/run_system.md single execution_status.csv schema,Five fixed columns at run root,run_switching_canonical.m writes PARTIAL then SUCCESS/FAILED; matches schema,ALIGNED
-docs/switching_backend_definition.md IS_CANONICAL from manifest label only,tools/switching_canonical_run_closure.m must not use folder naming for authority,Closure function selects runs with dir *_switching_canonical folder pattern,MISALIGNED
-docs/repo_execution_rules.md MATLAB Execution Master Policy,no helper files for agent script,run_system.md and template require helpers separate from runnable script,CONFLICT_ACROSS_DOCS
-docs/repo_execution_rules.md single-call wrapper no orchestration,tools/run_matlab_safe.bat one matlab -batch,Batch creates unused temp_runner_*.m with pause(1) but never runs it; dead code and confusing vs documented flow,MISALIGNED_MINOR
-docs/switching_canonical_definition.md no precomputed repo tables for canonical core,run_switching_canonical does not load repo tables/,Canonical entrypoint aligns,ALIGNED
-tools/switching_canonical_control_scan.ps1 invariants vs reports/infra_duplication_audit.md,Older audit claimed heuristic INPUT_SOURCE,Current PS1 manifest-only; audit doc may be stale,OUTDATED_REPORT_RISK
-docs/repo_execution_rules.md execution validity requires execution_probe_top.txt plus execution_status.csv plus run_dir,run_switching_canonical creates execution_probe_top.txt and execution_status.csv,Entrypoint aligns with signaling contract,ALIGNED

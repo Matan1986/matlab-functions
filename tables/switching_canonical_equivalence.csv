@@ -1,4 +1,0 @@
-run_id_1,run_id_2,equivalent,evidence
-
-run_2026_04_03_000147_switching_canonical,run_2026_04_04_100107_switching_canonical,YES,"Governance realignment (reports/switching_canonical_identity_realignment.md); canonical analyses and L3 manifests use run_2026_04_03_000147_switching_canonical; pairing asserted exact match with RMSE=0 between switching_canonical_*.csv families under both run roots (tables/switching_canonical_connectivity.csv, tables/switching_canonical_run_closure.csv)."
-

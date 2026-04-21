@@ -1,8 +1,0 @@
-﻿verdict,value,criterion,evidence
-RELAXATION_LOGIC_USED_IN_AGING,YES,Any aging-context artifact using relaxation canonical logic,"run_aging_measurement_definition_audit.m and derived report/table artifacts use R_relax_canonical with t0"
-T0_USED_IN_AGING,YES,Any aging-context artifact using t0-based definition,"Aging-labeled audit script/table/report contain explicit t0 perturbation and tau=t-t0 workflow"
-RELAXATION_OBSERVABLE_USED_IN_AGING,YES,Any aging-context artifact using relaxation observable,"R_relax_canonical explicitly present in aging-labeled script/report"
-CONFUSION_LOCALIZED,YES,Issue constrained to identifiable subset,"Core Aging code scan strong-pattern hits=0; contamination concentrated in aging_measurement_definition_audit artifact lineage"
-CONFUSION_SYSTEMIC,NO,Systemic only if shared utilities inject relaxation logic into Aging core,"No Aging references to relaxation_config_helper/fitAllRelaxations/importFiles_relaxation"
-AFFECTED_FILES_IDENTIFIED,YES,Affected files and derived outputs must be explicitly enumerated,"Primary script + root artifacts + two derived run directories identified"
-REQUIRES_PIPELINE_FIX,YES,If confusion exists, isolate and replace contaminated definition path,"Disable contaminated aging-measurement audit lineage and rewrite using aging-native definition"

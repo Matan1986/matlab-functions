@@ -1,8 +1,0 @@
-CHANGE_ID,SCOPE,ACTION
-1,Aging/utils/createRunContext.m,"Optional cfg.beforeManifestWrite function_handle: invoked after run paths are known, before run_manifest.json (new runs) and before manifest-exists check (cfg.run reuse branch)."
-2,Switching/utils/createSwitchingRunContext.m,"New: sole Switching entry for createRunContext('switching',...); sets beforeManifestWrite to assertSwitchingRunDirCanonical; validates repoRoot matches Aging createRunContext repository."
-3,Switching/analysis/*.m,"Replaced fullfile(...,'results','switching','runs'...) with switchingCanonicalRunRoot(repoRoot) or fullfile(switchingCanonicalRunRoot(repoRoot),...); replaced createRunContext('switching',...) with createSwitchingRunContext(repoRoot,...)."
-4,Switching/analysis/run_prediction_falsification_test.m,"Run allocation switched from cross_experiment to createSwitchingRunContext (outputs under results/switching/runs)."
-5,Switching/analysis/run_minimal_canonical.m,"Repo root from mfilename (no pwd walk); addpath Switching/utils."
-6,Switching/analysis/experimental/*.m,"Repo root from mfilename; raw script addpath Switching/utils for wrapper."
-7,Switching/analysis/run_switching_canonical.m,"createSwitchingRunContext only; redundant post-hoc assert removed; failure path uses repoR + switchingCanonicalRunRoot fallback + addpath Switching/utils."

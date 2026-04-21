@@ -1,9 +1,0 @@
-KEY,VALUE
-CANONICAL_GRAPH_DEFINED,YES
-CANONICAL_SWITCHING_ISOLATED,NO
-CROSS_MODULE_TOUCHPOINTS,"Aging/utils (createRunContext only); repo tables/phi_kappa_stability_summary.csv; repo tables/phi_kappa_stability_status.csv; Switching ver12 legacy backend; General ver2; Tools ver1 (analyze_phi_kappa genpath); tools/write_execution_marker (optional fallback under tables/)"
-ISOLATION_LAYER_ALIGNED_WITH_CANONICAL_SUBSYSTEM,NO
-ENFORCEMENT_NEEDED_NOW,NO
-FALSE_SAFETY_RISK,YES
-CANONICAL_ISOLATION_VERIFIED,NO
-CANONICAL_ISOLATION_AUDIT_COMPLETE,YES

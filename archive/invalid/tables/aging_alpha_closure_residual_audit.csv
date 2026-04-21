@@ -1,3 +1,0 @@
-model,loocv_rmse_overlap,mae_abs_residual_22_24_K,mae_abs_residual_outside_22_24_K,n_points_22_24_K,n_points_outside
-R ~ spread90_50 + kappa1,10.9809226364879,11.4069411766002,7.14579494952314,2,9
-R ~ spread90_50 + kappa1 + abs(alpha),5.74277144560232,8.02326014383835,3.94894871329357,2,9

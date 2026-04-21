@@ -1,5 +1,0 @@
-﻿component,previous_status,new_handling,blocking_resolved
-temperature_filter,"Missing (NEEDS_SCRIPT_UPDATE)","Implemented explicit canonical temperature admissibility via boundary exclusions (4K,30K), forced high-T remove (34K), and high-T width/peak/amplitude exclusion rule before acceptance metrics.",YES
-parameter_filter,"Missing (NEEDS_SCRIPT_UPDATE)","Restricted acceptance sweep to canonical-equivalent perturbations only: I_peak {max_sample,max_parabolic_local}, width {fwhm_linear,fwhm_nearest,fwhm_fine_interp}, S_peak {max_sample,max_parabolic_local}.",YES
-data_selection_trust,"Missing (NEEDS_SCRIPT_UPDATE)","Replaced legacy hardcoded input with TRUSTED_CANONICAL run selection from tables/switching_run_trust_classification.csv and canonical S_long loading.",YES
-coordinate_definition,"Incorrect (NEEDS_SCRIPT_UPDATE)","Replaced variant-dependent coordinate sweep with fixed canonical coordinate handling for acceptance metrics (single fixed scale mode).",YES

@@ -1,5 +1,0 @@
-stage,n_rows,n_cols,n_nan_total
-raw_join,14,22,308
-after_alignment,14,22,308
-after_finite_filter,14,22,308
-before_model,14,22,0

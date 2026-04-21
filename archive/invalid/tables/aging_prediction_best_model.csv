@@ -1,2 +1,0 @@
-"best_model_loocv","loocv_rmse","pearson_loocv_yhat","spearman_loocv_yhat","AGING_PREDICTED_FROM_PT","STATE_REQUIRED_FOR_AGING","TRAJECTORY_ADDS_INFORMATION","FULL_CLOSURE_ACHIEVED"
-"R ~ spread90_50 + kappa1","11.9148173531162","0.9117808799152","NaN","YES","YES","NO","PARTIAL"

@@ -1,3 +1,0 @@
-RUN_BASE_PATH,EXPECTED_DIRS,MISSING_DIRS,FAILURE_REASON
-"<repoRoot>/results/<experiment>/runs","results/;results/<experiment>/;results/<experiment>/runs/;results/<experiment>/runs/<run_id>/","results/<experiment>/runs/<run_id>/","createRunContext calls mkdir for runsRoot/runDir (lines 56 and 63; reuse branch line 43) but never checks mkdir success/return status; if mkdir fails (path/permission/invalid root), run_dir remains missing."
-"<repoRoot>/results/<experiment>/runs","run_dir_pointer.txt (expected by downstream execution signaling)","run_dir_pointer.txt","No code path writes run_dir_pointer.txt in createRunContext or its direct helpers; function only sets appdata via setRunContextAppdata (lines 50 and 83, function at line 407)."

@@ -1,6 +1,0 @@
-"check_name","status","evidence"
-"PROBE_WRITTEN","NO","execution_probe_top.txt missing after both runs: C:\Dev\matlab-functions\execution_probe_top.txt"
-"STATUS_FILE_CREATED","YES","execution_status.csv exists: C:\Dev\matlab-functions\results\switching\runs\run_2026_04_02_213133_minimal_canonical\execution_status.csv"
-"EXECUTION_STARTED","NO","Field EXECUTION_STARTED missing/empty in execution_status.csv"
-"WRITE_SUCCESS","NO","Field WRITE_SUCCESS missing/empty in execution_status.csv"
-"RERUN_CONSISTENT","YES","Probe(NO), status file(YES), and extracted key fields unchanged across two runs"

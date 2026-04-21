@@ -1,2 +1,0 @@
-BLIND_SPOTS_FOUND,CRITICAL_ISSUES_FOUND,SYSTEM_FULLY_CANONICAL,SCOPE,NOTES
-YES,NO,NO,Switching_canonical_chain_plus_shared_infra_touchpoints,"CRITICAL_ISSUES_FOUND=NO means no HIGH-severity finding with mandatory contract breach was recorded. SYSTEM_FULLY_CANONICAL=NO reflects residual fallbacks external raw paths intermediate PARTIAL status rows and registry-not-enforced-at-runtime items. See reports/system_blind_spot_audit.md."

@@ -1,2 +1,0 @@
-entrypoint_path,module,status,approved_by,selection_method,heuristic_selection_allowed,date,notes
-Switching/analysis/run_switching_canonical.m,Switching,CANONICAL_ENTRYPOINT,USER,MANUAL_FROM_CANDIDATES,NO,2026-04-04,"Aligned with tables/switching_canonical_entrypoint_candidates.csv rank 1 (STRONG_CANDIDATE) and tables/switching_canonical_entrypoint_status.csv RECOMMENDED_PRIMARY_DEFINITION; scientific model definition in this repo cites run_switching_canonical.m as extraction source."

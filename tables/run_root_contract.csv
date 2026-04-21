@@ -1,7 +1,0 @@
-KEY,VALUE
-CANONICAL_RUN_ROOT_ABSOLUTE,C:\Dev\matlab-functions\results\switching\runs
-CANONICAL_RUN_ROOT_RELATIVE,results/switching/runs
-CREATE_RUN_CONTEXT_EXPERIMENT_TAG,switching
-CWD_BASED_RUN_DIR,DISALLOWED
-ALTERNATE_RESULTS_SUBFOLDER_NAMES,DISALLOWED
-ENFORCEMENT_LOCATION,Switching/utils/switchingCanonicalRunRoot.m;Switching/utils/assertSwitchingRunDirCanonical.m;Switching/analysis/run_switching_canonical.m

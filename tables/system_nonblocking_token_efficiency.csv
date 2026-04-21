@@ -1,6 +1,0 @@
-aspect,verdict,notes,evidence
-Minimal entry doc,GOOD,repo_context_minimal.md lists boundaries + logs + templates,docs/repo_context_minimal.md
-Prompt exclusion list,GOOD,agent_prompt_exclude.md reduces bulk,docs/agent_prompt_exclude.md
-Four short templates,GOOD,Each references repo_context_minimal first,docs/templates/*.md
-Long policy still in repo,DRIFT_RISK,repo_execution_rules.md master block still large for full attach,docs/repo_execution_rules.md
-Operational path,ADEQUATE,Short path: repo_context_minimal + run_template + execution_status_schema,inspection

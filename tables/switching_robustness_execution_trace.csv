@@ -1,5 +1,0 @@
-stage,reached,evidence
-wrapper,YES,"SCRIPT_PATH_RESOLVED=Switching/analysis/run_parameter_robustness_switching_canonical.m; SCRIPT_EXISTS=YES; MATLAB_COMMAND_FULL=matlab -batch run('C:/Dev/matlab-functions/tools/temp_runner.m'); BEFORE_MATLAB_CALL seen; AFTER_MATLAB_CALL seen; MATLAB exit code=0; VALIDATOR_STATE/CHECK_* fields not emitted by wrapper output."
-entry,NO,"Top probe not created (execution_probe_top.txt=NO); expected marker SCRIPT_START_ROBUSTNESS not observed in wrapper output."
-context,NO,"RUN_DIR_CREATED=NO for run_*_switching_parameter_robustness_canonical; execution_status.csv timestamp unchanged (pre=2026-04-03 09:17:00, post=2026-04-03 09:17:00)."
-artifact,NO,"tables/switching_parameter_robustness.csv missing; tables/switching_parameter_robustness_status.csv missing; reports/switching_parameter_robustness.md missing."

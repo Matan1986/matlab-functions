@@ -1,9 +1,0 @@
-test_name,status,notes
-smoke_run_batch,PASS,"tools/run_matlab_safe.bat Switching/analysis/run_switching_canonical.m exited 0. run_dir: results/switching/runs/run_2026_04_05_013535_switching_canonical. Console showed SCRIPT_ENTERED, RUN CONTEXT, WRITE TEST; MATLAB batch completed (~9.5 min)."
-execution_success,PASS,"execution_status.csv present; EXECUTION_STATUS=SUCCESS; N_T=16; MAIN_RESULT_SUMMARY=switching_canonical completed. MATLAB exit code 0."
-matlab_errors,PASS,"One MATLAB warning: built-in name conflict for load (from run/resetCD cleanup). No execution error or FAILED status."
-markers_in_run_dir,PASS,"runtime_execution_markers.txt exists under run_dir; non-empty; contains ENTRY through COMPLETED in order."
-fallback_file_unchanged,PASS,"tables/runtime_execution_markers_fallback.txt Length=240 and LastWriteTimeUtc=2026-04-04T11:37:44Z unchanged before vs after smoke run (no write to fallback)."
-run_scoped_artifacts,PASS,"New run outputs confined to run_2026_04_05_013535_switching_canonical/; repo tables fallback not touched."
-failure_path_optional,SKIP,"Not executed: task forbids modifying script for controlled failure; no alternate no-code trigger used."
-light_compare_previous_run,PASS,"vs run_2026_04_04_235812_switching_canonical: switching_canonical_S_long.csv 113 lines both; switching_canonical_observables.csv 17 lines both; run_manifest.json present in new run. Structural match; no unexpected differences."

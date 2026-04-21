@@ -1,9 +1,0 @@
-CONTRACT_ID,REQUIREMENT,IMPLEMENTATION,SCOPE
-C1,Canonical run_dir always exists before status or outputs,"createSwitchingRunContext at start; on error before run_dir, allocateSwitchingFailureRunContext (createRunContext only; no ad hoc run_failure_* mkdir)",Switching/analysis/run_switching_canonical.m
-C2,Mandatory failure artifacts,"execution_status.csv with EXECUTION_STATUS=FAILED (final); run_manifest.json when allocated via createSwitchingRunContext; fingerprint from createRunContext",Same + Aging/utils/createRunContext.m
-C3,Single final status row,"writeSwitchingExecutionStatus(...,isFinal=true) writes one-row table via temp file + movefile replace",Switching/utils/writeSwitchingExecutionStatus.m
-C4,Allowed PARTIAL then final,"PARTIAL checkpoints use isFinal=false (overwrite); final SUCCESS/FAILED uses isFinal=true once",run_switching_canonical.m
-C5,No silent failure allocation,"Removed inner catch; allocateSwitchingFailureRunContext failure raises run_switching_canonical:FailureRunAllocation with original error text",run_switching_canonical.m
-C6,Same directory layout on failure,"failTablesDir/failReportsDir mirror success; mkdir before writes",run_switching_canonical.m
-C7,Manifest consistency,"No manifest rewrite on failure; new failure run gets full writeManifest from createRunContext only",createRunContext + catch path
-C8,No invalid execution_status at exit,"Atomic replace for final SUCCESS/FAILED minimizes truncated execution_status.csv",writeSwitchingExecutionStatus.m

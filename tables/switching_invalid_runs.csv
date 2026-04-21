@@ -1,2 +1,0 @@
-run_id,reason,evidence
-run_2026_04_04_095928_switching_canonical,INCOMPLETE_OR_FAILED_RUN,"RUN_STATUS=INVALID; classification=DRIFTED in tables/switching_canonical_run_closure.csv; execution_status=FAILED; missing switching_canonical_phi1.csv, switching_canonical_observables.csv, switching_canonical_validation.csv under run_dir/tables/"

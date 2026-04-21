@@ -1,8 +1,0 @@
-failure_class,when_occurs,matlab_launches,run_dir_expected,execution_status_expected,blocking_level,observability_artifact
-PRE_EXECUTION_INVALID_SCRIPT,Guard: path empty not-a-file not-.m,NO,NO,tables/pre_execution_failure_log.csv row,HARD pre-exec,pre_execution_failure_log.csv
-PRE_EXECUTION_VALIDATION_BLOCK,Reserved batch does not call validator today,N/A,N/A,N/A,N/A,Document only
-MATLAB_LAUNCHED_NO_SCRIPT_ENTRY,MATLAB exits before script body,YES,NO,None from script,Opaque,Console MATLAB exit code
-MATLAB_RUNTIME_ERROR,MATLAB nonzero or script error with catch,YES,Often YES,FAILED or PARTIAL in run_dir,Soft after entry,run_dir execution_status.csv
-PARTIAL_ARTIFACT_FAILURE,Partial outputs or PARTIAL status,YES,YES,PARTIAL or FAILED,Soft,run_dir tables
-SUCCESS,Normal completion,YES,YES,SUCCESS,OK,run_dir execution_status.csv
-SOFT_VALIDATOR_WARN,validate_matlab_runnable.ps1 WARN NOT_PASS,Does not affect batch,No,None,Non-blocking advisory,Validator stdout only

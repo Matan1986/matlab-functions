@@ -1,8 +1,0 @@
-KEY,VALUE
-POLICY_IMPLEMENTABLE,NO
-REGISTRY_RELIABLE,NO
-ENFORCEMENT_COVERAGE_SUFFICIENT,NO
-FALSE_SAFETY_ROOT_CAUSE,"module_canonical_status and assertModulesCanonical suggest repository-wide cross-module protection, but the registered canonical Switching script run_switching_canonical.m never consults the registry; assertModulesCanonical is optional and appears at only one analysis callsite with a caller-chosen module list; execution_status and writeSwitchingExecutionStatus do not record that a module gate ran, so SUCCESS is indistinguishable from ungated runs."
-MINIMAL_ISOLATION_REQUIREMENT,"Every execution path that can perform cross-module analysis must declare the full set of participating modules and invoke assertModulesCanonical (or an equivalent single choke-point check) before any cross-module data or path access; that gate must be reflected in authoritative run artifacts; and coverage must include the canonical Switching entrypoint if the policy is claimed for canonical Switching—or the policy scope must explicitly exclude that entry and any ungated scripts."
-SYSTEM_READY_FOR_ISOLATION_ENFORCEMENT,NO
-ISOLATION_FEASIBILITY_AUDIT_COMPLETE,YES

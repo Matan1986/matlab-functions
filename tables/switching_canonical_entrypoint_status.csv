@@ -1,7 +1,0 @@
-field,value
-ENTRYPOINT_CANDIDATES_FOUND,YES
-CLEAR_ENTRYPOINT_IDENTIFIED,YES
-MULTIPLE_ENTRYPOINTS,YES
-RECOMMENDED_PRIMARY_DEFINITION,Switching/analysis/run_switching_canonical.m
-RECOMMENDED_MINIMAL_WIRING,Switching/analysis/run_minimal_canonical.m
-NOTES,docs/switching_canonical_definition.md line 7-8 cites run_switching_canonical.m as extraction source; run_parameter_robustness_switching_canonical.m is a distinct robustness audit with repo-root status pattern

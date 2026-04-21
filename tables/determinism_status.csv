@@ -1,2 +1,0 @@
-run_a_id,run_b_id,PROOF_RUN_ID,OUTPUTS_IDENTICAL,MANIFEST_IDENTICAL,FINGERPRINT_IDENTICAL,NON_DETERMINISM_DETECTED,EXECUTION_DETERMINISTIC,EXECUTION_TRUSTED,summary
-run_2026_04_04_143211_switching_canonical,run_2026_04_04_143749_switching_canonical,run_2026_04_04_143749_switching_canonical,YES,NO,YES,NO,YES,YES,"Science tables execution_status execution_probe byte-identical. Manifest JSON differs by run_id timestamps paths. Fingerprint fields script_path script_hash git_commit env match. Non-numeric drift only run-scoped identity strings."

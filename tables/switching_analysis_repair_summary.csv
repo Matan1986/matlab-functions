@@ -1,7 +1,0 @@
-TOTAL_FAILED,12
-L1_COUNT,4
-L2_COUNT,1
-L3_COUNT,7
-L4_COUNT,0
-L5_COUNT,0
-SOURCE_TABLES,"tables/switching_analysis_full_classification.csv; tables/switching_analysis_inventory.csv; tables/switching_analysis_duplicates.csv; tables/switching_run_trust_classification.csv"

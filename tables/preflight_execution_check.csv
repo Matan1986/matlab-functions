@@ -1,9 +1,0 @@
-CHECK,RESULT,NOTES
-Invocation chain tools/run_matlab_safe.bat to matlab -batch run(script),PASS,Pre-execution guard calls tools/pre_execution_guard.ps1 before MATLAB.
-Validator tools/validate_matlab_runnable.ps1 in automated wrapper,NO,Documented as optional non-blocking; batch does not call validator (aligned with docs/repo_execution_rules.md).
-run_dir creation via createRunContext,PASS,run_switching_canonical creates tables/ and reports/ under run_dir.
-execution_status.csv written on success and failure paths,PASS,Failure path may allocate new run_dir via createRunContext switching_canonical_failure or fallback mkdir run_failure_*.
-Deterministic wrapper behavior,%RANDOM% in temp runner filename and unused runner file,NON_DETERMINISTIC_MINOR,Does not affect MATLAB invocation string; leftover artifact risk negligible.
-Deterministic science run identity,NO,run_id includes wall-clock timestamp (makeUniqueRunId); intentional non-reproducible id.
-Deterministic MATLAB fingerprint fields,NO,manifest captures host user matlab_version timestamp at run time.
-Failure path rethrow,PASS,run_switching_canonical catch writes status then rethrow(ME); not a silent success.
