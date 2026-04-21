@@ -41,6 +41,7 @@ for i = 1:numel(csvFiles)
         if runStatus ~= "CANONICAL"
             continue;
         end
+        explicitValidateObservablesCsv(csvPath);
         tbl = readtable(csvPath, 'TextType', 'string');
         tbl = normalizeObservableTable(tbl, csvPath);
         chunks{i} = tbl;
@@ -162,4 +163,11 @@ function repoRoot = resolveRepoRoot()
 thisFile = mfilename('fullpath');
 toolsDir = fileparts(thisFile);
 repoRoot = fileparts(toolsDir);
+end
+
+function explicitValidateObservablesCsv(csvPath)
+if exist(csvPath, 'file') ~= 2
+    error('load_observables:MissingObservablesCsv', ...
+        'Observables csv not found: %s', csvPath);
+end
 end

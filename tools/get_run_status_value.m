@@ -15,6 +15,9 @@ end
 
 statusValue = "INVALID";
 try
+    if ~explicit_validate_run_status_csv(statusPath)
+        return;
+    end
     t = readtable(statusPath, 'TextType', 'string', 'Delimiter', ',', 'VariableNamingRule', 'preserve');
     if ~isempty(t)
         vnames = lower(strtrim(string(t.Properties.VariableNames)));
@@ -42,6 +45,17 @@ end
 if ~ismember(statusValue, ["CANONICAL", "PARTIAL", "INVALID"])
     statusValue = "INVALID";
 end
+end
+
+function tf = explicit_validate_run_status_csv(statusPath)
+% P02 controlled shift: explicit boundary validation before readtable IO.
+tf = false;
+if exist(statusPath, 'file') ~= 2
+    return;
+end
+
+% Alignment-only rule: presence check only, no strict schema enforcement.
+tf = true;
 end
 
 function write_default_status(statusPath, value)

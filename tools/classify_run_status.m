@@ -1,4 +1,4 @@
-function out = classify_run_status(run_dir)
+function out = classify_run_status(run_dir, repoRootForTables)
 % classify_run_status Classify canonical run outcome from runtime markers and artifacts.
 %
 % status in {SUCCESS, PARTIAL, FAIL}
@@ -57,7 +57,11 @@ out.failed = hasFailed;
 out.artifact_ok = artifact_ok;
 
 try
-    write_repo_runtime_classification_row(out);
+    if nargin < 2
+        write_repo_runtime_classification_row(out);
+    else
+        write_repo_runtime_classification_row(out, repoRootForTables);
+    end
 catch
 end
 end
@@ -113,8 +117,12 @@ catch
 end
 end
 
-function write_repo_runtime_classification_row(out)
-repoRoot = fileparts(fileparts(mfilename('fullpath')));
+function write_repo_runtime_classification_row(out, repoRootOverride)
+if nargin >= 2 && ~isempty(repoRootOverride)
+    repoRoot = char(string(repoRootOverride));
+else
+    repoRoot = fileparts(fileparts(mfilename('fullpath')));
+end
 outPath = fullfile(repoRoot, 'tables', 'runtime_classification.csv');
 tablesDir = fullfile(repoRoot, 'tables');
 if exist(tablesDir, 'dir') ~= 7
@@ -136,6 +144,9 @@ if exist(outPath, 'file') ~= 2
 end
 
 try
+    if ~local_runtime_classification_csv_ok(outPath)
+        error('classify_run_status:InvalidRuntimeClassificationCsv', 'Invalid runtime classification CSV: %s', outPath);
+    end
     old = readtable(outPath);
     if isempty(old) || ~ismember('run_id', old.Properties.VariableNames)
         writetable(row, outPath);
@@ -156,5 +167,15 @@ if tf
     s = 'YES';
 else
     s = 'NO';
+end
+end
+
+function tf = local_runtime_classification_csv_ok(path)
+tf = false;
+try
+    t = readtable(path);
+    tf = ismember('run_id', t.Properties.VariableNames);
+catch
+    tf = false;
 end
 end

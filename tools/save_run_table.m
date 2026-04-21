@@ -32,10 +32,8 @@ end
 [~, baseName, ext] = fileparts(table_name);
 if isempty(ext)
     ext = '.csv';
-    fileName = [baseName ext];
-else
-    fileName = [baseName ext];
 end
+fileName = [baseName ext];
 
 ext = lower(ext);
 if ~ismember(ext, {'.csv', '.tsv'})

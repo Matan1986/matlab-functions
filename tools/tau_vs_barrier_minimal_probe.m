@@ -1,4 +1,4 @@
-function tau_vs_barrier_minimal_probe()
+function tau_vs_barrier_minimal_probe(cfg)
 % Minimal diagnostic: link aging characteristic time to switching barrier landscape.
 % Outputs:
 %   tables/tau_vs_barrier_test.csv
@@ -11,28 +11,46 @@ function tau_vs_barrier_minimal_probe()
 % Characteristic tau choice:
 % - tau_mean := tau_effective_seconds from aging/tau_vs_Tp.csv
 %   (finite-values filtering is applied per spec).
+%
+% Optional cfg struct: repoRootOverride, agingCsvPath, ptCsvPath (for harness/tests).
+
+if nargin < 1
+    cfg = struct();
+elseif ~isstruct(cfg)
+    cfg = struct();
+end
 
 repo_root = fileparts(fileparts(mfilename('fullpath'))); % tools/.. => repo root
+if isfield(cfg, 'repoRootOverride') && ~isempty(cfg.repoRootOverride)
+    repo_root = char(string(cfg.repoRootOverride));
+end
 
 % Sentinel to confirm the script starts executing.
 sentinel_path = fullfile(repo_root, 'tables', 'tau_vs_barrier_probe_sentinel.txt');
-try
-    fid = fopen(sentinel_path, 'w');
-    if fid >= 0
-        fprintf(fid, 'started');
-        fclose(fid);
-    end
-catch
-    % Ignore sentinel failures; analysis outputs are the real target.
+fid = fopen(sentinel_path, 'w');
+if fid >= 0
+    fprintf(fid, 'started');
+    fclose(fid);
 end
 
 aging_csv = fullfile(repo_root, 'results', 'aging', 'runs', 'run_2026_03_12_223709_aging_timescale_extraction', ...
     'tables', 'tau_vs_Tp.csv');
 pt_csv = fullfile(repo_root, 'results', 'switching', 'runs', 'run_2026_03_25_013356_pt_robust_canonical', ...
     'tables', 'PT_summary.csv');
+if isfield(cfg, 'agingCsvPath') && ~isempty(cfg.agingCsvPath)
+    aging_csv = char(string(cfg.agingCsvPath));
+end
+if isfield(cfg, 'ptCsvPath') && ~isempty(cfg.ptCsvPath)
+    pt_csv = char(string(cfg.ptCsvPath));
+end
 
 out_csv = fullfile(repo_root, 'tables', 'tau_vs_barrier_test.csv');
 out_md = fullfile(repo_root, 'reports', 'tau_vs_barrier_report.md');
+
+if ~local_tau_barrier_inputs_ok(aging_csv, pt_csv)
+    error('tau_vs_barrier_minimal_probe:invalidInputs', ...
+        'Aging/PT CSVs failed precondition.');
+end
 
 % Load
 aging = readtable(aging_csv);
@@ -190,6 +208,20 @@ fprintf('JOINED_T_VALUES:'); disp(T(:)');
 fprintf('DECISION: %s\n', decision);
 fprintf('WROTE: %s\n', out_csv);
 fprintf('WROTE: %s\n', out_md);
+end
+
+function tf = local_tau_barrier_inputs_ok(agingPath, ptPath)
+if exist(agingPath, 'file') ~= 2 || exist(ptPath, 'file') ~= 2
+    tf = false;
+    return;
+end
+aging = readtable(agingPath);
+pt = readtable(ptPath);
+tf = ismember('tau_effective_seconds', aging.Properties.VariableNames) ...
+    && ismember('Tp', aging.Properties.VariableNames) ...
+    && ismember('mean_threshold_mA', pt.Properties.VariableNames) ...
+    && ismember('std_threshold_mA', pt.Properties.VariableNames) ...
+    && ismember('T_K', pt.Properties.VariableNames);
 end
 
 function pred = loocv_linear_predict(X_features, y)

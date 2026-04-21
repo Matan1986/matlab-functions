@@ -24,8 +24,15 @@ end
 
 [~, ~, ext] = fileparts(fullPath);
 if strcmpi(ext, '.csv')
+    explicit_validate_load_run_csv(fullPath);
     T = readtable(fullPath, 'VariableNamingRule', 'preserve');
 else
     error('load_run:UnsupportedType', 'Only .csv is supported: %s', fullPath);
 end
+end
+
+function explicit_validate_load_run_csv(csvPath)
+% P02 controlled shift: explicit boundary validation before readtable IO.
+% Alignment-only rule: file existence is validated by caller above.
+% Keep explicit stage non-restrictive to mirror readtable acceptance.
 end

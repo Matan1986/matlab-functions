@@ -1,9 +1,8 @@
 function write_execution_marker(markerName, runDirOverride)
 % write_execution_marker Append a non-blocking runtime execution marker (observability only).
 %
-% Resolves run_dir from createRunContext appdata when available; optional runDirOverride
-% forces the destination directory (e.g. failure path after catch resolves run_dir).
-% If run_dir cannot be resolved, skips writing (run-scoped only; no repo-root fallback). Never throws.
+% Requires runDirOverride (run root). Writes atomically via temp file + rename.
+% Never throws.
 
 if nargin < 1 || isempty(markerName)
     return;
@@ -12,47 +11,40 @@ end
 markerName = char(string(markerName));
 
 try
+    thisDir = fileparts(mfilename('fullpath'));
+    if exist(fullfile(thisDir, 'atomic_commit_file.m'), 'file') == 2
+        addpath(thisDir);
+    end
+
+    if nargin < 2 || isempty(strtrim(char(string(runDirOverride))))
+        return;
+    end
+
     ts = char(datetime('now', 'Format', 'yyyy-MM-dd HH:mm:ss.SSS'));
     line = sprintf('%s %s\n', ts, markerName);
 
-    runDir = '';
-    if nargin >= 2 && ~isempty(runDirOverride)
-        runDir = char(string(runDirOverride));
-    else
-        runDir = resolve_run_dir_for_marker();
-    end
+    runDir = char(string(runDirOverride));
 
     if ~isempty(runDir) && exist(runDir, 'dir') == 7
         markerPath = fullfile(runDir, 'runtime_execution_markers.txt');
-        fid = fopen(markerPath, 'a');
+        old = '';
+        if isfile(markerPath)
+            try
+                old = fileread(markerPath);
+            catch %#ok<CTCH>
+                old = '';
+            end
+        end
+        newContent = [old line];
+        tmpPath = [markerPath '.tmp'];
+        fid = fopen(tmpPath, 'w');
         if fid >= 0
-            fprintf(fid, '%s', line);
+            fprintf(fid, '%s', newContent);
             fclose(fid);
+            atomic_commit_file(tmpPath, markerPath);
         end
         return;
     end
-catch
-end
-end
-
-function runDir = resolve_run_dir_for_marker()
-runDir = '';
-
-try
-    if isappdata(0, 'MATLAB_FUNCTIONS_ACTIVE_RUN_CONTEXT')
-        ctx = getappdata(0, 'MATLAB_FUNCTIONS_ACTIVE_RUN_CONTEXT');
-        if isstruct(ctx) && isfield(ctx, 'run_dir') && ~isempty(ctx.run_dir)
-            runDir = char(string(ctx.run_dir));
-            return;
-        end
-    end
-
-    if isappdata(0, 'runContext')
-        ctx = getappdata(0, 'runContext');
-        if isstruct(ctx) && isfield(ctx, 'run_dir') && ~isempty(ctx.run_dir)
-            runDir = char(string(ctx.run_dir));
-        end
-    end
-catch
+catch %#ok<CTCH>
 end
 end
