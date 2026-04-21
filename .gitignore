@@ -24,7 +24,6 @@ test_verify_run.log
 # =========================================================
 # Temporary / output text
 # =========================================================
-# only runtime output
 *_debug_output.txt
 *_test_output.txt
 verification_test_output.txt
@@ -42,6 +41,13 @@ Aging/results/
 Aging/diagnostics/results/
 Aging/tests/**/results/
 Switching ver12/main/Debug/
+
+# =========================================================
+# Reports (generated analysis artifacts)
+# =========================================================
+reports/**
+!reports/
+!reports/README.md
 
 # =========================================================
 # Local testing files
@@ -107,8 +113,6 @@ temp/
 # =========================================================
 _validation_tmp/
 **/runtime/
-# Runtime / debug tables only
-tables/*_log*
 tables/*_debug*
 tables/*_probe*
 tables/*_sentinel*
@@ -117,40 +121,37 @@ tables/*smoke*
 tables/_*
 
 # =========================================================
+# MASS GENERATED TABLES (actual behavior)
+# =========================================================
+tables/*status*
+tables/*audit*
+tables/*mapping*
+tables/*inventory*
+tables/*results*
+tables/*summary*
+tables/*coverage*
+tables/*analysis*
+tables/*validation*
+tables/*metrics*
+tables/*report*
+tables/*_map*
+tables/*_trace*
+tables/*_log*
+tables/*_check*
+
+# =========================================================
 # CRITICAL: repo pollution guards
 # =========================================================
-
-# legacy / experiments
 _legacy/
-
-# matlab debug outputs
 logs/
 probe_outputs/
 wrapper_run.txt
-
-# matlab prefs (agent)
 matlab_prefs_agent/
-
-# matlab figures (binary)
 *.fig
-
-# debug txt (more aggressive)
 *_debug_runtime.txt
 *_stdout*.txt
 *_stderr*.txt
 *_probe*.txt
-
-
-# kappa2 intermediate
 kappa2_phen_inputs.mat
-
-# debug / cleanup
 tables/*cleanup_debug*
 *VERIFICATION*.txt
-
-# =========================================================
-# NOTE:
-# tables/ are NOT globally ignored.
-# Only runtime/debug artifacts are excluded.
-# Canonical tables are part of the scientific system.
-# =========================================================
