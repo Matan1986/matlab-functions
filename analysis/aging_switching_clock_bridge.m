@@ -14,8 +14,16 @@ addpath(genpath(fullfile(repoRoot, 'Aging')));
 addpath(fullfile(repoRoot, 'tools'));
 addpath(fullfile(repoRoot, 'tools', 'figures'));
 
+if isfield(cfg, 'repoRootOverride') && ~isempty(cfg.repoRootOverride)
+    repoRoot = char(string(cfg.repoRootOverride));
+end
 cfg = applyDefaults(cfg, repoRoot);
 source = resolveSources(cfg);
+
+if ~local_clock_bridge_inputs_ok(source.agingClockPath, source.switchingXPath)
+    error('aging_switching_clock_bridge:invalidInputs', ...
+        'Clock bridge inputs failed precondition.');
+end
 
 runCfg = struct();
 runCfg.runLabel = char(string(cfg.runLabel));
@@ -124,6 +132,19 @@ assert(exist(source.agingClockPath, 'file') == 2, ...
     'Aging clock table not found: %s', source.agingClockPath);
 assert(exist(source.switchingXPath, 'file') == 2, ...
     'Switching X table not found: %s', source.switchingXPath);
+end
+
+function tf = local_clock_bridge_inputs_ok(agingPath, switchingPath)
+if exist(agingPath, 'file') ~= 2 || exist(switchingPath, 'file') ~= 2
+    tf = false;
+    return;
+end
+ag = readtable(agingPath, 'TextType', 'string', 'VariableNamingRule', 'preserve');
+sw = readtable(switchingPath, 'TextType', 'string', 'VariableNamingRule', 'preserve');
+reqA = {'Tp', 'tau_dip_seconds', 'tau_FM_seconds', 'R_tau_FM_over_tau_dip'};
+reqS = {'T_K', 'I_over_wS'};
+tf = all(ismember(reqA, ag.Properties.VariableNames)) && all(ismember(reqS, sw.Properties.VariableNames)) ...
+    && height(ag) >= 1 && height(sw) >= 1;
 end
 
 function ensureStandardSubdirs(runDir)

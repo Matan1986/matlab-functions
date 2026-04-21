@@ -10,12 +10,19 @@ end
 thisFile = mfilename('fullpath');
 analysisDir = fileparts(thisFile);
 repoRoot = fileparts(analysisDir);
+if isfield(cfg, 'repoRootOverride') && ~isempty(cfg.repoRootOverride)
+    repoRoot = char(string(cfg.repoRootOverride));
+end
 
 addpath(genpath(fullfile(repoRoot, 'Aging')));
 addpath(fullfile(repoRoot, 'tools'));
 
 cfg = applyDefaults(cfg);
 input = resolveInputs(repoRoot, cfg);
+
+if ~local_observable_catalog_for_robustness_ok(input.catalogPath)
+    error('observable_basis_sufficiency_robustness_audit:InvalidCatalog', 'Observable catalog failed precondition: %s', input.catalogPath);
+end
 
 catalogTbl = readtable(input.catalogPath, 'TextType', 'string');
 
@@ -664,4 +671,18 @@ end
 function tf = isabsolute(p)
 p = char(string(p));
 tf = ~isempty(regexp(p, '^[A-Za-z]:[\\/]', 'once')) || startsWith(p, '\\');
+end
+
+function tf = local_observable_catalog_for_robustness_ok(path)
+tf = false;
+req = {'observable_name', 'temperature_K', 'value'};
+try
+    tbl = readtable(path, 'TextType', 'string');
+    if ~all(ismember(req, tbl.Properties.VariableNames))
+        return;
+    end
+    tf = height(tbl) >= 1;
+catch
+    tf = false;
+end
 end

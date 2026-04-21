@@ -1,16 +1,28 @@
-function out = run_temperature_boundary_audit()
+function out = run_temperature_boundary_audit(repoRootIn)
 %RUN_TEMPERATURE_BOUNDARY_AUDIT Audit whether 4K/30K are boundary artifacts.
 
-thisFile = mfilename('fullpath');
-analysisDir = fileparts(thisFile);
-repoRoot = fileparts(analysisDir);
+if nargin < 1 || isempty(repoRootIn)
+    thisFile = mfilename('fullpath');
+    analysisDir = fileparts(thisFile);
+    repoRoot = fileparts(analysisDir);
+else
+    repoRoot = char(string(repoRootIn));
+end
 
 phiPath = fullfile(repoRoot, 'tables', 'phi1_observable_failure_by_T.csv');
 if exist(phiPath, 'file') ~= 2
     error('Missing required input: %s', phiPath);
 end
 
+if ~local_phi_boundary_csv_ok(phiPath)
+    error('run_temperature_boundary_audit:InvalidPhiCsv', 'Phi table failed precondition: %s', phiPath);
+end
+
 kapPath = resolveKappaPath(repoRoot);
+if ~local_kappa_boundary_csv_ok(kapPath)
+    error('run_temperature_boundary_audit:InvalidKappaCsv', 'Kappa table failed precondition: %s', kapPath);
+end
+
 phiTbl = readtable(phiPath, 'VariableNamingRule', 'preserve');
 kapTbl = readtable(kapPath, 'VariableNamingRule', 'preserve');
 
@@ -342,4 +354,40 @@ if isempty(paths)
 end
 [~, ix] = max([paths.datenum]);
 path = fullfile(paths(ix).folder, paths(ix).name);
+end
+
+function tf = local_phi_boundary_csv_ok(path)
+tf = false;
+prior = {'reconstruction_rmse_M2', 'abs_fit_residual', 'fit_residual_abs', 'fit_residual', 'error', 'residual'};
+try
+    tbl = readtable(path, 'VariableNamingRule', 'preserve');
+    if ~ismember('T_K', tbl.Properties.VariableNames)
+        return;
+    end
+    if isempty(pickFirstExisting(tbl.Properties.VariableNames, prior))
+        return;
+    end
+    tf = height(tbl) >= 1;
+catch
+    tf = false;
+end
+end
+
+function tf = local_kappa_boundary_csv_ok(path)
+tf = false;
+try
+    tbl = readtable(path, 'VariableNamingRule', 'preserve');
+    if ismember('T', tbl.Properties.VariableNames) && ~ismember('T_K', tbl.Properties.VariableNames)
+        tbl.Properties.VariableNames{'T'} = 'T_K';
+    end
+    if ~ismember('T_K', tbl.Properties.VariableNames)
+        return;
+    end
+    if ~ismember('kappa', tbl.Properties.VariableNames)
+        return;
+    end
+    tf = height(tbl) >= 1;
+catch
+    tf = false;
+end
 end

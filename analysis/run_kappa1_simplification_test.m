@@ -12,6 +12,11 @@ function run_kappa1_simplification_test(varargin)
 
 opts = localParseOpts(varargin{:});
 
+if ~local_kappa1_simplification_input_ok(opts.inputPath)
+    error('run_kappa1_simplification_test:invalidInput', ...
+        'Input table failed precondition: %s', opts.inputPath);
+end
+
 src = readtable(opts.inputPath, 'VariableNamingRule', 'preserve');
 required = {'kappa1', 'tail_width_q90_q50', 'S_peak'};
 assert(all(ismember(required, src.Properties.VariableNames)), ...
@@ -72,6 +77,16 @@ writelines(rep, opts.reportPath);
 
 fprintf(1, 'Wrote: %s\n', opts.outputCsvPath);
 fprintf(1, 'Wrote: %s\n', opts.reportPath);
+end
+
+function tf = local_kappa1_simplification_input_ok(path)
+if exist(path, 'file') ~= 2
+    tf = false;
+    return;
+end
+tbl = readtable(path, 'VariableNamingRule', 'preserve');
+required = {'kappa1', 'tail_width_q90_q50', 'S_peak'};
+tf = all(ismember(required, tbl.Properties.VariableNames)) && height(tbl) >= 20;
 end
 
 function specs = localModelSpecs(src)

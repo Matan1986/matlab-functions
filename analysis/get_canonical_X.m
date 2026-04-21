@@ -9,6 +9,10 @@ if ~isfile(obsPath)
     error('Canonical X observables file not found: %s', obsPath);
 end
 
+if ~local_canonical_obs_csv_header_ok(obsPath)
+    error('get_canonical_X:InvalidObservablesCsv', 'Observables CSV failed header precondition: %s', obsPath);
+end
+
 tbl = readtable(obsPath, 'VariableNamingRule', 'preserve', 'TextType', 'string');
 required = {'temperature', 'observable', 'value'};
 if ~all(ismember(required, tbl.Properties.VariableNames))
@@ -24,6 +28,23 @@ Traw = double(tbl.temperature(maskX));
 Xraw = double(tbl.value(maskX));
 
 [T, X] = collapseByTemperature(Traw, Xraw);
+end
+
+function tf = local_canonical_obs_csv_header_ok(path)
+tf = false;
+try
+    tbl = readtable(path, 'VariableNamingRule', 'preserve', 'TextType', 'string');
+    req = {'temperature', 'observable', 'value'};
+    if ~all(ismember(req, tbl.Properties.VariableNames))
+        return;
+    end
+    if ~any(string(tbl.observable) == "X")
+        return;
+    end
+    tf = true;
+catch
+    tf = false;
+end
 end
 
 function [Tuniq, Xuniq] = collapseByTemperature(T, X)

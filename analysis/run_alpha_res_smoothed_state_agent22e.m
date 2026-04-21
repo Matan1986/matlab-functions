@@ -1,4 +1,4 @@
-function run_alpha_res_smoothed_state_agent22e()
+function run_alpha_res_smoothed_state_agent22e(repoRootIn)
 %RUN_ALPHA_RES_SMOOTHED_STATE_AGENT22E  Agent 22E — smoothed kappa state → predict alpha_res
 %
 % Inputs (read-only): tables/alpha_structure.csv, tables/alpha_decomposition.csv
@@ -10,9 +10,13 @@ function run_alpha_res_smoothed_state_agent22e()
 % Smoothing: moving average and Savitzky–Golay on kappa1(T), kappa2(T); then
 % theta_smooth = atan2(k2s,k1s), delta_theta_smooth = diff(unwrap(theta_smooth)).
 
-thisFile = mfilename('fullpath');
-analysisDir = fileparts(thisFile);
-repoRoot = fileparts(analysisDir);
+if nargin < 1 || isempty(repoRootIn)
+    thisFile = mfilename('fullpath');
+    analysisDir = fileparts(thisFile);
+    repoRoot = fileparts(analysisDir);
+else
+    repoRoot = char(string(repoRootIn));
+end
 
 alphaStructPath = fullfile(repoRoot, 'tables', 'alpha_structure.csv');
 alphaDecPath = fullfile(repoRoot, 'tables', 'alpha_decomposition.csv');
@@ -22,6 +26,13 @@ outRep = fullfile(repoRoot, 'reports', 'alpha_res_smoothed_report.md');
 
 assert(exist(alphaStructPath, 'file') == 2, 'Missing %s', alphaStructPath);
 assert(exist(alphaDecPath, 'file') == 2, 'Missing %s', alphaDecPath);
+
+if ~local_alpha_structure_csv_ok(alphaStructPath)
+    error('run_alpha_res_smoothed_state_agent22e:InvalidAlphaStructure', 'alpha_structure.csv failed precondition: %s', alphaStructPath);
+end
+if ~local_alpha_decomposition_csv_ok(alphaDecPath)
+    error('run_alpha_res_smoothed_state_agent22e:InvalidAlphaDecomposition', 'alpha_decomposition.csv failed precondition: %s', alphaDecPath);
+end
 
 for d = {fullfile(repoRoot, 'tables'), fullfile(repoRoot, 'figures'), fullfile(repoRoot, 'reports')}
     if exist(d{1}, 'dir') ~= 7
@@ -366,4 +377,32 @@ axis(ax, 'equal');
 lims = [mn - pad, mx + pad];
 xlim(ax, lims);
 ylim(ax, lims);
+end
+
+function tf = local_alpha_structure_csv_ok(path)
+tf = false;
+try
+    tbl = readtable(path, 'VariableNamingRule', 'preserve');
+    req = {'T_K', 'kappa1', 'kappa2'};
+    if ~all(ismember(req, tbl.Properties.VariableNames))
+        return;
+    end
+    tf = height(tbl) >= 5;
+catch
+    tf = false;
+end
+end
+
+function tf = local_alpha_decomposition_csv_ok(path)
+tf = false;
+try
+    tbl = readtable(path, 'VariableNamingRule', 'preserve');
+    req = {'T_K', 'alpha_res', 'PT_geometry_valid'};
+    if ~all(ismember(req, tbl.Properties.VariableNames))
+        return;
+    end
+    tf = height(tbl) >= 5;
+catch
+    tf = false;
+end
 end

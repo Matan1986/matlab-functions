@@ -12,6 +12,7 @@ if exist(registryPath, 'file') ~= 2
     error('run_registry.csv not found: %s', registryPath);
 end
 
+explicit_validate_run_registry_csv(registryPath);
 T = readtable(registryPath, 'Delimiter', ',', 'TextType', 'string');
 
 if ~all(ismember({'run_id','experiment','run_rel_path'}, T.Properties.VariableNames))
@@ -47,5 +48,24 @@ thisFile = mfilename('fullpath');
 toolsDir = fileparts(thisFile);   % analysis/query
 repoRoot = fileparts(toolsDir);   % analysis
 repoRoot = fileparts(repoRoot); % repo root
+end
+
+function explicit_validate_run_registry_csv(registryPath)
+% P02 controlled shift: explicit boundary validation before readtable IO.
+txt = fileread(registryPath);
+lines = regexp(txt, '\r\n|\n|\r', 'split');
+if ~isempty(lines) && strlength(string(lines{end})) == 0
+    lines = lines(1:end-1);
+end
+if isempty(lines)
+    error('run_registry.csv missing expected columns.');
+end
+
+header = strtrim(string(lines{1}));
+headerCols = strtrim(split(header, ','));
+required = ["run_id", "experiment", "run_rel_path"];
+if ~all(ismember(required, headerCols))
+    error('run_registry.csv missing expected columns.');
+end
 end
 

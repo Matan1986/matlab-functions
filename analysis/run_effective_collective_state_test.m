@@ -1,4 +1,4 @@
-function run_effective_collective_state_test()
+function run_effective_collective_state_test(repoRootIn)
 %RUN_EFFECTIVE_COLLECTIVE_STATE_TEST  AGENT 19C — effective collective state (kappa1,kappa2)(T).
 %
 % Mirror implementation (read-only, same inputs/metrics): tools/run_collective_state_agent19c.ps1
@@ -11,14 +11,22 @@ function run_effective_collective_state_test()
 
 set(0, 'DefaultFigureVisible', 'off');
 
-thisFile = mfilename('fullpath');
-analysisDir = fileparts(thisFile);
-repoRoot = fileparts(analysisDir);
+if nargin < 1 || isempty(repoRootIn)
+    thisFile = mfilename('fullpath');
+    analysisDir = fileparts(thisFile);
+    repoRoot = fileparts(analysisDir);
+else
+    repoRoot = char(string(repoRootIn));
+end
 
 dataPath = fullfile(repoRoot, 'results', 'switching', 'runs', ...
     'run_2026_03_25_043610_kappa_phi_temperature_structure_test', 'tables', ...
     'residual_rank_structure_vs_T.csv');
 assert(exist(dataPath, 'file') == 2, 'Missing: %s', dataPath);
+
+if ~local_residual_rank_structure_csv_header_ok(dataPath)
+    error('run_effective_collective_state_test:InvalidCsv', 'Residual structure CSV failed header precondition: %s', dataPath);
+end
 
 tbl = readtable(dataPath, 'TextType', 'string');
 m = tbl.subset == "T_le_30";
@@ -282,4 +290,21 @@ fclose(fid);
 
 fprintf('Wrote:\n  %s\n  %s\n  %s\n', ...
     fullfile(tablesDir, 'collective_state_metrics.csv'), figPath, repPath);
+end
+
+function tf = local_residual_rank_structure_csv_header_ok(path)
+tf = false;
+try
+    tbl = readtable(path, 'TextType', 'string');
+    req = {'subset', 'T_K', 'kappa', 'rel_orth_leftover_norm'};
+    if ~all(ismember(req, tbl.Properties.VariableNames))
+        return;
+    end
+    if ~any(tbl.subset == "T_le_30")
+        return;
+    end
+    tf = true;
+catch
+    tf = false;
+end
 end

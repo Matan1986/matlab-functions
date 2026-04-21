@@ -1,7 +1,15 @@
-function export_deformation_closure_figs()
+function export_deformation_closure_figs(repoRootIn)
 % Reads tables/deformation_closure_metrics.csv and exports repo-root figures.
-repoRoot = fileparts(fileparts(mfilename('fullpath')));
-tbl = readtable(fullfile(repoRoot, 'tables', 'deformation_closure_metrics.csv'));
+if nargin < 1 || isempty(repoRootIn)
+    repoRoot = fileparts(fileparts(mfilename('fullpath')));
+else
+    repoRoot = char(string(repoRootIn));
+end
+csvPath = fullfile(repoRoot, 'tables', 'deformation_closure_metrics.csv');
+if exist(csvPath, 'file') == 2 && ~local_deformation_metrics_csv_header_ok(csvPath)
+    error('export_deformation_closure_figs:InvalidCsv', 'Deformation metrics CSV failed header precondition: %s', csvPath);
+end
+tbl = readtable(csvPath);
 figDir = fullfile(repoRoot, 'figures');
 if exist(figDir, 'dir') ~= 7
     mkdir(figDir);
@@ -46,4 +54,19 @@ sgtitle(fig2, 'Deformation coefficients vs I_{peak}', 'FontSize', 15, 'FontName'
 exportgraphics(fig2, [fn2 '.png'], 'Resolution', 300);
 close(fig2);
 fprintf('Wrote PNGs to %s\n', figDir);
+end
+
+function tf = local_deformation_metrics_csv_header_ok(path)
+tf = false;
+req = {'T_K', 'rmse_A_rank1', 'rmse_B_rank2_phi2', 'rmse_C_deform3', 'rmse_D_constrained', ...
+    'rmse_SVD_rank2_row', 'I_peak_mA', 'beta1_fixedKappa', 'beta2_fixedKappa'};
+try
+    tbl = readtable(path);
+    if ~all(ismember(req, tbl.Properties.VariableNames))
+        return;
+    end
+    tf = height(tbl) >= 1;
+catch
+    tf = false;
+end
 end

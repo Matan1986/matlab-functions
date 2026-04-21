@@ -26,6 +26,9 @@ addpath(fullfile(repoRoot, 'tools', 'figures'));
 addpath(analysisDir);
 
 cfg = applyDefaults(cfg);
+if isfield(cfg, 'repoRootOverride') && ~isempty(cfg.repoRootOverride)
+    repoRoot = char(string(cfg.repoRootOverride));
+end
 
 % ------------------------------------------------------------------ %
 % 1. Locate and load data
@@ -35,6 +38,11 @@ csvPath = fullfile(repoRoot, 'results', 'relaxation', 'runs', ...
 if exist(csvPath, 'file') ~= 2
     error('relaxation_temperature_scaling_test:missingData', ...
         'Required source file not found:\n  %s\n', csvPath);
+end
+
+if ~local_relaxation_temp_observables_ok(csvPath)
+    error('relaxation_temperature_scaling_test:invalidCsv', ...
+        'temperature_observables.csv failed precondition: %s', csvPath);
 end
 
 tbl = readtable(csvPath);
@@ -136,23 +144,8 @@ appendText(run.log_path, sprintf('Fit table: %s\n', tablePath));
 figA = saveAvsT(T_K_valid, A_valid, runDir, 'A_vs_T');
 appendText(run.log_path, sprintf('Figure A_vs_T: %s\n', figA.png));
 
-try
-    figLogA = saveLogAvsLogT(logT, logA, logA_fit, alpha, a, R2, runDir, 'logA_vs_logT');
-    figLogAPath = figLogA.png;
-catch MEfig
-    % Keep the run complete even if the second export is unstable in batch.
-    figLogAPath = fullfile(runDir, 'figures', 'logA_vs_logT.png');
-    if exist(figA.png, 'file') == 2
-        copyfile(figA.png, figLogAPath);
-    else
-        fidFallback = fopen(figLogAPath, 'w');
-        if fidFallback >= 0
-            fclose(fidFallback);
-        end
-    end
-    appendText(run.log_path, sprintf('WARNING: logA_vs_logT export failed: %s\n', MEfig.message));
-    appendText(run.log_path, sprintf('Fallback logA_vs_logT PNG path: %s\n', figLogAPath));
-end
+figLogA = saveLogAvsLogT(logT, logA, logA_fit, alpha, a, R2, runDir, 'logA_vs_logT');
+figLogAPath = figLogA.png;
 
 appendText(run.log_path, sprintf('Figure logA_vs_logT: %s\n', figLogAPath));
 
@@ -207,6 +200,18 @@ end
 % ================================================================== %
 % Local functions
 % ================================================================== %
+
+function tf = local_relaxation_temp_observables_ok(path)
+if exist(path, 'file') ~= 2
+    tf = false;
+    return;
+end
+tbl = readtable(path);
+vn = string(tbl.Properties.VariableNames);
+hasT = any(vn == "T_K") || any(vn == "T");
+hasA = any(vn == "A") || any(vn == "A_T");
+tf = hasT && hasA && height(tbl) >= 3;
+end
 
 function cfg = applyDefaults(cfg)
 cfg = setDefaultField(cfg, 'runLabel',    'relaxation_temperature_scaling_test');
