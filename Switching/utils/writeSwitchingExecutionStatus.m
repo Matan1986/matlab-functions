@@ -14,6 +14,15 @@ if isempty(runDir) || exist(runDir, 'dir') ~= 7
     error('writeSwitchingExecutionStatus:RunDir', 'runDir must be an existing directory: %s', char(string(runDir)));
 end
 
+thisFile = mfilename('fullpath');
+utilsDir = fileparts(thisFile);
+switchingDir = fileparts(utilsDir);
+repoRootWses = fileparts(switchingDir);
+toolsDirWses = fullfile(repoRootWses, 'tools');
+if exist(fullfile(toolsDirWses, 'atomic_commit_file.m'), 'file') == 2
+    addpath(toolsDirWses);
+end
+
 statusCols = {'EXECUTION_STATUS', 'INPUT_FOUND', 'ERROR_MESSAGE', 'N_T', 'MAIN_RESULT_SUMMARY'};
 es = wses_normExecStatus(executionStatus);
 allowed = {'PARTIAL', 'SUCCESS', 'FAILED'};
@@ -59,12 +68,11 @@ pathFinal = fullfile(runDir, 'execution_status.csv');
 if isFinal
     tmpPath = fullfile(runDir, 'execution_status.tmp.csv');
     writetable(T, tmpPath);
-    if exist(pathFinal, 'file') == 2
-        delete(pathFinal);
-    end
-    movefile(tmpPath, pathFinal, 'f');
+    atomic_commit_file(tmpPath, pathFinal);
 else
-    writetable(T, pathFinal);
+    tmpPath = fullfile(runDir, 'execution_status.partial.tmp.csv');
+    writetable(T, tmpPath);
+    atomic_commit_file(tmpPath, pathFinal);
 end
 
 end

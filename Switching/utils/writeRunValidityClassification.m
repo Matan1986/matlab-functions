@@ -73,8 +73,18 @@ end
 
 function wsvc_writeFile(rd, validity, reason)
 try
+    thisFile = mfilename('fullpath');
+    utilsDir = fileparts(thisFile);
+    switchingDir = fileparts(utilsDir);
+    repoRootWsvc = fileparts(switchingDir);
+    toolsDirWsvc = fullfile(repoRootWsvc, 'tools');
+    if exist(fullfile(toolsDirWsvc, 'atomic_commit_file.m'), 'file') == 2
+        addpath(toolsDirWsvc);
+    end
+
     p = fullfile(rd, 'run_validity.txt');
-    fid = fopen(p, 'w');
+    tmpPath = [p '.tmp'];
+    fid = fopen(tmpPath, 'w');
     if fid < 0
         return;
     end
@@ -83,6 +93,7 @@ try
     fprintf(fid, 'RUN_VALIDITY=%s\n', char(string(validity)));
     fprintf(fid, 'REASON=%s\n', c);
     fclose(fid);
+    atomic_commit_file(tmpPath, p);
 catch %#ok<CTCH>
 end
 end

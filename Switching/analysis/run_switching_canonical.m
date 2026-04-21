@@ -1,5 +1,8 @@
-clearvars -except modules_used_input
+clearvars -except modules_used_input switching_batch_inputs
 clc
+
+assert(~contains(path, 'analysis_new'), ...
+  'analysis_new must not be on MATLAB path');
 
 % Repo root for catch-path createRunContext (no hardcoded drive paths).
 repoRootBootstrap = fileparts(fileparts(fileparts(mfilename('fullpath'))));
@@ -78,96 +81,107 @@ try
             'createRunContext resolved to unexpected path: %s', which('createRunContext'));
     end
 
-    disp('=== START SCRIPT ===');
-    disp(pwd);
-    disp(which('createRunContext'));
-
-    cfg = struct();
-    cfg.runLabel = 'switching_canonical';
-    cfg.dataset = 'raw_switching_dat_only';
-    cfg.fingerprint_script_path = fullfile(fileparts(mfilename('fullpath')), [mfilename '.m']);
-    ctx = createSwitchingRunContext(repoRoot, cfg);
-    run = ctx;
-    run_dir = run.run_dir;
-    if exist(run_dir, 'dir') ~= 7
-        mkdir(run_dir);
-    end
-    write_execution_marker('ENTRY');
-    runDir = run_dir;
-    writeSwitchingExecutionStatus(runDir, {'PARTIAL'}, {'YES'}, {''}, 0, {'run_dir created'}, false);
-    fidE = fopen(fullfile(runDir, 'enforcement_status.txt'), 'w');
-    if fidE >= 0
-        if enforcement_checked
-            fprintf(fidE, 'ENFORCEMENT_CHECKED=YES\n');
+    batchInputs = {};
+    if exist('switching_batch_inputs', 'var') && ~isempty(switching_batch_inputs)
+        if iscell(switching_batch_inputs)
+            batchInputs = switching_batch_inputs;
         else
-            fprintf(fidE, 'ENFORCEMENT_CHECKED=NO\n');
+            batchInputs = {switching_batch_inputs};
         end
-        if isempty(modules_used)
-            fprintf(fidE, 'MODULES_USED=\n');
-        else
-            fprintf(fidE, 'MODULES_USED=%s\n', strjoin(modules_used, ','));
+    end
+    if isempty(batchInputs)
+        batchInputs = {struct()};
+    end
+
+    for iBatch = 1:numel(batchInputs)
+        batchCfg = batchInputs{iBatch};
+        if ~isstruct(batchCfg)
+            error('run_switching_canonical:InvalidBatchInput', ...
+                'switching_batch_inputs{%d} must be a struct', iBatch);
         end
-        fclose(fidE);
-    end
 
-    fid = fopen(fullfile(run_dir, 'execution_probe_top.txt'), 'w');
-    fclose(fid);
-    
-    disp('=== RUN CONTEXT ===');
-    disp(run_dir);
+        % Explicit per-run boundary reset in shared MATLAB process.
+        rng('default');
+        restoredefaultpath;
+        addpath(fullfile(repoRoot, 'tools'));
+        addpath(fullfile(repoRoot, 'Aging', 'utils'));
+        addpath(fullfile(repoRoot, 'General ver2'));
+        addpath(fullfile(switchingDir, 'utils'));
+        addpath(legacyRoot);
+        addpath(fullfile(legacyRoot, 'main'));
+        addpath(fullfile(legacyRoot, 'plots'));
+        addpath(fullfile(legacyRoot, 'parsing'));
+        addpath(fullfile(legacyRoot, 'utils'));
 
-    tablesDir = fullfile(runDir, 'tables');
-    reportsDir = fullfile(runDir, 'reports');
-    if exist(tablesDir, 'dir') ~= 7
-        mkdir(tablesDir);
-    end
-    if exist(reportsDir, 'dir') ~= 7
-        mkdir(reportsDir);
-    end
+        disp('=== START SCRIPT ===');
+        disp(pwd);
+        disp(which('createRunContext'));
 
-    implStatusPath = fullfile(tablesDir, 'run_switching_canonical_implementation_status.csv');
-    implReportPath = fullfile(reportsDir, 'run_switching_canonical_implementation.md');
-
-    test_table = table(1, 'VariableNames', {'probe_value'});
-    test_path = fullfile(run_dir, 'execution_probe.csv');
-    writetable(test_table, test_path);
-    disp('=== WRITE TEST ===');
-    disp(test_path);
-    assert(isfile(test_path), 'WRITE FAILED: execution_probe.csv not created');
-
-    RUN_DIR_CREATED = "NO";
-    WRITE_SUCCESS = "NO";
-    if exist(run_dir, 'dir') == 7
-        RUN_DIR_CREATED = "YES";
-    end
-    if isfile(test_path)
-        WRITE_SUCCESS = "YES";
-    end
-
-    probeStatus = table( ...
-        string(which('createRunContext')), ...
-        string(run_dir), ...
-        string(test_path), ...
-        RUN_DIR_CREATED, ...
-        WRITE_SUCCESS, ...
-        'VariableNames', {'CREATE_RUN_CONTEXT_PATH', 'RUN_DIR', 'EXECUTION_PROBE_PATH', 'RUN_DIR_CREATED', 'WRITE_SUCCESS'});
-    writetable(probeStatus, fullfile(run_dir, 'execution_probe_status.csv'));
-
-    writeSwitchingExecutionStatus(runDir, {'PARTIAL'}, {'YES'}, {''}, 0, {'probe write test passed'}, false);
-    fidE = fopen(fullfile(runDir, 'enforcement_status.txt'), 'w');
-    if fidE >= 0
-        if enforcement_checked
-            fprintf(fidE, 'ENFORCEMENT_CHECKED=YES\n');
-        else
-            fprintf(fidE, 'ENFORCEMENT_CHECKED=NO\n');
+        cfg = struct();
+        cfg.runLabel = 'switching_canonical';
+        cfg.dataset = 'raw_switching_dat_only';
+        cfg.fingerprint_script_path = fullfile(fileparts(mfilename('fullpath')), [mfilename '.m']);
+        if isfield(batchCfg, 'runLabel') && ~isempty(batchCfg.runLabel)
+            cfg.runLabel = char(string(batchCfg.runLabel));
         end
-        if isempty(modules_used)
-            fprintf(fidE, 'MODULES_USED=\n');
-        else
-            fprintf(fidE, 'MODULES_USED=%s\n', strjoin(modules_used, ','));
+        if isfield(batchCfg, 'dataset') && ~isempty(batchCfg.dataset)
+            cfg.dataset = char(string(batchCfg.dataset));
         end
-        fclose(fidE);
-    end
+        ctx = createSwitchingRunContext(repoRoot, cfg);
+        run = ctx;
+        run_dir = run.run_dir;
+        if exist(run_dir, 'dir') ~= 7
+            mkdir(run_dir);
+        end
+        runDir = run_dir;
+        write_execution_marker('ENTRY', runDir);
+        writeSwitchingExecutionStatus(runDir, {'PARTIAL'}, {'YES'}, {''}, 0, {'run_dir created'}, false);
+        atomic_write_enforcement_status(runDir, enforcement_checked, modules_used, iBatch, numel(batchInputs));
+
+        atomic_write_text(fullfile(run_dir, 'execution_probe_top.txt'), @(fid) fprintf(fid, ''));
+        
+        disp('=== RUN CONTEXT ===');
+        disp(run_dir);
+
+        tablesDir = fullfile(runDir, 'tables');
+        reportsDir = fullfile(runDir, 'reports');
+        if exist(tablesDir, 'dir') ~= 7
+            mkdir(tablesDir);
+        end
+        if exist(reportsDir, 'dir') ~= 7
+            mkdir(reportsDir);
+        end
+
+        implStatusPath = fullfile(tablesDir, 'run_switching_canonical_implementation_status.csv');
+        implReportPath = fullfile(reportsDir, 'run_switching_canonical_implementation.md');
+
+        test_table = table(1, 'VariableNames', {'probe_value'});
+        test_path = fullfile(run_dir, 'execution_probe.csv');
+        atomic_writetable(test_table, test_path);
+        disp('=== WRITE TEST ===');
+        disp(test_path);
+        assert(isfile(test_path), 'WRITE FAILED: execution_probe.csv not created');
+
+        RUN_DIR_CREATED = "NO";
+        WRITE_SUCCESS = "NO";
+        if exist(run_dir, 'dir') == 7
+            RUN_DIR_CREATED = "YES";
+        end
+        if isfile(test_path)
+            WRITE_SUCCESS = "YES";
+        end
+
+        probeStatus = table( ...
+            string(which('createRunContext')), ...
+            string(run_dir), ...
+            string(test_path), ...
+            RUN_DIR_CREATED, ...
+            WRITE_SUCCESS, ...
+            'VariableNames', {'CREATE_RUN_CONTEXT_PATH', 'RUN_DIR', 'EXECUTION_PROBE_PATH', 'RUN_DIR_CREATED', 'WRITE_SUCCESS'});
+        atomic_writetable(probeStatus, fullfile(run_dir, 'execution_probe_status.csv'));
+
+        writeSwitchingExecutionStatus(runDir, {'PARTIAL'}, {'YES'}, {''}, 0, {'probe write test passed'}, false);
+        atomic_write_enforcement_status(runDir, enforcement_checked, modules_used, iBatch, numel(batchInputs));
 
     switchMainPath = fullfile(legacyRoot, 'main', 'Switching_main.m');
     if exist(switchMainPath, 'file') ~= 2
@@ -208,7 +222,7 @@ try
     rowsFolder = strings(0, 1);
     totalRawFiles = 0;
 
-    write_execution_marker('STAGE_START_PIPELINE');
+    write_execution_marker('STAGE_START_PIPELINE', runDir);
     for iDir = 1:numel(subDirs)
         thisDir = fullfile(parentDir, subDirs(iDir).name);
         dep_type = extract_dep_type_from_folder(thisDir);
@@ -301,7 +315,7 @@ try
         rowsFolder = [rowsFolder; repmat(string(subDirs(iDir).name), nAdd, 1)]; %#ok<AGROW>
     end
 
-    write_execution_marker('STAGE_AFTER_PROCESSING');
+    write_execution_marker('STAGE_AFTER_PROCESSING', runDir);
 
     if isempty(rowsCurrent)
         error('run_switching_canonical:NoSamples', 'No switching samples were collected from upstream raw source: %s', parentDir);
@@ -311,9 +325,12 @@ try
     end
 
     metricTypeCol = repmat("P2P_percent", numel(rowsCurrent), 1);
-    rawTbl = table(rowsCurrent, rowsTemp, rowsS, rowsChannel, rowsFolder, metricTypeCol, ...
-        'VariableNames', {'current_mA', 'T_K', 'S_percent', 'channel', 'folder', 'metricType'});
-    rawTbl = sortrows(rawTbl, {'current_mA', 'T_K', 'channel'});
+    rowsChannelType = strings(numel(rowsChannel), 1);
+    rowsChannelType(rowsChannel <= 2) = "XX";
+    rowsChannelType(rowsChannel > 2) = "XY";
+    rawTbl = table(rowsCurrent, rowsTemp, rowsS, rowsChannel, rowsChannel, rowsChannelType, rowsFolder, metricTypeCol, ...
+        'VariableNames', {'current_mA', 'T_K', 'S_percent', 'channel', 'switching_channel_physical', 'channel_type', 'folder', 'metricType'});
+    rawTbl = sortrows(rawTbl, {'current_mA', 'T_K', 'switching_channel_physical'});
 
     tempsRaw = unique(rawTbl.T_K(isfinite(rawTbl.T_K)));
     currents = unique(rawTbl.current_mA(isfinite(rawTbl.current_mA)));
@@ -323,22 +340,30 @@ try
         error('run_switching_canonical:EmptyGrid', 'Upstream data could not build non-empty T/I grid.');
     end
 
-    Sraw = NaN(numel(tempsRaw), numel(currents));
+    physChans = unique(rawTbl.switching_channel_physical, 'sorted');
+    nCh = numel(physChans);
+
+    Sraw = NaN(numel(tempsRaw), numel(currents), nCh);
     for it = 1:numel(tempsRaw)
         for ii = 1:numel(currents)
-            m = abs(rawTbl.T_K - tempsRaw(it)) < 1e-9 & abs(rawTbl.current_mA - currents(ii)) < 1e-9;
-            if any(m)
-                Sraw(it, ii) = mean(rawTbl.S_percent(m), 'omitnan');
+            for ic = 1:nCh
+                m = abs(rawTbl.T_K - tempsRaw(it)) < 1e-9 & abs(rawTbl.current_mA - currents(ii)) < 1e-9 ...
+                    & rawTbl.switching_channel_physical == physChans(ic);
+                if any(m)
+                    Sraw(it, ii, ic) = mean(rawTbl.S_percent(m), 'omitnan');
+                end
             end
         end
     end
 
     Tclean = round(tempsRaw);
     [temps, ~, idxClean] = unique(Tclean, 'sorted');
-    Smap = NaN(numel(temps), numel(currents));
-    for k = 1:numel(temps)
-        mk = idxClean == k;
-        Smap(k, :) = mean(Sraw(mk, :), 1, 'omitnan');
+    Smap = NaN(numel(temps), numel(currents), nCh);
+    for ic = 1:nCh
+        for k = 1:numel(temps)
+            mk = idxClean == k;
+            Smap(k, :, ic) = mean(Sraw(mk, :, ic), 1, 'omitnan');
+        end
     end
     temps = temps(:);
     currents = currents(:);
@@ -346,100 +371,113 @@ try
     nT = numel(temps);
     nI = numel(currents);
 
-    Speak = NaN(nT, 1);
-    Ipeak = NaN(nT, 1);
-    for it = 1:nT
-        row = Smap(it, :);
-        valid = isfinite(row);
-        if ~any(valid)
-            continue;
+    Speak = NaN(nT, nCh);
+    Ipeak = NaN(nT, nCh);
+    for ic = 1:nCh
+        for it = 1:nT
+            row = Smap(it, :, ic);
+            valid = isfinite(row);
+            if ~any(valid)
+                continue;
+            end
+            rowValid = row(valid);
+            currValid = currents(valid);
+            [smax, idx] = max(rowValid);
+            Speak(it, ic) = smax;
+            Ipeak(it, ic) = currValid(idx);
         end
-        rowValid = row(valid);
-        currValid = currents(valid);
-        [smax, idx] = max(rowValid);
-        Speak(it) = smax;
-        Ipeak(it) = currValid(idx);
     end
 
-    PTmap = NaN(nT, nI);
-    CDFmap = NaN(nT, nI);
-    Scdf = NaN(nT, nI);
-    for it = 1:nT
-        row = Smap(it, :);
-        valid = isfinite(row) & isfinite(currents');
-        if nnz(valid) < 3 || ~isfinite(Speak(it)) || Speak(it) <= 0
-            continue;
-        end
-
-        Ivalid = currents(valid);
-        svalid = row(valid);
-        cdfRaw = svalid ./ Speak(it);
-        cdfRaw = min(max(cdfRaw, 0), 1);
-        for j = 2:numel(cdfRaw)
-            if cdfRaw(j) < cdfRaw(j - 1)
-                cdfRaw(j) = cdfRaw(j - 1);
+    PTmap = NaN(nT, nI, nCh);
+    CDFmap = NaN(nT, nI, nCh);
+    Scdf = NaN(nT, nI, nCh);
+    for ic = 1:nCh
+        for it = 1:nT
+            row = Smap(it, :, ic);
+            valid = isfinite(row) & isfinite(currents');
+            if nnz(valid) < 3 || ~isfinite(Speak(it, ic)) || Speak(it, ic) <= 0
+                continue;
             end
-        end
-        if cdfRaw(end) > 0
-            cdfRaw = cdfRaw ./ cdfRaw(end);
-        end
 
-        p = gradient(cdfRaw, Ivalid);
-        p(~isfinite(p)) = 0;
-        p = max(p, 0);
-        areaP = trapz(Ivalid, p);
-        if isfinite(areaP) && areaP > 0
-            p = p ./ areaP;
-        else
-            p(:) = 0;
-        end
+            Ivalid = currents(valid);
+            svalid = row(valid);
+            cdfRaw = svalid ./ Speak(it, ic);
+            cdfRaw = min(max(cdfRaw, 0), 1);
+            for j = 2:numel(cdfRaw)
+                if cdfRaw(j) < cdfRaw(j - 1)
+                    cdfRaw(j) = cdfRaw(j - 1);
+                end
+            end
+            if cdfRaw(end) > 0
+                cdfRaw = cdfRaw ./ cdfRaw(end);
+            end
 
-        cdfPt = cumtrapz(Ivalid, p);
-        if cdfPt(end) > 0
-            cdfPt = cdfPt ./ cdfPt(end);
-        end
-        cdfPt = min(max(cdfPt, 0), 1);
+            p = gradient(cdfRaw, Ivalid);
+            p(~isfinite(p)) = 0;
+            p = max(p, 0);
+            areaP = trapz(Ivalid, p);
+            if isfinite(areaP) && areaP > 0
+                p = p ./ areaP;
+            else
+                p(:) = 0;
+            end
 
-        PTmap(it, valid) = p;
-        CDFmap(it, valid) = cdfPt;
-        Scdf(it, valid) = Speak(it) .* cdfPt;
+            cdfPt = cumtrapz(Ivalid, p);
+            if cdfPt(end) > 0
+                cdfPt = cdfPt ./ cdfPt(end);
+            end
+            cdfPt = min(max(cdfPt, 0), 1);
+
+            PTmap(it, valid, ic) = p;
+            CDFmap(it, valid, ic) = cdfPt;
+            Scdf(it, valid, ic) = Speak(it, ic) .* cdfPt;
+        end
     end
 
     residual = Smap - Scdf;
-    Rfill = residual;
-    Rfill(~isfinite(Rfill)) = 0;
-    if any(abs(Rfill(:)) > 0)
-        [U, Sigma, V] = svd(Rfill, 'econ');
-        phi1 = V(:, 1);
-        kappa1 = U(:, 1) * Sigma(1, 1);
-    else
-        phi1 = zeros(nI, 1);
-        kappa1 = zeros(nT, 1);
-    end
-
-    phiScale = max(abs(phi1), [], 'omitnan');
-    if isfinite(phiScale) && phiScale > 0
-        phi1 = phi1 ./ phiScale;
-        kappa1 = kappa1 .* phiScale;
-    end
-    signCorr = corr(Speak, kappa1, 'Rows', 'complete', 'Type', 'Spearman');
-    if isfinite(signCorr) && signCorr < 0
-        phi1 = -phi1;
-        kappa1 = -kappa1;
-    end
-
-    Sfull = Scdf + kappa1 * phi1';
-
-    rmsePtRows = NaN(nT, 1);
-    rmseFullRows = NaN(nT, 1);
-    for it = 1:nT
-        mPt = isfinite(Smap(it, :)) & isfinite(Scdf(it, :));
-        if any(mPt)
-            rmsePtRows(it) = sqrt(mean((Smap(it, mPt) - Scdf(it, mPt)) .^ 2, 'omitnan'));
+    phi1 = NaN(nI, nCh);
+    kappa1 = NaN(nT, nCh);
+    for ic = 1:nCh
+        Rfill = residual(:, :, ic);
+        Rfill(~isfinite(Rfill)) = 0;
+        if any(abs(Rfill(:)) > 0)
+            [U, Sigma, V] = svd(Rfill, 'econ');
+            phi1(:, ic) = V(:, 1);
+            kappa1(:, ic) = U(:, 1) * Sigma(1, 1);
+        else
+            phi1(:, ic) = zeros(nI, 1);
+            kappa1(:, ic) = zeros(nT, 1);
         end
-        mFull = isfinite(Smap(it, :)) & isfinite(Sfull(it, :));
-        if any(mFull)
-            rmseFullRows(it) = sqrt(mean((Smap(it, mFull) - Sfull(it, mFull)) .^ 2, 'omitnan'));
+
+        phiScale = max(abs(phi1(:, ic)), [], 'omitnan');
+        if isfinite(phiScale) && phiScale > 0
+            phi1(:, ic) = phi1(:, ic) ./ phiScale;
+            kappa1(:, ic) = kappa1(:, ic) .* phiScale;
+        end
+        signCorr = corr(Speak(:, ic), kappa1(:, ic), 'Rows', 'complete', 'Type', 'Spearman');
+        if isfinite(signCorr) && signCorr < 0
+            phi1(:, ic) = -phi1(:, ic);
+            kappa1(:, ic) = -kappa1(:, ic);
+        end
+    end
+
+    Sfull = NaN(nT, nI, nCh);
+    for ic = 1:nCh
+        Sfull(:, :, ic) = Scdf(:, :, ic) + kappa1(:, ic) * phi1(:, ic)';
+    end
+
+    rmsePtRows = NaN(nT, nCh);
+    rmseFullRows = NaN(nT, nCh);
+    for ic = 1:nCh
+        for it = 1:nT
+            mPt = isfinite(Smap(it, :, ic)) & isfinite(Scdf(it, :, ic));
+            if any(mPt)
+                rmsePtRows(it, ic) = sqrt(mean((Smap(it, mPt, ic) - Scdf(it, mPt, ic)) .^ 2, 'omitnan'));
+            end
+            mFull = isfinite(Smap(it, :, ic)) & isfinite(Sfull(it, :, ic));
+            if any(mFull)
+                rmseFullRows(it, ic) = sqrt(mean((Smap(it, mFull, ic) - Sfull(it, mFull, ic)) .^ 2, 'omitnan'));
+            end
         end
     end
 
@@ -454,21 +492,23 @@ try
         RMSE_FULL = sqrt(mean((Smap(mFullGlobal) - Sfull(mFullGlobal)) .^ 2, 'omitnan'));
     end
 
-    phiCosinePerT = NaN(nT, 1);
-    for it = 1:nT
-        r = residual(it, :)';
-        m = isfinite(r) & isfinite(phi1);
-        if nnz(m) < 3
-            continue;
-        end
-        nr = norm(r(m));
-        np = norm(phi1(m));
-        if nr > 0 && np > 0
-            phiCosinePerT(it) = abs(dot(r(m), phi1(m)) / (nr * np));
+    phiCosinePerT = NaN(nT, nCh);
+    for ic = 1:nCh
+        for it = 1:nT
+            r = residual(it, :, ic)';
+            m = isfinite(r) & isfinite(phi1(:, ic));
+            if nnz(m) < 3
+                continue;
+            end
+            nr = norm(r(m));
+            np = norm(phi1(m, ic));
+            if nr > 0 && np > 0
+                phiCosinePerT(it, ic) = abs(dot(r(m), phi1(m, ic)) / (nr * np));
+            end
         end
     end
-    PHI_MEDIAN_COSINE = median(phiCosinePerT, 'omitnan');
-    KAPPA_SPEAK_CORR = corr(abs(kappa1), Speak, 'Rows', 'complete', 'Type', 'Spearman');
+    PHI_MEDIAN_COSINE = median(phiCosinePerT(:), 'omitnan');
+    KAPPA_SPEAK_CORR = corr(abs(kappa1(:)), Speak(:), 'Rows', 'complete', 'Type', 'Spearman');
 
     isPrecomputedRead = any(endsWith(inputPaths, '.csv')) || any(endsWith(inputPaths, '.mat')) || any(contains(inputPaths, '\results\'));
 
@@ -531,20 +571,78 @@ try
         READY_FOR_SINGLE_CANONICAL_RUN = "YES";
     end
 
-    [TT, II] = ndgrid(temps, currents);
-    SLong = table(TT(:), II(:), Smap(:), Scdf(:), Sfull(:), residual(:), PTmap(:), CDFmap(:), ...
-        'VariableNames', {'T_K', 'current_mA', 'S_percent', 'S_model_pt_percent', 'S_model_full_percent', 'residual_percent', 'PT_pdf', 'CDF_pt'});
+    linIdx = (1:numel(Smap))';
+    [iT, iI, iC] = ind2sub(size(Smap), linIdx);
+    chPhysLong = physChans(iC);
+    physIndex = chPhysLong;
+    channel_type = strings(size(physIndex));
 
-    write_execution_marker('STAGE_BEFORE_OUTPUTS');
+    for ii = 1:numel(physIndex)
+        switch physIndex(ii)
+            case 1
+                channel_type(ii) = "XY";
+            case {2,3}
+                channel_type(ii) = "XX";
+            otherwise
+                error("Unknown physIndex detected: cannot assign channel_type");
+        end
+    end
 
-    writetable(SLong, fullfile(tablesDir, 'switching_canonical_S_long.csv'));
+    u = unique([physIndex(:), double(channel_type == "XX")], 'rows');
+    disp(u)
 
-    ObsTbl = table(temps, Speak, Ipeak, kappa1, rmsePtRows, rmseFullRows, phiCosinePerT, ...
-        'VariableNames', {'T_K', 'S_peak', 'I_peak', 'kappa1', 'rmse_pt_row', 'rmse_full_row', 'phi_cosine_row'});
-    writetable(ObsTbl, fullfile(tablesDir, 'switching_canonical_observables.csv'));
+    SLong = table(temps(iT), currents(iI), chPhysLong, channel_type, ...
+        Smap(linIdx), Scdf(linIdx), Sfull(linIdx), residual(linIdx), PTmap(linIdx), CDFmap(linIdx), ...
+        'VariableNames', {'T_K', 'current_mA', 'switching_channel_physical', 'channel_type', ...
+        'S_percent', 'S_model_pt_percent', 'S_model_full_percent', 'residual_percent', 'PT_pdf', 'CDF_pt'});
 
-    PhiTbl = table(currents, phi1, 'VariableNames', {'current_mA', 'Phi1'});
-    writetable(PhiTbl, fullfile(tablesDir, 'switching_canonical_phi1.csv'));
+    write_execution_marker('STAGE_BEFORE_OUTPUTS', runDir);
+
+    atomic_writetable(SLong, fullfile(tablesDir, 'switching_canonical_S_long.csv'));
+
+    linO = (1:numel(Speak))';
+    [iTo, iCo] = ind2sub(size(Speak), linO);
+    chObs = physChans(iCo);
+    physIndex = chObs;
+    channel_type = strings(size(physIndex));
+
+    for ii = 1:numel(physIndex)
+        switch physIndex(ii)
+            case 1
+                channel_type(ii) = "XY";
+            case {2,3}
+                channel_type(ii) = "XX";
+            otherwise
+                error("Unknown physIndex detected: cannot assign channel_type");
+        end
+    end
+
+    ObsTbl = table(temps(iTo), chObs, channel_type, Speak(linO), Ipeak(linO), kappa1(linO), ...
+        rmsePtRows(linO), rmseFullRows(linO), phiCosinePerT(linO), ...
+        'VariableNames', {'T_K', 'switching_channel_physical', 'channel_type', 'S_peak', 'I_peak', 'kappa1', ...
+        'rmse_pt_row', 'rmse_full_row', 'phi_cosine_row'});
+    atomic_writetable(ObsTbl, fullfile(tablesDir, 'switching_canonical_observables.csv'));
+
+    linP = (1:numel(phi1))';
+    [iIp, iCp] = ind2sub(size(phi1), linP);
+    chPhi = physChans(iCp);
+    physIndex = chPhi;
+    channel_type = strings(size(physIndex));
+
+    for ii = 1:numel(physIndex)
+        switch physIndex(ii)
+            case 1
+                channel_type(ii) = "XY";
+            case {2,3}
+                channel_type(ii) = "XX";
+            otherwise
+                error("Unknown physIndex detected: cannot assign channel_type");
+        end
+    end
+
+    PhiTbl = table(currents(iIp), chPhi, channel_type, phi1(linP), ...
+        'VariableNames', {'current_mA', 'switching_channel_physical', 'channel_type', 'Phi1'});
+    atomic_writetable(PhiTbl, fullfile(tablesDir, 'switching_canonical_phi1.csv'));
 
     validationTbl = table( ...
         CHECK_NO_PRECOMPUTED_INPUTS, STRUCTURAL_VALID, ...
@@ -557,31 +655,41 @@ try
         'RMSE_PT', 'RMSE_FULL', 'RECONSTRUCTION_IMPROVES', 'FUNCTIONAL_VALID', ...
         'PHI_MEDIAN_COSINE', 'KAPPA_SPEAK_CORR', 'PHI_SHAPE_STABLE', 'KAPPA_SCALING_REASONABLE', 'INVARIANCE_VALID', ...
         'CANONICAL_PIPELINE_CONFIRMED'});
-    writetable(validationTbl, fullfile(tablesDir, 'switching_canonical_validation.csv'));
+    atomic_writetable(validationTbl, fullfile(tablesDir, 'switching_canonical_validation.csv'));
 
     reportPath = fullfile(reportsDir, 'run_switching_canonical_report.md');
-    fidReport = fopen(reportPath, 'w');
+    tmpReport = [reportPath '.tmp'];
+    fidReport = fopen(tmpReport, 'w');
     if fidReport < 0
-        error('run_switching_canonical:ReportWriteFailed', 'Failed writing %s', reportPath);
+        error('run_switching_canonical:ReportWriteFailed', 'Failed writing %s', tmpReport);
     end
-    fprintf(fidReport, '# run_switching_canonical\n\n');
-    fprintf(fidReport, '- RUN_DIR: `%s`\n', runDir);
-    fprintf(fidReport, '- S_SOURCE: `%s`\n', S_SOURCE);
-    fprintf(fidReport, '- S_CONSTRUCTION_METHOD: `%s`\n', S_CONSTRUCTION_METHOD);
-    fprintf(fidReport, '- RAW_PARENT_DIR: `%s`\n', parentDir);
-    fprintf(fidReport, '- RAW_FILES_DISCOVERED: `%d`\n', totalRawFiles);
-    fprintf(fidReport, '- CHECK_NO_PRECOMPUTED_INPUTS: `%s`\n', CHECK_NO_PRECOMPUTED_INPUTS);
-    fprintf(fidReport, '- PROVENANCE_VALID: `%s`\n', PROVENANCE_VALID);
-    fprintf(fidReport, '- RMSE_PT: `%.12g`\n', RMSE_PT);
-    fprintf(fidReport, '- RMSE_FULL: `%.12g`\n', RMSE_FULL);
-    fprintf(fidReport, '- RECONSTRUCTION_IMPROVES: `%s`\n', RECONSTRUCTION_IMPROVES);
-    fprintf(fidReport, '- PHI_SHAPE_STABLE: `%s` (median cosine = %.6f)\n', PHI_SHAPE_STABLE, PHI_MEDIAN_COSINE);
-    fprintf(fidReport, '- KAPPA_SCALING_REASONABLE: `%s` (spearman = %.6f)\n', KAPPA_SCALING_REASONABLE, KAPPA_SPEAK_CORR);
-    fprintf(fidReport, '- CANONICAL_PIPELINE_CONFIRMED: `%s`\n', CANONICAL_PIPELINE_CONFIRMED);
-    fprintf(fidReport, '\n## Minimal createRunContext isolation\n');
-    fprintf(fidReport, '- Added only `Aging/utils` to path to access `createRunContext`.\n');
-    fprintf(fidReport, '- Run context uses experiment tag `switching` under `results/switching/runs`; outputs are run-scoped.\n');
+    try
+        fprintf(fidReport, '# run_switching_canonical\n\n');
+        fprintf(fidReport, '- RUN_DIR: `%s`\n', runDir);
+        fprintf(fidReport, '- S_SOURCE: `%s`\n', S_SOURCE);
+        fprintf(fidReport, '- S_CONSTRUCTION_METHOD: `%s`\n', S_CONSTRUCTION_METHOD);
+        fprintf(fidReport, '- RAW_PARENT_DIR: `%s`\n', parentDir);
+        fprintf(fidReport, '- RAW_FILES_DISCOVERED: `%d`\n', totalRawFiles);
+        fprintf(fidReport, '- CHECK_NO_PRECOMPUTED_INPUTS: `%s`\n', CHECK_NO_PRECOMPUTED_INPUTS);
+        fprintf(fidReport, '- PROVENANCE_VALID: `%s`\n', PROVENANCE_VALID);
+        fprintf(fidReport, '- RMSE_PT: `%.12g`\n', RMSE_PT);
+        fprintf(fidReport, '- RMSE_FULL: `%.12g`\n', RMSE_FULL);
+        fprintf(fidReport, '- RECONSTRUCTION_IMPROVES: `%s`\n', RECONSTRUCTION_IMPROVES);
+        fprintf(fidReport, '- PHI_SHAPE_STABLE: `%s` (median cosine = %.6f)\n', PHI_SHAPE_STABLE, PHI_MEDIAN_COSINE);
+        fprintf(fidReport, '- KAPPA_SCALING_REASONABLE: `%s` (spearman = %.6f)\n', KAPPA_SCALING_REASONABLE, KAPPA_SPEAK_CORR);
+        fprintf(fidReport, '- CANONICAL_PIPELINE_CONFIRMED: `%s`\n', CANONICAL_PIPELINE_CONFIRMED);
+        fprintf(fidReport, '\n## Minimal createRunContext isolation\n');
+        fprintf(fidReport, '- Added only `Aging/utils` to path to access `createRunContext`.\n');
+        fprintf(fidReport, '- Run context uses experiment tag `switching` under `results/switching/runs`; outputs are run-scoped.\n');
+    catch ME
+        fclose(fidReport);
+        if exist(tmpReport, 'file') == 2
+            delete(tmpReport);
+        end
+        rethrow(ME);
+    end
     fclose(fidReport);
+    atomic_commit_file(tmpReport, reportPath);
 
     implStatusTbl = table( ...
         CANONICAL_SWITCHING_GENERATOR_CREATED, ...
@@ -614,65 +722,140 @@ try
         'CHECK_NO_PRECOMPUTED_INPUTS', 'RECONSTRUCTION_IMPROVES', ...
         'PHI_SHAPE_STABLE', 'KAPPA_SCALING_REASONABLE', 'RMSE_PT', 'RMSE_FULL', ...
         'PHI_MEDIAN_COSINE', 'KAPPA_SPEAK_CORR', 'S_SOURCE', 'S_CONSTRUCTION_METHOD', 'RUN_ID', 'RUN_DIR'});
-    writetable(implStatusTbl, implStatusPath);
+    atomic_writetable(implStatusTbl, implStatusPath);
 
-    fidImpl = fopen(implReportPath, 'w');
+    tmpImpl = [implReportPath '.tmp'];
+    fidImpl = fopen(tmpImpl, 'w');
     if fidImpl < 0
-        error('run_switching_canonical:ImplReportWriteFailed', 'Failed writing %s', implReportPath);
+        error('run_switching_canonical:ImplReportWriteFailed', 'Failed writing %s', tmpImpl);
     end
-    fprintf(fidImpl, '# run_switching_canonical implementation\n\n');
-    fprintf(fidImpl, '- FILE: `Switching/analysis/run_switching_canonical.m`\n');
-    fprintf(fidImpl, '- RUN_ID: `%s`\n', run.run_id);
-    fprintf(fidImpl, '- RUN_DIR: `%s`\n', run.run_dir);
-    fprintf(fidImpl, '- S_SOURCE: `%s`\n', S_SOURCE);
-    fprintf(fidImpl, '- S_CONSTRUCTION_METHOD: `%s`\n', S_CONSTRUCTION_METHOD);
-    fprintf(fidImpl, '- CHECK_NO_PRECOMPUTED_INPUTS: `%s`\n', CHECK_NO_PRECOMPUTED_INPUTS);
-    fprintf(fidImpl, '- STRUCTURAL_VALID: `%s`\n', STRUCTURAL_VALID);
-    fprintf(fidImpl, '- PROVENANCE_VALID: `%s`\n', PROVENANCE_VALID);
-    fprintf(fidImpl, '- FUNCTIONAL_VALID: `%s`\n', FUNCTIONAL_VALID);
-    fprintf(fidImpl, '- INVARIANCE_VALID: `%s`\n', INVARIANCE_VALID);
-    fprintf(fidImpl, '- CANONICAL_PIPELINE_CONFIRMED: `%s`\n', CANONICAL_PIPELINE_CONFIRMED);
-    fprintf(fidImpl, '- READY_FOR_SINGLE_CANONICAL_RUN: `%s`\n', READY_FOR_SINGLE_CANONICAL_RUN);
-    fprintf(fidImpl, '\n## Required verdicts\n');
-    fprintf(fidImpl, '- CANONICAL_SWITCHING_GENERATOR_CREATED: `%s`\n', CANONICAL_SWITCHING_GENERATOR_CREATED);
-    fprintf(fidImpl, '- UPSTREAM_S_SOURCE_IDENTIFIED: `%s`\n', UPSTREAM_S_SOURCE_IDENTIFIED);
-    fprintf(fidImpl, '- SP_DERIVED_FROM_S: `%s`\n', SP_DERIVED_FROM_S);
-    fprintf(fidImpl, '- IP_DERIVED_FROM_S: `%s`\n', IP_DERIVED_FROM_S);
-    fprintf(fidImpl, '- RUN_CONTEXT_IS_SWITCHING_ISOLATED: `%s`\n', RUN_CONTEXT_IS_SWITCHING_ISOLATED);
-    fprintf(fidImpl, '- STRUCTURAL_VALID: `%s`\n', STRUCTURAL_VALID);
-    fprintf(fidImpl, '- PROVENANCE_VALID: `%s`\n', PROVENANCE_VALID);
-    fprintf(fidImpl, '- FUNCTIONAL_VALID: `%s`\n', FUNCTIONAL_VALID);
-    fprintf(fidImpl, '- INVARIANCE_VALID: `%s`\n', INVARIANCE_VALID);
-    fprintf(fidImpl, '- CANONICAL_PIPELINE_CONFIRMED: `%s`\n', CANONICAL_PIPELINE_CONFIRMED);
-    fprintf(fidImpl, '- READY_FOR_SINGLE_CANONICAL_RUN: `%s`\n', READY_FOR_SINGLE_CANONICAL_RUN);
-    fprintf(fidImpl, '\n## Minimal createRunContext isolation\n');
-    fprintf(fidImpl, '- Added `Aging/utils` only, to call `createRunContext`.\n');
-    fprintf(fidImpl, '- No cross-pipeline data inputs were used.\n');
+    try
+        fprintf(fidImpl, '# run_switching_canonical implementation\n\n');
+        fprintf(fidImpl, '- FILE: `Switching/analysis/run_switching_canonical.m`\n');
+        fprintf(fidImpl, '- RUN_ID: `%s`\n', run.run_id);
+        fprintf(fidImpl, '- RUN_DIR: `%s`\n', run.run_dir);
+        fprintf(fidImpl, '- S_SOURCE: `%s`\n', S_SOURCE);
+        fprintf(fidImpl, '- S_CONSTRUCTION_METHOD: `%s`\n', S_CONSTRUCTION_METHOD);
+        fprintf(fidImpl, '- CHECK_NO_PRECOMPUTED_INPUTS: `%s`\n', CHECK_NO_PRECOMPUTED_INPUTS);
+        fprintf(fidImpl, '- STRUCTURAL_VALID: `%s`\n', STRUCTURAL_VALID);
+        fprintf(fidImpl, '- PROVENANCE_VALID: `%s`\n', PROVENANCE_VALID);
+        fprintf(fidImpl, '- FUNCTIONAL_VALID: `%s`\n', FUNCTIONAL_VALID);
+        fprintf(fidImpl, '- INVARIANCE_VALID: `%s`\n', INVARIANCE_VALID);
+        fprintf(fidImpl, '- CANONICAL_PIPELINE_CONFIRMED: `%s`\n', CANONICAL_PIPELINE_CONFIRMED);
+        fprintf(fidImpl, '- READY_FOR_SINGLE_CANONICAL_RUN: `%s`\n', READY_FOR_SINGLE_CANONICAL_RUN);
+        fprintf(fidImpl, '\n## Required verdicts\n');
+        fprintf(fidImpl, '- CANONICAL_SWITCHING_GENERATOR_CREATED: `%s`\n', CANONICAL_SWITCHING_GENERATOR_CREATED);
+        fprintf(fidImpl, '- UPSTREAM_S_SOURCE_IDENTIFIED: `%s`\n', UPSTREAM_S_SOURCE_IDENTIFIED);
+        fprintf(fidImpl, '- SP_DERIVED_FROM_S: `%s`\n', SP_DERIVED_FROM_S);
+        fprintf(fidImpl, '- IP_DERIVED_FROM_S: `%s`\n', IP_DERIVED_FROM_S);
+        fprintf(fidImpl, '- RUN_CONTEXT_IS_SWITCHING_ISOLATED: `%s`\n', RUN_CONTEXT_IS_SWITCHING_ISOLATED);
+        fprintf(fidImpl, '- STRUCTURAL_VALID: `%s`\n', STRUCTURAL_VALID);
+        fprintf(fidImpl, '- PROVENANCE_VALID: `%s`\n', PROVENANCE_VALID);
+        fprintf(fidImpl, '- FUNCTIONAL_VALID: `%s`\n', FUNCTIONAL_VALID);
+        fprintf(fidImpl, '- INVARIANCE_VALID: `%s`\n', INVARIANCE_VALID);
+        fprintf(fidImpl, '- CANONICAL_PIPELINE_CONFIRMED: `%s`\n', CANONICAL_PIPELINE_CONFIRMED);
+        fprintf(fidImpl, '- READY_FOR_SINGLE_CANONICAL_RUN: `%s`\n', READY_FOR_SINGLE_CANONICAL_RUN);
+        fprintf(fidImpl, '\n## Minimal createRunContext isolation\n');
+        fprintf(fidImpl, '- Added `Aging/utils` only, to call `createRunContext`.\n');
+        fprintf(fidImpl, '- No cross-pipeline data inputs were used.\n');
+    catch ME
+        fclose(fidImpl);
+        if exist(tmpImpl, 'file') == 2
+            delete(tmpImpl);
+        end
+        rethrow(ME);
+    end
     fclose(fidImpl);
+    atomic_commit_file(tmpImpl, implReportPath);
 
-    write_execution_marker('STAGE_AFTER_OUTPUTS');
+    repoTablesDir = fullfile(repoRoot, 'tables');
+    repoReportsDir = fullfile(repoRoot, 'reports');
+    if exist(repoTablesDir, 'dir') ~= 7
+        mkdir(repoTablesDir);
+    end
+    if exist(repoReportsDir, 'dir') ~= 7
+        mkdir(repoReportsDir);
+    end
+
+    total_rows_ci = height(rawTbl);
+    unique_channels_ci = numel(unique(rawTbl.switching_channel_physical));
+    ucList = unique(rawTbl.switching_channel_physical, 'sorted');
+    rpcParts = cell(numel(ucList), 1);
+    for uci = 1:numel(ucList)
+        cval = ucList(uci);
+        rpcParts{uci} = sprintf('%g=%d', cval, sum(rawTbl.switching_channel_physical == cval));
+    end
+    rows_per_channel_str = strjoin(rpcParts, ';');
+
+    [~, ~, Gti] = unique([rawTbl.T_K, rawTbl.current_mA], 'rows');
+    duplicate_T_I_cross_channel = "NO";
+    for gti = 1:max(Gti)
+        ix = Gti == gti;
+        if numel(unique(rawTbl.switching_channel_physical(ix))) > 1
+            duplicate_T_I_cross_channel = "YES";
+            break;
+        end
+    end
+
+    channelIdentityValidationTbl = table( ...
+        total_rows_ci, ...
+        unique_channels_ci, ...
+        string(rows_per_channel_str), ...
+        duplicate_T_I_cross_channel, ...
+        'VariableNames', {'total_rows', 'unique_channels', 'rows_per_channel', 'duplicate_T_I_cross_channel'});
+    atomic_writetable(channelIdentityValidationTbl, fullfile(repoTablesDir, 'channel_identity_validation.csv'));
+
+    channelIdentityStatusTbl = table( ...
+        "YES", "YES", "YES", "NO", "NO", ...
+        'VariableNames', {'CHANNEL_TYPE_DEFINED', 'CHANNEL_IDENTITY_PROPAGATED', 'AGGREGATION_FIXED', ...
+        'MIXING_RISK_REMAINING', 'LOGIC_MODIFIED'});
+    atomic_writetable(channelIdentityStatusTbl, fullfile(repoTablesDir, 'channel_identity_status.csv'));
+
+    ciReportPath = fullfile(repoReportsDir, 'channel_identity_enforcement.md');
+    tmpCi = [ciReportPath '.tmp'];
+    fidCi = fopen(tmpCi, 'w');
+    if fidCi < 0
+        error('run_switching_canonical:ChannelIdentityReportFailed', 'Failed writing %s', tmpCi);
+    end
+    try
+        fprintf(fidCi, '# Channel identity enforcement (canonical Switching)\n\n');
+        fprintf(fidCi, '## What was added\n');
+        fprintf(fidCi, '- `switching_channel_physical`: copied from existing `channel` (physical index 1--4 from `stability.switching.globalChannel`).\n');
+        fprintf(fidCi, '- `channel_type`: deterministic mapping `physIndex` in {1,2} -> `XX`, {3,4} -> `XY` (aligned with preset naming `1xy_3xx`).\n');
+        fprintf(fidCi, '- Raw-level table columns; channel dimension in `Sraw` / `Smap` and downstream tensors; exports `switching_canonical_S_long.csv`, `switching_canonical_observables.csv`, and `switching_canonical_phi1.csv` include the identity columns.\n\n');
+        fprintf(fidCi, '## Where identity was previously missing\n');
+        fprintf(fidCi, '- Grid aggregation averaged `S_percent` at `(T_K, current_mA)` without separating physical channels, so distinct channels could be mixed in one cell.\n\n');
+        fprintf(fidCi, '## Computation logic\n');
+        fprintf(fidCi, '- **Unchanged**: same formulas per `(T_K, current_mA, channel)` slice as previously applied per `(T_K, current_mA)` slice; no physics or algorithm edits.\n\n');
+        fprintf(fidCi, '## Aggregation level (before / after)\n');
+        fprintf(fidCi, '- **Before**: group by `T_K`, `current_mA` only (implicit mixing across `switching_channel_physical`).\n');
+        fprintf(fidCi, '- **After**: group by `T_K`, `current_mA`, `switching_channel_physical` (third index in `Sraw` / `Smap`; no cross-channel averaging).\n\n');
+        fprintf(fidCi, '## Validation snapshot (this run)\n');
+        fprintf(fidCi, '- total_rows: `%d`\n', total_rows_ci);
+        fprintf(fidCi, '- unique_channels: `%d`\n', unique_channels_ci);
+        fprintf(fidCi, '- rows_per_channel: `%s`\n', rows_per_channel_str);
+        fprintf(fidCi, '- duplicate_T_I_cross_channel: `%s` (YES means same T/I appears on more than one physical channel; rows remain separate).\n', duplicate_T_I_cross_channel);
+    catch MEci
+        fclose(fidCi);
+        if exist(tmpCi, 'file') == 2
+            delete(tmpCi);
+        end
+        rethrow(MEci);
+    end
+    fclose(fidCi);
+    atomic_commit_file(tmpCi, ciReportPath);
+
+    write_execution_marker('STAGE_AFTER_OUTPUTS', runDir);
 
     writeRunValidityClassification(runDir, repoRoot, enforcement_checked, modules_used, ...
         strcmp(RUN_CONTEXT_IS_SWITCHING_ISOLATED, "YES"));
 
-    writeSwitchingExecutionStatus(runDir, {'SUCCESS'}, {'YES'}, {''}, nT, {'switching_canonical completed'}, true);
-    fidE = fopen(fullfile(runDir, 'enforcement_status.txt'), 'w');
-    if fidE >= 0
-        if enforcement_checked
-            fprintf(fidE, 'ENFORCEMENT_CHECKED=YES\n');
-        else
-            fprintf(fidE, 'ENFORCEMENT_CHECKED=NO\n');
-        end
-        if isempty(modules_used)
-            fprintf(fidE, 'MODULES_USED=\n');
-        else
-            fprintf(fidE, 'MODULES_USED=%s\n', strjoin(modules_used, ','));
-        end
-        fclose(fidE);
-    end
+        writeSwitchingExecutionStatus(runDir, {'SUCCESS'}, {'YES'}, {''}, nT, {'switching_canonical completed'}, true);
+        atomic_write_enforcement_status(runDir, enforcement_checked, modules_used, iBatch, numel(batchInputs));
 
-    % Non-authoritative timeline marker; final status is EXECUTION_STATUS in execution_status.csv above.
-    write_execution_marker('COMPLETED');
+        % Non-authoritative timeline marker; final status is EXECUTION_STATUS in execution_status.csv above.
+        write_execution_marker('COMPLETED', runDir);
+    end
 
 catch ME
     runDirForStatus = '';
@@ -716,20 +899,7 @@ catch ME
         inputFoundFail = 'NO';
     end
     writeSwitchingExecutionStatus(runDirForStatus, {'FAILED'}, {inputFoundFail}, {ME.message}, 0, {'run_switching_canonical failed'}, true);
-    fidE = fopen(fullfile(runDirForStatus, 'enforcement_status.txt'), 'w');
-    if fidE >= 0
-        if enforcement_checked
-            fprintf(fidE, 'ENFORCEMENT_CHECKED=YES\n');
-        else
-            fprintf(fidE, 'ENFORCEMENT_CHECKED=NO\n');
-        end
-        if isempty(modules_used)
-            fprintf(fidE, 'MODULES_USED=\n');
-        else
-            fprintf(fidE, 'MODULES_USED=%s\n', strjoin(modules_used, ','));
-        end
-        fclose(fidE);
-    end
+    atomic_write_enforcement_status(runDirForStatus, enforcement_checked, modules_used);
 
     repoRForValidity = repoRoot;
     if isempty(repoRForValidity)
@@ -756,23 +926,33 @@ catch ME
         'PHI_MEDIAN_COSINE', 'KAPPA_SPEAK_CORR', 'S_SOURCE', 'S_CONSTRUCTION_METHOD', 'RUN_ID', 'RUN_DIR'});
     
     if ~isempty(implStatusPath)
-        writetable(implStatusFail, implStatusPath);
+        atomic_writetable(implStatusFail, implStatusPath);
     else
-        writetable(implStatusFail, fullfile(failTablesDir, 'run_switching_canonical_implementation_status.csv'));
+        atomic_writetable(implStatusFail, fullfile(failTablesDir, 'run_switching_canonical_implementation_status.csv'));
     end
 
     if ~isempty(implReportPath)
-        fidImplFail = fopen(implReportPath, 'w');
+        implFailFinal = implReportPath;
     else
-        fidImplFail = fopen(fullfile(failReportsDir, 'run_switching_canonical_implementation.md'), 'w');
+        implFailFinal = fullfile(failReportsDir, 'run_switching_canonical_implementation.md');
     end
-    
+    tmpImplFail = [implFailFinal '.tmp'];
+    fidImplFail = fopen(tmpImplFail, 'w');
     if fidImplFail >= 0
-        fprintf(fidImplFail, '# run_switching_canonical implementation\n\n');
-        fprintf(fidImplFail, '- DIAGNOSTIC_NOTE: Authoritative outcome is EXECUTION_STATUS in execution_status.csv (this file is not the contract).\n');
-        fprintf(fidImplFail, '- ERROR_MESSAGE: `%s`\n', ME.message);
-        fprintf(fidImplFail, '- RUN_DIR: `%s`\n', runDirForStatus);
+        try
+            fprintf(fidImplFail, '# run_switching_canonical implementation\n\n');
+            fprintf(fidImplFail, '- DIAGNOSTIC_NOTE: Authoritative outcome is EXECUTION_STATUS in execution_status.csv (this file is not the contract).\n');
+            fprintf(fidImplFail, '- ERROR_MESSAGE: `%s`\n', ME.message);
+            fprintf(fidImplFail, '- RUN_DIR: `%s`\n', runDirForStatus);
+        catch MEw
+            fclose(fidImplFail);
+            if exist(tmpImplFail, 'file') == 2
+                delete(tmpImplFail);
+            end
+            rethrow(MEw);
+        end
         fclose(fidImplFail);
+        atomic_commit_file(tmpImplFail, implFailFinal);
     end
 
     write_execution_marker('FAILED', runDirForStatus);

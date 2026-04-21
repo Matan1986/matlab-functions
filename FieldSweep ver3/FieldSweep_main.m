@@ -5,7 +5,7 @@ clc;
 close_all_except_ui_figures;
 
 %% 1) Paths
-baseFolder = 'C:\Users\User\My Drive (matanst@post.bgu.ac.il)\Quantum materials lab\Matlab functions';
+baseFolder = 'C:\Dev\matlab-functions';
 addpath(genpath(baseFolder));
 
 %% 2) User Parameters
