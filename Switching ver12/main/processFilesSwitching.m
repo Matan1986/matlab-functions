@@ -90,6 +90,7 @@ for i = 1:Nfiles
     for kk = 1:numCh
         phys2local(physIndex(kk)) = kk;
     end
+    assertChannelMappingInvariant_(physIndex, numCh, phys2local);
     if numCh == 0
         warning('processFilesSwitching: No valid LI channels in file %s', fileList(i).name);
         continue;
@@ -577,4 +578,28 @@ for i = 1:Nfiles
     num_of_pulses_with_same_dep = original_num_of_pulses_with_same_dep;
 end
 
+end
+
+function assertChannelMappingInvariant_(physIndex, numCh, phys2local)
+% Channel mapping contract (materialization-time): physIndex is local->physical; phys2local inverts.
+if numCh < 1
+    return;
+end
+if numel(physIndex) ~= numCh
+    error('processFilesSwitching:ChannelMappingInvariant', ...
+        'physIndex length (%d) must equal numCh (%d).', numel(physIndex), numCh);
+end
+for kk = 1:numCh
+    p = physIndex(kk);
+    if ~(isfinite(p) && p == floor(p) && p >= 1 && p <= 4)
+        error('processFilesSwitching:ChannelMappingInvariant', ...
+            'physIndex(%d) must be an integer in 1..4; got %g.', kk, p);
+    end
+end
+for kk = 1:numCh
+    if ~(isfinite(phys2local(physIndex(kk))) && phys2local(physIndex(kk)) == kk)
+        error('processFilesSwitching:ChannelMappingInvariant', ...
+            'phys2local(physIndex(k)) must equal k for k=%d (inverse mapping failed).', kk);
+    end
+end
 end

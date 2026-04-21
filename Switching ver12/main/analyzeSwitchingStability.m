@@ -6,12 +6,14 @@ function stability = analyzeSwitchingStability( ...
 % Supports conditioning-skip sweeps: opts.skipFirstPlateaus can be scalar or vector.
 %
 % INPUTS
-%   stored_data: cell(Nfiles,5) from processFilesSwitching:
+%   stored_data: cell(Nfiles,>=7) from processFilesSwitching:
 %       {i,1} data_unf  = [t_rel, Rch...]
 %       {i,2} data_filt = [t_rel, Rch...]
 %       {i,3} data_cent = [t_rel, Rch...]
 %       {i,4} valid_indices_of_all_pulses (logical)
 %       {i,5} intervel_avg_res (numPulses x numCh) plateau means (from UNFILTERED in your pipeline)
+%       {i,6} (optional) pulse-resolved copy for repeated pulses
+%       {i,7} physIndex row: physical = physIndex(local) for columns 1..numCh (required if numCh>0)
 %   sortedValues: vector of the sweep variable for each file (T or B or config index)
 %   delay_between_pulses_ms: scalar (ms)
 %   safety_margin_percent: scalar (%) used to exclude regions near pulses
@@ -175,6 +177,17 @@ for i = 1:Nfiles
         continue;
     end
     numPulses = size(plateauMeans,1);
+    if size(plateauMeans, 2) ~= numCh
+        error('analyzeSwitchingStability:ChannelMapping', ...
+            'plateauMeans has %d columns but trace has numCh=%d (file index %d).', ...
+            size(plateauMeans, 2), numCh, i);
+    end
+
+    physIdxRow = [];
+    if size(stored_data, 2) >= 7 && ~isempty(stored_data{i, 7})
+        physIdxRow = stored_data{i, 7}(:).';
+    end
+    assertPhysIndexRowContract_(physIdxRow, numCh, i);
 
     % pulse times (relative)
     pulse_times = t(1) + (0:numPulses-1) * delay_between_pulses_ms;
@@ -510,15 +523,20 @@ for i = 1:Nfiles
             end
         end
         if isfinite(metricsCh(k).stateGapAbs)
-            % ----- append summary row -----
-            rows(end+1,:) = {sv, k, ...
+            % ----- append summary row (canonical channel fields: local k + physical physIndex(k)) -----
+            chPhys = physIdxRow(k);
+            if ~(isfinite(chPhys) && chPhys >= 1 && chPhys <= 4 && chPhys == floor(chPhys))
+                error('analyzeSwitchingStability:ChannelMappingContract', ...
+                    'switching_channel_physical invalid at file index %d, local k=%d.', i, k);
+            end
+            rows(end+1,:) = {sv, k, chPhys, ...
                 metricsCh(k).plateauStdMean, metricsCh(k).stateStdLow, metricsCh(k).stateStdHigh, ...
                 metricsCh(k).driftStd, metricsCh(k).driftSlopeAbs, metricsCh(k).driftPerPulseAbs, ...
                 metricsCh(k).driftSlopeRelToGap, metricsCh(k).driftPerPulseRelToGap, metricsCh(k).driftFitR2, ...
                 metricsCh(k).driftRangeRelToGap, metricsCh(k).driftEndToStartRelToGap, ...
                 metricsCh(k).slopeRMS, metricsCh(k).withinRMS, metricsCh(k).settleTimeMean, ...
                 metricsCh(k).stateGapAbs, metricsCh(k).stateGapRel, metricsCh(k).stateSeparationD, metricsCh(k).flipErrorRate,...
-                metricsCh(k).switchAmp.median, metricsCh(k).switchAmp.N...
+                metricsCh(k).switchAmp.median, metricsCh(k).switchAmp.N, ...
                 metricsCh(k).stabilityIndex, ...
                 metricsCh(k).isStable};
         end
@@ -528,7 +546,7 @@ for i = 1:Nfiles
 end
 
 out.summaryTable = cell2table(rows, 'VariableNames', {
-    'depValue','channel', ...
+    'depValue','switching_channel_local','switching_channel_physical', ...
     'plateauStdMean','stateStdLow','stateStdHigh', ...
     'driftStd','driftSlopeAbs','driftPerPulseAbs', ...
     'driftSlopeRelToGap','driftPerPulseRelToGap','driftFitR2', ...
@@ -695,9 +713,9 @@ for m = 1:numel(metricsToShow)
         Ts = allT(allT.skipFirst==skipList(s),:);
         if isempty(Ts), continue; end
 
-        chans = unique(Ts.channel);
+        chans = unique(Ts.switching_channel_physical);
         for ch = chans(:).'
-            Tsc = Ts(Ts.channel==ch,:);
+            Tsc = Ts(Ts.switching_channel_physical == ch, :);
             plot(Tsc.depValue, Tsc.(met), 'o-', 'DisplayName', sprintf('skip=%d ch=%d', skipList(s), ch));
         end
     end
@@ -723,7 +741,7 @@ fprintf('\n================ Switching Stability Summary ================\n');
 fprintf('skipFirstPlateaus = %d\n', stability.opts.skipFirstPlateaus);
 fprintf('stateMethod       = %s\n\n', stability.opts.stateMethod);
 
-[G, depU, chU] = findgroups(T.depValue, T.channel);
+[G, depU, chU] = findgroups(T.depValue, T.switching_channel_physical);
 
 S = splitapply(@(d,gap,wr,drRel,drRange,drEnd,R2) [ ...
     mean(d,'omitnan'), ...
@@ -742,7 +760,7 @@ S = splitapply(@(d,gap,wr,drRel,drRange,drEnd,R2) [ ...
     T.driftFitR2, ...
     G);
 
-U = table(depU, chU, 'VariableNames', {'depValue','channel'});
+U = table(depU, chU, 'VariableNames', {'depValue','switching_channel_physical'});
 
 fprintf('%8s %4s | %6s %8s %8s %10s %10s %10s %6s\n', ...
     'depVal','ch','d''','gap','within','driftRel/p','range/gap','end2start','R2');
@@ -750,7 +768,7 @@ fprintf('-------------------------------------------------------------\n');
 
 for i = 1:height(U)
     fprintf('%8.3g %4d | %6.2f %8.3g %8.3g %10.3g %10.3g %10.3g %6.3g\n', ...
-        U.depValue(i), U.channel(i), ...
+        U.depValue(i), U.switching_channel_physical(i), ...
         S(i,1), S(i,2), S(i,3), ...
         S(i,4), S(i,5), S(i,6), S(i,7));
 end
@@ -821,7 +839,7 @@ for ii = 1:numel(depU)
     [~, bestRel] = max(score(idxCand));
     bestIdx = idxCand(bestRel);
 
-    switchInfo.perDepValue(ii).switchingChannel = Ti.channel(bestIdx);
+    switchInfo.perDepValue(ii).switchingChannel = Ti.switching_channel_physical(bestIdx);
     switchInfo.perDepValue(ii).switchScore      = score(bestIdx);
 end
 
@@ -831,4 +849,32 @@ if ~isempty(allCh)
     switchInfo.globalChannel = mode(allCh);
 end
 
+end
+
+
+function assertPhysIndexRowContract_(physIdxRow, numCh, fileIdx)
+% Enforces the same physIndex contract as processFilesSwitching for downstream materialization.
+if numCh < 1
+    return;
+end
+if isempty(physIdxRow) || numel(physIdxRow) ~= numCh
+    error('analyzeSwitchingStability:ChannelMapping', ...
+        ['Channel mapping enforcement: stored_data{%d,7} must contain physIndex with numel==numCh (%d). ' ...
+        'Upstream must call processFilesSwitching so column 7 is populated.'], fileIdx, numCh);
+end
+phys2loc = nan(1, 4);
+for kk = 1:numCh
+    p = physIdxRow(kk);
+    if ~(isfinite(p) && p == floor(p) && p >= 1 && p <= 4)
+        error('analyzeSwitchingStability:ChannelMapping', ...
+            'stored_data{%d,7}(%d) must be integer 1..4; got %g.', fileIdx, kk, p);
+    end
+    phys2loc(p) = kk;
+end
+for kk = 1:numCh
+    if ~(isfinite(phys2loc(physIdxRow(kk))) && phys2loc(physIdxRow(kk)) == kk)
+        error('analyzeSwitchingStability:ChannelMapping', ...
+            'physIndex inverse mapping failed for file index %d at local k=%d.', fileIdx, kk);
+    end
+end
 end
