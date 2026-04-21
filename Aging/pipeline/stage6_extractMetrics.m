@@ -18,77 +18,94 @@ function state = stage6_extractMetrics(state, cfg)
 %
 % =========================================================
 
-DipA     = [state.pauseRuns.Dip_A];
-DipSigma = [state.pauseRuns.Dip_sigma];
-FMstepA  = [state.pauseRuns.FM_step_A];
-Tp       = [state.pauseRuns.waitK];
+agingMode = lower(string(cfg.agingMetricMode));
+Tp = [state.pauseRuns.waitK];
 
-fprintf('\n=== Dip sigma statistics ===\n');
-fprintf('min sigma = %.2f K\n', min(DipSigma));
-fprintf('max sigma = %.2f K\n', max(DipSigma));
-fprintf('mean sigma = %.2f K\n', mean(DipSigma));
-fprintf('std/mean = %.2f\n', std(DipSigma)/mean(DipSigma));
-% --- extra diagnostics: does sigma add independent info? ---
-R_As = corr(DipA(:), DipSigma(:), 'rows','complete');
-fprintf('corr(Dip_A, Dip_sigma) = %.2f\n', R_As);
+if agingMode ~= "extrema_smoothed"
+    DipA     = [state.pauseRuns.Dip_A];
+    DipSigma = [state.pauseRuns.Dip_sigma];
+    FMstepA  = [state.pauseRuns.FM_step_A];
 
-% --- build per-component "strength" metrics (not ratios) ---
-Dip_area = DipA .* sqrt(2*pi) .* DipSigma;   % integrated Gaussian weight
+    fprintf('\n=== Dip sigma statistics ===\n');
+    fprintf('min sigma = %.2f K\n', min(DipSigma));
+    fprintf('max sigma = %.2f K\n', max(DipSigma));
+    fprintf('mean sigma = %.2f K\n', mean(DipSigma));
+    fprintf('std/mean = %.2f\n', std(DipSigma)/mean(DipSigma));
+    % --- extra diagnostics: does sigma add independent info? ---
+    R_As = corr(DipA(:), DipSigma(:), 'rows','complete');
+    fprintf('corr(Dip_A, Dip_sigma) = %.2f\n', R_As);
 
-% normalize for comparison across metrics (z-score)
-Z = @(x) (x - mean(x,'omitnan')) ./ (std(x,'omitnan') + eps);
+    % --- build per-component "strength" metrics (not ratios) ---
+    Dip_area = DipA .* sqrt(2*pi) .* DipSigma;   % integrated Gaussian weight
 
-Z_FM      = Z(FMstepA);
-Z_DipA    = Z(DipA);
-Z_DipArea = Z(Dip_area);
+    % normalize for comparison across metrics (z-score)
+    Z = @(x) (x - mean(x,'omitnan')) ./ (std(x,'omitnan') + eps);
 
-% --- quick table (all pauses) ---
-diagTbl = table(Tp(:), FMstepA(:), DipA(:), DipSigma(:), Dip_area(:), ...
-    Z_FM(:), Z_DipA(:), Z_DipArea(:), ...
-    'VariableNames', {'Tp_K','FM_step_A','Dip_A','Dip_sigma_K','Dip_area','Z_FM','Z_DipA','Z_DipArea'});
+    Z_FM      = Z(FMstepA);
+    Z_DipA    = Z(DipA);
+    Z_DipArea = Z(Dip_area);
 
-disp(diagTbl);
+    % --- quick table (all pauses) ---
+    diagTbl = table(Tp(:), FMstepA(:), DipA(:), DipSigma(:), Dip_area(:), ...
+        Z_FM(:), Z_DipA(:), Z_DipArea(:), ...
+        'VariableNames', {'Tp_K','FM_step_A','Dip_A','Dip_sigma_K','Dip_area','Z_FM','Z_DipA','Z_DipArea'});
 
-% --- show only 5 representative pauses (spread across Tp) ---
-n = numel(Tp);
-idx5 = unique(round(linspace(1,n, min(5,n))));
-disp(diagTbl(idx5,:));
+    disp(diagTbl);
 
-% --- simple diagnostic plot: which metric separates pauses better? ---
-figure('Color','w', ...
-       'Name','Diagnostic: AFM vs FM metric variability', ...
-       'NumberTitle','off');
+    % --- show only 5 representative pauses (spread across Tp) ---
+    n = numel(Tp);
+    idx5 = unique(round(linspace(1,n, min(5,n))));
+    disp(diagTbl(idx5,:));
 
-ax = axes; 
-hold(ax,'on');
+    % --- simple diagnostic plot: which metric separates pauses better? ---
+    makeDiagnostics = true;
+    if isfield(cfg, 'disableStage6Diagnostics') && logical(cfg.disableStage6Diagnostics)
+        makeDiagnostics = false;
+    end
+    if makeDiagnostics
+        figure('Color','w', ...
+               'Name','Diagnostic: AFM vs FM metric variability', ...
+               'NumberTitle','off');
 
-plot(Tp, Z_FM, '-o',['LineWi' ...
-    'dth'],1.5);
-plot(Tp, Z_DipA, '-o','LineWidth',1.5);
-plot(Tp, Z_DipArea, '-o','LineWidth',1.5);
-xlabel('T_p (K)');
-ylabel('Z-score (relative variation)');
-legend('FM\_step\_A','Dip\_A','Dip\_area','Location','best');
-title('Diagnostic: which component metric varies most across pauses?');
+        ax = axes;
+        hold(ax,'on');
 
-Tp        = [state.pauseRuns.waitK];
-Dip_area = [state.pauseRuns.Dip_area];
-FM_step  = [state.pauseRuns.FM_step_A];
+        plot(Tp, Z_FM, '-o',['LineWi' ...
+            'dth'],1.5);
+        plot(Tp, Z_DipA, '-o','LineWidth',1.5);
+        plot(Tp, Z_DipArea, '-o','LineWidth',1.5);
+        xlabel('T_p (K)');
+        ylabel('Z-score (relative variation)');
+        legend('FM\_step\_A','Dip\_A','Dip\_area','Location','best');
+        title('Diagnostic: which component metric varies most across pauses?');
+    end
 
-% --- auto scaling (based on what is actually plotted) ---
-FMvec = [state.pauseRuns.FM_E];   % row vector
+    % --- auto scaling (based on what is actually plotted) ---
+    FMvec = [state.pauseRuns.FM_E];   % row vector
+    switch cfg.AFM_metric_main
+        case 'height'
+            AFMvec = [state.pauseRuns.Dip_A];      % row vector
+            unitStr = '\\mu_B / Co';
 
-switch cfg.AFM_metric_main
-    case 'height'
-        AFMvec = [state.pauseRuns.Dip_A];      % row vector
-        unitStr = '\\mu_B / Co';
+        case 'area'
+            AFMvec = [state.pauseRuns.Dip_area];   % row vector
+            unitStr = '\\mu_B·K / Co';
 
-    case 'area'
-        AFMvec = [state.pauseRuns.Dip_area];   % row vector
-        unitStr = '\\mu_B·K / Co';
-
-    otherwise
-        error('Unknown AFM_metric_main: %s', cfg.AFM_metric_main);
+        otherwise
+            error('Unknown AFM_metric_main: %s', cfg.AFM_metric_main);
+    end
+else
+    AFMvec = nan(1, numel(state.pauseRuns));
+    FMvec = nan(1, numel(state.pauseRuns));
+    for i = 1:numel(state.pauseRuns)
+        if isfield(state.pauseRuns(i), 'AFM_extrema_smoothed') && isfinite(state.pauseRuns(i).AFM_extrema_smoothed)
+            AFMvec(i) = abs(state.pauseRuns(i).AFM_extrema_smoothed);
+        end
+        if isfield(state.pauseRuns(i), 'FM_extrema_smoothed') && isfinite(state.pauseRuns(i).FM_extrema_smoothed)
+            FMvec(i) = state.pauseRuns(i).FM_extrema_smoothed;
+        end
+    end
+    unitStr = '\\mu_{\\mathrm{B}} / \\mathrm{Co}';
 end
 
 % build probe vector (column), remove NaNs/Infs
@@ -107,21 +124,34 @@ end
 % ===============================
 % Build AFM / FM vectors for MAIN FIGURE
 % ===============================
+if agingMode == "extrema_smoothed"
+    Y_AFM = nan(1, numel(state.pauseRuns));
+    Y_FM = nan(1, numel(state.pauseRuns));
+    for i = 1:numel(state.pauseRuns)
+        if isfield(state.pauseRuns(i), 'AFM_extrema_smoothed') && isfinite(state.pauseRuns(i).AFM_extrema_smoothed)
+            Y_AFM(i) = abs(state.pauseRuns(i).AFM_extrema_smoothed);
+        end
+        if isfield(state.pauseRuns(i), 'FM_extrema_smoothed') && isfinite(state.pauseRuns(i).FM_extrema_smoothed)
+            Y_FM(i) = state.pauseRuns(i).FM_extrema_smoothed;
+        end
+    end
+    unitStr = '\\mu_{\\mathrm{B}} / \\mathrm{Co}';
+else
+    switch cfg.AFM_metric_main
+        case 'height'
+            Y_AFM = [state.pauseRuns.Dip_A];
+            unitStr = '\\mu_B / Co';
 
-switch cfg.AFM_metric_main
-    case 'height'
-        Y_AFM = [state.pauseRuns.Dip_A];
-        unitStr = '\\mu_B / Co';
+        case 'area'
+            Y_AFM = [state.pauseRuns.Dip_area];
+            unitStr = '\\mu_B\\cdot K / Co';
 
-    case 'area'
-        Y_AFM = [state.pauseRuns.Dip_area];
-        unitStr = '\\mu_B\\cdot K / Co';
+        otherwise
+            error('Unknown AFM_metric_main: %s', cfg.AFM_metric_main);
+    end
 
-    otherwise
-        error('Unknown AFM_metric_main: %s', cfg.AFM_metric_main);
+    Y_FM = [state.pauseRuns.FM_E];   % local FM strength (RMS from fit)
 end
-
-Y_FM = [state.pauseRuns.FM_E];   % local FM strength (RMS from fit)
 
 % ===============================
 % Colormap for pause temperatures (Tp)
@@ -173,18 +203,40 @@ for i = 1:numel(Tp)
         'LineWidth',markerEdgeWidth);
 end
 
-ylab_AFM = sprintf([ ...
-    '$\\mathrm{AFM-like}$\n' ...
-    '$\\mathrm{(10^{-%d}\\ %s)}$' ], ...
-    scalePower, unitStr);
+if agingMode == "extrema_smoothed"
+    ylab_AFM = sprintf([ ...
+        '$\\mathrm{AFM-like\\ |\\Delta M|\\ memory\\ signal}$\n' ...
+        '$\\mathrm{(10^{-%d}\\ \\mu_{\\mathrm{B}} / \\mathrm{Co})}$' ], ...
+        scalePower);
+else
+    ylab_AFM = sprintf([ ...
+        '$\\mathrm{AFM-like}$\n' ...
+        '$\\mathrm{(10^{-%d}\\ %s)}$' ], ...
+        scalePower, unitStr);
+end
 
 hY1 = ylabel(ylab_AFM,'Interpreter','latex');
 set(hY1,'FontSize',cfg.fontsize-2);
 
 set(ax1,'FontSize',cfg.fontsize-2)
 set(ax1,'XTick',Tp)
-xlim(ax1,[min(Tp)-1 max(Tp)+1])
-ylim(ax1,[0 max(max(Y_AFM*scaleFactor),max(Y_FM * scaleFactor))])
+tpMin = min(Tp);
+tpMax = max(Tp);
+tpSpan = max(tpMax - tpMin, eps);
+xPad = max(0.5, 0.05 * tpSpan);
+xlim(ax1,[tpMin - xPad, tpMax + xPad])
+
+yAll = [Y_AFM(:); Y_FM(:)] * scaleFactor;
+yAll = yAll(isfinite(yAll));
+if isempty(yAll)
+    ylim(ax1, [0 1])
+else
+    yMin = min(yAll);
+    yMax = max(yAll);
+    ySpan = max(yMax - yMin, eps);
+    yPad = max(0.05 * ySpan, eps);
+    ylim(ax1, [yMin - yPad, yMax + yPad])
+end
 
 
 % ---------- (b) FM background (FIT-based) ----------
@@ -214,18 +266,29 @@ end
 
 xlabel('Pause temperature (K)','Interpreter','latex');
 
-ylab_FM = sprintf([ ...
-    '$\\mathrm{FM-like}$\n' ...
-    '$\\mathrm{(10^{-%d}\\ \\mu_{\\mathrm{B}}/\\mathrm{Co})}$' ], ...
-    scalePower);
+if agingMode == "extrema_smoothed"
+    ylab_FM = sprintf([ ...
+        '$\\mathrm{FM-like\\ \\Delta M\\ memory\\ signal}$\n' ...
+        '$\\mathrm{(10^{-%d}\\ \\mu_{\\mathrm{B}} / \\mathrm{Co})}$' ], ...
+        scalePower);
+else
+    ylab_FM = sprintf([ ...
+        '$\\mathrm{FM-like}$\n' ...
+        '$\\mathrm{(10^{-%d}\\ \\mu_{\\mathrm{B}} / \\mathrm{Co})}$' ], ...
+        scalePower);
+end
 
 hY2 = ylabel(ylab_FM,'Interpreter','latex');
 set(hY2,'FontSize',cfg.fontsize-2);
 
 set(ax2,'FontSize',cfg.fontsize-2)
 set(ax2,'XTick',Tp)
-xlim(ax2,[min(Tp)-1 max(Tp)+1])
-ylim(ax2,[0 max(max(Y_AFM*scaleFactor),max(Y_FM * scaleFactor))])
+xlim(ax2,[tpMin - xPad, tpMax + xPad])
+if isempty(yAll)
+    ylim(ax2, [0 1])
+else
+    ylim(ax2, [yMin - yPad, yMax + yPad])
+end
 
 
 set(ax1,'XTickLabel',[])

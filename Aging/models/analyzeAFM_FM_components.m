@@ -28,6 +28,12 @@ function pauseRuns = analyzeAFM_FM_components( ...
 %   AFM = sharp dip in DeltaM (memory component)
 %   FM  = smooth background step around Tp
 %
+% Canonical sign layer:
+%   DeltaM_signed = M_pause - M_noPause
+%   dip_signed    = DeltaM_signed - DeltaM_smooth
+%   FM_signed     is signed and may change sign physically
+%   Rectified/absolute transforms are metrics, not canonical signed variables.
+%
 % =========================================================
 
 %% ---------------- Defaults ----------------
@@ -50,9 +56,14 @@ if nargin < 8 || isempty(FM_buffer_K)
     FM_buffer_K = 3;         % K
 end
 if nargin < 9 || isempty(dipMetric)
-    dipMetric = 'height';   % ברירת מחדל
+    dipMetric = 'height';   % ×‘×¨×™×¨×ª ×ž×—×“×œ
+end
+if nargin < 10 || ~isstruct(cfg)
+    cfg = struct();
 end
 dipMetric = lower(string(dipMetric));
+fmConvention = resolveFMConvention(cfg);
+fmDefinition = resolveFMDefinitionText(fmConvention);
 
 excludeLowT_mode = lower(string(excludeLowT_mode));
 
@@ -78,6 +89,9 @@ for i = 1:numel(pauseRuns)
     pauseRuns(i).AFM_area_err  = NaN;
     pauseRuns(i).FM_step_raw   = NaN;
     pauseRuns(i).FM_step_mag   = NaN;
+    pauseRuns(i).FM_signed     = NaN;
+    pauseRuns(i).FMConvention  = char(fmConvention);
+    pauseRuns(i).FM_definition_used = fmDefinition;
     pauseRuns(i).FM_step_err   = NaN;
     pauseRuns(i).FM_plateau_valid = false;
     pauseRuns(i).FM_plateau_reason = '';
@@ -100,7 +114,22 @@ for i = 1:numel(pauseRuns)
     end
 
     T  = pauseRuns(i).T_common(:);
+    % Analysis observable used by current pipeline logic (legacy-compatible).
     dM = pauseRuns(i).DeltaM(:);
+    % Canonical physical DeltaM (project-locked): M_pause - M_noPause.
+    if isfield(pauseRuns(i), 'DeltaM_signed') && ~isempty(pauseRuns(i).DeltaM_signed)
+        DeltaM_signed = pauseRuns(i).DeltaM_signed(:);
+        pauseRuns(i).DeltaM_signed_source = 'input_canonical';
+    else
+        DeltaM_signed = dM;
+        pauseRuns(i).DeltaM_signed_source = 'fallback_from_DeltaM_observable';
+    end
+    if numel(DeltaM_signed) ~= numel(dM)
+        DeltaM_signed = dM;
+        pauseRuns(i).DeltaM_signed_source = 'fallback_length_mismatch';
+    end
+    pauseRuns(i).DeltaM_signed = DeltaM_signed;
+    pauseRuns(i).DeltaM_definition_canonical = 'DeltaM = M_{pause} - M_{no-pause}';
     Tp = pauseRuns(i).waitK;
 
     if numel(T) < 20 || numel(T) ~= numel(dM)
@@ -160,10 +189,17 @@ for i = 1:numel(pauseRuns)
     %% =====================================================
     % 2) AFM sharp component
     %% =====================================================
+    % Residual of the active analysis observable (legacy-compatible).
     dM_sharp = dM - dM_smooth;
+    % Canonical physical dip (project-locked):
+    %   dip_signed = DeltaM_signed - DeltaM_smooth
+    dip_signed = DeltaM_signed - dM_smooth;
 
     pauseRuns(i).DeltaM_smooth = dM_smooth;
     pauseRuns(i).DeltaM_sharp  = dM_sharp;
+    pauseRuns(i).DeltaM_sharp_observable = dM_sharp;
+    pauseRuns(i).dip_signed    = dip_signed;
+    pauseRuns(i).dip_definition_canonical = 'dip_signed = DeltaM_signed - DeltaM_smooth';
 
     maskDip = isfinite(T) & ...
         (T > Tp - dip_window_K) & ...
@@ -186,14 +222,15 @@ for i = 1:numel(pauseRuns)
 
         case "height"
             % ----- dip as amplitude -----
-            pauseRuns(i).AFM_amp = -mean(dipVals);
+            pauseRuns(i).AFM_amp = mean(dipVals);
             pauseRuns(i).AFM_amp_err = std(dipVals) / sqrt(numel(dipVals));
             pauseRuns(i).AFM_area = NaN;
             pauseRuns(i).AFM_area_err = NaN;
 
         case "area"
             % ----- dip as integrated weight -----
-            y = max(0, -dM_sharp);
+            % NOTE: this is a rectified metric transform, not canonical signed dip.
+            y = max(0, dM_sharp);
             xDip = T(maskDip);
             yDip = y(maskDip);
 
@@ -284,7 +321,16 @@ for i = 1:numel(pauseRuns)
         pauseRuns(i).FM_plateau_left_clipped = false;
         
         if strcmp(baselineOut.status, 'ok')
-            pauseRuns(i).FM_step_raw = baselineOut.baseR - baselineOut.baseL;
+            % FM CONVENTION OPTIONS:
+            %   'rightMinusLeft' -> baseR - baseL
+            %   'leftMinusRight' -> baseL - baseR
+            % CURRENT PROJECT DEFAULT: FM = baseL - baseR
+            pauseRuns(i).FM_step_raw = computeFMFromBases(baselineOut.baseL, baselineOut.baseR, fmConvention);
+            % SIGNED PHYSICAL VARIABLE â€” DO NOT MODIFY SIGN
+            % FM_signed is a signed physical background/step quantity.
+            % Its sign is physically meaningful and may change between runs.
+            FM_signed = pauseRuns(i).FM_step_raw;
+            pauseRuns(i).FM_signed = FM_signed;
             pauseRuns(i).FM_step_mag = pauseRuns(i).FM_step_raw;
             pauseRuns(i).FM_step_err = NaN;  % Not computed in robust version
             pauseRuns(i).FM_plateau_valid = true;
@@ -510,7 +556,12 @@ for i = 1:numel(pauseRuns)
             FM_low  = mean(lowVals,'omitnan');
             FM_high = mean(highVals,'omitnan');
 
-            pauseRuns(i).FM_step_raw = FM_high - FM_low;
+            pauseRuns(i).FM_step_raw = computeFMFromBases(FM_low, FM_high, fmConvention);
+            % SIGNED PHYSICAL VARIABLE â€” DO NOT MODIFY SIGN
+            % FM_signed is a signed physical background/step quantity.
+            % Its sign is physically meaningful and may change between runs.
+            FM_signed = pauseRuns(i).FM_step_raw;
+            pauseRuns(i).FM_signed = FM_signed;
             pauseRuns(i).FM_step_mag = pauseRuns(i).FM_step_raw;  % Keep raw signed value
 
             semL = std(lowVals,'omitnan') / sqrt(nnz(isfinite(lowVals)));
@@ -520,6 +571,42 @@ for i = 1:numel(pauseRuns)
         end
     end  % end of old method else
 
+end
+end
+
+function fmConvention = resolveFMConvention(cfg)
+fmConvention = "leftMinusRight";
+if isstruct(cfg) && isfield(cfg, 'FMConvention') && ~isempty(cfg.FMConvention)
+    fmConvention = string(cfg.FMConvention);
+end
+fmConvention = lower(fmConvention);
+switch fmConvention
+    case {"rightminusleft", "leftminusright"}
+        return;
+    otherwise
+        error('Unknown FMConvention: %s', fmConvention);
+end
+end
+
+function fmValue = computeFMFromBases(baseL, baseR, fmConvention)
+switch lower(string(fmConvention))
+    case "rightminusleft"
+        fmValue = baseR - baseL;
+    case "leftminusright"
+        fmValue = baseL - baseR;
+    otherwise
+        error('Unknown FMConvention: %s', string(fmConvention));
+end
+end
+
+function txt = resolveFMDefinitionText(fmConvention)
+switch lower(string(fmConvention))
+    case "rightminusleft"
+        txt = 'FM = baseR - baseL';
+    case "leftminusright"
+        txt = 'FM = baseL - baseR';
+    otherwise
+        error('Unknown FMConvention: %s', string(fmConvention));
 end
 end
 
@@ -574,3 +661,4 @@ if ~isfinite(slopeK)
     slopeK = NaN;
 end
 end
+

@@ -7,7 +7,7 @@ function state = Main_Aging(cfg)
 %
 % This pipeline contains TWO independent choices:
 %
-%   cfg.agingMetricMode     = 'direct' | 'model'
+%   cfg.agingMetricMode     = 'direct' | 'model' | 'fit' | 'derivative' | 'extrema_smoothed'
 %   cfg.switchingMetricMode = 'direct' | 'model'
 %
 % ------------------------------------------------------------
@@ -141,7 +141,10 @@ dbg(cfg, "full", "switchExcludeTp config: %s", mat2str(cfg.switchParams.switchEx
 % =========================================================
 % Stage 7: Switching reconstruction
 % =========================================================
-[result, state] = stage7_reconstructSwitching(state, cfg);
+result = struct();
+if isfield(cfg, 'enableStage7') && cfg.enableStage7
+    [result, state] = stage7_reconstructSwitching(state, cfg);
+end
 
 % ========== EXTRACT PHYSICS CONTEXT ==========
 % Build comprehensive metadata for physicists
@@ -167,6 +170,30 @@ dbgSummaryPhysics(cfg, physicsContext, result, state);
 % Compile metrics summary
 nPause = numel(state.pauseRuns);
 nFigs = length(findobj('Type', 'figure'));
+corr_R_A = NaN;
+corr_R_B = NaN;
+corr_R_dAdT = NaN;
+corr_R_dBdT = NaN;
+partialcorr_R_A_given_T = NaN;
+partialcorr_R_B_given_T = NaN;
+if isfield(result, 'corr_R_A')
+    corr_R_A = result.corr_R_A;
+end
+if isfield(result, 'corr_R_B')
+    corr_R_B = result.corr_R_B;
+end
+if isfield(result, 'corr_R_dAdT')
+    corr_R_dAdT = result.corr_R_dAdT;
+end
+if isfield(result, 'corr_R_dBdT')
+    corr_R_dBdT = result.corr_R_dBdT;
+end
+if isfield(result, 'partialcorr_R_A_given_T')
+    partialcorr_R_A_given_T = result.partialcorr_R_A_given_T;
+end
+if isfield(result, 'partialcorr_R_B_given_T')
+    partialcorr_R_B_given_T = result.partialcorr_R_B_given_T;
+end
 
 % Build comprehensive summary with physics context
 dbgSummaryTable(cfg, ...
@@ -195,12 +222,12 @@ dbgSummaryTable(cfg, ...
     'fit_quality_R2', physicsContext.fit_quality_R2, ...
     '', '', ...
     '=== CHANNEL CORRELATIONS ===', '', ...
-    'corr(R,A)', result.corr_R_A, ...
-    'corr(R,B)', result.corr_R_B, ...
-    'corr(R,|dA/dT|)', result.corr_R_dAdT, ...
-    'corr(R,|dB/dT|)', result.corr_R_dBdT, ...
-    'partialcorr(R,A|T)', result.partialcorr_R_A_given_T, ...
-    'partialcorr(R,B|T)', result.partialcorr_R_B_given_T, ...
+    'corr(R,A)', corr_R_A, ...
+    'corr(R,B)', corr_R_B, ...
+    'corr(R,|dA/dT|)', corr_R_dAdT, ...
+    'corr(R,|dB/dT|)', corr_R_dBdT, ...
+    'partialcorr(R,A|T)', partialcorr_R_A_given_T, ...
+    'partialcorr(R,B|T)', partialcorr_R_B_given_T, ...
     '', '', ...
     '=== PIPELINE EXECUTION ===', '', ...
     'pause_runs', nPause, ...

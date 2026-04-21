@@ -81,7 +81,11 @@ for k = 1:N
         cfgK.switchParams.dipAreaLowPercentile = 5;
     end
 
-    [result, state] = stage7_reconstructSwitching(out, cfgK);
+    if isfield(cfgK, 'enableStage7') && cfgK.enableStage7
+        [result, state] = stage7_reconstructSwitching(out, cfgK);
+    else
+        continue;
+    end
 
     % --- Extract pause-domain vectors (match stage7 output) ---
     if ~isfield(result,'Tp_pause') || ...

@@ -23,8 +23,10 @@ cfg.doPlotting = true;
 cfg.diagnosticsVerbose = false;
 
 % --- Metric mode selection ---
+% agingMetricMode options: 'direct' | 'model' | 'fit' | 'derivative' | 'extrema_smoothed'
 cfg.agingMetricMode = 'derivative';
 cfg.switchingMetricMode = 'direct';
+cfg.enableStage7 = false;
 
 cfg.AFM_metric_main = 'area';
 cfg.doFit_MF_Gaussian = true;
@@ -63,6 +65,7 @@ cfg.showAFM_errors = false;
 cfg.colorRange = [0 1];
 
 cfg.subtractOrder = 'pauseMinusNo';
+cfg.FMConvention = 'leftMinusRight';  % 'rightMinusLeft' | 'leftMinusRight'
 
 cfg.doFilterDeltaM = true;
 cfg.filterMethod = 'sgolay';

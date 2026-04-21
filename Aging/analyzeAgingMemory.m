@@ -1,9 +1,11 @@
 function pauseRuns = analyzeAgingMemory( ...
     T_no, M_no, pauseRuns, dip_window_K, subtractOrder)
-% analyzeAgingMemory — Compute ΔM(T) = M_noPause - M_pause
-% and extract local memory indicators.
+% analyzeAgingMemory - Build DeltaM observables and canonical signed DeltaM.
+% Canonical sign definition (project-locked):
+%   DeltaM_signed = M_pause - M_noPause
+% Legacy subtractOrder values are compatibility observables only.
 if nargin < 5 || isempty(subtractOrder)
-    subtractOrder = 'noMinusPause';
+    subtractOrder = 'pauseMinusNo';
 end
 for i = 1:numel(pauseRuns)
 
@@ -25,15 +27,28 @@ for i = 1:numel(pauseRuns)
     M_no_i = interp1(T_no, M_no, Tgrid, 'linear');
     M_pa_i = interp1(T,    M,    Tgrid, 'linear');
 
+    % CANONICAL PHYSICS DEFINITION (project-locked):
+    %   DeltaM_signed = M_pause - M_noPause
+    %
+    % Compatibility note:
+    %   pauseRuns(i).DeltaM still follows subtractOrder for legacy behavior.
+    %   If subtractOrder='noMinusPause', that observable is NON-CANONICAL.
+    canonicalDeltaM = M_pa_i - M_no_i;
     switch lower(subtractOrder)
-
         case 'nominuspause'
-            % ΔM = M_noPause − M_pause
+            % LEGACY / NON-CANONICAL OBSERVABLE:
+            %   DeltaM = M_noPause - M_pause
             dM = M_no_i - M_pa_i;
-
+            DeltaM_signed = canonicalDeltaM;
+            deltaMDefinition = 'LEGACY (NON-CANONICAL): DeltaM = M_{no-pause} - M_{pause}';
+            deltaMConventionClass = 'legacy_noncanonical_observable';
         case 'pauseminusno'
-            % ΔM = M_pause − M_noPause
+            % CANONICAL OBSERVABLE:
+            %   DeltaM = M_pause - M_noPause
             dM = M_pa_i - M_no_i;
+            DeltaM_signed = canonicalDeltaM;
+            deltaMDefinition = 'DeltaM = M_{pause} - M_{no-pause}';
+            deltaMConventionClass = 'canonical';
 
         otherwise
             error('Unknown subtractOrder: %s', subtractOrder);
@@ -42,18 +57,17 @@ for i = 1:numel(pauseRuns)
 
     pauseRuns(i).T_common = Tgrid;
     pauseRuns(i).DeltaM   = dM;
+    pauseRuns(i).DeltaM_signed = DeltaM_signed;
+    pauseRuns(i).DeltaM_canonical = DeltaM_signed;
+    pauseRuns(i).DeltaM_definition_canonical = 'DeltaM = M_{pause} - M_{no-pause}';
+    pauseRuns(i).DeltaM_convention_class = deltaMConventionClass;
+    pauseRuns(i).DeltaM_is_canonical_observable = strcmp(deltaMConventionClass, 'canonical');
 
     pauseRuns(i).subtractOrder = subtractOrder;
 
-    % ----- human-readable definition of ΔM -----
-    switch lower(subtractOrder)
-        case 'nominuspause'
-            pauseRuns(i).DeltaM_definition = ...
-                'DeltaM = M_{no-pause} - M_{pause}';
-        case 'pauseminusno'
-            pauseRuns(i).DeltaM_definition = ...
-                'DeltaM = M_{pause} - M_{no-pause}';
-    end
+    % ----- human-readable definition of Î”M -----
+    pauseRuns(i).DeltaM_definition = deltaMDefinition;
+    pauseRuns(i).DeltaM_definition_used = deltaMDefinition;
     % -------------------------------------------
 
     % ---------- Local memory metrics ----------
@@ -76,7 +90,7 @@ for i = 1:numel(pauseRuns)
         end
     end
 
-    % ---------- Derivative of ΔM ----------
+    % ---------- Derivative of Î”M ----------
     pauseRuns(i).dDeltaM_dT = [];
     pauseRuns(i).dDeltaM_dT_rms = [];
 
@@ -108,3 +122,4 @@ for i = 1:numel(pauseRuns)
     end
 end
 end
+

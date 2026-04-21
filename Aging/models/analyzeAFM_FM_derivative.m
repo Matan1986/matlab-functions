@@ -6,6 +6,9 @@ function result = analyzeAFM_FM_derivative(T, dM, Tp, cfg)
 %   Experimental AFM/FM extraction mode using d(DeltaM)/dT diagnostics.
 %   Reuses stage4 direct decomposition logic for smoothing + AFM metrics,
 %   and computes FM from median levels outside the dip window.
+%   Canonical signed variables are carried through when available:
+%     DeltaM_signed = M_pause - M_noPause
+%     dip_signed    = DeltaM_signed - DeltaM_smooth
 %
 % INPUTS:
 %   T   - temperature vector
@@ -43,6 +46,9 @@ tmpOut = analyzeAFM_FM_components( ...
 tmp = tmpOut(1);
 result = copyFieldIfExists(result, tmp, 'DeltaM_smooth');
 result = copyFieldIfExists(result, tmp, 'DeltaM_sharp');
+result = copyFieldIfExists(result, tmp, 'DeltaM_definition_canonical');
+result = copyFieldIfExists(result, tmp, 'dip_signed');
+result = copyFieldIfExists(result, tmp, 'dip_definition_canonical');
 result = copyFieldIfExists(result, tmp, 'AFM_amp');
 result = copyFieldIfExists(result, tmp, 'AFM_amp_err');
 result = copyFieldIfExists(result, tmp, 'AFM_area');
@@ -94,7 +100,17 @@ if nRight >= 3
 end
 
 if isfinite(baseL) && isfinite(baseR)
-    result.FM_step_raw = baseR - baseL;
+    % FM CONVENTION OPTIONS:
+    %   'rightMinusLeft' -> baseR - baseL
+    %   'leftMinusRight' -> baseL - baseR
+    %
+    % CURRENT PROJECT DEFAULT:
+    %   FM = baseL - baseR
+    %
+    % With this convention:
+    %   Left plateau higher -> FM > 0
+    result.FM_step_raw = computeFMFromBases(baseL, baseR, cfg.FMConvention);
+    result.FM_definition_used = resolveFMDefinitionText(cfg.FMConvention);
     result.FM_step_mag = result.FM_step_raw;  % preserve sign
     result.FM_plateau_valid = true;
     result.FM_plateau_reason = '';
@@ -105,6 +121,7 @@ else
     result.FM_plateau_valid = false;
     result.FM_plateau_reason = 'derivative_baseline_insufficient';
     result.baseline_status = 'insufficient_points';
+    result.FM_definition_used = resolveFMDefinitionText(cfg.FMConvention);
 end
 
 result.FM_step_err = NaN;
@@ -129,6 +146,7 @@ end
 result.diagnostics = struct();
 result.diagnostics.baseL = baseL;
 result.diagnostics.baseR = baseR;
+result.diagnostics.FM_convention = string(cfg.FMConvention);
 result.diagnostics.dMdT = dMdT;
 result.diagnostics.dM_smooth = dM_smooth;
 result.diagnostics.leftMask = leftMask;
@@ -138,7 +156,9 @@ result.diagnostics.leftCount = nLeft;
 result.diagnostics.rightCount = nRight;
 result.diagnostics.FM_method = 'median_outside_dip';
 
-plotDerivativeShapeDiagnostic(T, dM_smooth, dMdT, Tp, cfg);
+if isfield(cfg, 'enableDerivativeDiagnostics') && logical(cfg.enableDerivativeDiagnostics)
+    plotDerivativeShapeDiagnostic(T, dM_smooth, dMdT, Tp, cfg);
+end
 
 end
 
@@ -167,12 +187,21 @@ end
 if ~isfield(cfg, 'AFM_metric_main') || isempty(cfg.AFM_metric_main)
     cfg.AFM_metric_main = 'height';
 end
+if ~isfield(cfg, 'enableDerivativeDiagnostics') || isempty(cfg.enableDerivativeDiagnostics)
+    cfg.enableDerivativeDiagnostics = false;
+end
+if ~isfield(cfg, 'FMConvention') || isempty(cfg.FMConvention)
+    cfg.FMConvention = 'leftMinusRight';
+end
 end
 
 function result = initResult(n)
 result = struct();
 result.DeltaM_smooth = nan(n, 1);
 result.DeltaM_sharp = nan(n, 1);
+result.DeltaM_definition_canonical = 'DeltaM = M_{pause} - M_{no-pause}';
+result.dip_signed = nan(n, 1);
+result.dip_definition_canonical = 'dip_signed = DeltaM_signed - DeltaM_smooth';
 result.AFM_amp = NaN;
 result.AFM_amp_err = NaN;
 result.AFM_area = NaN;
@@ -180,6 +209,7 @@ result.AFM_area_err = NaN;
 result.FM_step_raw = NaN;
 result.FM_step_mag = NaN;
 result.FM_step_err = NaN;
+result.FM_definition_used = '';
 result.FM_plateau_valid = false;
 result.FM_plateau_reason = '';
 result.baseline_TL = NaN;
@@ -187,6 +217,28 @@ result.baseline_TR = NaN;
 result.baseline_slope = NaN;
 result.baseline_status = 'unknown';
 result.diagnostics = struct();
+end
+
+function fmValue = computeFMFromBases(baseL, baseR, fmConvention)
+switch lower(string(fmConvention))
+    case "rightminusleft"
+        fmValue = baseR - baseL;
+    case "leftminusright"
+        fmValue = baseL - baseR;
+    otherwise
+        error('Unknown FMConvention: %s', string(fmConvention));
+end
+
+function txt = resolveFMDefinitionText(fmConvention)
+switch lower(string(fmConvention))
+    case "rightminusleft"
+        txt = 'FM = baseR - baseL';
+    case "leftminusright"
+        txt = 'FM = baseL - baseR';
+    otherwise
+        error('Unknown FMConvention: %s', string(fmConvention));
+end
+end
 end
 
 function out = copyFieldIfExists(out, in, fieldName)
@@ -306,4 +358,3 @@ else
     tpTag = strrep(tpTag, '.', 'p');
 end
 end
-

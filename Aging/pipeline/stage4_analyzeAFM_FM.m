@@ -13,9 +13,14 @@ function state = stage4_analyzeAFM_FM(state, cfg)
 % OUTPUTS:
 %   state - updated with AFM/FM metrics
 %
-% Physics meaning:
-%   AFM = dip metric (height/area)
-%   FM  = background step metric
+% Canonical physics definitions used across the Aging sign layer:
+%   DeltaM_signed = M_pause - M_noPause
+%   dip_signed    = DeltaM_signed - DeltaM_smooth
+%   FM_signed     = signed background/step and may change sign physically
+%
+% NOTE:
+%   Raw window observables and magnitude transforms are metrics, not
+%   canonical signed physical variables.
 %
 % =========================================================
 
@@ -41,7 +46,23 @@ switch agingMode
                 continue;
             end
 
-            result = analyzeAFM_FM_derivative(run.T_common, run.DeltaM, run.waitK, cfg);
+            % Use canonical DeltaM when available; keep legacy fallback.
+            dM_for_derivative = run.DeltaM;
+            if isfield(run, 'DeltaM_signed') && ~isempty(run.DeltaM_signed)
+                dM_for_derivative = run.DeltaM_signed;
+            end
+            result = analyzeAFM_FM_derivative(run.T_common, dM_for_derivative, run.waitK, cfg);
+            f = fieldnames(result);
+            for j = 1:numel(f)
+                run.(f{j}) = result.(f{j});
+            end
+            state.pauseRuns = assignRunFields(state.pauseRuns, i, run);
+        end
+
+    case 'extrema_smoothed'
+        for i = 1:numel(state.pauseRuns)
+            run = state.pauseRuns(i);
+            result = analyzeAFM_FM_extrema_smoothed(run);
             f = fieldnames(result);
             for j = 1:numel(f)
                 run.(f{j}) = result.(f{j});
@@ -83,21 +104,26 @@ for i = 1:numel(state.pauseRuns)
         % Use AFM_amp from analyzer (dip amplitude/height)
         if isfield(run, 'AFM_amp') && ~isempty(run.AFM_amp) && isfinite(run.AFM_amp)
             run.Dip_depth = run.AFM_amp;
+            run.Dip_depth_source = 'afm_amp_residual';
         else
             run.Dip_depth = NaN;
+            run.Dip_depth_source = 'unset';
         end
     end
     if ~isfield(run, 'FM_step_mag') || isempty(run.FM_step_mag)
         run.FM_step_mag = NaN;
     end
     if isfield(run, 'FM_step_raw') && ~isempty(run.FM_step_raw) && isfinite(run.FM_step_raw)
+        % FM_signed is a physical signed quantity (sign is meaningful).
         run.FM_signed = run.FM_step_raw;
     elseif isfield(run, 'FM_step_mag') && ~isempty(run.FM_step_mag) && isfinite(run.FM_step_mag)
+        % Compatibility fallback when only FM_step_mag exists.
         run.FM_signed = run.FM_step_mag;
     else
         run.FM_signed = NaN;
     end
     if isfinite(run.FM_signed)
+        % Magnitude metric (non-canonical physical variable).
         run.FM_abs = abs(run.FM_signed);
     else
         run.FM_abs = NaN;
@@ -141,12 +167,25 @@ for i = 1:numel(state.pauseRuns)
     end
 
     T = run.T_common(:);
-    DeltaM = run.DeltaM(:);
-    n = min(numel(T), numel(DeltaM));
-    T = T(1:n);
-    DeltaM = DeltaM(1:n);
+    % Active observable used by stage4 diagnostics (legacy-compatible).
+    DeltaM_observable = run.DeltaM(:);
+    % Canonical physical DeltaM (preferred when available).
+    if isfield(run, 'DeltaM_signed') && ~isempty(run.DeltaM_signed)
+        DeltaM_signed = run.DeltaM_signed(:);
+        run.DeltaM_signed_source = 'input_canonical';
+    else
+        DeltaM_signed = DeltaM_observable;
+        run.DeltaM_signed_source = 'fallback_from_DeltaM_observable';
+    end
 
-    valid = isfinite(T) & isfinite(DeltaM);
+    n = min([numel(T), numel(DeltaM_observable), numel(DeltaM_signed)]);
+    T = T(1:n);
+    DeltaM_observable = DeltaM_observable(1:n);
+    DeltaM_signed = DeltaM_signed(1:n);
+    % Keep canonical DeltaM aligned to the trimmed support for downstream audits.
+    run.DeltaM_signed = DeltaM_signed;
+
+    valid = isfinite(T) & isfinite(DeltaM_observable);
     if ~any(valid)
         run.dip_window = [NaN NaN];
         run.dip_edge_flag = false;
@@ -157,7 +196,7 @@ for i = 1:numel(state.pauseRuns)
     end
 
     Tv = T(valid);
-    dMv = DeltaM(valid);
+    dMv = DeltaM_observable(valid);
 
     % Clamp dip window to measured scan range
     Tlo = min(Tv);
@@ -186,15 +225,24 @@ for i = 1:numel(state.pauseRuns)
     run.Tmin = Tmin;
     run.Tmin_offset = Tmin - Tp;
 
-    % Compute Dip_depth as minimum dip magnitude if not already set
+    % Compatibility dip-window metric from raw DeltaM observable.
+    % This is NOT the canonical physical dip (which is residual dip_signed).
+    run.Dip_depth_window_metric = NaN;
     if ~isfield(run, 'Dip_depth') || isempty(run.Dip_depth) || ~isfinite(run.Dip_depth)
         % Only compute if dMv_window has valid data
         valid_window = isfinite(dMv_window);
         if any(valid_window)
-            dip_depth_value = -min(dMv_window(valid_window));  % Negative to get positive depth
-            if isfinite(dip_depth_value)  % Accept any finite value, even if slightly negative due to numerical precision
-                run.Dip_depth = abs(dip_depth_value);  % Use absolute value for robustness
+            dip_depth_value = max(dMv_window(valid_window));
+            if isfinite(dip_depth_value)
+                run.Dip_depth = dip_depth_value;
+                run.Dip_depth_source = 'raw_deltam_window_metric_noncanonical';
+                run.Dip_depth_window_metric = dip_depth_value;
             end
+        end
+    elseif isfield(run, 'Dip_depth_source') && strcmp(run.Dip_depth_source, 'afm_amp_residual')
+        valid_window = isfinite(dMv_window);
+        if any(valid_window)
+            run.Dip_depth_window_metric = max(dMv_window(valid_window));
         end
     end
 
@@ -203,25 +251,22 @@ for i = 1:numel(state.pauseRuns)
         run.Tmin_K = Tmin;
     end
 
-    % ===== CANONICAL TWO-TIME LAYER (Audit-Ready) =====
-    % Apply symmetric, audit-ready clock extraction to both dip and FM.
-    % This centralizes selector logic and preserves sign information.
+    % ===== TWO-TIME LAYER (Audit-Ready) =====
+    % Dip clock below is a raw-window observable metric for compatibility.
+    % Canonical physical dip remains run.dip_signed from residual decomposition.
+    % FM clock remains based on signed FM_step_raw/FM_signed.
     
     if isfield(cfg, 'useCanonicalClocks') && cfg.useCanonicalClocks
-        % DIP (AFM) CLOCK - Symmetric extraction
+        % DIP WINDOW METRIC CLOCK (non-canonical dip observable)
         if hasT && hasDM
-            % Prepare dip observable data within dip window
+            % Prepare raw DeltaM window observable within dip window
             dipMask = (T >= dip_lo) & (T <= dip_hi);
             if any(dipMask)
                 T_dip = T(dipMask);
-                dM_dip = DeltaM(dipMask);
+                dM_dip_window_metric = DeltaM_observable(dipMask);
+                dM_dip_window_metric_signed = dM_dip_window_metric;
                 
-                % Signed version: negative = memory effect depth
-                dM_dip_signed = -dM_dip;  % Flip sign to make memory = positive
-                % Raw version: unsigned
-                dM_dip_raw = abs(dM_dip);
-                
-                % Build canonical dip clock
+                % Build dip-window metric clock (legacy behavior preserved).
                 cfg_dip = struct();
                 if isfield(cfg, 'dip_selector_mode')
                     cfg_dip.selector_mode = cfg.dip_selector_mode;
@@ -240,9 +285,10 @@ for i = 1:numel(state.pauseRuns)
                 end
                 cfg_dip.sign_handling = 'preserve';  % Always preserve sign for audit
                 
-                dip_clock = construct_canonical_clock(T_dip, dM_dip_raw, dM_dip_signed, cfg_dip);
+                dip_clock = construct_canonical_clock( ...
+                    T_dip, dM_dip_window_metric, dM_dip_window_metric_signed, cfg_dip);
                 
-                % Assign canonical dip outputs
+                % Legacy field names are kept for compatibility with downstream code.
                 run.tau_dip_canonical = dip_clock.value;
                 run.tau_dip_signed = dip_clock.signed_value;
                 run.tau_dip_absolute = dip_clock.absolute_value;
@@ -253,14 +299,17 @@ for i = 1:numel(state.pauseRuns)
                 run.tau_dip_range = dip_clock.data_range;
                 % Store full clock struct for robustness audits
                 run.tau_dip_clock_struct = dip_clock;
+                run.tau_dip_source = 'raw_deltam_window_metric_noncanonical';
+                run.tau_dip_is_canonical = false;
+                run.tau_dip_metric = dip_clock.value;
             end
         end
         
-        % FM CLOCK - Symmetric extraction using same logic
+        % FM CLOCK - signed physical FM step (canonical sign preserved)
         if isfinite(run.FM_step_raw) || isfinite(run.FM_step_mag)
             % Use FM step value (preserved signed and unsigned)
-            FM_signed = run.FM_step_raw;  % Positive = drop in FM, negative = rise
-            FM_raw = abs(FM_signed);
+            FM_signed = run.FM_step_raw;  % Preserve signed FM convention
+            FM_raw = FM_signed;
             
             % Create synthetic temperature array [low, high] for FM plateau
             if isfinite(run.FM_plateau_left_width_K) && isfinite(run.FM_plateau_right_width_K)
@@ -309,7 +358,7 @@ for i = 1:numel(state.pauseRuns)
             end
         end
     end
-    % ===== END CANONICAL TWO-TIME LAYER =====
+    % ===== END TWO-TIME LAYER =====
 
     state.pauseRuns = assignRunFields(state.pauseRuns, i, run);
 end

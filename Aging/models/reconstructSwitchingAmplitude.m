@@ -1,4 +1,8 @@
 function result = reconstructSwitchingAmplitude(mode, pauseRuns, pauseRuns_raw, params, Tp, Tsw, Rsw)
+% EXPERIMENTAL MODULE:
+% This code performs switching reconstruction from aging signals.
+% It is NOT part of the canonical aging pipeline.
+% Results must NOT be used for physical interpretation without validation.
 % =========================================================
 % reconstructSwitchingAmplitude
 %

@@ -144,7 +144,7 @@ state = stage3_computeDeltaM(state, cfg)
 **Modified Fields (state.pauseRuns[]):**
 - `T_common` - Common temperature grid
 - `DeltaM` - ΔM(T) = M_pause(T) - M_noPause(T)
-- `subtractOrder` - Subtraction convention used ('noMinusPause' or 'pauseMinusNo')
+- `subtractOrder` - Subtraction convention used ('noMinusPause')
 - `DeltaM_definition` - Human-readable definition string
 - `DeltaM_atPause` - ΔM value at pause temperature
 - `DeltaM_localMin` - Local minimum of ΔM in dip window
@@ -768,7 +768,7 @@ All fields listed above are created in exactly ONE stage. No field is created or
 
 #### Stage 3 (Compute DeltaM)
 **Added missing fields:**
-- `subtractOrder` - Subtraction convention ('noMinusPause' or 'pauseMinusNo')
+- `subtractOrder` - Subtraction convention ('noMinusPause')
 - `DeltaM_definition` - Human-readable definition string
 - `dDeltaM_dT` - Temperature derivative of ΔM(T)
 - `dDeltaM_dT_rms` - Local RMS of derivative

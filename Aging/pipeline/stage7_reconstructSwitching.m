@@ -1,4 +1,8 @@
 function [result, state] = stage7_reconstructSwitching(state, cfg)
+% EXPERIMENTAL MODULE:
+% This code performs switching reconstruction from aging signals.
+% It is NOT part of the canonical aging pipeline.
+% Results must NOT be used for physical interpretation without validation.
 % =========================================================
 % stage7_reconstructSwitching
 %

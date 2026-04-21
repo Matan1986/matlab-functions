@@ -16,8 +16,15 @@ addpath(genpath(agingRoot));
 addpath(fullfile(repoRoot, 'tools'));
 
 cfg = applyDefaults(cfg, repoRoot);
+if isfield(cfg, 'repoRootOverride') && ~isempty(cfg.repoRootOverride)
+    repoRoot = char(string(cfg.repoRootOverride));
+end
 assert(exist(cfg.datasetPath, 'file') == 2, ...
     'Dataset not found: %s', cfg.datasetPath);
+
+if ~local_aging_rescaling_dataset_ok(cfg.datasetPath)
+    error('aging_time_rescaling_collapse:InvalidDataset', 'Aging dataset CSV failed precondition: %s', cfg.datasetPath);
+end
 
 cfgRun = struct();
 cfgRun.runLabel = char(string(cfg.runLabel));
@@ -706,6 +713,17 @@ end
 
 function s = stampNow()
 s = char(datetime('now', 'Format', 'yyyy-MM-dd HH:mm:ss'));
+end
+
+function tf = local_aging_rescaling_dataset_ok(path)
+tf = false;
+try
+    dataTbl = readtable(path, 'TextType', 'string', 'VariableNamingRule', 'preserve');
+    dataTbl = normalizeDatasetTable(dataTbl);
+    tf = height(dataTbl) >= 1;
+catch
+    tf = false;
+end
 end
 
 

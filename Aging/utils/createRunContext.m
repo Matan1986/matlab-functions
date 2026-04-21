@@ -29,6 +29,11 @@ utilsDir = fileparts(thisFile);
 agingDir = fileparts(utilsDir);
 repoRoot = fileparts(agingDir);
 
+toolsDir = fullfile(repoRoot, 'tools');
+if exist(fullfile(toolsDir, 'atomic_commit_file.m'), 'file') == 2
+    addpath(toolsDir);
+end
+
 % Reuse existing run context if provided by caller.
 if isfield(cfg, 'run') && isstruct(cfg.run) && isfield(cfg.run, 'run_id') && ~isempty(cfg.run.run_id)
     run = cfg.run;
@@ -57,7 +62,6 @@ if isfield(cfg, 'run') && isstruct(cfg.run) && isfield(cfg.run, 'run_id') && ~is
     end
     ensureRunNotesFile(run);
 
-    setRunContextAppdata(run);
     return;
 end
 
@@ -93,7 +97,6 @@ writeConfigSnapshot(run.config_snapshot_path, cfg, run);
 writeLogHeader(run.log_path, run);
 ensureRunNotesFile(run);
 
-setRunContextAppdata(run);
 end
 
 function run = ensureRunFilePaths(run)
@@ -233,18 +236,50 @@ else
     manifest.dataset = '';
 end
 
+if isfield(cfg, 'subtractOrder') && ~isempty(cfg.subtractOrder)
+    switch lower(string(cfg.subtractOrder))
+        case "nominuspause"
+            manifest.DeltaM_definition_used = 'DeltaM = M_noPause - M_pause';
+        case "pauseminusno"
+            manifest.DeltaM_definition_used = 'DeltaM = M_pause - M_noPause';
+        otherwise
+            manifest.DeltaM_definition_used = sprintf('Unknown subtractOrder: %s', string(cfg.subtractOrder));
+    end
+end
+
+if isfield(cfg, 'FMConvention') && ~isempty(cfg.FMConvention)
+    switch lower(string(cfg.FMConvention))
+        case "rightminusleft"
+            manifest.FM_definition_used = 'FM = baseR - baseL';
+        case "leftminusright"
+            manifest.FM_definition_used = 'FM = baseL - baseR';
+        otherwise
+            manifest.FM_definition_used = sprintf('Unknown FMConvention: %s', string(cfg.FMConvention));
+    end
+end
+
 try
     jsonText = jsonencode(manifest, 'PrettyPrint', true);
 catch
     jsonText = jsonencode(manifest);
 end
 
-fid = fopen(run.manifest_path, 'w');
+tmpManifest = [run.manifest_path '.tmp'];
+fid = fopen(tmpManifest, 'w');
 if fid < 0
-    error('Failed to write run manifest: %s', run.manifest_path);
+    error('Failed to write run manifest: %s', tmpManifest);
 end
-cleanupObj = onCleanup(@() fclose(fid)); %#ok<NASGU>
-fprintf(fid, '%s\n', jsonText);
+try
+    fprintf(fid, '%s\n', jsonText);
+catch ME
+    fclose(fid);
+    if exist(tmpManifest, 'file') == 2
+        delete(tmpManifest);
+    end
+    rethrow(ME);
+end
+fclose(fid);
+atomic_commit_file(tmpManifest, run.manifest_path);
 end
 
 function fingerprint = computeRunFingerprint(repoRoot, cfg)
@@ -353,8 +388,10 @@ function writeConfigSnapshot(snapshotPath, cfg, run)
 % Preferred: exact MATLAB script snapshot when available.
 if exist('matlab.io.saveVariablesToScript', 'file') == 2
     try
-        matlab.io.saveVariablesToScript(snapshotPath, 'cfg');
-        appendRunInfo(snapshotPath, run);
+        tmpSnap = [snapshotPath '.tmp'];
+        matlab.io.saveVariablesToScript(tmpSnap, 'cfg');
+        appendRunInfo(tmpSnap, run);
+        atomic_commit_file(tmpSnap, snapshotPath);
         return;
     catch
         % Fall through to JSON snapshot fallback.
@@ -369,19 +406,28 @@ catch
 end
 cfgJsonEscaped = strrep(cfgJson, '''', '''''');
 
-fid = fopen(snapshotPath, 'w');
+tmpSnap = [snapshotPath '.tmp'];
+fid = fopen(tmpSnap, 'w');
 if fid < 0
-    error('Failed to write config snapshot: %s', snapshotPath);
+    error('Failed to write config snapshot: %s', tmpSnap);
 end
-cleanupObj = onCleanup(@() fclose(fid)); %#ok<NASGU>
-
-fprintf(fid, '%% Auto-generated config snapshot for %s\n', run.run_id);
-fprintf(fid, '%% Timestamp: %s\n', run.timestamp);
-fprintf(fid, '%% Experiment: %s\n', run.experiment);
-fprintf(fid, '%% Label: %s\n\n', run.label);
-fprintf(fid, 'cfg_snapshot_json = ''%s'';\n', cfgJsonEscaped);
-fprintf(fid, 'cfg_snapshot = jsondecode(cfg_snapshot_json);\n');
-fprintf(fid, 'cfg = cfg_snapshot;\n');
+try
+    fprintf(fid, '%% Auto-generated config snapshot for %s\n', run.run_id);
+    fprintf(fid, '%% Timestamp: %s\n', run.timestamp);
+    fprintf(fid, '%% Experiment: %s\n', run.experiment);
+    fprintf(fid, '%% Label: %s\n\n', run.label);
+    fprintf(fid, 'cfg_snapshot_json = ''%s'';\n', cfgJsonEscaped);
+    fprintf(fid, 'cfg_snapshot = jsondecode(cfg_snapshot_json);\n');
+    fprintf(fid, 'cfg = cfg_snapshot;\n');
+catch ME
+    fclose(fid);
+    if exist(tmpSnap, 'file') == 2
+        delete(tmpSnap);
+    end
+    rethrow(ME);
+end
+fclose(fid);
+atomic_commit_file(tmpSnap, snapshotPath);
 end
 
 function appendRunInfo(snapshotPath, run)
@@ -400,16 +446,26 @@ fprintf(fid, 'if ~exist(''cfg_snapshot'',''var'') && exist(''cfg'',''var''), cfg
 end
 
 function writeLogHeader(logPath, run)
-fid = fopen(logPath, 'a');
+tmpLog = [logPath '.tmp'];
+fid = fopen(tmpLog, 'w');
 if fid < 0
-    error('Failed to write run log: %s', logPath);
+    error('Failed to write run log: %s', tmpLog);
 end
-cleanupObj = onCleanup(@() fclose(fid)); %#ok<NASGU>
-fprintf(fid, '[%s] Run initialized\n', run.timestamp);
-fprintf(fid, 'run_id: %s\n', run.run_id);
-fprintf(fid, 'label: %s\n', run.label);
-fprintf(fid, 'experiment: %s\n', run.experiment);
-fprintf(fid, '\n');
+try
+    fprintf(fid, '[%s] Run initialized\n', run.timestamp);
+    fprintf(fid, 'run_id: %s\n', run.run_id);
+    fprintf(fid, 'label: %s\n', run.label);
+    fprintf(fid, 'experiment: %s\n', run.experiment);
+    fprintf(fid, '\n');
+catch ME
+    fclose(fid);
+    if exist(tmpLog, 'file') == 2
+        delete(tmpLog);
+    end
+    rethrow(ME);
+end
+fclose(fid);
+atomic_commit_file(tmpLog, logPath);
 end
 
 function ensureRunNotesFile(run)
@@ -419,20 +475,14 @@ end
 if exist(run.notes_path, 'file') == 2
     return;
 end
-fid = fopen(run.notes_path, 'w');
+tmpNotes = [run.notes_path '.tmp'];
+fid = fopen(tmpNotes, 'w');
 if fid < 0
     return;
 end
-cleanupObj = onCleanup(@() fclose(fid)); %#ok<NASGU>
+fclose(fid);
+atomic_commit_file(tmpNotes, run.notes_path);
 % Intentionally empty template for manual notes.
-end
-
-
-function setRunContextAppdata(run)
-% Canonical root appdata storage for active run context.
-setappdata(0, 'runContext', run);
-% Backward-compatible key for existing callers.
-setappdata(0, 'MATLAB_FUNCTIONS_ACTIVE_RUN_CONTEXT', run);
 end
 
 function name = getComputerName()
