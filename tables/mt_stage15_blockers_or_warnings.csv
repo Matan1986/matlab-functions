@@ -1,0 +1,9 @@
+item_id,type,severity,question_anchor,component,finding,required_resolution
+S15B01,blocker,critical,Q8,clean_MT_data,Low-field bypass via field_threshold causes non-uniform cleaning across fields,Define explicit policy and persist branch-specific cleaning metrics
+S15B02,blocker,critical,Q9,find_increasing_temperature_segments_MT;find_decreasing_temperature_segments_MT,Expected ramp uses Timems(2)-Timems(1) as global cadence assumption,Add time-axis regularity precheck or adaptive dt model
+S15B03,blocker,critical,Q10,importFiles_MT,Import catch continues silently producing partial datasets,Implement strict per-file import status and fail criteria in canonical script
+S15B04,warning,high,Q3,getFileList_MT;compute_unitsRatio_MT,Mass parsed from filename can bias M_per_mass and M_per_Co derived variables,Add metadata provenance checks and optional sidecar override
+S15B05,warning,medium,Q4,MT_main and segment functions,Segmentation labels inferred from segment order not explicit branch metadata,Write canonical segment table with deterministic segment_type mapping
+S15B06,blocker,high,Q13,MT_main,Branch calls missing plot_MT_2D_maps when plotAllCurvesOnOneFigure is false,Forbid or repair branch before canonical implementation signoff
+S15B07,warning,medium,Q6,MT_main,Temp_table and VSM_table overwritten with smooth values hides staged lineage,Persist raw clean smooth in separate canonical artifacts
+S15B08,blocker,high,Q12,MT_main,Legacy script lacks execution probe/status/run_dir contract,Implement template-compliant pure script wrapper before production use
