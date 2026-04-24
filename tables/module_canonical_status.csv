@@ -1,4 +1,4 @@
 MODULE,STATUS,CANONICAL_PIPELINE,CANONICAL_RUN_IDENTITY,CANONICAL_ANALYSIS_COMPLETE,KNOWLEDGE_INTEGRATION_STATUS,DO_NOT_ASSUME
-Switching,CANONICAL,YES,YES,NO,WEAK,"Switching canonical pipeline/entrypoint/run identity exists; canonical collapse hierarchy requires producer-side .csv.meta.json on input tables; full canonical analysis reconstruction is incomplete; claims/query/scientific snapshot propagation are pending."
+Switching,CANONICAL,YES,YES,NO,WEAK,"Switching canonical pipeline/entrypoint/run identity exists; canonical collapse hierarchy metrics are available (sidecar metadata emitted; metadata gate passes); full canonical analysis reconstruction and claims/query/scientific snapshot propagation remain incomplete."
 Relaxation,NOT_CANONICAL,NO,UNKNOWN,NO,PARTIAL,"Relaxation is not yet canonical; do not assume canonical pipeline or run identity closure."
 Aging,NOT_CANONICAL,NO,UNKNOWN,NO,PARTIAL,"Aging is not yet canonical; do not assume canonical pipeline or run identity closure."

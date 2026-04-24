@@ -40,7 +40,7 @@ See `tables/project_workstream_status.csv` (one row per active workstream).
 ## Critical Warnings
 
 - Canonical Switching code, canonical run identity, and canonical run registry discoverability now exist.
-- Switching canonical collapse inputs are gated on per-table `.csv.meta.json` sidecar metadata from producers; missing metadata blocks canonical collapse hierarchy runs (expected); commit `c703f8b` adds validation, not completed collapse metrics.
+- Switching: producer `.csv.meta.json` sidecars and commit `3ce1f83` unblock the collapse metadata gate; canonical collapse hierarchy runs with metrics and Phi1/kappa1 sign fix (`used_width_scaling=NO`). Knowledge propagation to claims/snapshot/query and runnable-script contract cleanup remain pending (`RUNNABLE_SCRIPT_CONTRACT_OK=NO`; e.g. `run_switching_canonical.m` header vs `clear; clc;`, `run_switching_residual_mode_analysis.m` local functions / `CHECK_FUNCTION=FAIL`).
 - Switching context source metadata is now aligned in `docs/repo_state.json` to canonical entrypoint/run anchors.
 - Context bundles were regenerated from aligned sources, including the extended model source for Switching metadata.
 - Switching knowledge-system integration remains WEAK because claims, snapshot, context, and query layers are still legacy-weighted, mixed, or non-canonical for Switching.
