@@ -7,6 +7,9 @@ addpath(fullfile(repoRoot, 'Switching', 'utils'));
 
 run = struct();
 runDir = '';
+gateRows = struct('table_name', string.empty(0,1), 'table_path', string.empty(0,1), ...
+    'validation_status', string.empty(0,1), 'failure_code', string.empty(0,1), ...
+    'failure_message', string.empty(0,1), 'metadata_path', string.empty(0,1));
 
 try
     cfg = struct();
@@ -35,9 +38,32 @@ try
         error('run_switching_collapse_breakdown_analysis:MissingInput', ...
             'Missing required input tables: switching_scaling_canonical_test.csv and/or switching_transition_detection.csv');
     end
-    sLongPath = resolveLatestCanonical(repoRoot, 'switching_canonical_S_long.csv');
+    sLongPath = switchingResolveLatestCanonicalTable(repoRoot, 'switching_canonical_S_long.csv');
     if exist(sLongPath, 'file') ~= 2
         error('run_switching_collapse_breakdown_analysis:MissingSLong', 'Missing canonical S_long table.');
+    end
+
+    ctxBase = struct('repo_root', repoRoot, 'required_context', 'canonical_collapse');
+    try
+        mScale = validateCanonicalInputTable(scalingPath, switchingMergeStructCtx(ctxBase, struct('table_name', 'switching_scaling_canonical_test.csv', 'expected_role', 'collapse_scaling_input')));
+        gateRows = switchingAddInputGateRow(gateRows, 'switching_scaling_canonical_test.csv', scalingPath, 'PASS', '', '', char(mScale.metadata_path));
+    catch MEv
+        gateRows = switchingAddInputGateRow(gateRows, 'switching_scaling_canonical_test.csv', scalingPath, 'FAIL', char(string(MEv.identifier)), char(string(MEv.message)), [scalingPath '.meta.json']);
+        rethrow(MEv);
+    end
+    try
+        mTr = validateCanonicalInputTable(transitionPath, switchingMergeStructCtx(ctxBase, struct('table_name', 'switching_transition_detection.csv', 'expected_role', 'transition_derived')));
+        gateRows = switchingAddInputGateRow(gateRows, 'switching_transition_detection.csv', transitionPath, 'PASS', '', '', char(mTr.metadata_path));
+    catch MEv
+        gateRows = switchingAddInputGateRow(gateRows, 'switching_transition_detection.csv', transitionPath, 'FAIL', char(string(MEv.identifier)), char(string(MEv.message)), [transitionPath '.meta.json']);
+        rethrow(MEv);
+    end
+    try
+        mS = validateCanonicalInputTable(sLongPath, switchingMergeStructCtx(ctxBase, struct('table_name', 'switching_canonical_S_long.csv', 'expected_role', 'canonical_raw_long')));
+        gateRows = switchingAddInputGateRow(gateRows, 'switching_canonical_S_long.csv', sLongPath, 'PASS', '', '', char(mS.metadata_path));
+    catch MEv
+        gateRows = switchingAddInputGateRow(gateRows, 'switching_canonical_S_long.csv', sLongPath, 'FAIL', char(string(MEv.identifier)), char(string(MEv.message)), [sLongPath '.meta.json']);
+        rethrow(MEv);
     end
 
     scaleTbl = readtable(scalingPath);
@@ -232,9 +258,9 @@ try
 
     fig3 = fullfile(runFigures, 'switching_collapse_error_vs_mode_metrics.png');
     h3 = figure('Visible','off','Color','w','Position',[100 100 1200 700]);
-    plot(commonT, zscoreSafe(totalErr), '-o', 'LineWidth', 1.8); hold on;
-    plot(commonT, zscoreSafe(abs(kappa2Local)), '-s', 'LineWidth', 1.8);
-    plot(commonT, zscoreSafe(rank1Local), '-^', 'LineWidth', 1.8);
+    plot(commonT, switchingZscoreSafe(totalErr), '-o', 'LineWidth', 1.8); hold on;
+    plot(commonT, switchingZscoreSafe(abs(kappa2Local)), '-s', 'LineWidth', 1.8);
+    plot(commonT, switchingZscoreSafe(rank1Local), '-^', 'LineWidth', 1.8);
     grid on;
     xlabel('T (K)');
     ylabel('z-score');
@@ -279,19 +305,21 @@ try
     report{end+1} = sprintf('- `%s`', fig3);
     report{end+1} = '';
     report{end+1} = '## Final Verdicts';
-    report{end+1} = sprintf('- COLLAPSE_VALID_GLOBALLY = %s', yesno(collapseValidGlobal));
-    report{end+1} = sprintf('- COLLAPSE_BREAKS_AT_TRANSITION = %s', yesno(breaksAtTransition));
+    report{end+1} = sprintf('- COLLAPSE_VALID_GLOBALLY = %s', switchingYesNoLabel(collapseValidGlobal));
+    report{end+1} = sprintf('- COLLAPSE_BREAKS_AT_TRANSITION = %s', switchingYesNoLabel(breaksAtTransition));
     report{end+1} = sprintf('- COLLAPSE_BREAKS_IN_TAILS_OR_CENTER = %s', centerTailLabel);
     report{end+1} = sprintf('- COLLAPSE_FAILURE_EXPLAINED_BY_MODE2 = %s', failExplainedMode2);
     report{end+1} = sprintf('- COLLAPSE_SUPPORTS_LOW_DIMENSIONAL_MODEL = %s', supportsLowDim);
-    report{end+1} = sprintf('- post31_5_fully_broken_indicator = %s', yesno(fullyBrokenPost));
+    report{end+1} = sprintf('- post31_5_fully_broken_indicator = %s', switchingYesNoLabel(fullyBrokenPost));
 
-    writeBoth(errVsTTbl, repoRoot, runTables, 'switching_collapse_error_vs_T.csv');
-    writeBoth(localTbl, repoRoot, runTables, 'switching_collapse_local_breakdown.csv');
-    writeBoth(linkTbl, repoRoot, runTables, 'switching_collapse_rank_connection.csv');
-    writeBoth(statusTbl, repoRoot, runTables, 'switching_collapse_breakdown_status.csv');
-    writeLines(fullfile(runReports, 'switching_collapse_breakdown_analysis.md'), report);
-    writeLines(fullfile(repoRoot, 'reports', 'switching_collapse_breakdown_analysis.md'), report);
+    switchingWriteTableBothPaths(errVsTTbl, repoRoot, runTables, 'switching_collapse_error_vs_T.csv');
+    switchingWriteTableBothPaths(localTbl, repoRoot, runTables, 'switching_collapse_local_breakdown.csv');
+    switchingWriteTableBothPaths(linkTbl, repoRoot, runTables, 'switching_collapse_rank_connection.csv');
+    switchingWriteTableBothPaths(statusTbl, repoRoot, runTables, 'switching_collapse_breakdown_status.csv');
+    gateTbl = switchingInputGateRowsToTable(gateRows);
+    switchingWriteTableBothPaths(gateTbl, repoRoot, runTables, 'switching_canonical_input_gate_status.csv');
+    switchingWriteTextLinesFile(fullfile(runReports, 'switching_collapse_breakdown_analysis.md'), report, 'run_switching_collapse_breakdown_analysis:WriteFail');
+    switchingWriteTextLinesFile(fullfile(repoRoot, 'reports', 'switching_collapse_breakdown_analysis.md'), report, 'run_switching_collapse_breakdown_analysis:WriteFail');
 
     writeSwitchingExecutionStatus(runDir, {'SUCCESS'}, {'YES'}, {''}, nT, {'switching collapse breakdown analysis completed'}, true);
     fidBottom = fopen(fullfile(runDir, 'execution_probe_bottom.txt'), 'w');
@@ -310,58 +338,26 @@ catch ME
         'VariableNames', {'STATUS','INPUT_FOUND','N_temperatures_used','execution_notes','figures_written'});
     writetable(statusTbl, fullfile(runDir, 'tables', 'switching_collapse_breakdown_status.csv'));
     writetable(statusTbl, fullfile(repoRoot, 'tables', 'switching_collapse_breakdown_status.csv'));
+    failCode = string(ME.identifier);
+    if strlength(failCode) == 0
+        failCode = "UNSPECIFIED_ERROR";
+    end
+    if isempty(gateRows.table_name)
+        gateRows = switchingAddInputGateRow(gateRows, 'unknown', 'unknown', 'FAIL', char(failCode), char(string(ME.message)), '');
+    else
+        if ~any(gateRows.validation_status == "FAIL")
+            gateRows = switchingAddInputGateRow(gateRows, 'unknown', 'unknown', 'FAIL', char(failCode), char(string(ME.message)), '');
+        end
+    end
+    gateTbl = switchingInputGateRowsToTable(gateRows);
+    writetable(gateTbl, fullfile(runDir, 'tables', 'switching_canonical_input_gate_status.csv'));
+    writetable(gateTbl, fullfile(repoRoot, 'tables', 'switching_canonical_input_gate_status.csv'));
     lines = {};
     lines{end+1} = '# Canonical Collapse Breakdown Analysis FAILED';
     lines{end+1} = sprintf('- error_id: `%s`', ME.identifier);
     lines{end+1} = sprintf('- error_message: `%s`', ME.message);
-    writeLines(fullfile(runDir, 'reports', 'switching_collapse_breakdown_analysis.md'), lines);
-    writeLines(fullfile(repoRoot, 'reports', 'switching_collapse_breakdown_analysis.md'), lines);
+    switchingWriteTextLinesFile(fullfile(runDir, 'reports', 'switching_collapse_breakdown_analysis.md'), lines, 'run_switching_collapse_breakdown_analysis:WriteFail');
+    switchingWriteTextLinesFile(fullfile(repoRoot, 'reports', 'switching_collapse_breakdown_analysis.md'), lines, 'run_switching_collapse_breakdown_analysis:WriteFail');
     writeSwitchingExecutionStatus(runDir, {'FAILED'}, {'NO'}, {ME.message}, 0, {'switching collapse breakdown analysis failed'}, true);
     rethrow(ME);
-end
-
-function p = resolveLatestCanonical(repoRoot, fileName)
-p = '';
-runsRoot = switchingCanonicalRunRoot(repoRoot);
-if exist(runsRoot, 'dir') ~= 7, return; end
-d = dir(fullfile(runsRoot, 'run_*_switching_canonical'));
-paths = {};
-for i = 1:numel(d)
-    f = fullfile(runsRoot, d(i).name, 'tables', fileName);
-    if exist(f, 'file') == 2, paths{end+1,1} = f; end %#ok<AGROW>
-end
-if isempty(paths), return; end
-[~, idx] = max(cellfun(@(x) dir(x).datenum, paths));
-p = paths{idx};
-end
-
-function z = zscoreSafe(x)
-z = NaN(size(x));
-v = isfinite(x);
-if nnz(v) < 2, return; end
-mu = mean(x(v), 'omitnan');
-sd = std(x(v), 'omitnan');
-if sd <= 0, return; end
-z(v) = (x(v) - mu) ./ sd;
-end
-
-function s = yesno(tf)
-s = 'NO';
-if tf, s = 'YES'; end
-end
-
-function writeBoth(tbl, repoRoot, runTables, name)
-writetable(tbl, fullfile(runTables, name));
-writetable(tbl, fullfile(repoRoot, 'tables', name));
-end
-
-function writeLines(pathOut, lines)
-fid = fopen(pathOut, 'w');
-if fid < 0
-    error('run_switching_collapse_breakdown_analysis:WriteFail', 'Cannot write %s', pathOut);
-end
-for i = 1:numel(lines)
-    fprintf(fid, '%s\n', lines{i});
-end
-fclose(fid);
 end
