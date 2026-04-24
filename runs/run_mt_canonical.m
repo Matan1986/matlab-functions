@@ -5,11 +5,8 @@ if fidTopProbe >= 0
     fclose(fidTopProbe);
 end
 
-repoRoot = 'C:/Dev/matlab-functions';
-if exist(repoRoot, 'dir') ~= 7
-    scriptDir = fileparts(mfilename('fullpath'));
-    repoRoot = fileparts(scriptDir);
-end
+scriptDir = fileparts(mfilename('fullpath'));
+repoRoot = fileparts(scriptDir);
 
 addpath(fullfile(repoRoot, 'Aging', 'utils'));
 addpath(fullfile(repoRoot, 'tools'));
