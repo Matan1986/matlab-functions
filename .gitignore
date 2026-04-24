@@ -1,60 +1,177 @@
 # =========================================================
-# IDE / Local settings
+# IDE / OS / Local settings
 # =========================================================
 .vscode/
+.idea/
+.DS_Store
+Thumbs.db
 .matlab_prefs/
+matlab_prefs_agent/
 
 # =========================================================
-# MATLAB temporary files
+# MATLAB temporary / generated files
 # =========================================================
 *.asv
 *.m~
 *.p
+*.mex*
+*.slxc
 .mwhome/
 MathWorks/
 
+# Temporary ad-hoc MATLAB scripts at repo root
+/temp_*.m
+/tmp_*.m
+/untitled.m
+/load_local.m
+/copy_contour_between_open_figures.m
+
 # =========================================================
-# Logs
+# Logs / stdout / stderr / runtime text
 # =========================================================
 *.log
+*_debug_output.txt
+*_test_output.txt
+*_debug_runtime.txt
+*_stdout*.txt
+*_stderr*.txt
+*_probe*.txt
+*VERIFICATION*.txt
+
 matlab_debug*.log
 matlab_final_verify.log
 test_verify_run.log
-
-# =========================================================
-# Temporary / output text
-# =========================================================
-*_debug_output.txt
-*_test_output.txt
 verification_test_output.txt
 diagnostic_output.txt
 output.txt
+verification_log.txt
+verification_results.txt
+validation_check.txt
+wrapper_output.txt
+wrapper_run.txt
+probe_wrapper_log*.txt
+
+# Runtime/status scratch files at repo root
+/run2.exit
+/run_dir_pointer.txt
+/matlab_tasklist.txt
+/kappa2_*_status.txt
+/kappa2_build_status.txt
+/kappa2_audit_status.txt
+/kappa2_phen_audit_inputs_status.txt
+/tatus
 
 # =========================================================
-# Results / generated artifacts
+# Generated results / figures / reports / tables
 # =========================================================
 results/**
 !results/
 !results/README.md
 
+reports/**
+!reports/
+!reports/README.md
+
+figures/**
+!figures/
+!figures/README.md
+
+status/**
+!status/
+!status/README.md
+
+tables/**
+!tables/
+!tables/README.md
+
+tables_old/**
+!tables_old/
+!tables_old/README.md
+
+results_old/
+
+# Module-local generated outputs
 Aging/results/
 Aging/diagnostics/results/
 Aging/tests/**/results/
 Switching ver12/main/Debug/
 
 # =========================================================
-# Reports (generated analysis artifacts)
+# Generated table/report filename guards
 # =========================================================
-reports/**
-!reports/
-!reports/README.md
+tables/*_debug*
+tables/*_probe*
+tables/*_sentinel*
+tables/*_tmp*
+tables/*smoke*
+tables/_*
+tables/*status*
+tables/*audit*
+tables/*mapping*
+tables/*inventory*
+tables/*results*
+tables/*summary*
+tables/*coverage*
+tables/*analysis*
+tables/*validation*
+tables/*metrics*
+tables/*report*
+tables/*_map*
+tables/*_trace*
+tables/*_log*
+tables/*_check*
+tables/*cleanup_debug*
+
+# =========================================================
+# Local scratch / archive / experimental directories
+# =========================================================
+/analysis_new/
+/archive/
+/canonical/
+/junk/
+/tmp/
+/temp/
+/.tmp*/
+/_validation_tmp/
+/logs/
+/probe_outputs/
+/_legacy/
+/tests/
+
+# Keep placeholder docs if intentionally created later
+!analysis_new/README.md
+!archive/README.md
+!canonical/README.md
+!junk/README.md
+!tests/README.md
+
+# =========================================================
+# Local scripts / one-off cleanup / phase scratch
+# =========================================================
+/run_cleanup.ps1
+/execute_artifact_cleanup.ps1
+/run_phase8_*.m
+/run_relaxation_canonical_implementation_check_dirty_backup.m
+/run_xx_relaxation_config2_chain.m
+/run_xx_relaxation_validation.m
+
+# =========================================================
+# scripts/ generated validation artifacts
+# Keep source scripts trackable, ignore generated outputs/docs/tables
+# =========================================================
+scripts/EXECUTION_GUIDE.md
+scripts/VALIDATION_DELIVERABLES.md
+scripts/VALIDATION_REPORT.md
+scripts/VALIDATION_SUMMARY.md
+scripts/*status*.txt
+scripts/*pipeline_compare*.txt
+scripts/*.csv
 
 # =========================================================
 # Local testing files
 # =========================================================
 simple_test.m
 test_*.m
-verification_log.txt
 DIAGNOSTICS_SCAN_REPORT.md
 
 # =========================================================
@@ -63,7 +180,7 @@ DIAGNOSTICS_SCAN_REPORT.md
 Aging old/
 
 # =========================================================
-# Local configuration
+# Local configuration / run paths
 # =========================================================
 runs/localPaths.m
 runs/
@@ -72,17 +189,6 @@ runs/
 # External dependency
 # =========================================================
 General ver2/appearanceControl/altmany-export_fig-3.54.0.0/
-
-# =========================================================
-# Misc
-# =========================================================
-tmp_*
-Debug/
-which_baseline.txt
-Aging/which_baseline.txt
-SAFECORR_PR_DIFF.md
-verification_results.txt
-Aging/verification/probe.txt
 
 # =========================================================
 # AI / Codex temporary files
@@ -102,56 +208,22 @@ snapshot/
 *.tmp.zip
 
 # =========================================================
-# Temp folders
+# Misc repo pollution guards
 # =========================================================
-.tmp*
-tmp/
-temp/
-
-# =========================================================
-# Validation / runtime artifacts
-# =========================================================
-_validation_tmp/
-**/runtime/
-tables/*_debug*
-tables/*_probe*
-tables/*_sentinel*
-tables/*_tmp*
-tables/*smoke*
-tables/_*
-
-# =========================================================
-# MASS GENERATED TABLES (actual behavior)
-# =========================================================
-tables/*status*
-tables/*audit*
-tables/*mapping*
-tables/*inventory*
-tables/*results*
-tables/*summary*
-tables/*coverage*
-tables/*analysis*
-tables/*validation*
-tables/*metrics*
-tables/*report*
-tables/*_map*
-tables/*_trace*
-tables/*_log*
-tables/*_check*
-
-# =========================================================
-# CRITICAL: repo pollution guards
-# =========================================================
-_legacy/
-logs/
-probe_outputs/
-wrapper_run.txt
-matlab_prefs_agent/
-*.fig
-*_debug_runtime.txt
-*_stdout*.txt
-*_stderr*.txt
-*_probe*.txt
+Debug/
+which_baseline.txt
+Aging/which_baseline.txt
+SAFECORR_PR_DIFF.md
+Aging/verification/probe.txt
 kappa2_phen_inputs.mat
-tables/*cleanup_debug*
-*VERIFICATION*.txt
+
+# =========================================================
+# Additional local temp / quarantine artifacts
+# =========================================================
+/analysis/tmp_*.txt
+/tmp_*.txt
+/tmp_*.json
+/tmp_root_cleanup_quarantine/
+
+# Tool-local validation/runtime artifacts
+tools/**/_validation_tmp/
