@@ -40,8 +40,9 @@ See `tables/project_workstream_status.csv` (one row per active workstream).
 
 - Canonical Switching code, canonical run identity, and canonical run registry discoverability now exist.
 - Switching context source metadata is now aligned in `docs/repo_state.json` to canonical entrypoint/run anchors.
-- `docs/context_bundle.json` is a generated artifact and remains pending producer-controlled regeneration approval.
+- Context bundles were regenerated from aligned sources, including the extended model source for Switching metadata.
 - Switching knowledge-system integration remains WEAK because claims, snapshot, context, and query layers are still legacy-weighted, mixed, or non-canonical for Switching.
+- Snapshot, claims, and query propagation remain pending and are not closed by context regeneration.
 - Do not build a new Switching context bundle before micro-integration is planned and executed.
 
 ## Update Protocol

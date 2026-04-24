@@ -64,11 +64,11 @@
 
       "entry_points": [
         "Switching_main.m",
-        "analysis/switching_full_scaling_collapse.m"
+        "Switching/analysis/run_switching_canonical.m"
       ],
 
       "analysis_scripts": [
-        "analysis/switching_full_scaling_collapse.m"
+        "Switching/analysis/run_switching_canonical.m"
       ],
 
       "observables": {
@@ -84,7 +84,7 @@
       },
 
       "known_runs": [
-        "run_2026_03_12_234016_switching_full_scaling_collapse"
+        "run_2026_04_03_000147_switching_canonical"
       ],
 
       "notes": [
