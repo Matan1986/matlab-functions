@@ -1,0 +1,9 @@
+invariant_id,layer,invariant_statement,violation_risk,current_code_evidence,required_enforcement
+INV01,raw,Raw columns T_raw and M_raw are immutable once imported,hidden overwrite of measured truth,MT_main stores smoothed values back into Temp_table and VSM_table,Write raw table before any cleaning and never overwrite
+INV02,processed,Every cleaned point must be traceable to explicit mask/interpolation decision,non-auditable preprocessing,clean_MT_data creates bad_mask Hampel replacements and interpolation without export,Emit cleaning audit counts and index masks per file
+INV03,processed,Cleaning policy must be uniform or explicitly stratified by design,field-dependent bias,clean_MT_data bypasses cleaning when fieldOe<field_threshold,Declare low-field bypass policy and branch metrics
+INV04,derived,Derived scalings M_over_H M_per_mass M_per_Co must never overwrite raw/clean variables,physics-definition conflation,plot functions compute derived values inline from current M vectors,Separate raw clean derived tables
+INV05,segmentation,Segment boundaries must remain stable under small threshold perturbations,fragile branch assignment,segmentation uses threshold constants from MT_main,Add perturbation sweep and stability summary table
+INV06,segmentation,Expected ramp model must not assume uniform time sampling without validation,cadence-dependent mis-segmentation,segment functions use Timems(2)-Timems(1) globally,Precheck time-step regularity or compute local dt model
+INV07,pipeline,Import failures must be explicit and bounded by strict policy,silent partial datasets,importFiles_MT catches and continues after per-file failure,Collect per-file status and fail when required files fail
+INV08,metadata,Mass and field provenance must be explicit and verifiable,derived-scale corruption from filename errors,getFileList_MT parses field and mass from filenames,Add provenance column header-vs-filename check

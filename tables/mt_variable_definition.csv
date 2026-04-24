@@ -1,0 +1,12 @@
+variable_name,layer,canonical_role,definition,source_functions,must_preserve,notes
+M_raw_emu,raw,primary_measured_object,Raw magnetic moment in emu indexed by T_K H_Oe time_s and file_id,importFiles_MT;importOneFile_MT;importOneFile_MT_MPMS,YES,Canonical raw truth
+M_clean_emu,processed,primary_processed_object,Cleaned magnetic moment after mask+interpolation before/after smoothing labeling,clean_MT_data,YES,Must remain traceable to M_raw_emu with parameterized transforms
+M_smooth_emu,processed,aux_processed_object,Smoothed magnetic moment from M_clean_emu (SG and moving average),clean_MT_data,YES,Not a replacement for raw
+T_K,raw,primary_axis,Temperature axis in Kelvin,importFiles_MT;clean_MT_data,YES,Raw and clean forms may differ only by documented mask/interpolation
+H_Oe,raw,primary_axis,Magnetic field axis in Oe,importFiles_MT,YES,Used to derive M_over_H
+time_s,raw,primary_axis,Measurement time axis in seconds,importFiles_MT,YES,Segmentation depends on cadence assumptions
+M_over_H,derived,secondary_observable,Derived susceptibility-like quantity M divided by H,Plots_MT;Plots_MT_combined;plot_MT_2D_maps_segments,NO,Derived only when H != 0
+M_per_mass,derived,secondary_observable,M normalized by mass in g,compute_unitsRatio_MT,NO,Depends on mass provenance
+M_per_Co,derived,secondary_observable,M converted to muB per Co atom for Co1/3TaS2,compute_unitsRatio_MT,NO,Composition-model dependent derived variable
+segment_id,derived,extraction_label,ZFC/FCW segment identifier from temperature-ramp detection,find_increasing_temperature_segments_MT;find_decreasing_temperature_segments_MT,NO,Derived indexing layer
+segment_type,derived,extraction_label,ZFC FCW or other segment class,find_increasing_temperature_segments_MT;find_decreasing_temperature_segments_MT,NO,Not a direct measurement

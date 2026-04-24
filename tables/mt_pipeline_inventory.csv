@@ -1,0 +1,20 @@
+stage,substage,component_type,component_name,file_path,invocation_site,inputs,outputs,notes
+entrypoint,candidate_main,script,MT_main,MT ver2/MT_main.m,manual_run,"hardcoded baseFolder, dir, runtime flags, params struct","in-memory tables, figures",Top-level orchestration script; no run_dir or artifact writes
+entrypoint,alternate_entrys,helper_functions,"Plots_MT; Plots_MT_combined; Plots_MT_Tcuts; plot_MT_2D_maps_segments",MT ver2/*.m,called from MT_main,"Temp_table/VSM_table/segments/units","figures only",No independent orchestration
+discovery,file_listing,function,getFileList_MT,MT ver2/getFileList_MT.m,MT_main,"directory path, color_scheme","fileList, sortedFields, colors, mass",Discovers *.DAT and sorts by field inferred from filename
+metadata,filename_parsing,function,getFileList_MT,MT ver2/getFileList_MT.m,MT_main,"filename tokens","field Oe, mass mg",Field and mass parsed from filename regex; errors if absent
+import,system_detection,function,detect_MT_file_type,MT ver2/detect_MT_file_type.m,MT_main,"folderPath, first filename",systemType (MPMS/PPMS),Reads first file header and falls back by column count
+import,batch_import,function,importFiles_MT,MT ver2/importFiles_MT.m,MT_main,"directory, fileList, sortedFields, MPMS, DC","Time_table, Temp_table, VSM_table, MagneticFieldOe_table",Per-file try/catch continues silently after display message
+import,single_file_ppms,function,importOneFile_MT,MT ver2/importOneFile_MT.m,importFiles_MT,filename,"TimeSec, TemperatureK, MomentEmu, MagneticFieldOe",Uses fixed 50-variable import options
+import,single_file_mpms,function,importOneFile_MT_MPMS,MT ver2/importOneFile_MT_MPMS.m,importFiles_MT,"filename, DC","TimeSec, TemperatureK, MomentEmu, MagneticFieldOe",Dynamic header matching by exact names
+units,conversion,function,compute_unitsRatio_MT,MT ver2/compute_unitsRatio_MT.m,MT_main,"unitsMode, mass",unitsRatio + label,Supports raw/per_mass/per_co variants
+cleaning,outlier_cleaning,function,clean_MT_data,MT ver2/clean_MT_data.m,MT_main,"T_in, M_in, fieldOe, params, Unfiltered","raw/clean/smooth vectors",High-field-only cleaning; low field bypass if field<threshold
+segmentation,increasing_segments,function,find_increasing_temperature_segments_MT,MT ver2/find_increasing_temperature_segments_MT.m,MT_main,"time, filtered_temp, thresholds","cell array [start,end]",Detects monotonic ramps with stabilization checks
+segmentation,decreasing_segments,function,find_decreasing_temperature_segments_MT,MT ver2/find_decreasing_temperature_segments_MT.m,MT_main,"time, filtered_temp, thresholds","cell array [start,end]",Same scheme for cooling ramps
+plotting,per_field_curves,function,Plots_MT,MT ver2/Plots_MT.m,MT_main,"tables, segments, units, plotQuantity","figures",Per-field ZFC/FCW view with global Y limits
+plotting,combined_curves,function,Plots_MT_combined,MT ver2/Plots_MT_combined.m,MT_main,"tables, segments, units, figureMode","figure + legendData",Combined figure; custom legend axes
+plotting,temperature_cuts,function,Plots_MT_Tcuts,MT ver2/Plots_MT_Tcuts.m,MT_main,"tables, increasing segments, target temperatures",figure,Builds M(H) cuts around target temperatures
+plotting,segment_2d_maps,function,plot_MT_2D_maps_segments,MT ver2/plot_MT_2D_maps_segments.m,MT_main,"tables, segments, units, plotQuantity","ZFC/FCW/diff figures",Binning + optional gaussian smoothing
+plotting,missing_call_target,missing_function,plot_MT_2D_maps,MT ver2/(missing),MT_main,"tables, fields, units",N/A,Called when plotAllCurvesOnOneFigure=false but no definition found in repo
+analysis,legacy_fit,function,analysisAndFitt_MT,MT ver2/analysisAndFitt_MT.m,not_called_by_MT_main,"Temp_table, HC_table, sortedFields, smoothing params",fit plot + smoothed_data,Heat-capacity naming mismatch indicates likely reused legacy utility
+external_dependencies,shared_utils,function_calls,"close_all_except_ui_figures; extract_growth_FIB; chooseAutoScalePower","General ver2/*.m",MT_main/Plots_MT_combined,context + vectors,auxiliary metadata/formatting,Cross-module dependencies outside MT ver2

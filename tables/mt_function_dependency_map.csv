@@ -1,0 +1,21 @@
+caller,function_type,callee,callee_location,dependency_class,status,evidence
+MT_main,script,getFileList_MT,MT ver2/getFileList_MT.m,internal,resolved,direct call
+MT_main,script,compute_unitsRatio_MT,MT ver2/compute_unitsRatio_MT.m,internal,resolved,direct call
+MT_main,script,detect_MT_file_type,MT ver2/detect_MT_file_type.m,internal,resolved,direct call
+MT_main,script,importFiles_MT,MT ver2/importFiles_MT.m,internal,resolved,direct call
+MT_main,script,clean_MT_data,MT ver2/clean_MT_data.m,internal,resolved,direct call in per-file loop
+MT_main,script,find_increasing_temperature_segments_MT,MT ver2/find_increasing_temperature_segments_MT.m,internal,resolved,direct call
+MT_main,script,find_decreasing_temperature_segments_MT,MT ver2/find_decreasing_temperature_segments_MT.m,internal,resolved,direct call
+MT_main,script,Plots_MT,MT ver2/Plots_MT.m,internal,resolved,conditional plotting branch
+MT_main,script,Plots_MT_combined,MT ver2/Plots_MT_combined.m,internal,resolved,conditional plotting branch
+MT_main,script,Plots_MT_Tcuts,MT ver2/Plots_MT_Tcuts.m,internal,resolved,conditional plotting branch
+MT_main,script,plot_MT_2D_maps_segments,MT ver2/plot_MT_2D_maps_segments.m,internal,resolved,conditional plotting branch
+MT_main,script,plot_MT_2D_maps,MT ver2/(not found),internal,missing,call exists but implementation absent
+MT_main,script,close_all_except_ui_figures,General ver2/close_all_except_ui_figures.m,external,resolved,utility call at script start
+MT_main,script,extract_growth_FIB,General ver2/extract_growth_FIB.m,external,resolved,metadata extraction call
+Plots_MT,function,buildMagneticYLabel,MT ver2/buildMagneticYLabel.m,internal,resolved,y-axis label construction
+Plots_MT_combined,function,chooseAutoScalePower,General ver2/chooseAutoScalePower.m,external,resolved,auto-scale exponent selection
+importFiles_MT,function,importOneFile_MT,MT ver2/importOneFile_MT.m,internal,resolved,PPMS/non-MPMS path
+importFiles_MT,function,importOneFile_MT_MPMS,MT ver2/importOneFile_MT_MPMS.m,internal,resolved,MPMS path
+plot_MT_2D_maps_segments,function,clean_triplet (local),MT ver2/plot_MT_2D_maps_segments.m,internal,resolved,local subfunction
+analysisAndFitt_MT,function,fit/fittype/sgolayfilt,mATLAB built-ins,builtin,resolved,curve fitting + smoothing

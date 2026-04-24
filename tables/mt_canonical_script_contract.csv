@@ -1,0 +1,13 @@
+contract_id,contract_area,requirement,source_reference,implementation_note,status
+SC01,script_name_location,Future canonical runnable script path is runs/run_mt_canonical.m,Stage1.6 review patch,Adopt runs-path proposal for canonical diagnostic script,VERIFIED
+SC02,pure_script_rule,Runnable script must be pure script with no local functions,docs/repo_execution_rules.md,Move helper logic into separate existing helper files,DEFINED
+SC03,ascii_only,Runnable script must contain only ASCII characters,docs/repo_execution_rules.md,Run non-ASCII check before execution,DEFINED
+SC04,entry_probe,Write execution_probe_top.txt at script start,docs/templates/matlab_run_template.m,Treat as mandatory run-entry signal,DEFINED
+SC05,run_context,Call createRunContext('mt',cfg) to allocate run_dir,docs/templates/matlab_run_template.m,Use run.run_dir for all artifacts,DEFINED
+SC06,run_scoped_artifacts,Create run-scoped tables reports figures subdirectories,docs/templates/matlab_run_template.m,No outputs outside run_dir except allowed pointer file,DEFINED
+SC07,status_artifact,Write execution_status.csv on success and failure,docs/repo_execution_rules.md;docs/templates/matlab_run_template.m,Populate mandatory status columns,DEFINED
+SC08,catch_semantics,In catch write FAILED status then rethrow error,docs/templates/matlab_run_template.m,No silent catch-and-continue for top-level run,DEFINED
+SC09,raw_clean_coexistence,Preserve raw and clean columns side-by-side in canonical tables,Stage1.5 physics audit position,Do not overwrite imported vectors with smoothed vectors,DEFINED
+SC10,diagnostic_boundary,First canonical script is diagnostic and must emit blockers without production-physics claims,Stage1.6 review patch,Use explicit diagnostic readiness vs production readiness verdicts,DEFINED
+SC11,strict_import_policy,Per-file import failures must be tabulated and enforced by threshold,Stage1.5 blockers from importFiles_MT,Replace silent continue behavior with strict policy in wrapper logic,BLOCKED_BY_CURRENT_HELPER_BEHAVIOR
+SC12,forbidden_branch,Do not execute missing plot_MT_2D_maps branch until repaired,MT_main dependency gap,Use only validated plotting helpers for diagnostics,BLOCKED
