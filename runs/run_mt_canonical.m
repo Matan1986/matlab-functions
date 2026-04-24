@@ -40,6 +40,53 @@ cfg.segmentation.temp_rate = 3;
 cfg.segmentation.temp_stabilization_window = 10;
 cfg.segmentation.min_segment_length_temp = 50;
 
+configLoadedFlag = false;
+configPathUsed = '';
+
+localCfgPath = fullfile(repoRoot, 'local', 'mt_canonical_config.m');
+if exist(localCfgPath, 'file') == 2
+    run(localCfgPath);
+    if exist('mt_canonical_config', 'var') && isstruct(mt_canonical_config)
+        u = mt_canonical_config;
+        ufn = fieldnames(u);
+        for ii = 1:numel(ufn)
+            key = ufn{ii};
+            if strcmp(key, 'cleaning')
+                if isstruct(u.cleaning)
+                    sf = fieldnames(u.cleaning);
+                    for jj = 1:numel(sf)
+                        cfg.cleaning.(sf{jj}) = u.cleaning.(sf{jj});
+                    end
+                end
+            elseif strcmp(key, 'segmentation')
+                if isstruct(u.segmentation)
+                    sf = fieldnames(u.segmentation);
+                    for jj = 1:numel(sf)
+                        cfg.segmentation.(sf{jj}) = u.segmentation.(sf{jj});
+                    end
+                end
+            else
+                cfg.(key) = u.(key);
+            end
+        end
+        if numel(ufn) > 0
+            configLoadedFlag = true;
+            configPathUsed = char(string(localCfgPath));
+        end
+        clear mt_canonical_config;
+    end
+end
+
+if configLoadedFlag
+    configLoadedStr = "YES";
+else
+    configLoadedStr = "NO";
+end
+configPathReport = '';
+if configLoadedFlag
+    configPathReport = configPathUsed;
+end
+
 run = struct();
 try
     run = createRunContext('mt', cfg);
@@ -271,6 +318,8 @@ try
 
     metricCol = [ ...
         "RUN_ID"; ...
+        "CONFIG_LOADED"; ...
+        "CONFIG_PATH"; ...
         "INPUT_DIR"; ...
         "DAT_FILE_COUNT"; ...
         "IMPORTED_OK"; ...
@@ -288,6 +337,8 @@ try
 
     valueCol = [ ...
         string(run.run_id); ...
+        configLoadedStr; ...
+        string(configPathReport); ...
         string(inputDir); ...
         string(datCount); ...
         string(importedOk); ...
@@ -318,6 +369,8 @@ try
     fprintf(fidReport, '# MT Canonical Diagnostic Run Report\n\n');
     fprintf(fidReport, '- RUN_ID: %s\n', run.run_id);
     fprintf(fidReport, '- RUN_DIR: %s\n', run.run_dir);
+    fprintf(fidReport, '- CONFIG_LOADED=%s\n', char(configLoadedStr));
+    fprintf(fidReport, '- CONFIG_PATH=%s\n', configPathReport);
     fprintf(fidReport, '- INPUT_DIR: %s\n', inputDir);
     fprintf(fidReport, '- DAT_FILE_COUNT: %d\n', datCount);
     fprintf(fidReport, '- IMPORTED_OK: %d\n', importedOk);

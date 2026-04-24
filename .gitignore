@@ -186,6 +186,8 @@ Aging old/
 # =========================================================
 runs/localPaths.m
 runs/
+# MT canonical operator config (machine-specific paths; optional)
+/local/mt_canonical_config.m
 
 # =========================================================
 # External dependency
