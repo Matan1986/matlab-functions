@@ -135,6 +135,18 @@ grid(ax2, 'off');
 
 set(ax1, 'XTickLabel', []);
 
+% Keep two-panel layout while reserving room for a shared colorbar.
+pos1 = ax1.Position;
+pos2 = ax2.Position;
+ax1.Position = [pos1(1), pos1(2), pos1(3) - 0.06, pos1(4)];
+ax2.Position = [pos2(1), pos2(2), pos2(3) - 0.06, pos2(4)];
+
+colormap(hFig, cmap);
+clim(ax2, [tpMin tpMax]);
+cb = colorbar(ax2, 'eastoutside');
+cb.Label.String = 'T_p (K)';
+cb.Position = [0.88, 0.11, 0.02, 0.815];
+
 figPng = fullfile(figDir, 'aging_direct_summary_vs_Tp.png');
 figFig = fullfile(figDir, 'aging_direct_summary_vs_Tp.fig');
 saveas(hFig, figPng);
