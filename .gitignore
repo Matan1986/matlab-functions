@@ -106,6 +106,7 @@ tables/*_tmp*
 tables/*smoke*
 tables/_*
 tables/*status*
+!tables/project_workstream_status.csv
 tables/*audit*
 tables/*mapping*
 tables/*inventory*

@@ -27,10 +27,10 @@
                     "Switching":  {
                                       "path":  "Switching/",
                                       "entry_points":  [
-                                                           "analysis/switching_full_scaling_collapse.m"
+                                                           "Switching/analysis/run_switching_canonical.m"
                                                        ],
                                       "analysis_scripts":  [
-                                                               "analysis/switching_full_scaling_collapse.m"
+                                                               "Switching/analysis/run_switching_canonical.m"
                                                            ],
                                       "observables":  {
                                                           "core":  [
@@ -44,7 +44,7 @@
                                                                       ]
                                                       },
                                       "known_runs":  [
-                                                         "run_2026_03_10_112659_alignment_audit"
+                                                         "run_2026_04_03_000147_switching_canonical"
                                                      ]
                                   },
                     "Relaxation":  {

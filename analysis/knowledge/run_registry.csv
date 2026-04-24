@@ -521,3 +521,4 @@
 "run_legacy_test_logs","switching","results\switching\runs\run_legacy_test_logs","","","","","","","0",""
 "run_legacy_XI_Xshape_analysis","switching","results\switching\runs\run_legacy_XI_Xshape_analysis","tables/mode_space_directions.csv;tables/XI_Xshape_regression_metrics.csv","reports/XI_Xshape_analysis_report.md","","","","","0",""
 "run_TRI_collapse_diagnostics","aging","results\aging\runs\run_TRI_collapse_diagnostics","tables/collapse_quality_metrics.csv;tables/collapse_variance_profiles.csv;tables/svd_spectra_by_tp.csv","reports/tri_collapse_diagnostics_report.md","","","","","0",""
+"run_2026_04_03_000147_switching_canonical","switching","results\switching\runs\run_2026_04_03_000147_switching_canonical","","","","","","","0","canonical_identity_anchor"
