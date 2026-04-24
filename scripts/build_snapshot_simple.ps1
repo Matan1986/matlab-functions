@@ -147,6 +147,37 @@ function Build-Bundle {
     Write-Output ("Built: " + $FileName)
 }
 
+function Add-FileMappingWithPolicy {
+    param(
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [System.Collections.ArrayList]$Mappings,
+        [Parameter(Mandatory = $true)]
+        [string]$RepoRoot,
+        [Parameter(Mandatory = $true)]
+        [string]$RelativePath,
+        [Parameter(Mandatory = $true)]
+        [string]$DestPrefix,
+        [Parameter(Mandatory = $true)]
+        [bool]$Essential
+    )
+
+    $fullPath = Join-Path $RepoRoot $RelativePath
+    if (Test-Path -LiteralPath $fullPath) {
+        [void]$Mappings.Add(@{
+            Source = $fullPath
+            DestPrefix = $DestPrefix
+        })
+        return
+    }
+
+    if ($Essential) {
+        throw ("Essential snapshot_control file missing: " + $RelativePath)
+    }
+
+    Write-Warning ("Optional snapshot_control file missing: " + $RelativePath)
+}
+
 function Get-ExperimentFolders {
     param(
         [Parameter(Mandatory = $true)]
@@ -226,6 +257,33 @@ try {
         }
     }
 
+    $controlMappings = [System.Collections.ArrayList]::new()
+    $controlFiles = @(
+        @{ RelativePath = 'docs\project_control_board.md'; DestPrefix = 'docs/project_control_board.md'; Essential = $true },
+        @{ RelativePath = 'tables\project_workstream_status.csv'; DestPrefix = 'tables/project_workstream_status.csv'; Essential = $true },
+        @{ RelativePath = 'docs\context_bundle.json'; DestPrefix = 'docs/context_bundle.json'; Essential = $true },
+        @{ RelativePath = 'docs\context_bundle_full.json'; DestPrefix = 'docs/context_bundle_full.json'; Essential = $false },
+        @{ RelativePath = 'docs\repo_state.json'; DestPrefix = 'docs/repo_state.json'; Essential = $true },
+        @{ RelativePath = 'docs\system_master_plan.md'; DestPrefix = 'docs/system_master_plan.md'; Essential = $false },
+        @{ RelativePath = 'docs\infrastructure_laws.md'; DestPrefix = 'docs/infrastructure_laws.md'; Essential = $false },
+        @{ RelativePath = 'docs\AGENT_RULES.md'; DestPrefix = 'docs/AGENT_RULES.md'; Essential = $false },
+        @{ RelativePath = 'docs\system_registry.json'; DestPrefix = 'docs/system_registry.json'; Essential = $false },
+        @{ RelativePath = 'analysis\knowledge\run_registry.csv'; DestPrefix = 'analysis/knowledge/run_registry.csv'; Essential = $false },
+        @{ RelativePath = 'tables\switching_canonical_identity.csv'; DestPrefix = 'tables/switching_canonical_identity.csv'; Essential = $false },
+        @{ RelativePath = 'tables\module_canonical_status.csv'; DestPrefix = 'tables/module_canonical_status.csv'; Essential = $false }
+    )
+
+    foreach ($controlFile in $controlFiles) {
+        Add-FileMappingWithPolicy `
+            -Mappings $controlMappings `
+            -RepoRoot $repoRoot `
+            -RelativePath $controlFile.RelativePath `
+            -DestPrefix $controlFile.DestPrefix `
+            -Essential ([bool]$controlFile.Essential)
+    }
+
+    Build-Bundle -FileName 'snapshot_control.zip' -Mappings $controlMappings
+
     Build-Bundle -FileName 'snapshot_core.zip' -Mappings @(
         @{
             Source = (Join-Path $repoRoot 'docs\repo_state.json')
@@ -289,6 +347,14 @@ try {
 
     $readmePath = Join-Path $outDir 'README.txt'
     @'
+READ FIRST (external agent handoff)
+
+1) Start with snapshot_control.zip.
+2) Read docs/project_control_board.md and tables/project_workstream_status.csv first.
+3) Context bundles are navigation/state artifacts, not evidence closure.
+4) Scientific graph, claims, and query integration may be partial for canonical Switching.
+5) Do not treat claims/snapshot/query outputs as canonical unless control board and workstream status explicitly say so.
+
 snapshot_simple bundle guide
 
 snapshot_core.zip
