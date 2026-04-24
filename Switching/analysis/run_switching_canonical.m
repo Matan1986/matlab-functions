@@ -1,9 +1,6 @@
 clearvars -except modules_used_input switching_batch_inputs
 clc
 
-assert(~contains(path, 'analysis_new'), ...
-  'analysis_new must not be on MATLAB path');
-
 % Repo root for catch-path createRunContext (no hardcoded drive paths).
 repoRootBootstrap = fileparts(fileparts(fileparts(mfilename('fullpath'))));
 addpath(fullfile(repoRootBootstrap, 'tools'));
@@ -27,6 +24,8 @@ try
     disp('SCRIPT_ENTERED');
 
     restoredefaultpath;
+    assert(~contains(path, 'analysis_new'), ...
+        'analysis_new must not be on MATLAB path');
     addpath(fullfile(repoRoot, 'tools'));
     addpath(fullfile(repoRoot, 'Aging', 'utils'));
     if exist(fullfile(repoRoot, 'Aging', 'utils'), 'dir') ~= 7
@@ -599,6 +598,16 @@ try
     write_execution_marker('STAGE_BEFORE_OUTPUTS', runDir);
 
     atomic_writetable(SLong, fullfile(tablesDir, 'switching_canonical_S_long.csv'));
+    pSL = fullfile(tablesDir, 'switching_canonical_S_long.csv');
+    optMetaSL = struct();
+    optMetaSL.table_name = 'switching_canonical_S_long.csv';
+    optMetaSL.expected_role = 'canonical_raw_long';
+    optMetaSL.producer_script = 'Switching/analysis/run_switching_canonical.m';
+    optMetaSL.source_run_id = char(string(run.run_id));
+    optMetaSL.lineage_tags = {'switching_canonical_export', 'measured_S_rows', 'pt_cdf_columns'};
+    optMetaSL.valid_contexts = {'canonical_collapse'};
+    optMetaSL.forbidden_transformations = cell(1, 0);
+    switchingWriteCanonicalCsvSidecar({pSL}, repoRoot, optMetaSL);
 
     linO = (1:numel(Speak))';
     [iTo, iCo] = ind2sub(size(Speak), linO);
@@ -643,6 +652,16 @@ try
     PhiTbl = table(currents(iIp), chPhi, channel_type, phi1(linP), ...
         'VariableNames', {'current_mA', 'switching_channel_physical', 'channel_type', 'Phi1'});
     atomic_writetable(PhiTbl, fullfile(tablesDir, 'switching_canonical_phi1.csv'));
+    pPhi = fullfile(tablesDir, 'switching_canonical_phi1.csv');
+    optMetaPhi = struct();
+    optMetaPhi.table_name = 'switching_canonical_phi1.csv';
+    optMetaPhi.expected_role = 'phi1_shape';
+    optMetaPhi.producer_script = 'Switching/analysis/run_switching_canonical.m';
+    optMetaPhi.source_run_id = char(string(run.run_id));
+    optMetaPhi.lineage_tags = {'switching_canonical_export', 'phi1_mode_shape'};
+    optMetaPhi.valid_contexts = {'canonical_collapse'};
+    optMetaPhi.forbidden_transformations = cell(1, 0);
+    switchingWriteCanonicalCsvSidecar({pPhi}, repoRoot, optMetaPhi);
 
     validationTbl = table( ...
         CHECK_NO_PRECOMPUTED_INPUTS, STRUCTURAL_VALID, ...

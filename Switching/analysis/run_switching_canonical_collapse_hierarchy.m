@@ -160,8 +160,13 @@ try
 
     % Level 0: backbone.
     pred0 = Bmap;
-    % Level 1: backbone + kappa1*phi1.
-    pred1 = pred0 + kappa1(:) * phi1Vec(:)';
+    % Level 1: backbone + kappa1 along the residual SVD axis mode1 = V(:,1) of (Smap - Bmap).
+    % switching_mode_amplitudes_vs_T.csv stores kappa1 as (Rfill * mode1), i.e. the LS scalar for
+    %   representing each temperature row of Rfill = (Smap - Bmap) along +mode1.
+    % switching_canonical_phi1.csv is aggregated to phi1Vec on allI and L2-normalized; for gated
+    %   canonical inputs, reconstruction audit shows phi1Vec is anti-parallel to mode1 (|cos| = 1).
+    % Therefore use pred0 - kappa1*phi1Vec' to realize +kappa1*mode1 without mutating sidecars.
+    pred1 = pred0 - kappa1(:) * phi1Vec(:)';
     % Level 2: derive phi2 from residual SVD and apply kappa2 amplitude.
     R1 = Smap - pred1;
     R1z = R1;
@@ -244,6 +249,11 @@ try
     lines{end+1} = '- canonical_context = canonical_collapse';
     lines{end+1} = '- old width-based collapse table excluded.';
     lines{end+1} = '';
+    lines{end+1} = '## Phi1 / kappa1 sign convention (documented)';
+    lines{end+1} = '- kappa1 is the LS coefficient along mode1 from svd(Smap - Bmap) in the residual-mode producer.';
+    lines{end+1} = '- Exported canonical phi1Vec (aggregated, unit L2) is anti-parallel to that mode1 for this gate.';
+    lines{end+1} = '- Level-1 prediction: pred1 = pred0 - kappa1*phi1Vec''  (equivalent to pred0 + kappa1*mode1).';
+    lines{end+1} = '';
     lines{end+1} = '## Final Verdicts';
     lines{end+1} = '- NEW_SCRIPT_CREATED = YES';
     lines{end+1} = '- OLD_WIDTH_COLLAPSE_EXCLUDED = YES';
@@ -254,6 +264,7 @@ try
     lines{end+1} = '- DOMINANCE_METRICS_COMPUTED = YES';
     lines{end+1} = '- WIDTH_SCALING_USED = NO';
     lines{end+1} = '- NO_REFACTOR_PERFORMED = YES';
+    lines{end+1} = '- PHI1_SIGN_FIX_APPLIED = YES';
     switchingWriteTextLinesFile(fullfile(runReports, 'switching_canonical_collapse_hierarchy.md'), lines, 'run_switching_canonical_collapse_hierarchy:WriteFail');
     switchingWriteTextLinesFile(fullfile(repoRoot, 'reports', 'switching_canonical_collapse_hierarchy.md'), lines, 'run_switching_canonical_collapse_hierarchy:WriteFail');
 
