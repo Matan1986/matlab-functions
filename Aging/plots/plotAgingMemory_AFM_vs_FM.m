@@ -1,4 +1,23 @@
-function plotAgingMemory_AFM_vs_FM(pauseRuns, fontsize, showErrors, normalizeAFM_FM)
+function plotAgingMemory_AFM_vs_FM(pauseRuns, fontsize, showErrors, normalizeAFM_FM, cfg)
+% ============================================================
+% DIAGNOSTIC PLOT - AFM/FM vs Tp
+%
+% This function provides a simple visualization of AFM and FM
+% metrics for debugging and inspection purposes.
+%
+% ------------------------------------------------------------
+% STATUS:
+% - NOT the canonical figure for publication
+% - NOT the default direct decomposition visualization
+%
+% The canonical paper-ready figure should be generated using
+% a styled plot based on DIRECT observables (AFM_RMS, FM_direct).
+%
+% ------------------------------------------------------------
+% USE CASE:
+% - quick inspection
+% - debugging
+% ============================================================
 % =========================================================
 % plotAgingMemory_AFM_vs_FM
 %
@@ -10,6 +29,8 @@ function plotAgingMemory_AFM_vs_FM(pauseRuns, fontsize, showErrors, normalizeAFM
 %   fontsize        - base font size
 %   showErrors      - toggle error bars
 %   normalizeAFM_FM - normalize AFM/FM axes if true
+%   cfg             - optional config struct (uses existing fields only):
+%                     AFM_metric_main, allowSignedFM
 %
 % OUTPUTS:
 %   none (creates figure)
@@ -30,12 +51,17 @@ end
 if nargin < 4 || isempty(normalizeAFM_FM)
     normalizeAFM_FM = false;
 end
+if nargin < 5 || isempty(cfg)
+    cfg = struct();
+end
 
 %% ---------------- Extract pause temperatures ----------------
 Tp = [pauseRuns.waitK];
 
 %% ---------------- Determine AFM dip metric ----------------
-if isfield(pauseRuns,'dipMetric')
+if isfield(cfg, 'AFM_metric_main') && ~isempty(cfg.AFM_metric_main)
+    dipMetric = lower(string(cfg.AFM_metric_main));
+elseif isfield(pauseRuns,'dipMetric')
     dipMetric = lower(string(pauseRuns(1).dipMetric));
 else
     dipMetric = "height";   % fallback for legacy runs
@@ -44,27 +70,67 @@ end
 switch dipMetric
     case "height"
         AFM_val     = [pauseRuns.AFM_amp];
-        AFM_val_err = [pauseRuns.AFM_amp_err];
+        if isfield(pauseRuns, 'AFM_amp_err')
+            AFM_val_err = [pauseRuns.AFM_amp_err];
+        else
+            AFM_val_err = NaN(size(AFM_val));
+        end
         AFM_label   = 'AFM dip height';
     case "area"
         AFM_val     = [pauseRuns.AFM_area];
-        AFM_val_err = [pauseRuns.AFM_area_err];
+        if isfield(pauseRuns, 'AFM_area_err')
+            AFM_val_err = [pauseRuns.AFM_area_err];
+        else
+            AFM_val_err = NaN(size(AFM_val));
+        end
         AFM_label   = 'AFM dip area';
+    case "rms"
+        % RMS: canonical direct AFM observable
+        AFM_val     = [pauseRuns.AFM_RMS];
+        AFM_val_err = NaN(size(AFM_val));
+        AFM_label   = 'AFM dip RMS';
     otherwise
         error('Unknown dipMetric: %s', dipMetric);
 end
 
 %% ---------------- FM data ----------------
-FM_step = [pauseRuns.FM_step_mag];
+useSignedFM = true;  % default preserves historical signed FM plotting
+if isfield(cfg, 'allowSignedFM') && ~isempty(cfg.allowSignedFM)
+    useSignedFM = logical(cfg.allowSignedFM);
+end
 
-FM_err = NaN(size(FM_step));
+FM_err = NaN(1, numel(pauseRuns));
+if useSignedFM
+    if isfield(pauseRuns, 'FM_signed')
+        FM_step = [pauseRuns.FM_signed];
+    elseif isfield(pauseRuns, 'FM_step_raw')
+        FM_step = [pauseRuns.FM_step_raw];
+    else
+        FM_step = [pauseRuns.FM_step_mag];
+    end
+    FM_label = 'FM step';
+else
+    if isfield(pauseRuns, 'FM_abs')
+        FM_step = [pauseRuns.FM_abs];
+    elseif isfield(pauseRuns, 'FM_step_mag')
+        FM_step = abs([pauseRuns.FM_step_mag]);
+    else
+        FM_step = abs([pauseRuns.FM_step_raw]);
+    end
+    FM_label = 'FM step magnitude';
+end
+
 if isfield(pauseRuns,'FM_step_err')
     FM_err = [pauseRuns.FM_step_err];
 end
 
 %% ---------------- Valid masks ----------------
 validAFM = isfinite(Tp) & isfinite(AFM_val);
-validFM  = isfinite(Tp) & isfinite(FM_step);
+pipelineValidFM = true(size(Tp));
+if isfield(pauseRuns, 'FM_plateau_valid')
+    pipelineValidFM = logical([pauseRuns.FM_plateau_valid]);
+end
+validFM  = isfinite(Tp) & isfinite(FM_step) & pipelineValidFM;
 
 %% ---------------- Optional normalization ----------------
 if normalizeAFM_FM
@@ -137,9 +203,9 @@ xlim(xlim_common);
 xlabel('Pause temperature T_p (K)');
 
 if normalizeAFM_FM
-    ylabel('FM step (norm.)');
+    ylabel([FM_label ' (norm.)']);
 else
-    ylabel('FM step');
+    ylabel(FM_label);
 end
 
 box on;

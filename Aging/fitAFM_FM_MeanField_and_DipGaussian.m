@@ -1,4 +1,31 @@
 function pauseRuns = fitAFM_FM_MeanField_and_DipGaussian(pauseRuns, dip_window_K, opts)
+% ============================================================
+% AGING MODULE - CLARITY HEADER
+%
+% ROLE:
+% Legacy standalone fit method (mean-field FM + Gaussian dip).
+%
+% DECOMPOSITION TYPE:
+% LEGACY
+%
+% STAGE:
+% other
+%
+% DOES:
+% - fit mean-field FM background and Gaussian dip components
+% - produce DeltaM_fit_total and legacy fit parameter fields
+%
+% DOES NOT:
+% - participate in Main_Aging default pipeline routing
+% - define default stage6 AFM_like / FM_like observables
+%
+% AFFECTS SUMMARY OBSERVABLES:
+% NO
+%
+% NOTES:
+% This file is part of a multi-decomposition system.
+% It does not define the canonical observable by itself unless stated.
+% ============================================================
 % fitAFM_FM_MeanField_and_DipGaussian
 % ------------------------------------------------------------
 % FM component  : Mean-field step model
@@ -51,8 +78,9 @@ for i = 1:numel(pauseRuns)
         isfield(pauseRuns(i),'DeltaM_sharp');
 
     %% =======================================================
-    %% (1) FM — Mean Field
+    %% (1) FM - Mean Field
     %% =======================================================
+    % [LEGACY]
     FM_curve  = zeros(size(T));
     FM_params = [NaN NaN NaN];
 
@@ -101,8 +129,9 @@ for i = 1:numel(pauseRuns)
     end
 
     %% =======================================================
-    %% (2) Dip — Gaussian
+    %% (2) Dip - Gaussian
     %% =======================================================
+    % [LEGACY]
     Dip_curve  = zeros(size(T));
     Dip_params = [NaN NaN NaN];
 

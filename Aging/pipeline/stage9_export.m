@@ -55,7 +55,12 @@ prettyNames = {'Pause T (K)', ...
     'DeltaM definition', ...
     'FM definition'};
 
-%% --- Always show summary table figure ---
+showSummaryTableFigure = true;
+if isfield(cfg, 'showStage9SummaryTable') && ~isempty(cfg.showStage9SummaryTable)
+    showSummaryTableFigure = logical(cfg.showStage9SummaryTable);
+end
+
+%% --- Optional summary table figure ---
 tblData = table2cell(summaryTbl);
 
 % Convert numeric columns to scientific notation
@@ -63,17 +68,19 @@ tblData(:,2) = convertToScientificStr(summaryTbl.DeltaM_atPause, 3);
 tblData(:,3) = convertToScientificStr(summaryTbl.DeltaM_localMin, 3);
 tblData(:,4) = convertToScientificStr(summaryTbl.T_localMin_K, 3);
 
-% Create table figure (ALWAYS)
-f_tbl = figure('Color','w','Name','DeltaM Summary Table');
-t = uitable('Parent', f_tbl, ...
-    'Data', tblData, ...
-    'ColumnName', prettyNames, ...
-    'Units','normalized', ...
-    'Position',[0 0 1 1]);
+f_tbl = [];
+if showSummaryTableFigure
+    f_tbl = figure('Color','w','Name','DeltaM Summary Table');
+    t = uitable('Parent', f_tbl, ...
+        'Data', tblData, ...
+        'ColumnName', prettyNames, ...
+        'Units','normalized', ...
+        'Position',[0 0 1 1]);
 
-set(t, 'FontSize', 14, ...
-    'RowStriping', 'on', ...
-    'ColumnWidth', {130,130,130,150,260,220});
+    set(t, 'FontSize', 14, ...
+        'RowStriping', 'on', ...
+        'ColumnWidth', {130,130,130,150,260,220});
+end
 
 agingMode = '';
 if isfield(cfg, 'agingMetricMode') && ~isempty(cfg.agingMetricMode)
@@ -113,7 +120,7 @@ end
 
 switch lower(cfg.saveTableMode)
     case 'none'
-        % do nothing (table already shown)
+        % do nothing
 
     case 'excel'
         outFile = fullfile(cfg.outputFolder, sprintf('%s_AgingSummary.xlsx', cfg.sample_name));
@@ -121,18 +128,28 @@ switch lower(cfg.saveTableMode)
         fprintf('Saved summary table to %s\n', outFile);
 
     case 'figure'
-        outFig = fullfile(cfg.outputFolder, sprintf('%s_AgingSummary.fig', cfg.sample_name));
-        savefig(f_tbl, outFig);
-        fprintf('Saved table figure to %s\n', outFig);
+        if isempty(f_tbl)
+            warning('stage9_export:NoSummaryTableFigure', ...
+                'saveTableMode=\"figure\" requested but summary table figure is disabled.');
+        else
+            outFig = fullfile(cfg.outputFolder, sprintf('%s_AgingSummary.fig', cfg.sample_name));
+            savefig(f_tbl, outFig);
+            fprintf('Saved table figure to %s\n', outFig);
+        end
 
     case 'both'
         outFile = fullfile(cfg.outputFolder, sprintf('%s_AgingSummary.xlsx', cfg.sample_name));
         writetable(summaryTbl, outFile);
 
-        outFig = fullfile(cfg.outputFolder, sprintf('%s_AgingSummary.fig', cfg.sample_name));
-        savefig(f_tbl, outFig);
+        if isempty(f_tbl)
+            warning('stage9_export:NoSummaryTableFigure', ...
+                'saveTableMode=\"both\" requested but summary table figure is disabled; saving Excel only.');
+        else
+            outFig = fullfile(cfg.outputFolder, sprintf('%s_AgingSummary.fig', cfg.sample_name));
+            savefig(f_tbl, outFig);
 
-        fprintf('Saved Excel + FIG in %s\n', cfg.outputFolder);
+            fprintf('Saved Excel + FIG in %s\n', cfg.outputFolder);
+        end
 
     otherwise
         warning('Unknown saveTableMode "%s". Use none|figure|excel|both.', cfg.saveTableMode);

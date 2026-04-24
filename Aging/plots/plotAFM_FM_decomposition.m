@@ -1,9 +1,48 @@
 function plotAFM_FM_decomposition(pauseRun, fontsize)
+% ============================================================
+% AGING MODULE - CLARITY HEADER
+%
+% ROLE:
+% Diagnostic visualization for direct smooth/residual decomposition.
+%
+% DECOMPOSITION TYPE:
+% DIRECT
+%
+% STAGE:
+% other
+%
+% DOES:
+% - plot DeltaM with DeltaM_smooth and DeltaM_sharp for a single run
+% - visualize direct decomposition representation
+%
+% DOES NOT:
+% - define stage6 summary observables
+% - represent the default AFM_like / FM_like summary source
+%
+% AFFECTS SUMMARY OBSERVABLES:
+% NO
+%
+% NOTES:
+% This file is part of a multi-decomposition system.
+% It does not define the canonical observable by itself unless stated.
+% ============================================================
 % =========================================================
 % plotAFM_FM_decomposition
 %
 % PURPOSE:
 %   Plot DeltaM decomposition into FM-like smooth background and AFM-like dip.
+%
+% This function plots a single-run decomposition:
+%
+%   DeltaM(T) = DeltaM_smooth(T) + DeltaM_sharp(T)
+%
+% This is:
+%   - a function-level decomposition
+%   - used for analysis/debugging
+%
+% This is NOT:
+%   - the AFM/FM summary vs pause temperature
+%   - NOT a basic plotting target
 %
 % INPUTS:
 %   pauseRun  - struct with fields T_common, DeltaM, DeltaM_smooth, DeltaM_sharp
@@ -56,6 +95,7 @@ else
     Tmax = max(T);
 end
 
+% [DIRECT_DECOMPOSITION]
 % ------------------------------------------------------------
 % Figure
 % ------------------------------------------------------------

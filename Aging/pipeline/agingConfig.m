@@ -21,6 +21,8 @@ cfg.useAutoYScale = true;
 cfg.RobustnessCheck = false;
 cfg.doPlotting = true;
 cfg.diagnosticsVerbose = false;
+cfg.enableDiagnosticPlots = false;
+cfg.mode = 'default';  % 'default' | 'basic_plots'
 
 % --- Metric mode selection ---
 % agingMetricMode options: 'direct' | 'model' | 'fit' | 'derivative' | 'extrema_smoothed'
@@ -29,6 +31,7 @@ cfg.switchingMetricMode = 'direct';
 cfg.enableStage7 = false;
 
 cfg.AFM_metric_main = 'area';
+cfg.AFM_percentile = 90;
 cfg.doFit_MF_Gaussian = true;
 cfg.normalizeAFM_FM = true;
 cfg.allowSignedFM = true;   % default: legacy magnitude-only
@@ -81,6 +84,7 @@ cfg.offsetValue = 120;
 
 cfg.saveTableMode = 'none';
 cfg.outputFolder = '';
+cfg.showStage9SummaryTable = true;
 
 % --- Debug ---
 cfg.debug = struct();

@@ -1,4 +1,166 @@
+% ============================================================
+% FM DEFINITION - DIRECT DECOMPOSITION (DEFAULT)
+%
+% Within the direct (non-fit) decomposition framework,
+% the FM (background) is estimated using a plateau-based method:
+%
+%   FM = difference between left and right plateaus
+%
+% Terminology:
+%   DIRECT_FM_DEFAULT = plateau-based
+%
+% ------------------------------------------------------------
+% RATIONALE:
+%
+% This choice provides a simple and physically interpretable
+% baseline using only regions of the signal outside the dip.
+%
+% More complex alternatives (e.g. derivative-based or robust
+% baseline estimation) exist, but are not used as the default.
+%
+% ------------------------------------------------------------
+% SCOPE:
+%
+% This definition applies ONLY within the direct decomposition.
+% It does NOT define FM globally across other frameworks
+% such as Gaussian fitting.
+%
+% ------------------------------------------------------------
+% NOTE:
+%
+% This is a default choice for consistency and interpretability,
+% not a claim of optimality.
+%
+% ============================================================
+% ============================================================
+% AFM OBSERVABLE - DIRECT DECOMPOSITION (CANONICAL CHOICE)
+%
+% Within the direct (non-fit) decomposition framework:
+%
+%   AFM_direct = sqrt(mean(dip.^2))
+%
+% ------------------------------------------------------------
+% SCOPE:
+%
+% This definition applies ONLY to the direct decomposition.
+% It does NOT define AFM globally across other frameworks
+% such as Gaussian fitting.
+%
+% This definition applies only within the direct (non-fit) decomposition framework.
+% It does NOT imply a global choice over other methods such as Gaussian fitting.
+%
+% ------------------------------------------------------------
+% RATIONALE:
+%
+% Multiple AFM definitions were tested:
+%   - amplitude (min)
+%   - area (integral)
+%   - RMS
+%   - window-based
+%
+% A stability analysis across:
+%   - FM definitions
+%   - smoothing parameters
+%   - dip window
+%   - additive noise
+%
+% showed that RMS(dip) is the most stable observable.
+%
+% ------------------------------------------------------------
+% INTERPRETATION:
+%
+% RMS(dip) captures the distributed magnitude of the dip,
+% making it less sensitive to local noise and baseline errors.
+%
+% ------------------------------------------------------------
+% NOTE:
+%
+% This choice is empirical and based on stability,
+% not a fundamental physical requirement.
+%
+% See:
+% reports/aging/afm_observable_selection_report.md
+%
+% Future option:
+% AFM may be normalized by range or FM for dimensionless form
+%
+% ============================================================
 function result = analyzeAFM_FM_derivative(T, dM, Tp, cfg)
+% ============================================================
+% AGING MODULE - CLARITY HEADER
+%
+% ROLE:
+% Derivative-assisted stage4 method that reuses direct decomposition.
+%
+% DECOMPOSITION TYPE:
+% DERIVATIVE
+%
+% STAGE:
+% stage4
+%
+% DOES:
+% - reuse direct decomposition outputs for AFM metrics and dip fields
+% - add d(DeltaM_smooth)/dT diagnostics
+% - redefine FM_step_raw from median levels outside dip window
+%
+% DOES NOT:
+% - define final stage6 AFM_like / FM_like summary observables
+% - replace stage5 fit-derived summary metrics in the default path
+%
+% AFFECTS SUMMARY OBSERVABLES:
+% INDIRECT
+%
+% NOTES:
+% This file is part of a multi-decomposition system.
+% It does not define the canonical observable by itself unless stated.
+% ============================================================
+% ============================================================
+% DIRECT DECOMPOSITION FAMILY - CANONICAL DOCUMENTATION
+%
+% OVERVIEW:
+% All direct methods share the same physical structure:
+%   DeltaM(T) = smooth background (FM-like) + dip (AFM-like)
+%
+% The dip extraction is IDENTICAL across variants:
+%   dip = DeltaM - DeltaM_smooth
+%
+% The ONLY major difference between variants is how FM is defined.
+%
+% ------------------------------------------------------------
+% VARIANTS:
+%
+% 1) CORE DIRECT
+%    - FM: mean of two fixed plateau windows (left/right of dip)
+%    - Local, window-based estimate
+%
+% 2) DERIVATIVE-ASSISTED DIRECT
+%    - FM: median of all points outside dip window
+%    - Global baseline estimate
+%    - Derivative used for diagnostics only (not FM itself)
+%
+% 3) ROBUST-BASELINE DIRECT
+%    - FM: median of automatically selected flat regions
+%    - Robust to noise and outliers
+%
+% 4) EXTREMA-BASED (PARTIAL)
+%    - Uses local extrema heuristics
+%    - Not a full direct decomposition
+%
+% ------------------------------------------------------------
+% IMPORTANT:
+% - All variants share the SAME dip definition
+% - Differences in AFM come ONLY from differences in FM
+% - Changing FM changes AFM quantitatively
+%
+% DEFAULT BEHAVIOR:
+% The default runtime path is:
+%   derivative-assisted direct (FM override)
+%
+% ------------------------------------------------------------
+% NOTE TO DEVELOPERS:
+% Do NOT assume "direct" is a single method.
+% Always specify which FM definition is used.
+% ============================================================
 % =========================================================
 % analyzeAFM_FM_derivative
 %
@@ -35,7 +197,10 @@ end
 
 cfg = applyDefaults(cfg);
 
+% [DERIVATIVE_ASSISTED]
 % Reuse existing stage4 decomposition path (smoothing + AFM metrics).
+% AFM (DIRECT):
+% Using RMS(dip) as canonical observable within direct decomposition
 tmpRun = struct('T_common', T, 'DeltaM', dM, 'waitK', Tp);
 tmpOut = analyzeAFM_FM_components( ...
     tmpRun, cfg.dip_window_K, cfg.smoothWindow_K, ...
@@ -77,6 +242,7 @@ if numel(dM_smooth) ~= n
 end
 
 % Derivative diagnostics on finite support.
+% [DERIVATIVE_ASSISTED]
 dMdT = nan(n, 1);
 finiteMask = isfinite(T) & isfinite(dM_smooth);
 if nnz(finiteMask) >= 2
@@ -100,6 +266,7 @@ if nRight >= 3
 end
 
 if isfinite(baseL) && isfinite(baseR)
+    % [DERIVATIVE_ASSISTED]
     % FM CONVENTION OPTIONS:
     %   'rightMinusLeft' -> baseR - baseL
     %   'leftMinusRight' -> baseL - baseR
@@ -109,6 +276,9 @@ if isfinite(baseL) && isfinite(baseR)
     %
     % With this convention:
     %   Left plateau higher -> FM > 0
+    % FM DEFINITION:
+    % This line defines FM using derivative-assisted direct:
+    % global median levels outside the dip window.
     result.FM_step_raw = computeFMFromBases(baseL, baseR, cfg.FMConvention);
     result.FM_definition_used = resolveFMDefinitionText(cfg.FMConvention);
     result.FM_step_mag = result.FM_step_raw;  % preserve sign

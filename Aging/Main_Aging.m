@@ -40,6 +40,8 @@ if ~exist('cfg','var') || ~isstruct(cfg)
     cfg = agingConfig();
 end
 
+cfg = applyAgingMode(cfg);
+
 % ========== DEBUG INFRASTRUCTURE INIT ==========
 dbgInitDiagnostics(cfg);
 
@@ -252,5 +254,42 @@ Bohar_units = cfg.Bohar_units;
 params = cfg.switchParams;
 Tsw = cfg.Tsw;
 Rsw = cfg.Rsw;
+end
+
+function cfg = applyAgingMode(cfg)
+if ~isfield(cfg, 'mode') || isempty(cfg.mode)
+    cfg.mode = 'default';
+end
+
+mode = lower(string(cfg.mode));
+
+switch mode
+    case "basic_plots"
+        % Practical plotting preset: keep only observable-level basic Aging
+        % figures and suppress diagnostic/decomposition/robustness plots.
+        cfg.doPlotting = true;
+        cfg.enableStage7 = false;
+        cfg.RobustnessCheck = false;
+
+        if ~isfield(cfg, 'debug') || ~isstruct(cfg.debug)
+            cfg.debug = struct();
+        end
+        cfg.debug.enable = false;
+        cfg.debug.plotGeometry = false;
+        cfg.debug.plots = "key";
+        cfg.debug.keyPlotTags = ["DeltaM_overview"];
+
+        % Stage 6 summary figure is the basic AFM-like / FM-like observable.
+        cfg.disableStage6Diagnostics = true;
+
+        % Single-run decomposition figures are diagnostic, not basic.
+        cfg.showAFM_FM_example = false;
+
+        % Hide the stage-9 table figure in basic plotting mode.
+        cfg.showStage9SummaryTable = false;
+
+    otherwise
+        % Keep the existing pipeline behavior for all non-basic modes.
+end
 end
 

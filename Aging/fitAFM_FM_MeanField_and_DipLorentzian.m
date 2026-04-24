@@ -1,4 +1,31 @@
 function pauseRuns = fitAFM_FM_MeanField_and_DipLorentzian(pauseRuns, dip_window_K, opts)
+% ============================================================
+% AGING MODULE - CLARITY HEADER
+%
+% ROLE:
+% Legacy standalone fit method (mean-field FM + Lorentzian dip).
+%
+% DECOMPOSITION TYPE:
+% LEGACY
+%
+% STAGE:
+% other
+%
+% DOES:
+% - fit mean-field FM background and Lorentzian dip components
+% - produce DeltaM_fit_total and legacy fit parameter fields
+%
+% DOES NOT:
+% - participate in Main_Aging default pipeline routing
+% - define default stage6 AFM_like / FM_like observables
+%
+% AFFECTS SUMMARY OBSERVABLES:
+% NO
+%
+% NOTES:
+% This file is part of a multi-decomposition system.
+% It does not define the canonical observable by itself unless stated.
+% ============================================================
 % fitAFM_FM_MeanField_and_DipLorentzian
 % ------------------------------------------------------------
 % Adds a NEW fitting layer:
@@ -60,6 +87,7 @@ for i = 1:numel(pauseRuns)
     % -------------------------------
     % (A) Fit FM by Mean-Field model
     % -------------------------------
+    % [LEGACY]
     FM_curve = zeros(size(T));
     FM_params = [NaN NaN NaN];
 
@@ -125,6 +153,7 @@ for i = 1:numel(pauseRuns)
     % -------------------------------
     % (B) Fit dip by Lorentzian
     % -------------------------------
+    % [LEGACY]
     Dip_curve  = zeros(size(T));
     Dip_params = [NaN NaN NaN];
 

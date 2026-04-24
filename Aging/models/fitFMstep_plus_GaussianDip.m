@@ -1,4 +1,31 @@
 function pauseRuns = fitFMstep_plus_GaussianDip(pauseRuns, dip_window_K, opts)
+% ============================================================
+% AGING MODULE - CLARITY HEADER
+%
+% ROLE:
+% Fit model that decomposes DeltaM into tanh-step FM and Gaussian dip AFM.
+%
+% DECOMPOSITION TYPE:
+% FIT
+%
+% STAGE:
+% other
+%
+% DOES:
+% - fit DeltaM in a local window around Tp with step + Gaussian components
+% - expose fit parameters and fit-derived FM/AFM scalar metrics
+%
+% DOES NOT:
+% - choose the final summary observable source
+% - replace stage4 diagnostic decomposition outputs
+%
+% AFFECTS SUMMARY OBSERVABLES:
+% YES
+%
+% NOTES:
+% This file is part of a multi-decomposition system.
+% It does not define the canonical observable by itself unless stated.
+% ============================================================
 % =========================================================
 % fitFMstep_plus_GaussianDip
 %
@@ -129,6 +156,7 @@ for i = 1:numel(pauseRuns)
         p = bestP;
     end
 
+    % [FIT_DECOMPOSITION]
     % -------- decode --------
     C     = p(1);
     m     = p(2);
@@ -139,11 +167,13 @@ for i = 1:numel(pauseRuns)
     sigma = max(p(7)*tScale, 0.4);
 
 
+    % [FIT_DECOMPOSITION]
     % -------- curves --------
     bg   = C + m*(T-Tp) + Astep*tanh((T-Tp)/w);
     dip  = -Adip*exp(-(T-T0).^2/(2*sigma^2));
     fitY = bg + dip;
 
+    % [FIT_DECOMPOSITION]
     % -------- optional component metrics (fit window) --------
     useWin = abs(T - Tp) <= W & isfinite(y);
     Twin = T(useWin);
@@ -179,6 +209,7 @@ for i = 1:numel(pauseRuns)
     pauseRuns(i).fit_NRMSE    = NRMSE;
     pauseRuns(i).fit_chi2_red = chi2_red;
 
+    % [FIT_DECOMPOSITION]
     % -------- store --------
     pauseRuns(i).FM_step_A = 2*Astep;  % Keep raw signed value (no abs)
     pauseRuns(i).Dip_A     = Adip;

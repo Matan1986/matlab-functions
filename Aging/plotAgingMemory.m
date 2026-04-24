@@ -27,17 +27,17 @@ if nargin < 11
 end
 
 % ---------------- USER CONTROL ----------------
-SHOW_PAUSES_K = [10 14 18 22 26];   % pauses to mark in ΔM(T)
+SHOW_PAUSES_K = [6 10 14 18 22 26];   % pauses to mark in ΔM(T)
 % ---------------------------------------------
 
-% ---------------- COLORS ----------------
-cols_full = pickColors(numel(pauseRuns), color_scheme);
-
-n = size(cols_full,1);
-i1 = max(1, round(colorRange(1) * n));
-i2 = min(n, round(colorRange(2) * n));
-idx = round(linspace(i1, i2, n));
-cols = cols_full(idx,:);
+% ---------------- COLORS (Tp-synchronized with direct summary) ----------------
+Tp_all = [pauseRuns.waitK];
+cmap = cmocean('thermal', 256);
+Tp_norm = (Tp_all - min(Tp_all)) ./ (max(Tp_all) - min(Tp_all) + eps);
+idx = round(1 + Tp_norm * (size(cmap, 1) - 1));
+idx(~isfinite(idx)) = 1;
+idx = min(max(idx, 1), size(cmap, 1));
+cols = cmap(idx, :);
 
 lw_ref = linewidth + 1.0;
 lw_run = linewidth + 0.2;
@@ -143,6 +143,7 @@ end
 globalAmp = max(allAmp);
 
 figure('Color','w','Name',[sample_name ', Aging Memory, ΔM(T)']); hold on;
+axDM = gca;
 
 for i = 1:numel(pauseRuns)
 
@@ -192,9 +193,31 @@ end
 title([sample_name ', Aging Memory, \DeltaM(T)'],'FontWeight','bold');
 
 xlim([0 45]); xticks(0:5:45);
-legend('show','Location','bestoutside');
 box on;
 set(gca,'FontSize',fontsize);
+
+% Remove legend and replace with Tp colorbar.
+legend(gca, 'off');
+colormap(axDM, cmap);
+if any(isfinite(Tp_all))
+    caxis(axDM, [min(Tp_all) max(Tp_all)]);
+end
+cb = colorbar(axDM);
+cb.Label.String = 'T_p (K)';
+
+% Export publication-style colorbar version.
+repoRoot = 'c:/Dev/matlab-functions';
+if exist(repoRoot, 'dir') ~= 7
+    thisFile = mfilename('fullpath');
+    agingDir = fileparts(thisFile);
+    repoRoot = fileparts(agingDir);
+end
+outDir = fullfile(repoRoot, 'results', 'aging', 'figures');
+if exist(outDir, 'dir') ~= 7
+    mkdir(outDir);
+end
+saveas(gcf, fullfile(outDir, 'MG_119_Aging_Memory_MT_colorbar.png'));
+savefig(gcf, fullfile(outDir, 'MG_119_Aging_Memory_MT_colorbar.fig'));
 
 % ============================================================
 % TEXT SUMMARY

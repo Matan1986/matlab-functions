@@ -1,10 +1,45 @@
 function state = stage4_analyzeAFM_FM(state, cfg)
+% ============================================================
+% AGING MODULE - CLARITY HEADER
+%
+% ROLE:
+% Stage4 orchestrator for decomposition-family routing and stage4 metrics.
+%
+% DECOMPOSITION TYPE:
+% DIRECT / DERIVATIVE / EXTREMA
+%
+% STAGE:
+% stage4
+%
+% DOES:
+% - dispatch to direct, derivative-assisted, or extrema-based analyzers
+% - persist stage4 decomposition diagnostics and signed FM fields
+%
+% DOES NOT:
+% - define the final stage6 AFM_like / FM_like summary observables
+% - perform stage5 fit parameter extraction
+%
+% AFFECTS SUMMARY OBSERVABLES:
+% INDIRECT
+%
+% NOTES:
+% This file is part of a multi-decomposition system.
+% It does not define the canonical observable by itself unless stated.
+% ============================================================
 % =========================================================
 % stage4_analyzeAFM_FM
 %
 % PURPOSE:
 %   Orchestrate AFM/FM decomposition from DeltaM.
 %   Delegates computation to specialized analysis functions.
+%
+% This stage computes decomposition quantities.
+%
+% IMPORTANT:
+%   - The continuous decomposition (DeltaM_smooth, DeltaM_sharp) is a
+%     DIAGNOSTIC representation.
+%   - It shows how a single run is decomposed as a function of temperature.
+%   - It is NOT a basic observable-level figure.
 %
 % INPUTS:
 %   state - struct with pauseRuns
@@ -32,6 +67,7 @@ end
 agingMode = lower(string(cfg.agingMetricMode));
 
 switch agingMode
+    % [DIRECT_DECOMPOSITION]
     case {'direct', 'model', 'fit'}
         state.pauseRuns = analyzeAFM_FM_components( ...
             state.pauseRuns, cfg.dip_window_K, cfg.smoothWindow_K, ...
@@ -39,6 +75,7 @@ switch agingMode
             cfg.FM_plateau_K, cfg.excludeLowT_mode, cfg.FM_buffer_K, ...
             cfg.AFM_metric_main, cfg);
 
+    % [DERIVATIVE_ASSISTED]
     case 'derivative'
         for i = 1:numel(state.pauseRuns)
             run = state.pauseRuns(i);
@@ -59,6 +96,7 @@ switch agingMode
             state.pauseRuns = assignRunFields(state.pauseRuns, i, run);
         end
 
+    % [EXTREMA_BASED]
     case 'extrema_smoothed'
         for i = 1:numel(state.pauseRuns)
             run = state.pauseRuns(i);
@@ -75,6 +113,7 @@ switch agingMode
 end
 
 % ====================== Stage4 Dip Diagnostics ======================
+% [DIRECT_DECOMPOSITION]
 % Keep dip-analysis diagnostics in pauseRuns without altering AFM/FM logic.
 for i = 1:numel(state.pauseRuns)
     run = state.pauseRuns(i);
@@ -364,12 +403,15 @@ for i = 1:numel(state.pauseRuns)
 end
 
 % ====================== Debug Diagnostics (Optional) ======================
+% This stage may produce additional figures unless cfg.mode = 'basic_plots'
+% is used.
 if isfield(cfg, 'debug') && isfield(cfg.debug, 'enable') && cfg.debug.enable
     state = debugAgingStage4(state, cfg);
 end
 
 % ====================== Debug Geometry Plots (Optional) ======================
 if isfield(cfg, 'doPlotting') && cfg.doPlotting && ...
+        isfield(cfg, 'debug') && isfield(cfg.debug, 'enable') && cfg.debug.enable && ...
         isfield(cfg, 'debug') && isfield(cfg.debug, 'plotGeometry') && cfg.debug.plotGeometry && ...
         usejava('desktop')
     debugPlotGeometry(state, cfg);

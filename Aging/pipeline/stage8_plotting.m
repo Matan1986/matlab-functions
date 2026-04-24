@@ -6,6 +6,14 @@ function stage8_plotting(state, cfg, result)
 %   Generate switching reconstruction plots and aging memory figures.
 %   Uses controlled debug figure system for memory efficiency.
 %
+% This stage produces observable-level figures.
+%
+% Use cfg.mode = 'basic_plots' to generate:
+%   - DeltaM vs Temperature
+%   - AFM/FM summary vs Pause temperature
+%
+% Do NOT confuse with diagnostic decomposition plots.
+%
 % INPUTS:
 %   state  - struct with analysis data
 %   cfg    - configuration struct
@@ -88,13 +96,22 @@ if enableStage7
 end
 
 %% --- Figure 3: Aging memory summary ---
-h3 = dbgFigure(cfg, "DeltaM_overview");
-if ~isempty(h3)
-    figure(h3); clf;
+% This stage may produce additional figures unless cfg.mode = 'basic_plots'
+% is used.
+isBasicPlotsMode = isfield(cfg, 'mode') && strcmpi(string(cfg.mode), "basic_plots");
+if isBasicPlotsMode
     plotAgingMemory(state.noPause_T, state.noPause_M, state.pauseRuns, cfg.color_scheme, ...
         cfg.fontsize, cfg.linewidth, cfg.sample_name, cfg.Bohar_units, ...
         cfg.offsetMode, cfg.offsetValue, cfg.dip_window_K, cfg.colorRange, cfg.useAutoYScale);
-    dbgSaveFig(cfg, h3, 'DeltaM_overview.png');
+else
+    h3 = dbgFigure(cfg, "DeltaM_overview");
+    if ~isempty(h3)
+        figure(h3); clf;
+        plotAgingMemory(state.noPause_T, state.noPause_M, state.pauseRuns, cfg.color_scheme, ...
+            cfg.fontsize, cfg.linewidth, cfg.sample_name, cfg.Bohar_units, ...
+            cfg.offsetMode, cfg.offsetValue, cfg.dip_window_K, cfg.colorRange, cfg.useAutoYScale);
+        dbgSaveFig(cfg, h3, 'DeltaM_overview.png');
+    end
 end
 
 dbg(cfg, "summary", "Plotting complete (figures created: %d)", length(findobj('Type', 'figure')));

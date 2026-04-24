@@ -1,16 +1,70 @@
 function state = stage6_extractMetrics(state, cfg)
+% ============================================================
+% AGING MODULE - CLARITY HEADER
+%
+% ROLE:
+% Stage6 summary extraction and plotting of AFM_like/FM_like observables.
+%
+% DECOMPOSITION TYPE:
+% FIT / EXTREMA
+%
+% STAGE:
+% stage6
+%
+% DOES:
+% - select summary observables per pause run
+% - persist state.summary.AFM_like and state.summary.FM_like
+% - persist explicit summary source labels
+%
+% DOES NOT:
+% - perform stage4 direct smooth/residual decomposition
+% - perform stage5 fitting
+%
+% AFFECTS SUMMARY OBSERVABLES:
+% YES
+%
+% NOTES:
+% This file is part of a multi-decomposition system.
+% It does not define the canonical observable by itself unless stated.
+% ============================================================
 % =========================================================
 % stage6_extractMetrics
 %
+% OBSERVABLE CONTRACT (CURRENT DEFAULT):
+%
+% AFM_like:
+%   - defined as Dip_area_selected
+%   - currently sourced from Dip_area_fit (Gaussian fit)
+%
+% FM_like:
+%   - defined as FM_E
+%   - derived from tanh step fit
+%
+% IMPORTANT:
+%   - These are fit-derived observables.
+%   - They are NOT the same as:
+%       dip_signed (stage4)
+%       FM_signed  (stage4)
+%
 % PURPOSE:
 %   Extract AFM/FM metrics, print diagnostics, and plot summary figures.
+%
+% This function produces AFM-like and FM-like observables:
+%   - one scalar value per pause temperature
+%   - used for physical interpretation and summary plots
+%
+% This is:
+%   - the correct 'basic decomposition' figure
+%
+% This is NOT:
+%   - a continuous decomposition of a single run
 %
 % INPUTS:
 %   state - struct with pauseRuns
 %   cfg   - configuration struct
 %
 % OUTPUTS:
-%   state - unchanged data struct (diagnostic plots/prints only)
+%   state - updated data struct with explicit summary observables
 %
 % Physics meaning:
 %   AFM = dip height/area metrics
@@ -22,6 +76,13 @@ agingMode = lower(string(cfg.agingMetricMode));
 Tp = [state.pauseRuns.waitK];
 
 if agingMode ~= "extrema_smoothed"
+    % [FIT_DECOMPOSITION]
+    if isfield(state.pauseRuns, 'Dip_area_selected')
+        DipAreaSelected = [state.pauseRuns.Dip_area_selected];
+    else
+        DipAreaSelected = [state.pauseRuns.Dip_area];
+    end
+
     DipA     = [state.pauseRuns.Dip_A];
     DipSigma = [state.pauseRuns.Dip_sigma];
     FMstepA  = [state.pauseRuns.FM_step_A];
@@ -36,17 +97,17 @@ if agingMode ~= "extrema_smoothed"
     fprintf('corr(Dip_A, Dip_sigma) = %.2f\n', R_As);
 
     % --- build per-component "strength" metrics (not ratios) ---
-    Dip_area = DipA .* sqrt(2*pi) .* DipSigma;   % integrated Gaussian weight
+    Dip_area_fit_diag = DipA .* sqrt(2*pi) .* DipSigma;   % integrated Gaussian weight
 
     % normalize for comparison across metrics (z-score)
     Z = @(x) (x - mean(x,'omitnan')) ./ (std(x,'omitnan') + eps);
 
     Z_FM      = Z(FMstepA);
     Z_DipA    = Z(DipA);
-    Z_DipArea = Z(Dip_area);
+    Z_DipArea = Z(Dip_area_fit_diag);
 
     % --- quick table (all pauses) ---
-    diagTbl = table(Tp(:), FMstepA(:), DipA(:), DipSigma(:), Dip_area(:), ...
+    diagTbl = table(Tp(:), FMstepA(:), DipA(:), DipSigma(:), Dip_area_fit_diag(:), ...
         Z_FM(:), Z_DipA(:), Z_DipArea(:), ...
         'VariableNames', {'Tp_K','FM_step_A','Dip_A','Dip_sigma_K','Dip_area','Z_FM','Z_DipA','Z_DipArea'});
 
@@ -88,7 +149,7 @@ if agingMode ~= "extrema_smoothed"
             unitStr = '\\mu_B / Co';
 
         case 'area'
-            AFMvec = [state.pauseRuns.Dip_area];   % row vector
+            AFMvec = DipAreaSelected;              % row vector
             unitStr = '\\mu_B·K / Co';
 
         otherwise
@@ -123,8 +184,40 @@ end
 
 % ===============================
 % Build AFM / FM vectors for MAIN FIGURE
+% This section defines observable-level quantities.
+%
+% AFM-like(T_pause):
+%   - definition:
+%       cfg.AFM_metric_main = 'height' -> Dip_A
+%       cfg.AFM_metric_main = 'area'   -> Dip_area_selected
+%   - default path in this project:
+%       Dip_area_selected = Dip_area_fit
+%       Dip_area_fit = Dip_A * sqrt(2*pi) * Dip_sigma
+%       because cfg.dipAreaSource = 'legacy_fit' selects the fit-derived
+%       Gaussian area from stage5_fitFMGaussian.
+%   - interpretation:
+%       scalar measure of dip strength per pause temperature.
+%
+% FM-like(T_pause):
+%   - definition:
+%       FM_E
+%   - exact fit-based metric:
+%       FM_E = sqrt(mean((stepWin - mean(stepWin)).^2))
+%       where stepWin = Astep * tanh((T - Tp)/w) on the fit window.
+%   - interpretation:
+%       scalar measure of fitted FM background strength per pause
+%       temperature.
+%
+% IMPORTANT:
+%   - These are summary observables: one value per pause run.
+%   - They are NOT the same as the continuous decomposition
+%       DeltaM(T) = DeltaM_smooth(T) + DeltaM_sharp(T).
+%   - If cfg.agingMetricMode = 'extrema_smoothed', this figure switches to
+%       AFM_extrema_smoothed and FM_extrema_smoothed instead of fit-based
+%       Dip_A / Dip_area / FM_E.
 % ===============================
 if agingMode == "extrema_smoothed"
+    % [EXTREMA_BASED]
     Y_AFM = nan(1, numel(state.pauseRuns));
     Y_FM = nan(1, numel(state.pauseRuns));
     for i = 1:numel(state.pauseRuns)
@@ -135,15 +228,31 @@ if agingMode == "extrema_smoothed"
             Y_FM(i) = state.pauseRuns(i).FM_extrema_smoothed;
         end
     end
+    AFM_source = 'AFM_extrema_smoothed_abs';
+    FM_source = 'FM_extrema_smoothed';
     unitStr = '\\mu_{\\mathrm{B}} / \\mathrm{Co}';
 else
+    % [FIT_DECOMPOSITION]
     switch cfg.AFM_metric_main
         case 'height'
             Y_AFM = [state.pauseRuns.Dip_A];
+            AFM_source = 'Dip_A';
             unitStr = '\\mu_B / Co';
 
         case 'area'
-            Y_AFM = [state.pauseRuns.Dip_area];
+            % "selected" means the summary-stage AFM observable used here.
+            Y_AFM = DipAreaSelected;
+            if isfield(state.pauseRuns, 'Dip_area_selected_source')
+                selectedSources = unique(string({state.pauseRuns.Dip_area_selected_source}));
+                selectedSources = selectedSources(selectedSources ~= "");
+                if numel(selectedSources) == 1
+                    AFM_source = char(selectedSources);
+                else
+                    AFM_source = 'Dip_area_selected';
+                end
+            else
+                AFM_source = 'Dip_area';
+            end
             unitStr = '\\mu_B\\cdot K / Co';
 
         otherwise
@@ -151,7 +260,24 @@ else
     end
 
     Y_FM = [state.pauseRuns.FM_E];   % local FM strength (RMS from fit)
+    FM_source = 'FM_E';
 end
+
+if ~isfield(state, 'summary') || ~isstruct(state.summary)
+    state.summary = struct();
+end
+% SOURCE OF TRUTH:
+% In the default path, AFM_like is defined from Tanh step + Gaussian dip
+% fit outputs (via Dip_area_selected/Dip_area_fit).
+% In the default path, FM_like is defined from the same stage5 fit-based
+% decomposition path (via FM_E).
+% AFM_like in the default path is NOT derived from the direct
+% smooth/residual decomposition.
+state.summary.AFM_like = Y_AFM;
+state.summary.FM_like  = Y_FM;
+state.summary.sources  = struct( ...
+    'AFM_source', AFM_source, ...
+    'FM_source',  FM_source);
 
 % ===============================
 % Colormap for pause temperatures (Tp)

@@ -1,8 +1,170 @@
+% ============================================================
+% FM DEFINITION - DIRECT DECOMPOSITION (DEFAULT)
+%
+% Within the direct (non-fit) decomposition framework,
+% the FM (background) is estimated using a plateau-based method:
+%
+%   FM = difference between left and right plateaus
+%
+% Terminology:
+%   DIRECT_FM_DEFAULT = plateau-based
+%
+% ------------------------------------------------------------
+% RATIONALE:
+%
+% This choice provides a simple and physically interpretable
+% baseline using only regions of the signal outside the dip.
+%
+% More complex alternatives (e.g. derivative-based or robust
+% baseline estimation) exist, but are not used as the default.
+%
+% ------------------------------------------------------------
+% SCOPE:
+%
+% This definition applies ONLY within the direct decomposition.
+% It does NOT define FM globally across other frameworks
+% such as Gaussian fitting.
+%
+% ------------------------------------------------------------
+% NOTE:
+%
+% This is a default choice for consistency and interpretability,
+% not a claim of optimality.
+%
+% ============================================================
+% ============================================================
+% AFM OBSERVABLE - DIRECT DECOMPOSITION (CANONICAL CHOICE)
+%
+% Within the direct (non-fit) decomposition framework:
+%
+%   AFM_direct = sqrt(mean(dip.^2))
+%
+% ------------------------------------------------------------
+% SCOPE:
+%
+% This definition applies ONLY to the direct decomposition.
+% It does NOT define AFM globally across other frameworks
+% such as Gaussian fitting.
+%
+% This definition applies only within the direct (non-fit) decomposition framework.
+% It does NOT imply a global choice over other methods such as Gaussian fitting.
+%
+% ------------------------------------------------------------
+% RATIONALE:
+%
+% Multiple AFM definitions were tested:
+%   - amplitude (min)
+%   - area (integral)
+%   - RMS
+%   - window-based
+%
+% A stability analysis across:
+%   - FM definitions
+%   - smoothing parameters
+%   - dip window
+%   - additive noise
+%
+% showed that RMS(dip) is the most stable observable.
+%
+% ------------------------------------------------------------
+% INTERPRETATION:
+%
+% RMS(dip) captures the distributed magnitude of the dip,
+% making it less sensitive to local noise and baseline errors.
+%
+% ------------------------------------------------------------
+% NOTE:
+%
+% This choice is empirical and based on stability,
+% not a fundamental physical requirement.
+%
+% See:
+% reports/aging/afm_observable_selection_report.md
+%
+% Future option:
+% AFM may be normalized by range or FM for dimensionless form
+%
+% ============================================================
 function pauseRuns = analyzeAFM_FM_components( ...
     pauseRuns, dip_window_K, smoothWindow_K, ...
     excludeLowT_FM, excludeLowT_K, ...
     FM_plateau_K, excludeLowT_mode, FM_buffer_K, dipMetric, cfg)
 
+% ============================================================
+% AGING MODULE - CLARITY HEADER
+%
+% ROLE:
+% Core direct decomposition engine for stage4 AFM/FM extraction.
+%
+% DECOMPOSITION TYPE:
+% DIRECT
+%
+% STAGE:
+% stage4
+%
+% DOES:
+% - compute DeltaM_smooth, DeltaM_sharp, and dip_signed
+% - compute AFM metrics (height/area) from dip-window residual content
+% - compute FM_step_raw from plateau/baseline levels
+%
+% DOES NOT:
+% - define final stage6 AFM_like / FM_like summary observables
+% - perform stage5 tanh+Gaussian fit extraction
+%
+% AFFECTS SUMMARY OBSERVABLES:
+% INDIRECT
+%
+% NOTES:
+% This file is part of a multi-decomposition system.
+% It does not define the canonical observable by itself unless stated.
+% ============================================================
+% ============================================================
+% DIRECT DECOMPOSITION FAMILY - CANONICAL DOCUMENTATION
+%
+% OVERVIEW:
+% All direct methods share the same physical structure:
+%   DeltaM(T) = smooth background (FM-like) + dip (AFM-like)
+%
+% The dip extraction is IDENTICAL across variants:
+%   dip = DeltaM - DeltaM_smooth
+%
+% The ONLY major difference between variants is how FM is defined.
+%
+% ------------------------------------------------------------
+% VARIANTS:
+%
+% 1) CORE DIRECT
+%    - FM: mean of two fixed plateau windows (left/right of dip)
+%    - Local, window-based estimate
+%
+% 2) DERIVATIVE-ASSISTED DIRECT
+%    - FM: median of all points outside dip window
+%    - Global baseline estimate
+%    - Derivative used for diagnostics only (not FM itself)
+%
+% 3) ROBUST-BASELINE DIRECT
+%    - FM: median of automatically selected flat regions
+%    - Robust to noise and outliers
+%
+% 4) EXTREMA-BASED (PARTIAL)
+%    - Uses local extrema heuristics
+%    - Not a full direct decomposition
+%
+% ------------------------------------------------------------
+% IMPORTANT:
+% - All variants share the SAME dip definition
+% - Differences in AFM come ONLY from differences in FM
+% - Changing FM changes AFM quantitatively
+%
+% DEFAULT BEHAVIOR:
+% The default runtime path is:
+%   derivative-assisted direct (FM override)
+%
+% ------------------------------------------------------------
+% NOTE TO DEVELOPERS:
+% Do NOT assume "direct" is a single method.
+% Always specify which FM definition is used.
+% ============================================================
 % =========================================================
 % analyzeAFM_FM_components
 %
@@ -61,6 +223,9 @@ end
 if nargin < 10 || ~isstruct(cfg)
     cfg = struct();
 end
+if ~isfield(cfg, 'AFM_percentile') || isempty(cfg.AFM_percentile) || ~isfinite(cfg.AFM_percentile)
+    cfg.AFM_percentile = 90;
+end
 dipMetric = lower(string(dipMetric));
 fmConvention = resolveFMConvention(cfg);
 fmDefinition = resolveFMDefinitionText(fmConvention);
@@ -87,6 +252,8 @@ for i = 1:numel(pauseRuns)
     pauseRuns(i).AFM_amp_err   = NaN;
     pauseRuns(i).AFM_area      = NaN;
     pauseRuns(i).AFM_area_err  = NaN;
+    pauseRuns(i).AFM_RMS       = NaN;
+    pauseRuns(i).AFM_percentile = NaN;
     pauseRuns(i).FM_step_raw   = NaN;
     pauseRuns(i).FM_step_mag   = NaN;
     pauseRuns(i).FM_signed     = NaN;
@@ -108,6 +275,8 @@ for i = 1:numel(pauseRuns)
     pauseRuns(i).FM_plateau_right_slope = NaN;
     pauseRuns(i).FM_plateau_meets_minCriteria = false;
     pauseRuns(i).FM_plateau_narrow_fallback = false;
+    pauseRuns(i).FM_plateau_mask_left = [];
+    pauseRuns(i).FM_plateau_mask_right = [];
 
     if ~isfield(pauseRuns(i),'T_common') || ~isfield(pauseRuns(i),'DeltaM')
         continue;
@@ -135,6 +304,8 @@ for i = 1:numel(pauseRuns)
     if numel(T) < 20 || numel(T) ~= numel(dM)
         continue;
     end
+    pauseRuns(i).FM_plateau_mask_left = false(size(T));
+    pauseRuns(i).FM_plateau_mask_right = false(size(T));
 
     %% =====================================================
     % 0) validity
@@ -150,6 +321,7 @@ for i = 1:numel(pauseRuns)
     %% =====================================================
     % 1) FM smooth background
     %% =====================================================
+    % [DIRECT_DECOMPOSITION]
     dT = median(diff(T(baseValid)));
     if ~isfinite(dT) || dT <= 0
         dT = 0.1;
@@ -189,6 +361,7 @@ for i = 1:numel(pauseRuns)
     %% =====================================================
     % 2) AFM sharp component
     %% =====================================================
+    % [DIRECT_DECOMPOSITION]
     % Residual of the active analysis observable (legacy-compatible).
     dM_sharp = dM - dM_smooth;
     % Canonical physical dip (project-locked):
@@ -215,13 +388,25 @@ for i = 1:numel(pauseRuns)
     if isempty(dipVals)
         continue;
     end
+    % AFM_RMS: RMS(dip), canonical direct AFM observable
+    pauseRuns(i).AFM_RMS = sqrt(mean(dipVals.^2));
+    pauseRuns(i).AFM_percentile = prctile(abs(dipVals), cfg.AFM_percentile);
     %% =====================================================
     % 3) AFM dip metrics + errors
     %% =====================================================
+    % [DIRECT_DECOMPOSITION]
+    % AFM (DIRECT):
+    % Using RMS(dip) as canonical observable within direct decomposition
+    %
+    % NOTE:
+    % The branch logic below is preserved for legacy compatibility and
+    % does not change existing runtime behavior in this function.
     switch dipMetric
 
         case "height"
             % ----- dip as amplitude -----
+            % AFM (DIRECT):
+            % Using RMS(dip) as canonical observable within direct decomposition
             pauseRuns(i).AFM_amp = mean(dipVals);
             pauseRuns(i).AFM_amp_err = std(dipVals) / sqrt(numel(dipVals));
             pauseRuns(i).AFM_area = NaN;
@@ -252,6 +437,8 @@ for i = 1:numel(pauseRuns)
                 continue;
             end
 
+            % AFM (DIRECT):
+            % Using RMS(dip) as canonical observable within direct decomposition
             pauseRuns(i).AFM_area = trapz(xDip, yDip);
 
             dTloc = median(diff(T(maskDip)));
@@ -269,6 +456,7 @@ for i = 1:numel(pauseRuns)
     %% =====================================================
     % 4) FM plateau step + error (robust baseline estimation)
     %% =====================================================
+    % [DIRECT_DECOMPOSITION]
     
     % --- Try robust baseline estimation first ---
     useRobustBaseline = false;
@@ -279,6 +467,7 @@ for i = 1:numel(pauseRuns)
     end
     
     if useRobustBaseline
+        % [DIRECT_DECOMPOSITION]
         % Set up baseline config with defaults
         cfg_baseline = struct();
         cfg_baseline.dip_halfwidth_K = dip_window_K;
@@ -313,10 +502,16 @@ for i = 1:numel(pauseRuns)
             pauseRuns(i).FM_plateau_left_window_raw = [min(T(baselineOut.idxL)), max(T(baselineOut.idxL))];
             pauseRuns(i).FM_plateau_left_window = pauseRuns(i).FM_plateau_left_window_raw;
             pauseRuns(i).FM_plateau_n_left = numel(baselineOut.idxL);
+            maskL = false(size(T));
+            maskL(baselineOut.idxL(:)) = true;
+            pauseRuns(i).FM_plateau_mask_left = maskL;
         end
         if isfield(baselineOut, 'idxR') && ~isempty(baselineOut.idxR)
             pauseRuns(i).FM_plateau_right_window = [min(T(baselineOut.idxR)), max(T(baselineOut.idxR))];
             pauseRuns(i).FM_plateau_n_right = numel(baselineOut.idxR);
+            maskR = false(size(T));
+            maskR(baselineOut.idxR(:)) = true;
+            pauseRuns(i).FM_plateau_mask_right = maskR;
         end
         pauseRuns(i).FM_plateau_left_clipped = false;
         
@@ -325,6 +520,9 @@ for i = 1:numel(pauseRuns)
             %   'rightMinusLeft' -> baseR - baseL
             %   'leftMinusRight' -> baseL - baseR
             % CURRENT PROJECT DEFAULT: FM = baseL - baseR
+            % FM DEFINITION:
+            % This line defines FM using robust-baseline direct:
+            % robust baseline levels from automatically selected flat regions.
             pauseRuns(i).FM_step_raw = computeFMFromBases(baselineOut.baseL, baselineOut.baseR, fmConvention);
             % SIGNED PHYSICAL VARIABLE â€” DO NOT MODIFY SIGN
             % FM_signed is a signed physical background/step quantity.
@@ -367,10 +565,16 @@ for i = 1:numel(pauseRuns)
                 pauseRuns(i).FM_plateau_left_window_raw = [min(T(baselineOut.idxL)), max(T(baselineOut.idxL))];
                 pauseRuns(i).FM_plateau_left_window = pauseRuns(i).FM_plateau_left_window_raw;
                 pauseRuns(i).FM_plateau_n_left = numel(baselineOut.idxL);
+                maskL = false(size(T));
+                maskL(baselineOut.idxL(:)) = true;
+                pauseRuns(i).FM_plateau_mask_left = maskL;
             end
             if isfield(baselineOut, 'idxR') && ~isempty(baselineOut.idxR)
                 pauseRuns(i).FM_plateau_right_window = [min(T(baselineOut.idxR)), max(T(baselineOut.idxR))];
                 pauseRuns(i).FM_plateau_n_right = numel(baselineOut.idxR);
+                maskR = false(size(T));
+                maskR(baselineOut.idxR(:)) = true;
+                pauseRuns(i).FM_plateau_mask_right = maskR;
             end
             pauseRuns(i).FM_plateau_left_clipped = false;
             
@@ -400,6 +604,7 @@ for i = 1:numel(pauseRuns)
             continue;
         end
     else
+        % [DIRECT_DECOMPOSITION]
         % --- Original plateau window logic ---
         % Check for fixed right plateau mode
         useFixedRightPlateau = false;
@@ -480,6 +685,8 @@ for i = 1:numel(pauseRuns)
         pauseRuns(i).FM_plateau_left_clipped = logical(lowWin_clipped_by_lowT || lowWin_clamped_data);
         pauseRuns(i).FM_plateau_n_left = nnz(maskLow);
         pauseRuns(i).FM_plateau_n_right = nnz(maskHigh);
+        pauseRuns(i).FM_plateau_mask_left = logical(maskLow);
+        pauseRuns(i).FM_plateau_mask_right = logical(maskHigh);
         pauseRuns(i).FM_plateau_geometry_source = "stage4";
         [leftWidthK, leftSlopeK] = computeMaskWidthSlope(T, dM_smooth, maskLow);
         [rightWidthK, rightSlopeK] = computeMaskWidthSlope(T, dM_smooth, maskHigh);
@@ -556,6 +763,8 @@ for i = 1:numel(pauseRuns)
             FM_low  = mean(lowVals,'omitnan');
             FM_high = mean(highVals,'omitnan');
 
+            % FM (DIRECT DEFAULT):
+            % Plateau-based baseline (left/right plateaus)
             pauseRuns(i).FM_step_raw = computeFMFromBases(FM_low, FM_high, fmConvention);
             % SIGNED PHYSICAL VARIABLE â€” DO NOT MODIFY SIGN
             % FM_signed is a signed physical background/step quantity.

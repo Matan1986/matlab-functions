@@ -1,4 +1,78 @@
 function out = estimateRobustBaseline_canonical(T, Y, Tmin, cfg, masks_optional)
+% ============================================================
+% AGING MODULE - CLARITY HEADER
+%
+% ROLE:
+% Auxiliary robust baseline estimator for direct FM plateau extraction.
+%
+% DECOMPOSITION TYPE:
+% DIRECT
+%
+% STAGE:
+% other
+%
+% DOES:
+% - compute robust left/right plateau levels around a dip window
+% - return baseline geometry used by stage4 FM_step_raw construction
+%
+% DOES NOT:
+% - define stage6 AFM_like / FM_like summary observables
+% - perform tanh+Gaussian fit decomposition
+%
+% AFFECTS SUMMARY OBSERVABLES:
+% NO
+%
+% NOTES:
+% This file is part of a multi-decomposition system.
+% It does not define the canonical observable by itself unless stated.
+% ============================================================
+% ============================================================
+% DIRECT DECOMPOSITION FAMILY - CANONICAL DOCUMENTATION
+%
+% OVERVIEW:
+% All direct methods share the same physical structure:
+%   DeltaM(T) = smooth background (FM-like) + dip (AFM-like)
+%
+% The dip extraction is IDENTICAL across variants:
+%   dip = DeltaM - DeltaM_smooth
+%
+% The ONLY major difference between variants is how FM is defined.
+%
+% ------------------------------------------------------------
+% VARIANTS:
+%
+% 1) CORE DIRECT
+%    - FM: mean of two fixed plateau windows (left/right of dip)
+%    - Local, window-based estimate
+%
+% 2) DERIVATIVE-ASSISTED DIRECT
+%    - FM: median of all points outside dip window
+%    - Global baseline estimate
+%    - Derivative used for diagnostics only (not FM itself)
+%
+% 3) ROBUST-BASELINE DIRECT
+%    - FM: median of automatically selected flat regions
+%    - Robust to noise and outliers
+%
+% 4) EXTREMA-BASED (PARTIAL)
+%    - Uses local extrema heuristics
+%    - Not a full direct decomposition
+%
+% ------------------------------------------------------------
+% IMPORTANT:
+% - All variants share the SAME dip definition
+% - Differences in AFM come ONLY from differences in FM
+% - Changing FM changes AFM quantitatively
+%
+% DEFAULT BEHAVIOR:
+% The default runtime path is:
+%   derivative-assisted direct (FM override)
+%
+% ------------------------------------------------------------
+% NOTE TO DEVELOPERS:
+% Do NOT assume "direct" is a single method.
+% Always specify which FM definition is used.
+% ============================================================
 % ESTIMATEROBUSTBASELINE_CANONICAL  Canonical robust baseline estimation for dip metrics
 
 if nargin < 5
@@ -46,6 +120,7 @@ out.plateauCriteriaSatisfied = false;
 out.narrowFallback = false;
 
 % Define dip window
+% [DIRECT_DECOMPOSITION]
 dipL = Tmin - cfg.dip_halfwidth_K;
 dipR = Tmin + cfg.dip_halfwidth_K;
 out.dip_mask = (T >= dipL) & (T <= dipR);
@@ -133,6 +208,7 @@ if any(out.plateauL_mask & out.dip_mask) || any(out.plateauR_mask & out.dip_mask
 end
 
 % Aggregate plateau levels robustly
+% [DIRECT_DECOMPOSITION]
 YL = Y(out.idxL);
 YR = Y(out.idxR);
 
@@ -154,6 +230,7 @@ if out.TR <= out.TL
 end
 
 % Compute baseline (linear interpolation)
+% [DIRECT_DECOMPOSITION]
 out.slope = (out.baseR - out.baseL) / (out.TR - out.TL);
 out.baseline = out.baseL + out.slope * (T - out.TL);
 

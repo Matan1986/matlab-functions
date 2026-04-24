@@ -1,4 +1,32 @@
 function state = stage5_fitFMGaussian(state, cfg)
+% ============================================================
+% AGING MODULE - CLARITY HEADER
+%
+% ROLE:
+% Stage5 fit layer that transfers tanh+Gaussian fit outputs into pauseRuns.
+%
+% DECOMPOSITION TYPE:
+% FIT
+%
+% STAGE:
+% stage5
+%
+% DOES:
+% - call fitFMstep_plus_GaussianDip on pauseRuns_raw
+% - persist fit parameters and fit-derived FM/AFM metrics
+% - select Dip_area_selected source for downstream summary usage
+%
+% DOES NOT:
+% - compute stage4 direct smooth/residual decomposition
+% - draw final stage6 summary figure
+%
+% AFFECTS SUMMARY OBSERVABLES:
+% YES
+%
+% NOTES:
+% This file is part of a multi-decomposition system.
+% It does not define the canonical observable by itself unless stated.
+% ============================================================
 % =========================================================
 % stage5_fitFMGaussian
 %
@@ -18,6 +46,7 @@ function state = stage5_fitFMGaussian(state, cfg)
 %
 % =========================================================
 
+% [FIT_DECOMPOSITION]
 % --- Step 4c: MF(FM) + Gaussian(dip) fitting ---
 % Provides Dip_area for cfg.agingMetricMode = 'model'.
 fitOpts = struct();
@@ -44,6 +73,10 @@ end
 
 % --- Dip area semantics (single assignment point) ---
 % Keep legacy default output: Dip_area follows fit-derived area unless configured otherwise.
+% Dip_area_selected is the explicit alias for the value stage6 uses in the
+% summary observables. Dip_area is retained for backward compatibility.
+% NOTE: Dip_area is an overloaded legacy field. Use Dip_area_selected and
+% Dip_area_selected_source for explicit provenance.
 if isfield(cfg, 'dipAreaSource') && ~isempty(cfg.dipAreaSource)
     dipAreaSource = lower(string(cfg.dipAreaSource));
 else
@@ -51,6 +84,7 @@ else
 end
 
 for i = 1:numel(state.pauseRuns)
+    % [FIT_DECOMPOSITION]
     state.pauseRuns(i).Dip_area_fit = ...
         state.pauseRuns(i).Dip_A * sqrt(2*pi) * state.pauseRuns(i).Dip_sigma;
 
@@ -61,20 +95,27 @@ for i = 1:numel(state.pauseRuns)
     switch dipAreaSource
         case "direct"
             selectedDipArea = state.pauseRuns(i).Dip_area_direct;
+            selectedDipAreaSource = 'Dip_area_direct';
         case "mode"
             if isfield(cfg, 'switchingMetricMode') && strcmpi(cfg.switchingMetricMode, 'direct')
                 selectedDipArea = state.pauseRuns(i).Dip_area_direct;
+                selectedDipAreaSource = 'Dip_area_direct';
             else
                 selectedDipArea = state.pauseRuns(i).Dip_area_fit;
+                selectedDipAreaSource = 'Dip_area_fit';
             end
         otherwise
             selectedDipArea = state.pauseRuns(i).Dip_area_fit;
+            selectedDipAreaSource = 'Dip_area_fit';
     end
 
     if ~isfinite(selectedDipArea)
         selectedDipArea = state.pauseRuns(i).Dip_area_fit;
+        selectedDipAreaSource = 'Dip_area_fit';
     end
 
+    state.pauseRuns(i).Dip_area_selected = selectedDipArea;
+    state.pauseRuns(i).Dip_area_selected_source = selectedDipAreaSource;
     state.pauseRuns(i).Dip_area = selectedDipArea;
 end
 

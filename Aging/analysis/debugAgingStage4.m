@@ -39,7 +39,7 @@ for i = 1:numel(state.pauseRuns)
         continue;
     end
 
-    windows = buildDebugWindows(Tp, cfg, debugCfg, T);
+    windows = buildDebugWindows(Tp, cfg, debugCfg, T, state.pauseRuns(i));
 
     [dipDepth_raw, dipArea_raw] = computeDipMetrics(T, dM_raw, windows.dip);
     [dipDepth_filt, dipArea_filt] = computeDipMetrics(T, dM_filt, windows.dip);
@@ -164,11 +164,14 @@ if ~exist(outFolder, 'dir')
 end
 end
 
-function windows = buildDebugWindows(Tp, cfg, debugCfg, T)
-% Build debug windows using robust baseline estimation
-% Uses scan temperature T (not pause temps Tp) for baseline estimation
+function windows = buildDebugWindows(Tp, cfg, debugCfg, T, pauseRun)
+% Build debug windows using persisted stage4 pipeline plateau state.
 
 T = T(:);
+if nargin < 5 || ~isstruct(pauseRun)
+    pauseRun = struct();
+end
+
 if isempty(T)
     windows = struct();
     windows.dip = [Tp - cfg.dip_window_K, Tp + cfg.dip_window_K];
@@ -177,80 +180,56 @@ if isempty(T)
     windows.noise = [NaN NaN];
     windows.fmPlateauL = [NaN NaN];
     windows.fmPlateauR = [NaN NaN];
+    windows.fmMaskL = false(size(T));
+    windows.fmMaskR = false(size(T));
     return;
 end
 
-% Set up baseline estimation config
-cfg_baseline = struct();
-cfg_baseline.dip_halfwidth_K = cfg.dip_window_K;
-if isfield(cfg, 'dip_margin_K')
-    cfg_baseline.dip_margin_K = cfg.dip_margin_K;
-else
-    cfg_baseline.dip_margin_K = 2;
+dip = [Tp - cfg.dip_window_K, Tp + cfg.dip_window_K];
+maskL = false(size(T));
+maskR = false(size(T));
+if isfield(pauseRun, 'FM_plateau_mask_left') && ~isempty(pauseRun.FM_plateau_mask_left)
+    tmp = logical(pauseRun.FM_plateau_mask_left(:));
+    if numel(tmp) == numel(T)
+        maskL = tmp;
+    end
 end
-if isfield(cfg, 'plateau_nPoints')
-    cfg_baseline.plateau_nPoints = cfg.plateau_nPoints;
-else
-    cfg_baseline.plateau_nPoints = 6;
-end
-
-% Get a reasonable baseline reference value (Y)
-% Use the minimum value or a smoothed baseline
-if all(isfinite(T)) && numel(T) > 10
-    Y_dummy = zeros(size(T));  % For T-based plateau selection
-else
-    Y_dummy = zeros(size(T));
-end
-
-% Estimate robust baseline
-baselineOut = estimateRobustBaseline(T, Y_dummy, Tp, cfg_baseline);
-
-% Extract window information
-if strcmp(baselineOut.status, 'ok')
-    baseL = [baselineOut.TL - 0.1, baselineOut.TL + 0.1];  % Small window around TL
-    baseR = [baselineOut.TR - 0.1, baselineOut.TR + 0.1];  % Small window around TR
-else
-    % Fallback if robust baseline fails
-    finiteT = T(isfinite(T));
-    if ~isempty(finiteT)
-        Tmin = min(finiteT);
-        Tmax = max(finiteT);
-        Tmid = (Tmin + Tmax) / 2;
-        dT = (Tmax - Tmin) / 4;
-        baseL = [Tmin, Tmin + dT];
-        baseR = [Tmax - dT, Tmax];
-    else
-        baseL = [NaN NaN];
-        baseR = [NaN NaN];
+if isfield(pauseRun, 'FM_plateau_mask_right') && ~isempty(pauseRun.FM_plateau_mask_right)
+    tmp = logical(pauseRun.FM_plateau_mask_right(:));
+    if numel(tmp) == numel(T)
+        maskR = tmp;
     end
 end
 
-% Dip window (unchanged)
-dip = [Tp - cfg.dip_window_K, Tp + cfg.dip_window_K];
-
-% FM plateaus
-fmL = baseL;
-if isfield(cfg, 'FM_rightPlateauMode') && strcmpi(cfg.FM_rightPlateauMode, 'fixed')
-    fmR = cfg.FM_rightPlateauFixedWindow_K(:).';
+if isfield(pauseRun, 'FM_plateau_left_window') && numel(pauseRun.FM_plateau_left_window) == 2
+    fmL = pauseRun.FM_plateau_left_window(:).';
 else
-    fmR = baseR;
+    fmL = [NaN NaN];
 end
+if isfield(pauseRun, 'FM_plateau_right_window') && numel(pauseRun.FM_plateau_right_window) == 2
+    fmR = pauseRun.FM_plateau_right_window(:).';
+else
+    fmR = [NaN NaN];
+end
+if ~any(maskL)
+    fmL = [NaN NaN];
+end
+if ~any(maskR)
+    fmR = [NaN NaN];
+end
+baseL = fmL;
+baseR = fmR;
 
 % Noise window
 noise = resolveNoiseWindow(T, debugCfg);
 
 % Verbose diagnostics
 if isfield(debugCfg, 'verbose') && debugCfg.verbose
-    fprintf('\nDebug baseline windows [Tp=%.4g K]:\n', Tp);
-    fprintf('  Baseline status: %s\n', baselineOut.status);
-    if strcmp(baselineOut.status, 'ok')
-        fprintf('  Plateau_L: T=[%.4g,%.4g] K (n=%d points)\n', ...
-            min(T(baselineOut.idxL)), max(T(baselineOut.idxL)), numel(baselineOut.idxL));
-        fprintf('  Plateau_R: T=[%.4g,%.4g] K (n=%d points)\n', ...
-            min(T(baselineOut.idxR)), max(T(baselineOut.idxR)), numel(baselineOut.idxR));
-        fprintf('  Baseline: TL=%.4g K, TR=%.4g K, slope=%.6g\n', ...
-            baselineOut.TL, baselineOut.TR, baselineOut.slope);
-    end
+    fprintf('\nDebug plateau windows from pipeline [Tp=%.4g K]:\n', Tp);
+    fprintf('  Plateau_L: T=[%.4g,%.4g] K (n=%d points)\n', ...
+        fmL(1), fmL(2), nnz(maskL));
+    fprintf('  Plateau_R: T=[%.4g,%.4g] K (n=%d points)\n', ...
+        fmR(1), fmR(2), nnz(maskR));
 end
 
 windows = struct();
@@ -260,9 +239,8 @@ windows.baseR = baseR;
 windows.noise = noise;
 windows.fmPlateauL = fmL;
 windows.fmPlateauR = fmR;
-if strcmp(baselineOut.status, 'ok')
-    windows.baselineOut = baselineOut;  % Store full output for diagnostics
-end
+windows.fmMaskL = maskL;
+windows.fmMaskR = maskR;
 end
 
 function win = resolveNoiseWindow(T, debugCfg)
@@ -358,8 +336,8 @@ addWindowPatch(ax, windows.dip, [0.9 0.7 0.7]);
 addWindowPatch(ax, windows.baseL, [0.7 0.8 0.9]);
 addWindowPatch(ax, windows.baseR, [0.7 0.8 0.9]);
 addWindowPatch(ax, windows.noise, [0.9 0.9 0.7]);
-addWindowPatch(ax, windows.fmPlateauL, [0.8 0.9 0.8]);
-addWindowPatch(ax, windows.fmPlateauR, [0.8 0.9 0.8]);
+addMaskPatch(ax, T, windows.fmMaskL, [0.8 0.9 0.8]);
+addMaskPatch(ax, T, windows.fmMaskR, [0.8 0.9 0.8]);
 
 xline(ax, Tp, 'r--', 'LineWidth', 1.2);
 if debugCfg.overlayShowTc
@@ -398,6 +376,28 @@ lo = min(win); hi = max(win);
 yl = ylim(ax);
 patch(ax, [lo hi hi lo], [yl(1) yl(1) yl(2) yl(2)], color, ...
     'FaceAlpha', 0.15, 'EdgeColor', 'none');
+end
+
+function addMaskPatch(ax, T, mask, color)
+if isempty(mask) || isempty(T)
+    return;
+end
+mask = logical(mask(:));
+T = T(:);
+if numel(mask) ~= numel(T) || ~any(mask)
+    return;
+end
+idx = find(mask);
+breaks = [1; find(diff(idx) > 1) + 1];
+for k = 1:numel(breaks)
+    iStart = idx(breaks(k));
+    if k < numel(breaks)
+        iEnd = idx(breaks(k + 1) - 1);
+    else
+        iEnd = idx(end);
+    end
+    addWindowPatch(ax, [T(iStart), T(iEnd)], color);
+end
 end
 
 function txt = flagsToText(flags)
