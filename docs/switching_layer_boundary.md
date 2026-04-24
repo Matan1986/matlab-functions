@@ -18,6 +18,17 @@ Normative execution rules remain in `docs/repo_execution_rules.md` and `docs/swi
 
 No other directory is the canonical **data** layer for Switching. If an artifact is not in that run folder (or copied from it with explicit provenance), it is **not** canonical run truth.
 
+### Provenance Disambiguation
+
+Identical filenames such as `switching_canonical_S_long.csv`, `switching_canonical_phi1.csv`, `switching_canonical_observables.csv`, and `switching_canonical_validation.csv` may appear in many non-anchor run directories under `results/switching/runs/`.
+
+Those copies are **not** canonical by filename alone. They are treated as:
+
+- **HISTORICAL / PRE-ANCHOR / NON-CANONICAL** when outside the anchor run and not explicitly promoted by identity policy.
+- **READ_ONLY_DUPLICATE** when listed in `tables/switching_canonical_duplicates.csv`.
+
+Canonical truth for Switching remains bound to the anchor run directory above.
+
 ---
 
 ## What is not canonical
