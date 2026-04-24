@@ -45,7 +45,8 @@ configPathUsed = '';
 
 localCfgPath = fullfile(repoRoot, 'local', 'mt_canonical_config.m');
 if exist(localCfgPath, 'file') == 2
-    run(localCfgPath);
+    % fileread+eval avoids MATLAB rule: script basename cannot match assigned var name.
+    eval(fileread(localCfgPath));
     if exist('mt_canonical_config', 'var') && isstruct(mt_canonical_config)
         u = mt_canonical_config;
         ufn = fieldnames(u);
