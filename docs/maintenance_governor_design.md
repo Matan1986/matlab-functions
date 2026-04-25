@@ -60,6 +60,16 @@ Approved publication routes:
 2. dedicated maintenance automation branch
 3. GitHub Issue/PR comment for summaries and approval queue notes
 
+Coverage interpretation rule for artifact-limited workspaces:
+
+- If a Run Output Audit producer reports no accessible run roots in Codex workspace, interpret as `coverage limitation`, not canonical failure.
+- Expected normalized classification for this scenario:
+  - `rule_id=RO_SUSPICIOUS_006`
+  - `module_state=UNKNOWN`
+  - `severity=MEDIUM`
+  - `confidence=HIGH`
+- Governor/summary layers should surface this as advisory coverage risk and request a run with artifact access route, not closure or failure claim.
+
 ## 2) Required Schemas
 
 ## 2.1 Per-agent normalized finding rows (required)

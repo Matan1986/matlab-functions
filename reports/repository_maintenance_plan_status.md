@@ -110,3 +110,12 @@ Plan document: `docs/repository_maintenance_plan.md`
 - manual deployment checklist documented: YES
 - codex automations updated/deployed by this task: NO
 - readiness for first advisory dry-run after manual deployment: YES
+
+## First advisory dry-run (Run Output Audit)
+
+- publication loop to GitHub issue succeeded (`FIRST_ADVISORY_DRY_RUN_PUBLISHING = PASS`): YES
+- normalized row emitted with mandatory confidence and `status_proposal=OPEN`: YES
+- advisory-only constraints preserved and backlog mutation prevented: YES
+- codex workspace lacked run roots (`results/<experiment>/runs/run_*`), so real run-output coverage result recorded as limited (`RUN_OUTPUT_AUDIT_REAL_COVERAGE = LIMITED`): YES
+- emitted as coverage-risk (`rule_id=RO_SUSPICIOUS_006`, `module_state=UNKNOWN`, `severity=MEDIUM`, `confidence=HIGH`): YES
+- issue #13 remains open as advisory coverage signal (not maintained backlog state): YES

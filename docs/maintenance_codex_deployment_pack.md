@@ -60,6 +60,7 @@ Publishing requirements (mandatory):
   3) alternative: GitHub Issue/PR comment for summaries/queues
 - Direct commits to main are disallowed unless explicitly approved by future policy.
 - Chat-only output is incomplete for maintenance-loop purposes.
+- For Run Output Audit in artifact-limited Codex workspace, absence of run roots is coverage limitation, not canonical failure.
 
 Pre-governor artifact targets:
 - reports/maintenance/agent_outputs/<yyyy_mm_dd>/<agent_name>_findings.csv
@@ -154,6 +155,7 @@ Contract guardrails:
 - optional artifact families are conditional unless explicitly required by run intent/rules
 - do not overstate non-canonical/WIP differences as canonical failures
 - script-failure suggestions must remain tentative unless directly evidenced
+- if no results/<experiment>/runs/run_* are visible, emit coverage-risk finding (`RO_SUSPICIOUS_006`, `module_state=UNKNOWN`, `severity=MEDIUM`, `confidence=HIGH`)
 
 Output sections:
 - RUN STATUS
@@ -335,6 +337,7 @@ Where `<agent_name>` is one of:
 - `tables/system_backlog_registry.csv` must not be mutated.
 - Scientific code and claims/query/snapshots must not be modified.
 - No agent may mark `RESOLVED` or `WONTFIX`.
+- Codex/cloud run-output coverage may be limited by missing artifacts; treat as coverage signal and rerun with artifact access route for full validation.
 
 ## 7) Manual Deployment Checklist
 

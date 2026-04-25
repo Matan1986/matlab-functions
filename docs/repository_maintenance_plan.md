@@ -200,6 +200,15 @@ Review-reader requirement:
   - `reports/maintenance/governor_summary_latest.md`
   - `reports/maintenance/approval_queue_latest.md`
 
+Codex workspace coverage limitation (Run Output Audit):
+
+- Codex/cloud worktrees may not include local/generated run artifacts (`results/<experiment>/runs/run_*`).
+- If run roots are absent in the Codex workspace, Run Output Audit must report an audit coverage limitation (coverage-risk), not repository/canonical failure.
+- Full run-output validation requires one of:
+  1. local execution in an environment containing run artifacts
+  2. a published artifact snapshot/branch/PR containing required run directories
+  3. another explicitly documented artifact access route
+
 ## 10) Parallelization Model
 
 Parallel execution lanes:

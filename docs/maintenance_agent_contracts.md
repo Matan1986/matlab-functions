@@ -267,6 +267,7 @@ Assess recent run artifact completeness/integrity and emit normalized maintenanc
 - missing expected artifacts/partially written runs (artifact families are conditional by run intent, not globally mandatory per run)
 - duplicate run labels
 - suspiciously small/inconsistent runs
+- missing run-root visibility in Codex/artifact-limited workspace as audit coverage limitation (not repository failure)
 
 ### What it must not infer
 
@@ -274,12 +275,14 @@ Assess recent run artifact completeness/integrity and emit normalized maintenanc
 - script-level blame without evidence
 - canonical failure for non-canonical modules
 - hard-failure from absence of optional artifacts when the run intent does not require them
+- repository/canonical failure solely from absent `results/<experiment>/runs/run_*` in artifact-limited Codex workspace
 
 ### Module-state awareness rules
 
 - `CANONICAL` module: missing required run-root metadata can be `HIGH` policy findings.
 - `NOT_CANONICAL` module: classify as migration/WIP run-system risk unless hard global contract breach.
 - `UNKNOWN` module: classify as `UNKNOWN_STATE_RISK`; avoid closure claims.
+- when workspace has no run roots available, emit coverage-risk under `UNKNOWN` state and request artifact-access route for full validation.
 
 ### Deterministic `finding_key` rule
 
@@ -288,6 +291,11 @@ Theme token: `run_output_audit`
 Subject: normalized run issue type (for example `missing_run_manifest`)
 Location: normalized run directory path
 Rule: stable token (`RO_MANIFEST_001`, `RO_OBS_SCHEMA_002`, etc.)
+
+Coverage-limit mapping:
+
+- `rule_id=RO_SUSPICIOUS_006` may be used for `NO_RUN_ROOTS_VISIBLE_IN_WORKSPACE` coverage-risk finding in artifact-limited Codex runs.
+- default coverage-risk severity/confidence: `MEDIUM` / `HIGH`.
 
 ### Compatibility anchors (mandatory interpretation)
 

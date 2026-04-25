@@ -39,6 +39,7 @@ Efficiency and scope bounding (mandatory):
 - prioritize registered/anchored scope first: modules in `docs/system_registry.json` and active operational anchors
 - avoid unbounded whole-repo recursion when a narrower anchored scope is sufficient
 - for run audits, prioritize most recent run windows first before deep historical back-scan
+- if no run roots are visible in workspace, emit a coverage-risk finding instead of failing repository state
 
 Rule catalog requirement:
 
@@ -325,6 +326,7 @@ Assess run artifact completeness and consistency under the run system, with modu
 - `observables.csv` integrity when present
 - suspicious/partial run signatures and duplicate labels
 - begin with recent runs first; only expand to older runs when unresolved risk requires it
+- if no `results/<experiment>/runs/run_*` directories are accessible, report `NO_RUN_ROOTS_VISIBLE_IN_WORKSPACE` as coverage limitation
 
 ### Output format
 
@@ -366,6 +368,7 @@ Use `theme=run_output_audit`.
 - `HIGH`: missing required run-root metadata in canonical module run directories
 - `MEDIUM`: incomplete/suspicious run requiring follow-up
 - `LOW`: minor consistency issues
+- coverage limitation default when no run roots are visible in workspace: `MEDIUM` with `module_state=UNKNOWN` and `confidence=HIGH`
 
 Module-state adjustment:
 
@@ -398,6 +401,7 @@ Use:
 - do not require non-canonical directory conventions as hard failures when current authoritative docs specify otherwise
 - do not treat `observables.csv` as universally mandatory; only enforce when run intent indicates observables export
 - treat missing optional artifact directories as conditional unless run intent/rules explicitly require them
+- do not treat absent run-root directories in artifact-limited Codex workspace as canonical/repository failure
 
 ### Final verdict block
 
