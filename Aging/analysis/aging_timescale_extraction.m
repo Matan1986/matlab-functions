@@ -446,20 +446,24 @@ spreadDecades = max(logTau) - min(logTau);
 end
 
 function fig = makeDipDepthFigure(dataTbl, tauTbl)
-fig = create_figure('Visible', 'off', 'Position', [2 2 17.8 8.0]);
+fig = create_figure('Visible', 'off', 'Position', [2 2 17.8 8.0], 'Name', 'Dip_depth_vs_tw_by_Tp');
 ax = axes(fig);
 hold(ax, 'on');
 
 tpValues = unique(dataTbl.Tp, 'sorted');
 cmap = parula(256);
 colormap(ax, cmap);
-clim(ax, [min(tpValues), max(tpValues)]);
+tpMin = min(tpValues);
+tpMax = max(tpValues);
+if isfinite(tpMin) && isfinite(tpMax) && (tpMax > tpMin)
+    clim(ax, [tpMin, tpMax]);
+end
 
 for i = 1:numel(tpValues)
     tp = tpValues(i);
     sub = dataTbl(dataTbl.Tp == tp, :);
     sub = sortrows(sub, 'tw');
-    colorValue = mapValueToColor(tp, [min(tpValues), max(tpValues)], cmap);
+    colorValue = mapValueToColor(tp, [tpMin, tpMax], cmap);
 
     tauRow = tauTbl(tauTbl.Tp == tp, :);
     lineStyle = '-';
@@ -491,7 +495,7 @@ legend(ax, [hSolid, hDashed], 'Location', 'eastoutside');
 end
 
 function fig = makeTauFigure(tauTbl)
-fig = create_figure('Visible', 'off', 'Position', [2 2 12.0 8.0]);
+fig = create_figure('Visible', 'off', 'Position', [2 2 12.0 8.0], 'Name', 'tau_vs_Tp');
 ax = axes(fig);
 hold(ax, 'on');
 
