@@ -17,6 +17,7 @@ $ErrorActionPreference = "Stop"
 
 $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $agentOutDir = Join-Path $repoRoot ("reports\maintenance\agent_outputs\{0}" -f $Date)
+$moduleStewardOutDir = Join-Path $repoRoot ("reports\maintenance\module_stewards\{0}" -f $Date)
 $dailyLogPath = Join-Path $repoRoot ("reports\maintenance\logs\daily_maintenance_{0}.log" -f $Date)
 $tableOut = Join-Path $repoRoot "tables\maintenance_publication_health_latest.csv"
 $reportOut = Join-Path $repoRoot "reports\maintenance\maintenance_health_latest.md"
@@ -207,6 +208,47 @@ foreach ($agent in $allCodexAgents) {
     }
 }
 
+# Switching Analysis Steward is schedule-aware advisory output under module_stewards path.
+# Missing artifacts are WATCH during stabilization and are excluded from hard-failure publication verdict.
+$stewardProducer = "switching_analysis_steward"
+$stewardFindingsPath = Join-Path $moduleStewardOutDir "switching_analysis_steward_findings.csv"
+$stewardReportPath = Join-Path $moduleStewardOutDir "switching_analysis_steward_report.md"
+$stewardExpectedToday = $true
+
+$stewardFindingsExists = Test-Path -LiteralPath $stewardFindingsPath
+$stewardReportExists = Test-Path -LiteralPath $stewardReportPath
+
+if (-not $stewardFindingsExists) {
+    $stewardFindingsAlert = if ($stewardExpectedToday) { "WATCH" } else { "OK" }
+    $stewardFindingsNote = if ($stewardExpectedToday) {
+        "Switching Analysis Steward findings CSV missing (stabilization policy: WATCH)."
+    } else {
+        "Switching Analysis Steward findings CSV not expected for this date."
+    }
+    [void]$rows.Add((New-HealthRow -Producer $stewardProducer -ArtifactType "module_steward_findings_csv" `
+        -Path $stewardFindingsPath -Status "MISSING" -AlertLevel $stewardFindingsAlert -Notes $stewardFindingsNote))
+} else {
+    $stewardSchema = Get-CsvSchemaStatus -LiteralPath $stewardFindingsPath -Kind "NormalizedFindings"
+    $stewardSchemaAlert = if ($stewardSchema -eq "PRESENT") { "OK" } else { "ACTION" }
+    [void]$rows.Add((New-HealthRow -Producer $stewardProducer -ArtifactType "module_steward_findings_csv" `
+        -Path $stewardFindingsPath -Status $stewardSchema -AlertLevel $stewardSchemaAlert `
+        -Notes "Switching Analysis Steward findings schema validation (normalized mandatory headers)."))
+}
+
+if (-not $stewardReportExists) {
+    $stewardReportAlert = if ($stewardExpectedToday) { "WATCH" } else { "OK" }
+    $stewardReportNote = if ($stewardExpectedToday) {
+        "Switching Analysis Steward report missing (stabilization policy: WATCH)."
+    } else {
+        "Switching Analysis Steward report not expected for this date."
+    }
+    [void]$rows.Add((New-HealthRow -Producer $stewardProducer -ArtifactType "module_steward_report_md" `
+        -Path $stewardReportPath -Status "MISSING" -AlertLevel $stewardReportAlert -Notes $stewardReportNote))
+} else {
+    [void]$rows.Add((New-HealthRow -Producer $stewardProducer -ArtifactType "module_steward_report_md" `
+        -Path $stewardReportPath -Status "PRESENT" -AlertLevel "OK" -Notes "Switching Analysis Steward report exists."))
+}
+
 $runAuditSimplifiedPath = Join-Path $agentOutDir "run_output_audit_findings.csv"
 $simplifiedExists = Test-Path -LiteralPath $runAuditSimplifiedPath
 $runAuditExpectedToday = ($expectedAgentsForDate -contains "run_output_audit")
@@ -393,8 +435,17 @@ $schemaBlock
 - Weekly Sunday Codex producers: ``$weeklyListText``
 - Weekly Sunday producers required today: **$weeklyRequiredText**
 - Expected for this date: ``$expectedTodayText``
+- Module steward directory checked: ``$moduleStewardOutDir``
 
 Expected producers evaluated for publication verdict are schedule-aware for this date.
+
+## Module Steward Publication Status
+
+- Producer: ``$stewardProducer``
+- Expected path:
+  - ``$stewardFindingsPath``
+  - ``$stewardReportPath``
+- Missing steward outputs are currently classified as **WATCH** during stabilization.
 
 ## Final Verdicts
 

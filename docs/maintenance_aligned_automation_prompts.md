@@ -654,3 +654,102 @@ Module-state adjustment:
 - `NORMALIZED_FINDINGS_EMITTED = YES/NO`
 - `ADVISORY_ONLY_PRE_GOVERNOR = YES`
 - `BACKLOG_MUTATED = NO`
+
+---
+
+## 6) Switching Analysis Steward — Aligned Prompt
+
+### Agent name
+
+Switching Analysis Steward
+
+### Purpose
+
+Produce a daily bounded advisory digest for Switching module scientific-state and analysis-order risks, including parallel-agent collision and stale-source risks.
+
+### Current/future schedule note
+
+- Recommended schedule: daily at 04:35
+- Manual execution: allowed when needed
+- Output is advisory only and does not perform canonical closure
+
+### Inputs to read first
+
+- Global execution rule inputs listed above
+- `docs/analysis_module_reconstruction_and_canonicalization_full_workflow.md`
+- `docs/system_registry.json`
+
+### Scan scope
+
+- Switching module only
+- analysis disorder and duplicate analysis tracks
+- observables/derived output consistency signals within Switching advisory surfaces
+- stale source/reference usage in Switching scientific-state summaries
+- cross-run/cross-artifact collision indicators in Switching maintenance outputs
+- status-classification hygiene for new Switching advisory outputs
+
+### Publication target (mandatory)
+
+- `reports/maintenance/module_stewards/<yyyy_mm_dd>/switching_analysis_steward_report.md`
+- `reports/maintenance/module_stewards/<yyyy_mm_dd>/switching_analysis_steward_findings.csv`
+
+### Output format
+
+1. Advisory report:
+   - `RUN SUMMARY`
+   - `SWITCHING MODULE STATE DIGEST`
+   - `ANALYSIS DISORDER RISKS`
+   - `STALE SOURCE RISKS`
+   - `MINIMAL ADVISORY FOLLOW-UP`
+2. Normalized findings rows (CSV-like block)
+
+### Normalized finding row schema
+
+- `producer_agent` = `switching_analysis_steward`
+- `finding_key`
+- `theme` = `switching_analysis_steward`
+- `module` = `Switching`
+- `module_state`
+- `scope`
+- `rule_id`
+- `severity`
+- `title`
+- `description`
+- `evidence_ref`
+- `status_proposal` (must be `OPEN`)
+- `human_approval_required`
+- `observed_at_utc`
+- optional: `triage_decision`, `next_action`, `normalized_subject`, `normalized_location`, `notes`
+
+### Deterministic finding_key rule
+
+`finding_key = sha1(lower(theme) + "|" + lower(normalized_subject) + "|" + lower(normalized_location) + "|" + lower(rule_id))`
+
+Use `theme=switching_analysis_steward`.
+
+### Rule catalog (Switching Analysis Steward)
+
+- `SAS_DUP_001`
+- `SAS_OBS_002`
+- `SAS_OUTPUT_003`
+- `SAS_STALE_004`
+- `SAS_LEGACY_005`
+- `SAS_CROSS_006`
+- `SAS_STATUS_007`
+- `SAS_SCIENCE_008`
+- `SAS_SOURCE_009`
+
+### Do-not-do list
+
+- no file edits
+- no MATLAB execution
+- no claims/query/snapshot/context edits
+- no canonical closure declaration
+- no backlog mutation
+
+### Final verdict block
+
+- `AGENT_RUN_COMPLETED = YES/NO`
+- `NORMALIZED_FINDINGS_EMITTED = YES/NO`
+- `ADVISORY_ONLY_PRE_GOVERNOR = YES`
+- `BACKLOG_MUTATED = NO`

@@ -23,11 +23,11 @@ This does not authorize audit execution by itself.
   - applicable rules docs (`docs/AGENT_RULES.md`, `docs/results_system.md`, `docs/repository_structure.md`)
 - Until normalized ingestion + governor integration exist, all outputs (scheduled and manual) are advisory raw audit outputs only and are not maintained backlog state.
 
-## Normalized Output Schema (All Five Agents)
+## Normalized Output Schema (Core Agents + Steward)
 
 Required fields:
 
-- `producer_agent` (`repository_drift_guard|helper_duplication_guard|run_output_audit|switching_canonical_boundary_guard|canonicalization_progress_guard`)
+- `producer_agent` (`repository_drift_guard|helper_duplication_guard|run_output_audit|switching_canonical_boundary_guard|canonicalization_progress_guard|switching_analysis_steward`)
 - `finding_key`
 - `theme`
 - `module`
@@ -50,6 +50,10 @@ Optional fields:
 - `confidence`
 - `workstream_id`
 - `notes`
+- `triage_decision`
+- `next_action`
+- `normalized_subject`
+- `normalized_location`
 
 ### Deterministic `finding_key` baseline
 
@@ -102,12 +106,19 @@ Primary ownership:
 - Run artifact integrity/completeness -> `run_output_audit`
 - Switching canonical boundary confusion -> `switching_canonical_boundary_guard`
 - Cross-module canonicalization progress consistency -> `canonicalization_progress_guard`
+- Switching module analysis disorder + scientific-state digest -> `switching_analysis_steward`
 
 Overlap policy:
 
 - Overlap is allowed for context, but one finding must have a single primary owner.
 - Secondary agents may emit linked findings only when they add distinct evidence or boundary interpretation.
 - When overlap occurs, include a cross-reference note in `notes` using the other agent theme/rule token.
+
+Boundary clarification for Switching domain:
+
+- `switching_analysis_steward` owns module-level analysis disorder/collision-risk and bounded scientific-state digest findings.
+- `switching_canonical_boundary_guard` owns canonical/non-canonical label and canonical-truth boundary violations.
+- `canonicalization_progress_guard` owns module/workstream canonicalization-progress consistency findings.
 
 ## 1) Repository Drift Guard Contract
 
@@ -514,3 +525,85 @@ Theme token: `canonicalization_progress`
 - These contracts are ready for implementation planning and agent-output normalization.
 - They do not activate governor behavior and do not replace the maintenance plan.
 - No technical audits should be interpreted as maintained backlog state until normalized ingestion and governor merge are implemented.
+
+## 6) Switching Analysis Steward Contract
+
+### Purpose
+
+Provide a daily advisory module steward output for Switching that detects analysis disorder and parallel-agent collision risk while publishing a bounded scientific-state digest.
+
+### Required inputs / operational anchors (read first)
+
+- `docs/project_control_board.md`
+- `tables/project_workstream_status.csv`
+- `tables/module_canonical_status.csv`
+- `docs/analysis_module_reconstruction_and_canonicalization_full_workflow.md`
+- `docs/AGENT_RULES.md`
+- `docs/results_system.md`
+- `docs/repository_structure.md`
+
+### Scope
+
+- Switching module only
+- advisory analysis-order/disorder and collision-risk detection
+- bounded scientific-state digest production
+- stale source/reference risk in Switching advisory outputs
+
+### Publication target
+
+- `reports/maintenance/module_stewards/<yyyy_mm_dd>/switching_analysis_steward_report.md`
+- `reports/maintenance/module_stewards/<yyyy_mm_dd>/switching_analysis_steward_findings.csv`
+
+### Schema authority
+
+Mandatory normalized columns:
+
+- `finding_key`
+- `theme`
+- `rule_id`
+- `producer_agent`
+- `module`
+- `module_state`
+- `scope`
+- `severity`
+- `confidence`
+- `title`
+- `description`
+- `evidence_ref`
+- `status_proposal`
+- `human_approval_required`
+- `observed_at_utc`
+
+Optional columns:
+
+- `triage_decision`
+- `next_action`
+- `normalized_subject`
+- `normalized_location`
+
+### Rule catalog (Switching Analysis Steward)
+
+- `SAS_DUP_001`
+- `SAS_OBS_002`
+- `SAS_OUTPUT_003`
+- `SAS_STALE_004`
+- `SAS_LEGACY_005`
+- `SAS_CROSS_006`
+- `SAS_STATUS_007`
+- `SAS_SCIENCE_008`
+- `SAS_SOURCE_009`
+
+### Do-not-modify rules
+
+- no file edits
+- no MATLAB execution
+- no claims/query/snapshot/context edits
+- no canonical closure declaration
+- no backlog mutation
+
+### Schedule/integration note
+
+- Recommended schedule: daily at 04:35
+- Manual execution: allowed when needed
+- Pre-governor treatment: advisory raw audit output only
+- Governor minimal ingestion: not enabled for steward outputs

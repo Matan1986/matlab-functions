@@ -10,13 +10,14 @@ Existing automations to update:
 1. Repository Drift Guard
 2. Run Output Audit
 3. Helper Duplication Guard
+4. Switching Analysis Steward
 
 New automations to create:
 
-4. Switching Canonical Boundary Guard
-5. Canonicalization Progress Guard
+5. Switching Canonical Boundary Guard
+6. Canonicalization Progress Guard
 
-## 2) Final Copy/Paste Prompts (Five Agents)
+## 2) Final Copy/Paste Prompts (Six Agents)
 
 Use each prompt as a standalone Codex automation definition.
 
@@ -298,15 +299,66 @@ Output sections:
 - MINIMAL FIX SUGGESTIONS (bounded, reversible)
 ```
 
+### 2.6 Switching Analysis Steward (create new automation)
+
+```text
+[Use Common Required Header above]
+
+Agent name: switching_analysis_steward
+Theme: switching_analysis_steward
+
+Additional required reads:
+- docs/analysis_module_reconstruction_and_canonicalization_full_workflow.md
+- docs/system_registry.json
+
+Purpose:
+Daily advisory Switching-only module steward for analysis disorder/collision risk detection and bounded scientific-state digest publication.
+
+Scan scope:
+- Switching module only
+- analysis disorder and parallel-agent collision risk in Switching advisory outputs
+- stale source/reference usage within Switching state summaries
+- observables/output consistency signals across recent Switching run/report surfaces
+- classification/status-label hygiene in new Switching advisory outputs
+
+Rule catalog:
+- SAS_DUP_001
+- SAS_OBS_002
+- SAS_OUTPUT_003
+- SAS_STALE_004
+- SAS_LEGACY_005
+- SAS_CROSS_006
+- SAS_STATUS_007
+- SAS_SCIENCE_008
+- SAS_SOURCE_009
+
+Publication target (mandatory):
+- reports/maintenance/module_stewards/<yyyy_mm_dd>/switching_analysis_steward_report.md
+- reports/maintenance/module_stewards/<yyyy_mm_dd>/switching_analysis_steward_findings.csv
+
+Policy:
+- advisory-only, report-only, no canonical closure
+- no file edits, no MATLAB execution, no backlog mutation
+
+Output sections:
+- RUN SUMMARY
+- SWITCHING MODULE STATE DIGEST
+- ANALYSIS DISORDER RISKS
+- STALE SOURCE RISKS
+- MINIMAL ADVISORY FOLLOW-UP
+```
+
 ## 3) Schedule Table
 
 | Automation | Schedule | Mode | Status |
 |---|---|---|---|
-| Repository Drift Guard | Daily 04:00 | Light daily | Existing, update |
-| Run Output Audit | Daily 04:10 | Light daily | Existing, update |
-| Switching Canonical Boundary Guard | Daily 04:15 | Light daily | New, create |
-| Helper Duplication Guard | Sundays 04:20 | Weekly deep | Existing, update |
-| Canonicalization Progress Guard | Weekdays 04:25 + Sunday deep pass | Daily light + weekly deep | New, create |
+| Local Windows maintenance task | Daily 04:00 | Local daily wrapper | Existing |
+| Switching Canonical Boundary Guard | Daily 04:15 | Daily light | New, create |
+| Canonicalization Progress Guard | Daily 04:25 | Daily light | New, create |
+| Switching Analysis Steward | Daily 04:35 | Daily advisory module steward | New, create |
+| Repository Drift Guard | Weekly Sunday | Weekly deep | Existing, update |
+| Run Output Audit (cloud) | Weekly Sunday | Weekly deep cloud | Existing, update |
+| Helper Duplication Guard | Weekly Sunday | Weekly deep | Existing, update |
 | Maintenance Governor | Future target 04:30 | Serial merge | Not active until ingestion exists |
 | ChatGPT scheduled review | Daily 09:00 Asia/Jerusalem | Advisory read/summarize | Already configured externally |
 
@@ -335,6 +387,11 @@ Where `<agent_name>` is one of:
 - `switching_canonical_boundary_guard`
 - `canonicalization_progress_guard`
 
+Switching Analysis Steward publication path (module steward lane):
+
+- `reports/maintenance/module_stewards/<yyyy_mm_dd>/switching_analysis_steward_report.md`
+- `reports/maintenance/module_stewards/<yyyy_mm_dd>/switching_analysis_steward_findings.csv`
+
 ## 6) Safety Notes
 
 - Do not run technical audits until this deployment pack is reviewed.
@@ -354,6 +411,7 @@ Where `<agent_name>` is one of:
 2. Create new Codex automations:
    - Switching Canonical Boundary Guard
    - Canonicalization Progress Guard
+   - Switching Analysis Steward
 3. Configure schedules according to this deployment pack.
 4. Confirm each automation publishes artifacts to GitHub-visible route.
 5. Confirm no direct-main commits are possible in automation config.
@@ -365,7 +423,7 @@ Where `<agent_name>` is one of:
 ## 8) Deployment Readiness Verdict
 
 - Deployment pack document prepared: YES
-- Five prompts included: YES
+- Six prompts included: YES
 - Publishing constraints included: YES
 - Manual deployment required (not executed in this document): YES
 - Technical audits remain blocked until manual deployment + first advisory dry-run review: YES
