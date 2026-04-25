@@ -4,8 +4,9 @@
 
 .DESCRIPTION
   Runs tools/maintenance/run_run_output_audit_local.ps1, then
-  tools/maintenance/run_governor_minimal.ps1 for the same date token.
-  Stops before Governor if the audit step fails. Writes a daily log under
+  tools/maintenance/run_governor_minimal.ps1 for the same date token, then
+  tools/maintenance/guard_run_snapshot_coverage.ps1 (detection-only; no -Date).
+  Stops before the next step if a step fails. Writes a daily log under
   reports/maintenance/logs/.
 
   Manual (from repo root):
@@ -31,9 +32,12 @@ $logDir = Join-Path $repoRoot "reports\maintenance\logs"
 $logPath = Join-Path $logDir ("daily_maintenance_{0}.log" -f $Date)
 $auditScript = Join-Path $PSScriptRoot "run_run_output_audit_local.ps1"
 $governorScript = Join-Path $PSScriptRoot "run_governor_minimal.ps1"
+$guardScript = Join-Path $PSScriptRoot "guard_run_snapshot_coverage.ps1"
 $agentCsv = Join-Path $repoRoot ("reports\maintenance\agent_outputs\{0}\run_output_audit_findings.csv" -f $Date)
 $latestCsv = Join-Path $repoRoot "tables\maintenance_findings_latest.csv"
 $summaryMd = Join-Path $repoRoot "reports\maintenance\governor_summary_latest.md"
+$snapshotCoverageCsv = Join-Path $repoRoot "tables\run_snapshot_coverage_latest.csv"
+$snapshotCoverageMd = Join-Path $repoRoot "reports\maintenance\run_snapshot_coverage_latest.md"
 
 if (-not (Test-Path -LiteralPath $logDir)) {
     New-Item -ItemType Directory -Path $logDir -Force | Out-Null
@@ -51,19 +55,23 @@ function Invoke-MaintenanceStep {
     param(
         [string]$StepName,
         [string]$ScriptPath,
-        [string]$DateArg
+        [string]$DateArg,
+        [switch]$OmitDateArgument
     )
     Write-DailyLog ("--- {0} ---" -f $StepName)
     $tmpOut = [System.IO.Path]::GetTempFileName()
     $tmpErr = [System.IO.Path]::GetTempFileName()
     try {
+        $argList = @(
+            "-NoProfile",
+            "-ExecutionPolicy", "Bypass",
+            "-File", $ScriptPath
+        )
+        if (-not $OmitDateArgument) {
+            $argList += @("-Date", $DateArg)
+        }
         $proc = Start-Process -FilePath $powershellExe -Wait -PassThru -NoNewWindow `
-            -ArgumentList @(
-                "-NoProfile",
-                "-ExecutionPolicy", "Bypass",
-                "-File", $ScriptPath,
-                "-Date", $DateArg
-            ) `
+            -ArgumentList $argList `
             -RedirectStandardOutput $tmpOut `
             -RedirectStandardError $tmpErr
 
@@ -107,6 +115,10 @@ if (-not (Test-Path -LiteralPath $governorScript)) {
     Write-DailyLog "FATAL: governor script not found."
     exit 1
 }
+if (-not (Test-Path -LiteralPath $guardScript)) {
+    Write-DailyLog "FATAL: guard_run_snapshot_coverage script not found."
+    exit 1
+}
 
 $auditOk = Invoke-MaintenanceStep -StepName "run_run_output_audit_local" -ScriptPath $auditScript -DateArg $Date
 if (-not $auditOk) {
@@ -124,9 +136,19 @@ if (-not $govOk) {
 }
 Write-Output "Step run_governor_minimal: OK"
 
+$guardOk = Invoke-MaintenanceStep -StepName "guard_run_snapshot_coverage" -ScriptPath $guardScript -OmitDateArgument
+if (-not $guardOk) {
+    Write-DailyLog "FINAL_VERDICT=FAIL (guard_run_snapshot_coverage)"
+    Write-Output "Step guard_run_snapshot_coverage: FAILED."
+    exit 1
+}
+Write-Output "Step guard_run_snapshot_coverage: OK"
+
 Write-DailyLog ("Agent CSV (expected): {0}" -f $agentCsv)
 Write-DailyLog ("Governor latest CSV: {0}" -f $latestCsv)
 Write-DailyLog ("Governor summary MD: {0}" -f $summaryMd)
+Write-DailyLog ("Snapshot coverage CSV: {0}" -f $snapshotCoverageCsv)
+Write-DailyLog ("Snapshot coverage report: {0}" -f $snapshotCoverageMd)
 Write-DailyLog "FINAL_VERDICT=OK"
 Write-Output ""
 Write-Output "Daily maintenance completed OK."
@@ -134,4 +156,6 @@ Write-Output ("  Log: {0}" -f $logPath)
 Write-Output ("  Agent CSV: {0}" -f $agentCsv)
 Write-Output ("  Latest findings: {0}" -f $latestCsv)
 Write-Output ("  Summary: {0}" -f $summaryMd)
+Write-Output ("  Snapshot coverage CSV: {0}" -f $snapshotCoverageCsv)
+Write-Output ("  Snapshot coverage report: {0}" -f $snapshotCoverageMd)
 exit 0
