@@ -33,6 +33,7 @@ Required behavior:
 - ensure every advisory finding has a corresponding normalized finding row (no advisory-only orphan findings)
 - persist normalized findings and advisory summary to documented GitHub-visible publication targets; do not leave findings only in chat output
 - when platform supports branch/PR publication, publish via approved maintenance route (draft PR preferred, otherwise dedicated automation branch)
+- publish maintenance artifacts under `reports/maintenance/` as normal tracked files; do not rely on force-add for this path
 
 Efficiency and scope bounding (mandatory):
 
