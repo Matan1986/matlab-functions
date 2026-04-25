@@ -33,6 +33,9 @@ globalNI = 0;
 overallResidualMin = NaN;
 overallResidualMax = NaN;
 overallResidualRmse = NaN;
+sharedSBmin = NaN;
+sharedSBmax = NaN;
+residualClimAbs = NaN;
 
 try
     cfg = struct();
@@ -123,6 +126,11 @@ try
     residualMin = nan(nPanels, 1);
     residualMax = nan(nPanels, 1);
     residualRmse = nan(nPanels, 1);
+    allSharedVals = [];
+    allResidualVals = [];
+    axMeasured = gobjects(nPanels, 1);
+    axBackbone = gobjects(nPanels, 1);
+    axResidual = gobjects(nPanels, 1);
 
     fig = figure('Visible', 'off', 'Color', 'w', ...
         'Position', [80, 80, min(1600, 620), max(380, 260 * nPanels)]);
@@ -194,8 +202,10 @@ try
         residualMin(iPan) = min(M_res(:), [], 'omitnan');
         residualMax(iPan) = max(M_res(:), [], 'omitnan');
         residualRmse(iPan) = sqrt(mean((M_res(:)).^2, 'omitnan'));
+        allSharedVals = [allSharedVals; M_meas(isfinite(M_meas)); M_back(isfinite(M_back))]; %#ok<AGROW>
+        allResidualVals = [allResidualVals; M_res(isfinite(M_res))]; %#ok<AGROW>
 
-        nexttile(tl);
+        axMeasured(iPan) = nexttile(tl);
         imagesc(allI, allT, M_meas);
         set(gca, 'YDir', 'normal');
         xlabel('Current (mA)');
@@ -207,7 +217,7 @@ try
         end
         colorbar;
 
-        nexttile(tl);
+        axBackbone(iPan) = nexttile(tl);
         imagesc(allI, allT, M_back);
         set(gca, 'YDir', 'normal');
         xlabel('Current (mA)');
@@ -219,7 +229,7 @@ try
         end
         colorbar;
 
-        nexttile(tl);
+        axResidual(iPan) = nexttile(tl);
         imagesc(allI, allT, M_res);
         set(gca, 'YDir', 'normal');
         xlabel('Current (mA)');
@@ -230,6 +240,24 @@ try
             title(char("Residual | " + key), 'Interpreter', 'none');
         end
         colorbar;
+    end
+
+    if isempty(allSharedVals)
+        error('run_switching_canonical_map_backbone_residual_visualization:EmptySharedScaleValues', ...
+            'No finite values available to compute shared measured/backbone color limits.');
+    end
+    if isempty(allResidualVals)
+        error('run_switching_canonical_map_backbone_residual_visualization:EmptyResidualScaleValues', ...
+            'No finite values available to compute residual symmetric color limits.');
+    end
+    sharedSBmin = min(allSharedVals);
+    sharedSBmax = max(allSharedVals);
+    residualClimAbs = max(abs(allResidualVals));
+
+    for iPan = 1:nPanels
+        caxis(axMeasured(iPan), [sharedSBmin, sharedSBmax]);
+        caxis(axBackbone(iPan), [sharedSBmin, sharedSBmax]);
+        caxis(axResidual(iPan), [-residualClimAbs, residualClimAbs]);
     end
 
     sgtitle(tl, 'Canonical measured/backbone/residual maps on physical axes', 'Interpreter', 'none');
@@ -266,17 +294,20 @@ try
     statusTbl = table( ...
         {'CANONICAL_S_LONG_VALIDATED'; 'BACKBONE_COLUMN_FOUND'; 'RESIDUAL_COMPUTED'; ...
          'WIDTH_SCALING_USED'; 'LEGACY_ALIGNMENT_USED'; 'BACKBONE_RESIDUAL_VISUALIZED'; ...
+         'SHARED_S_BACKBONE_CLIM'; 'SYMMETRIC_RESIDUAL_CLIM'; ...
          'FIGURES_WRITTEN'; 'INSPECTION_READY'; 'PAPER_READY_FIGURE'; ...
          'READY_FOR_STAGE2_RECONSTRUCTION_VISUALIZATION'}, ...
         {vCanonicalValidated; vBackboneFound; vResidualComputed; ...
          vWidthScalingUsed; vLegacyAlignmentUsed; vBackboneResidualVisualized; ...
-         vFiguresWritten; vInspectionReady; vPaperReady; vReadyStage2}, ...
+         'YES'; 'YES'; vFiguresWritten; vInspectionReady; vPaperReady; vReadyStage2}, ...
         {char(string(sLongPath)); ...
          'S_model_pt_percent required and verified'; ...
          'Residual computed as S_percent - S_model_pt_percent'; ...
          'NO width normalization or width coordinate used'; ...
          'NO alignment or shift-scale collapse inputs used'; ...
          char(figPath); ...
+         sprintf('[%.6g, %.6g]', sharedSBmin, sharedSBmax); ...
+         sprintf('[-%.6g, +%.6g]', residualClimAbs, residualClimAbs); ...
          char(pngPath); ...
          'Inspection-ready canonical physical-axis panel figure'; ...
          'NO journal typography/caption contract audit'; ...
@@ -312,6 +343,10 @@ try
     lines{end+1} = sprintf('- residual_min: %.6g', overallResidualMin);
     lines{end+1} = sprintf('- residual_max: %.6g', overallResidualMax);
     lines{end+1} = sprintf('- residual_rmse (panel aggregate): %.6g', overallResidualRmse);
+    lines{end+1} = '';
+    lines{end+1} = '## Color limits';
+    lines{end+1} = sprintf('- shared measured/backbone clim: `[%.6g, %.6g]`', sharedSBmin, sharedSBmax);
+    lines{end+1} = sprintf('- residual symmetric clim: `[-%.6g, +%.6g]`', residualClimAbs, residualClimAbs);
     lines{end+1} = '';
     lines{end+1} = '## Outputs';
     lines{end+1} = sprintf('- Figure `.fig`: `%s`', figPath);
@@ -372,12 +407,13 @@ catch ME
     statusTbl = table( ...
         {'CANONICAL_S_LONG_VALIDATED'; 'BACKBONE_COLUMN_FOUND'; 'RESIDUAL_COMPUTED'; ...
          'WIDTH_SCALING_USED'; 'LEGACY_ALIGNMENT_USED'; 'BACKBONE_RESIDUAL_VISUALIZED'; ...
+         'SHARED_S_BACKBONE_CLIM'; 'SYMMETRIC_RESIDUAL_CLIM'; ...
          'FIGURES_WRITTEN'; 'INSPECTION_READY'; 'PAPER_READY_FIGURE'; ...
          'READY_FOR_STAGE2_RECONSTRUCTION_VISUALIZATION'}, ...
         {vCanonicalValidated; vBackboneFound; vResidualComputed; ...
          vWidthScalingUsed; vLegacyAlignmentUsed; vBackboneResidualVisualized; ...
-         vFiguresWritten; vInspectionReady; vPaperReady; vReadyStage2}, ...
-        {failMsg; failMsg; failMsg; failMsg; failMsg; failMsg; failMsg; failMsg; failMsg; failMsg}, ...
+         'NO'; 'NO'; vFiguresWritten; vInspectionReady; vPaperReady; vReadyStage2}, ...
+        {failMsg; failMsg; failMsg; failMsg; failMsg; failMsg; failMsg; failMsg; failMsg; failMsg; failMsg; failMsg}, ...
         'VariableNames', {'check', 'result', 'detail'});
     writetable(statusTbl, fullfile(runDir, 'tables', 'switching_canonical_map_backbone_residual_status.csv'));
     writetable(statusTbl, fullfile(repoRoot, 'tables', 'switching_canonical_map_backbone_residual_status.csv'));
