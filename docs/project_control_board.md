@@ -48,6 +48,9 @@ See `tables/project_workstream_status.csv` (one row per active workstream).
 - `claims/` may remain legacy-weighted; do not treat claims as canonical-current unless workstream status shows `claims_alignment=YES`.
 - `analysis/query/query_system.m` is not yet canonical-aware and query outputs may mix canonical and legacy evidence.
 - Query outputs may surface stale/non-canonical context; treat query results as advisory unless canonical-current status is confirmed via operational anchors.
+- Aging and Relaxation remain `NOT_CANONICAL` at module level; workstream `canonical_code_status=YES` must not be read as full module canonicalization closure.
+- Aging/Relaxation cross-module outputs are `WIP` / `ADVISORY` / `NOT_CANONICAL_SOURCE` until explicit module-level closure is recorded in canonical status tables.
+- Canonical/paper-ready wording in non-canonical module outputs is governance-risk phrasing, not closure evidence.
 - `tables/switching_canonical_identity.csv` is currently missing; treat any reference to it as downgraded/non-authoritative until evidence-backed restoration is approved.
 - `analysis/knowledge/run_registry.csv` is a query/discovery registry and is not a complete filesystem inventory of every run directory.
 - Do not build a new Switching context bundle before micro-integration is planned and executed.
