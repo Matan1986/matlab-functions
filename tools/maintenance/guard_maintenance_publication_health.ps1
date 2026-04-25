@@ -21,7 +21,18 @@ $dailyLogPath = Join-Path $repoRoot ("reports\maintenance\logs\daily_maintenance
 $tableOut = Join-Path $repoRoot "tables\maintenance_publication_health_latest.csv"
 $reportOut = Join-Path $repoRoot "reports\maintenance\maintenance_health_latest.md"
 
-$expectedAgents = @(
+$dailyCodexAgents = @(
+    "switching_canonical_boundary_guard",
+    "canonicalization_progress_guard"
+)
+
+$weeklySundayAgents = @(
+    "repository_drift_guard",
+    "run_output_audit",
+    "helper_duplication_guard"
+)
+
+$allCodexAgents = @(
     "repository_drift_guard",
     "run_output_audit",
     "switching_canonical_boundary_guard",
@@ -126,7 +137,26 @@ function New-HealthRow {
 
 $rows = New-Object System.Collections.Generic.List[object]
 
-foreach ($agent in $expectedAgents) {
+$dateForSchedule = $null
+try {
+    $dateForSchedule = [DateTime]::ParseExact($Date, "yyyy_MM_dd", [System.Globalization.CultureInfo]::InvariantCulture)
+} catch {
+    $dateForSchedule = Get-Date
+}
+$isSunday = ($dateForSchedule.DayOfWeek -eq [System.DayOfWeek]::Sunday)
+
+$expectedAgentsForDate = New-Object System.Collections.Generic.List[string]
+foreach ($a in $dailyCodexAgents) { [void]$expectedAgentsForDate.Add($a) }
+if ($isSunday) {
+    foreach ($a in $weeklySundayAgents) {
+        if ($expectedAgentsForDate -notcontains $a) {
+            [void]$expectedAgentsForDate.Add($a)
+        }
+    }
+}
+
+foreach ($agent in $allCodexAgents) {
+    $isExpectedToday = ($expectedAgentsForDate -contains $agent)
     $findingsPath = Join-Path $agentOutDir ("{0}_findings.csv" -f $agent)
     $reportPath = Join-Path $agentOutDir ("{0}_report.md" -f $agent)
 
@@ -136,11 +166,16 @@ foreach ($agent in $expectedAgents) {
     # run_output_audit_findings.csv is the simplified Governor CSV only; validated below (not normalized).
     if ($agent -ne "run_output_audit") {
         if (-not $findingsExists) {
-            $findAlert = if (-not $reportExists) { "ACTION" } else { "WATCH" }
-            $findNotes = if (-not $reportExists) {
-                "Expected agent findings CSV not found (report also missing)."
+            if ($isExpectedToday) {
+                $findAlert = if (-not $reportExists) { "ACTION" } else { "WATCH" }
+                $findNotes = if (-not $reportExists) {
+                    "Expected agent findings CSV not found (report also missing)."
+                } else {
+                    "Findings CSV missing; report present (partial publication)."
+                }
             } else {
-                "Findings CSV missing; report present (partial publication)."
+                $findAlert = "OK"
+                $findNotes = "Not expected for this date by schedule (optional on non-required days)."
             }
             [void]$rows.Add((New-HealthRow -Producer $agent -ArtifactType "normalized_findings_csv" -Path $findingsPath `
                 -Status "MISSING" -AlertLevel $findAlert -Notes $findNotes))
@@ -153,11 +188,16 @@ foreach ($agent in $expectedAgents) {
     }
 
     if (-not $reportExists) {
-        $repAlert = if (-not $findingsExists) { "ACTION" } else { "WATCH" }
-        $repNotes = if (-not $findingsExists) {
-            "Expected agent report markdown not found (findings also missing)."
+        if ($isExpectedToday) {
+            $repAlert = if (-not $findingsExists) { "ACTION" } else { "WATCH" }
+            $repNotes = if (-not $findingsExists) {
+                "Expected agent report markdown not found (findings also missing)."
+            } else {
+                "Report missing; findings file present (partial publication)."
+            }
         } else {
-            "Report missing; findings file present (partial publication)."
+            $repAlert = "OK"
+            $repNotes = "Not expected for this date by schedule (optional on non-required days)."
         }
         [void]$rows.Add((New-HealthRow -Producer $agent -ArtifactType "agent_report_md" -Path $reportPath `
             -Status "MISSING" -AlertLevel $repAlert -Notes $repNotes))
@@ -169,10 +209,17 @@ foreach ($agent in $expectedAgents) {
 
 $runAuditSimplifiedPath = Join-Path $agentOutDir "run_output_audit_findings.csv"
 $simplifiedExists = Test-Path -LiteralPath $runAuditSimplifiedPath
+$runAuditExpectedToday = ($expectedAgentsForDate -contains "run_output_audit")
 if (-not $simplifiedExists) {
+    $simpAlert = if ($runAuditExpectedToday) { "ACTION" } else { "OK" }
+    $simpNote = if ($runAuditExpectedToday) {
+        "Governor-compatible simplified Run Output Audit CSV missing."
+    } else {
+        "Run Output Audit is not expected for this date by schedule (optional on non-required days)."
+    }
     [void]$rows.Add((New-HealthRow -Producer "run_output_audit" -ArtifactType "simplified_findings_csv" `
-        -Path $runAuditSimplifiedPath -Status "MISSING" -AlertLevel "ACTION" `
-        -Notes "Governor-compatible simplified Run Output Audit CSV missing."))
+        -Path $runAuditSimplifiedPath -Status "MISSING" -AlertLevel $simpAlert `
+        -Notes $simpNote))
 } else {
     $simpSchema = Get-CsvSchemaStatus -LiteralPath $runAuditSimplifiedPath -Kind "SimplifiedRunAudit"
     $simpAlert = if ($simpSchema -eq "PRESENT") { "OK" } else { "ACTION" }
@@ -268,7 +315,7 @@ $agentReportRows = @($rows | Where-Object { $_.artifact_type -eq "agent_report_m
 # ALL_EXPECTED_AGENTS_PUBLISHED: normalized findings + report per agent; run_output_audit uses simplified CSV + report
 $allAgentsPublished = $true
 $simplifiedRow = $rows | Where-Object { $_.artifact_type -eq "simplified_findings_csv" } | Select-Object -First 1
-foreach ($agent in $expectedAgents) {
+foreach ($agent in $expectedAgentsForDate) {
     $rr = $agentReportRows | Where-Object { $_.producer -eq $agent } | Select-Object -First 1
     if ($agent -eq "run_output_audit") {
         $fr = $simplifiedRow
@@ -309,6 +356,10 @@ $verdictBlock = @(
 
 $missingBlock = if ($missingList.Count -eq 0) { "(none)" } else { $missingList -join [Environment]::NewLine }
 $schemaBlock = if ($schemaList.Count -eq 0) { "(none)" } else { $schemaList -join [Environment]::NewLine }
+$dailyListText = ($dailyCodexAgents -join ', ')
+$weeklyListText = ($weeklySundayAgents -join ', ')
+$expectedTodayText = ($expectedAgentsForDate -join ', ')
+$weeklyRequiredText = if ($isSunday) { "YES" } else { "NO" }
 
 $md = @"
 # Maintenance Publication Health
@@ -335,7 +386,15 @@ $schemaBlock
 
 ## Agent Publication Status
 
-Expected producers (per maintenance plan): ``$($expectedAgents -join ', ')``.
+## Expected Producers For This Date
+
+- Date parsed for schedule: ``$($dateForSchedule.ToString("yyyy_MM_dd"))`` (DayOfWeek: ``$($dateForSchedule.DayOfWeek)``)
+- Daily expected Codex producers: ``$dailyListText``
+- Weekly Sunday Codex producers: ``$weeklyListText``
+- Weekly Sunday producers required today: **$weeklyRequiredText**
+- Expected for this date: ``$expectedTodayText``
+
+Expected producers evaluated for publication verdict are schedule-aware for this date.
 
 ## Final Verdicts
 
