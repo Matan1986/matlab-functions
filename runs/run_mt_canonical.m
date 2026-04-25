@@ -126,13 +126,13 @@ try
     datCount = numel(datFiles);
     inputFound = inputExists && (datCount > 0);
 
-    fileInventory = table('Size', [0 12], ...
-        'VariableTypes', {'double','string','string','double','double','string','string','string','double','double','double','logical'}, ...
-        'VariableNames', {'file_id','file_name','file_path','field_from_name_oe','mass_mg','system_detected','parser_selected','import_status','n_rows','time_min_s','time_max_s','time_regular_warning'});
+    fileInventory = table('Size', [0 27], ...
+        'VariableTypes', {'double','string','string','double','double','string','string','string','double','double','double','logical','double','double','double','double','double','double','double','double','double','double','double','string','string','string','string'}, ...
+        'VariableNames', {'file_id','file_name','file_path','field_from_name_oe','mass_mg','system_detected','parser_selected','import_status','n_rows','time_min_s','time_max_s','time_regular_warning','dt_mean_s','dt_std_s','dt_cv','dt_median_s','dt_q90_s','dt_q99_s','dt_max_s','negative_dt_count','zero_dt_count','pause_gap_count','pause_gap_fraction','time_quality','time_warning_class','time_blocker_reason','segmentation_trust'});
 
-    rawSummary = table('Size', [0 9], ...
-        'VariableTypes', {'double','double','double','double','double','double','double','double','logical'}, ...
-        'VariableNames', {'file_id','n_rows','T_min_K','T_max_K','H_min_Oe','H_max_Oe','M_min_emu','M_max_emu','time_regular_warning'});
+    rawSummary = table('Size', [0 25], ...
+        'VariableTypes', {'double','double','double','double','double','double','double','double','logical','double','double','double','double','double','double','double','double','double','double','double','double','string','string','string','string'}, ...
+        'VariableNames', {'file_id','n_rows','T_min_K','T_max_K','H_min_Oe','H_max_Oe','M_min_emu','M_max_emu','time_regular_warning','dt_mean_s','dt_std_s','dt_cv','dt_median_s','dt_q90_s','dt_q99_s','dt_max_s','negative_dt_count','zero_dt_count','pause_gap_count','pause_gap_fraction','dt_count','time_quality','time_warning_class','time_blocker_reason','segmentation_trust'});
 
     cleaningAudit = table('Size', [0 9], ...
         'VariableTypes', {'double','string','double','double','logical','double','double','double','double'}, ...
@@ -147,11 +147,17 @@ try
     mtCleaningAuditWritten = "NO";
     mtSegmentTableWritten = "NO";
     mtTimeAxisWarningsPresent = "NO";
+    mtTimeAxisCorruptionPresent = "NO";
+    mtTimeAxisPauseGapsPresent = "NO";
+    mtTimeAxisSegmentationRiskPresent = "NO";
+    mtSegmentationTrustLevel = "HIGH";
     mtReadyForProductionRelease = "NO";
+    mtReadyForAdvancedAnalysis = "NO";
 
     importedOk = 0;
     importedFail = 0;
     timeWarningCount = 0;
+    runSegmentationTrustRank = 1;
 
     if inputFound
         mtInputFound = "YES";
@@ -176,7 +182,23 @@ try
             nRows = 0;
             timeMin = NaN;
             timeMax = NaN;
-            timeRegularWarning = false;
+            dtMean = NaN;
+            dtStd = NaN;
+            dtCv = NaN;
+            dtMedian = NaN;
+            dtQ90 = NaN;
+            dtQ99 = NaN;
+            dtMax = NaN;
+            dtCount = 0;
+            negativeDtCount = 0;
+            zeroDtCount = 0;
+            pauseGapCount = 0;
+            pauseGapFraction = 0;
+            timeQuality = "FAIL";
+            timeWarningClass = "CORRUPTION";
+            timeBlockerReason = "IMPORT_FAILED_OR_NO_TIME_DATA";
+            segmentationTrust = "FAIL";
+            timeRegularWarning = true;
 
             try
                 if strcmp(parserSelected, "importOneFile_MT_MPMS")
@@ -188,32 +210,124 @@ try
                 importStatus = "IMPORTED";
                 importedOk = importedOk + 1;
                 nRows = numel(TimeSec);
-
-                if nRows > 0
-                    timeMin = min(TimeSec);
-                    timeMax = max(TimeSec);
+                finiteTimeMask = isfinite(TimeSec);
+                nonfiniteTimeCount = nRows - sum(finiteTimeMask);
+                finiteTime = TimeSec(finiteTimeMask);
+                if ~isempty(finiteTime)
+                    timeMin = min(finiteTime);
+                    timeMax = max(finiteTime);
                 end
 
-                if nRows >= 3
-                    dt = diff(TimeSec);
-                    dt = dt(isfinite(dt));
-                    if ~isempty(dt)
-                        dtMean = mean(abs(dt));
-                        if dtMean > 0
-                            dtCv = std(dt) / dtMean;
-                            if dtCv > 0.05
-                                timeRegularWarning = true;
-                                timeWarningCount = timeWarningCount + 1;
-                            end
-                        end
+                dt = [];
+                if numel(finiteTime) >= 2
+                    dt = diff(finiteTime);
+                end
+                dtCount = numel(dt);
+                if dtCount > 0
+                    absDt = abs(dt);
+                    dtMean = mean(absDt);
+                    dtStd = std(dt);
+                    if dtMean > 0
+                        dtCv = dtStd / dtMean;
+                    else
+                        dtCv = NaN;
                     end
+                    dtMedian = median(absDt);
+                    sortedAbsDt = sort(absDt);
+                    idx90 = max(1, min(dtCount, floor(0.90 * (dtCount - 1)) + 1));
+                    idx99 = max(1, min(dtCount, floor(0.99 * (dtCount - 1)) + 1));
+                    dtQ90 = sortedAbsDt(idx90);
+                    dtQ99 = sortedAbsDt(idx99);
+                    dtMax = max(absDt);
+                    negativeDtCount = sum(dt < 0);
+                    zeroDtCount = sum(dt == 0);
+                    pauseGapCount = sum(dt > 20);
+                    pauseGapFraction = pauseGapCount / dtCount;
                 else
-                    timeRegularWarning = true;
+                    nonfiniteTimeCount = max(nonfiniteTimeCount, 1);
+                end
+
+                zeroDtFraction = 0;
+                if dtCount > 0
+                    zeroDtFraction = zeroDtCount / dtCount;
+                end
+
+                if nRows < 3
+                    timeQuality = "FAIL";
+                    timeWarningClass = "CORRUPTION";
+                    timeBlockerReason = "TOO_FEW_ROWS";
+                    segmentationTrust = "FAIL";
+                elseif nonfiniteTimeCount > 0
+                    timeQuality = "FAIL";
+                    timeWarningClass = "CORRUPTION";
+                    timeBlockerReason = "NONFINITE_TIME_VALUES";
+                    segmentationTrust = "FAIL";
+                elseif dtCount == 0
+                    timeQuality = "FAIL";
+                    timeWarningClass = "CORRUPTION";
+                    timeBlockerReason = "NO_USABLE_FINITE_DT";
+                    segmentationTrust = "FAIL";
+                elseif negativeDtCount > 0
+                    timeQuality = "FAIL";
+                    timeWarningClass = "CORRUPTION";
+                    timeBlockerReason = "NEGATIVE_DT_PRESENT";
+                    segmentationTrust = "FAIL";
+                elseif zeroDtFraction >= 0.10
+                    timeQuality = "FAIL";
+                    timeWarningClass = "CORRUPTION";
+                    timeBlockerReason = "HEAVY_ZERO_DT_DUPLICATES";
+                    segmentationTrust = "FAIL";
+                elseif pauseGapFraction >= 0.20 || (~isnan(dtCv) && dtCv >= 0.50)
+                    timeQuality = "MEDIUM";
+                    timeWarningClass = "SEGMENTATION_RISK";
+                    timeBlockerReason = "";
+                    segmentationTrust = "LOW";
+                elseif pauseGapCount > 0
+                    timeQuality = "MEDIUM";
+                    timeWarningClass = "PAUSE_GAPS";
+                    timeBlockerReason = "";
+                    segmentationTrust = "MEDIUM";
+                elseif ~isnan(dtCv) && dtCv > 0.20
+                    timeQuality = "MEDIUM";
+                    timeWarningClass = "NONUNIFORM";
+                    timeBlockerReason = "";
+                    segmentationTrust = "MEDIUM";
+                else
+                    timeQuality = "GOOD";
+                    timeWarningClass = "NONE";
+                    timeBlockerReason = "";
+                    segmentationTrust = "HIGH";
+                end
+
+                timeRegularWarning = ~strcmp(timeWarningClass, "NONE");
+                if timeRegularWarning
                     timeWarningCount = timeWarningCount + 1;
                 end
 
-                rawSummary = [rawSummary; table(double(iFile), double(nRows), min(TemperatureK), max(TemperatureK), min(MagneticFieldOe), max(MagneticFieldOe), min(MomentEmu), max(MomentEmu), timeRegularWarning, ...
-                    'VariableNames', {'file_id','n_rows','T_min_K','T_max_K','H_min_Oe','H_max_Oe','M_min_emu','M_max_emu','time_regular_warning'})];
+                if strcmp(timeWarningClass, "CORRUPTION")
+                    mtTimeAxisCorruptionPresent = "YES";
+                elseif strcmp(timeWarningClass, "PAUSE_GAPS")
+                    mtTimeAxisPauseGapsPresent = "YES";
+                elseif strcmp(timeWarningClass, "SEGMENTATION_RISK")
+                    mtTimeAxisSegmentationRiskPresent = "YES";
+                end
+
+                thisTrustRank = 1;
+                if strcmp(segmentationTrust, "MEDIUM")
+                    thisTrustRank = 2;
+                elseif strcmp(segmentationTrust, "LOW")
+                    thisTrustRank = 3;
+                elseif strcmp(segmentationTrust, "FAIL")
+                    thisTrustRank = 4;
+                end
+                if thisTrustRank > runSegmentationTrustRank
+                    runSegmentationTrustRank = thisTrustRank;
+                end
+
+                rawSummary = [rawSummary; table(double(iFile), double(nRows), min(TemperatureK), max(TemperatureK), min(MagneticFieldOe), max(MagneticFieldOe), min(MomentEmu), max(MomentEmu), logical(timeRegularWarning), ...
+                    double(dtMean), double(dtStd), double(dtCv), double(dtMedian), double(dtQ90), double(dtQ99), double(dtMax), double(negativeDtCount), double(zeroDtCount), double(pauseGapCount), double(pauseGapFraction), double(dtCount), ...
+                    timeQuality, timeWarningClass, timeBlockerReason, segmentationTrust, ...
+                    'VariableNames', {'file_id','n_rows','T_min_K','T_max_K','H_min_Oe','H_max_Oe','M_min_emu','M_max_emu','time_regular_warning','dt_mean_s','dt_std_s','dt_cv','dt_median_s','dt_q90_s','dt_q99_s','dt_max_s','negative_dt_count','zero_dt_count','pause_gap_count','pause_gap_fraction','dt_count','time_quality','time_warning_class','time_blocker_reason','segmentation_trust'})];
 
                 [~, ~, ~, M_clean, T_smooth, M_smooth] = clean_MT_data(TemperatureK, MomentEmu, thisField, cfg.cleaning, cfg.Unfiltered);
 
@@ -284,7 +398,9 @@ try
             end
 
             fileInventory = [fileInventory; table(double(iFile), thisName, thisPath, double(thisField), double(massFromName), string(systemType), parserSelected, importStatus + "|" + importError, double(nRows), double(timeMin), double(timeMax), logical(timeRegularWarning), ...
-                'VariableNames', {'file_id','file_name','file_path','field_from_name_oe','mass_mg','system_detected','parser_selected','import_status','n_rows','time_min_s','time_max_s','time_regular_warning'})];
+                double(dtMean), double(dtStd), double(dtCv), double(dtMedian), double(dtQ90), double(dtQ99), double(dtMax), double(negativeDtCount), double(zeroDtCount), double(pauseGapCount), double(pauseGapFraction), ...
+                timeQuality, timeWarningClass, timeBlockerReason, segmentationTrust, ...
+                'VariableNames', {'file_id','file_name','file_path','field_from_name_oe','mass_mg','system_detected','parser_selected','import_status','n_rows','time_min_s','time_max_s','time_regular_warning','dt_mean_s','dt_std_s','dt_cv','dt_median_s','dt_q90_s','dt_q99_s','dt_max_s','negative_dt_count','zero_dt_count','pause_gap_count','pause_gap_fraction','time_quality','time_warning_class','time_blocker_reason','segmentation_trust'})];
         end
 
         if importedFail == 0 && importedOk > 0
@@ -311,10 +427,19 @@ try
     mtCleaningAuditWritten = "YES";
     mtSegmentTableWritten = "YES";
 
-    if timeWarningCount > 0
+    if strcmp(mtTimeAxisCorruptionPresent, "YES") || strcmp(mtTimeAxisPauseGapsPresent, "YES") || strcmp(mtTimeAxisSegmentationRiskPresent, "YES") || timeWarningCount > 0
         mtTimeAxisWarningsPresent = "YES";
     else
         mtTimeAxisWarningsPresent = "NO";
+    end
+    if runSegmentationTrustRank == 1
+        mtSegmentationTrustLevel = "HIGH";
+    elseif runSegmentationTrustRank == 2
+        mtSegmentationTrustLevel = "MEDIUM";
+    elseif runSegmentationTrustRank == 3
+        mtSegmentationTrustLevel = "LOW";
+    else
+        mtSegmentationTrustLevel = "FAIL";
     end
 
     metricCol = [ ...
@@ -330,10 +455,15 @@ try
         "MT_CLEANING_AUDIT_WRITTEN"; ...
         "MT_SEGMENT_TABLE_WRITTEN"; ...
         "MT_TIME_AXIS_WARNINGS_PRESENT"; ...
+        "MT_TIME_AXIS_CORRUPTION_PRESENT"; ...
+        "MT_TIME_AXIS_PAUSE_GAPS_PRESENT"; ...
+        "MT_TIME_AXIS_SEGMENTATION_RISK_PRESENT"; ...
+        "MT_SEGMENTATION_TRUST_LEVEL"; ...
         "POINT_TABLES_WRITTEN"; ...
         "RAW_CLEAN_DERIVED_SEPARATION"; ...
         "FULL_CANONICAL_DATA_PRODUCT"; ...
         "MT_READY_FOR_PRODUCTION_CANONICAL_RELEASE"; ...
+        "MT_READY_FOR_ADVANCED_ANALYSIS"; ...
         "DIAGNOSTIC_ONLY"];
 
     valueCol = [ ...
@@ -349,10 +479,15 @@ try
         mtCleaningAuditWritten; ...
         mtSegmentTableWritten; ...
         mtTimeAxisWarningsPresent; ...
+        mtTimeAxisCorruptionPresent; ...
+        mtTimeAxisPauseGapsPresent; ...
+        mtTimeAxisSegmentationRiskPresent; ...
+        mtSegmentationTrustLevel; ...
         "NO"; ...
         "SUMMARY_LEVEL_ONLY"; ...
         "NO"; ...
         mtReadyForProductionRelease; ...
+        mtReadyForAdvancedAnalysis; ...
         "YES"];
 
     canonicalSummary = table(metricCol, valueCol, ...
@@ -385,10 +520,15 @@ try
     fprintf(fidReport, '- MT_CLEANING_AUDIT_WRITTEN=%s\n', mtCleaningAuditWritten);
     fprintf(fidReport, '- MT_SEGMENT_TABLE_WRITTEN=%s\n', mtSegmentTableWritten);
     fprintf(fidReport, '- MT_TIME_AXIS_WARNINGS_PRESENT=%s\n', mtTimeAxisWarningsPresent);
+    fprintf(fidReport, '- MT_TIME_AXIS_CORRUPTION_PRESENT=%s\n', mtTimeAxisCorruptionPresent);
+    fprintf(fidReport, '- MT_TIME_AXIS_PAUSE_GAPS_PRESENT=%s\n', mtTimeAxisPauseGapsPresent);
+    fprintf(fidReport, '- MT_TIME_AXIS_SEGMENTATION_RISK_PRESENT=%s\n', mtTimeAxisSegmentationRiskPresent);
+    fprintf(fidReport, '- MT_SEGMENTATION_TRUST_LEVEL=%s\n', mtSegmentationTrustLevel);
     fprintf(fidReport, '- POINT_TABLES_WRITTEN=NO\n');
     fprintf(fidReport, '- RAW_CLEAN_DERIVED_SEPARATION=SUMMARY_LEVEL_ONLY\n');
     fprintf(fidReport, '- FULL_CANONICAL_DATA_PRODUCT=NO\n');
-    fprintf(fidReport, '- MT_READY_FOR_PRODUCTION_CANONICAL_RELEASE=%s\n\n', mtReadyForProductionRelease);
+    fprintf(fidReport, '- MT_READY_FOR_PRODUCTION_CANONICAL_RELEASE=%s\n', mtReadyForProductionRelease);
+    fprintf(fidReport, '- MT_READY_FOR_ADVANCED_ANALYSIS=%s\n\n', mtReadyForAdvancedAnalysis);
 
     fprintf(fidReport, '## Output artifacts\n\n');
     fprintf(fidReport, '- tables/mt_file_inventory.csv\n');
