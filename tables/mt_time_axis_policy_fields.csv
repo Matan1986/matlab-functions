@@ -1,0 +1,28 @@
+artifact,field_name,field_type,level,description,decision_role
+mt_raw_summary.csv,time_nonfinite_count,int,file,Count of non-finite TimeSec samples,blocker_signal
+mt_raw_summary.csv,time_dt_cv,double,file,Coefficient of variation of dt using std(dt)/mean(abs(dt)),warning_or_risk
+mt_raw_summary.csv,time_dt_negative_count,int,file,Count of negative dt values,blocker_signal
+mt_raw_summary.csv,time_dt_zero_count,int,file,Count of zero dt values,blocker_signal
+mt_raw_summary.csv,time_pause_gap_count,int,file,Count of dt greater than pause_gap_threshold_s,warning_or_risk
+mt_raw_summary.csv,time_pause_gap_fraction,double,file,time_pause_gap_count divided by dt_count,risk_signal
+mt_raw_summary.csv,time_quality_class,string,file,Overall class OK WARNING RISK BLOCKER,primary_file_decision
+mt_raw_summary.csv,time_warning_class,string,file,Class NONE PAUSE_GAPS NONUNIFORM SEGMENTATION_RISK CORRUPTION,diagnostic_label
+mt_raw_summary.csv,time_segmentation_trust,string,file,Trust HIGH MEDIUM LOW FAIL,trust_output
+mt_raw_summary.csv,time_regular_warning,logical,file,Legacy aggregate warning flag retained for transition,legacy_compat
+mt_file_inventory.csv,time_nonfinite_count,int,file,Mirrored time metric for inventory view,blocker_signal
+mt_file_inventory.csv,time_dt_cv,double,file,Mirrored time metric for inventory view,warning_or_risk
+mt_file_inventory.csv,time_dt_negative_count,int,file,Mirrored time metric for inventory view,blocker_signal
+mt_file_inventory.csv,time_dt_zero_count,int,file,Mirrored time metric for inventory view,blocker_signal
+mt_file_inventory.csv,time_pause_gap_count,int,file,Mirrored time metric for inventory view,warning_or_risk
+mt_file_inventory.csv,time_pause_gap_fraction,double,file,Mirrored time metric for inventory view,risk_signal
+mt_file_inventory.csv,time_quality_class,string,file,Mirrored class for inventory view,primary_file_decision
+mt_file_inventory.csv,time_warning_class,string,file,Mirrored warning class for inventory view,diagnostic_label
+mt_file_inventory.csv,time_segmentation_trust,string,file,Mirrored trust for inventory view,trust_output
+mt_file_inventory.csv,time_blocker_reason,string,file,Reason text when class is BLOCKER,audit_trace
+mt_canonical_run_summary.csv,MT_TIME_AXIS_WARNINGS_PRESENT,string,run,Legacy aggregate run flag retained,legacy_compat
+mt_canonical_run_summary.csv,MT_TIME_AXIS_CORRUPTION_PRESENT,string,run,YES when any file has corruption class,primary_run_decision
+mt_canonical_run_summary.csv,MT_TIME_AXIS_PAUSE_GAPS_PRESENT,string,run,YES when benign pause gaps are observed,warning_context
+mt_canonical_run_summary.csv,MT_TIME_AXIS_SEGMENTATION_RISK_PRESENT,string,run,YES when risk class appears without hard corruption,risk_context
+mt_canonical_run_summary.csv,MT_TIME_AXIS_BLOCKER_PRESENT,string,run,YES when any blocker condition is present,primary_run_decision
+mt_canonical_run_summary.csv,MT_SEGMENTATION_TRUST_LEVEL,string,run,Aggregate trust HIGH MEDIUM LOW FAIL,trust_output
+mt_canonical_run_report.md,Time Axis Diagnostics Section,markdown,run,Human-readable counts classes and trust rationale,reporting
