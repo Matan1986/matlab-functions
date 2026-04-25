@@ -9,6 +9,9 @@
 
 "confidence": "high",
 
+"boundary_status": "LEGACY_NON_CANONICAL_ADVISORY",
+"boundary_explanation": "Current canonical collapse uses used_width_scaling = NO",
+
 "constraints": [
 "not_best_in_every_metric",
 "tradeoffs_exist"
@@ -22,6 +25,7 @@
 ],
 
 "notes": [
+"LEGACY/NON_CANONICAL/ADVISORY: width-based X claim preserved as historical evidence; do not treat as canonical-current without explicit anchor confirmation",
 "No observable simultaneously outperforms X across all criteria",
 "Alternative observables improve some metrics but degrade others"
 ],

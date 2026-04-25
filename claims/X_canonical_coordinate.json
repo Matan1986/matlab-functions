@@ -9,6 +9,9 @@
 
 "confidence": "high",
 
+"boundary_status": "LEGACY_NON_CANONICAL_ADVISORY",
+"boundary_explanation": "Current canonical collapse uses used_width_scaling = NO",
+
 "constraints": [
 "not_unique",
 "temperature_dependent",
@@ -27,6 +30,7 @@
 ],
 
 "notes": [
+"LEGACY/NON_CANONICAL/ADVISORY: width-based X claim preserved as historical evidence; do not treat as canonical-current without explicit anchor confirmation",
 "A âˆ X^Î² with strong scaling and peak alignment (~26 K)",
 "X lies on the Pareto front and is non-dominated across evaluation criteria",
 "X lies within a broad basin of parameterizations and is not fine-tuned",

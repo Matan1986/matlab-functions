@@ -9,6 +9,9 @@
 
 "confidence": "high",
 
+"boundary_status": "LEGACY_NON_CANONICAL_ADVISORY",
+"boundary_explanation": "Current canonical collapse uses used_width_scaling = NO",
+
 "constraints": [
 "X_is_function_of_T",
 "temperature_not_sufficient"
@@ -22,6 +25,7 @@
 ],
 
 "notes": [
+"LEGACY/NON_CANONICAL/ADVISORY: width-based X claim preserved as historical evidence; do not treat as canonical-current without explicit anchor confirmation",
 "Alternative smooth functions of temperature fail to reproduce alignment and cross-experiment consistency",
 "X captures a non-trivial projection of the dynamics"
 ],

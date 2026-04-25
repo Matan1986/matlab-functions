@@ -21,7 +21,6 @@ It is not a source of scientific evidence and does not replace:
 - `docs/AGENT_RULES.md`
 - `docs/system_registry.json`
 - `tables/module_canonical_status.csv`
-- `tables/switching_canonical_identity.csv`
 - `analysis/knowledge/run_registry.csv`
 - `snapshot_scientific_v3/`
 - `docs/context_bundle.json`
@@ -48,6 +47,8 @@ See `tables/project_workstream_status.csv` (one row per active workstream).
 - `snapshot_scientific_v3/` is a historical/evidence index and may lag canonical integration; do not treat it as current canonical state unless workstream status shows `snapshot_alignment=YES`.
 - `claims/` may remain legacy-weighted; do not treat claims as canonical-current unless workstream status shows `claims_alignment=YES`.
 - `analysis/query/query_system.m` is not yet canonical-aware and query outputs may mix canonical and legacy evidence.
+- Query outputs may surface stale/non-canonical context; treat query results as advisory unless canonical-current status is confirmed via operational anchors.
+- `tables/switching_canonical_identity.csv` is currently missing; treat any reference to it as downgraded/non-authoritative until evidence-backed restoration is approved.
 - `analysis/knowledge/run_registry.csv` is a query/discovery registry and is not a complete filesystem inventory of every run directory.
 - Do not build a new Switching context bundle before micro-integration is planned and executed.
 

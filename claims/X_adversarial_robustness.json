@@ -9,6 +9,9 @@
 
 "confidence": "high",
 
+"boundary_status": "LEGACY_NON_CANONICAL_ADVISORY",
+"boundary_explanation": "Current canonical collapse uses used_width_scaling = NO",
+
 "constraints": [
 "equivalent_candidates_exist",
 "no_global_dominator"
@@ -21,6 +24,7 @@
 ],
 
 "notes": [
+"LEGACY/NON_CANONICAL/ADVISORY: width-based X claim preserved as historical evidence; do not treat as canonical-current without explicit anchor confirmation",
 "Constructed perturbations and alternative forms remain tradeoff-equivalent at best",
 "No candidate improves all metrics simultaneously"
 ],
