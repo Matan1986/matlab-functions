@@ -119,3 +119,8 @@ Plan document: `docs/repository_maintenance_plan.md`
 - codex workspace lacked run roots (`results/<experiment>/runs/run_*`), so real run-output coverage result recorded as limited (`RUN_OUTPUT_AUDIT_REAL_COVERAGE = LIMITED`): YES
 - emitted as coverage-risk (`rule_id=RO_SUSPICIOUS_006`, `module_state=UNKNOWN`, `severity=MEDIUM`, `confidence=HIGH`): YES
 - issue #13 remains open as advisory coverage signal (not maintained backlog state): YES
+
+## Maintenance publication path tracking
+
+- `.gitignore` updated to unignore `reports/maintenance/` artifacts while keeping broad `reports/**` ignore in place: YES
+- maintenance publication path should no longer require force-add for tracked governance/report artifacts: YES

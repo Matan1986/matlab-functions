@@ -61,6 +61,7 @@ Publishing requirements (mandatory):
 - Direct commits to main are disallowed unless explicitly approved by future policy.
 - Chat-only output is incomplete for maintenance-loop purposes.
 - For Run Output Audit in artifact-limited Codex workspace, absence of run roots is coverage limitation, not canonical failure.
+- `reports/maintenance/` artifacts are expected to be tracked publication targets (no force-add workflow expected for this path).
 
 Pre-governor artifact targets:
 - reports/maintenance/agent_outputs/<yyyy_mm_dd>/<agent_name>_findings.csv
