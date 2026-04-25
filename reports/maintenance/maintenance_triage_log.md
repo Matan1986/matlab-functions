@@ -14,6 +14,12 @@ This log records advisory triage decisions only. It is not the durable backlog a
 - Date: `2026_04_25` | Source: `repository_drift_guard` | Issue: `GitHub Issue #17` | Rule: `RS_LEGACY_004` | Module: `Switching` | Severity: `MEDIUM` | Decision: `WATCH` | Timing: `weekly`
 - Date: `2026_04_25` | Source: `repository_drift_guard` | Issue: `GitHub Issue #17` | Rule: `RS_MOD_002` | Module: `Aging` | Severity: `MEDIUM` | Decision: `WATCH` | Timing: `module_canonicalization`
 
+### Issue #18 (Switching Analysis Steward) - ACTION_NOW triaged entries
+
+- Date: `2026_04_25` | Source: `switching_analysis_steward` | Issue: `Issue #18` | Rule: `SAS_OUTPUT_003` | Module: `Switching` | Severity: `HIGH` | Decision: `INVESTIGATE_LATER` | Timing: `weekly`
+- Date: `2026_04_25` | Source: `switching_analysis_steward` | Issue: `Issue #18` | Rule: `SAS_SOURCE_009` | Module: `Switching` | Severity: `HIGH` | Decision: `INVESTIGATE_LATER` | Timing: `weekly`
+- Date: `2026_04_25` | Source: `switching_analysis_steward` | Issue: `Issue #18` | Rule: `SAS_CROSS_006` | Module: `Switching` | Severity: `MEDIUM` | Decision: `WATCH` | Timing: `module_boundary_review`
+
 ## Not Backlog State
 
 - Separate from `tables/system_backlog_registry.csv`.
