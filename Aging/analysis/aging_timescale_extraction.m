@@ -12,9 +12,14 @@ addpath(genpath(agingRoot));
 addpath(fullfile(repoRoot, 'tools'));
 addpath(fullfile(repoRoot, 'tools', 'figures'));
 
-datasetPath = fullfile(repoRoot, 'results', 'aging', 'runs', ...
+defaultDatasetPath = fullfile(repoRoot, 'results', 'aging', 'runs', ...
     'run_2026_03_12_211204_aging_dataset_build', 'tables', ...
     'aging_observable_dataset.csv');
+datasetPath = defaultDatasetPath;
+envDatasetPath = strtrim(getenv('AGING_OBSERVABLE_DATASET_PATH'));
+if ~isempty(envDatasetPath)
+    datasetPath = envDatasetPath;
+end
 assert(exist(datasetPath, 'file') == 2, ...
     'Missing consolidated Aging observable dataset: %s', datasetPath);
 
@@ -26,6 +31,11 @@ run_output_dir = runCtx.run_dir;
 
 fprintf('Aging timescale extraction run root:\n%s\n', run_output_dir);
 fprintf('Input dataset: %s\n', datasetPath);
+if ~strcmp(datasetPath, defaultDatasetPath)
+    fprintf('Dataset override via AGING_OBSERVABLE_DATASET_PATH is active.\n');
+else
+    fprintf('Dataset override not set; using default dataset path.\n');
+end
 
 dataTbl = normalizeDatasetTable(loadObservableDataset(datasetPath));
 dataTbl = sortrows(dataTbl, {'Tp', 'tw'});

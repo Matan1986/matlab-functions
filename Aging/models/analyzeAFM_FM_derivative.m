@@ -398,6 +398,7 @@ switch lower(string(fmConvention))
     otherwise
         error('Unknown FMConvention: %s', string(fmConvention));
 end
+end
 
 function txt = resolveFMDefinitionText(fmConvention)
 switch lower(string(fmConvention))
@@ -407,7 +408,6 @@ switch lower(string(fmConvention))
         txt = 'FM = baseL - baseR';
     otherwise
         error('Unknown FMConvention: %s', string(fmConvention));
-end
 end
 end
 

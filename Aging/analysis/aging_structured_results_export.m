@@ -10,6 +10,9 @@ thisFile = mfilename('fullpath');
 analysisDir = fileparts(thisFile);
 agingRoot = fileparts(analysisDir);
 repoRoot = fileparts(agingRoot);
+% Prepend repo Aging root so gitignored Aging/localPaths.m wins over any
+% other localPaths earlier on the MATLAB path (machine-specific path shim).
+addpath(fullfile(repoRoot, 'Aging'), '-begin');
 addpath(genpath(agingRoot));
 addpath(fullfile(repoRoot, 'tools'));
 
@@ -48,6 +51,9 @@ for i = 1:size(datasetSpecs, 1)
     datasetKey = datasetSpecs{i, 1};
     fallbackTwSec = datasetSpecs{i, 2};
 
+    % Prior iterations' stage0_setupPaths prepends genpath(repoRoot), which can
+    % put .codex_tmp/aging_localpaths ahead of repo Aging/localPaths.m.
+    addpath(fullfile(repoRoot, 'Aging'), '-begin');
     cfg = agingConfig(datasetKey);
     cfg.runLabel = cfgRun.runLabel;
     cfg.doPlotting = false;
@@ -188,8 +194,8 @@ save_run_table(coeffTbl, 'svd_mode_coefficients.csv', run_output_dir);
 corrTbl = buildObservableModeCorrelationTable(obsMatrixTbl, coeffTbl);
 save_run_table(corrTbl, 'observable_mode_correlations.csv', run_output_dir);
 
-% Figures.
-fig1 = figure('Color', 'w', 'Visible', 'off', 'Position', [80 80 920 620]);
+% Figures (Name must match save_run_figure base_name; see tools/save_run_figure.m).
+fig1 = figure('Color', 'w', 'Visible', 'off', 'Position', [80 80 920 620], 'Name', 'aging_DeltaM_map');
 ax1 = axes(fig1);
 imagesc(ax1, Tgrid, logTw, M.');
 axis(ax1, 'xy');
@@ -203,7 +209,7 @@ set(ax1, 'FontSize', 14);
 save_run_figure(fig1, 'aging_DeltaM_map', run_output_dir);
 close(fig1);
 
-fig2 = figure('Color', 'w', 'Visible', 'off', 'Position', [80 80 920 620]);
+fig2 = figure('Color', 'w', 'Visible', 'off', 'Position', [80 80 920 620], 'Name', 'aging_svd_singular_spectrum');
 ax2 = axes(fig2);
 hold(ax2, 'on');
 plot(ax2, svdSingTbl.mode, svdSingTbl.normalized_singular_value, '-o', 'LineWidth', 2.2, 'Color', [0.1 0.35 0.75]);

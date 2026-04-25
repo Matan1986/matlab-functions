@@ -15,16 +15,31 @@ addpath(fullfile(repoRoot, 'tools', 'figures'));
 cfgRun = struct();
 cfgRun.runLabel = 'aging_component_clock_test';
 cfgRun.datasetName = 'aging_observable_dataset';
-cfgRun.source_dataset = fullfile('results', 'aging', 'runs', ...
+cfgRun.source_dataset_default = fullfile('results', 'aging', 'runs', ...
     'run_2026_03_12_211204_aging_dataset_build', 'tables', 'aging_observable_dataset.csv');
+cfgRun.source_dataset = cfgRun.source_dataset_default;
+envDatasetPath = strtrim(getenv('AGING_OBSERVABLE_DATASET_PATH'));
+if ~isempty(envDatasetPath)
+    cfgRun.source_dataset = envDatasetPath;
+end
 
 runCtx = createRunContext('aging', cfgRun);
 run_output_dir = runCtx.run_dir;
 
 fprintf('Aging component clock test run root:\n%s\n', run_output_dir);
 
-datasetPath = fullfile(repoRoot, cfgRun.source_dataset);
+if ~isempty(envDatasetPath)
+    datasetPath = cfgRun.source_dataset;
+else
+    datasetPath = fullfile(repoRoot, cfgRun.source_dataset);
+end
 assert(exist(datasetPath, 'file') == 2, 'Missing dataset: %s', datasetPath);
+fprintf('Input dataset: %s\n', datasetPath);
+if ~isempty(envDatasetPath)
+    fprintf('Dataset override via AGING_OBSERVABLE_DATASET_PATH is active.\n');
+else
+    fprintf('Dataset override not set; using default dataset path.\n');
+end
 
 dataTbl = loadObservableDataset(datasetPath);
 tpValues = unique(dataTbl.Tp, 'sorted');
@@ -54,7 +69,7 @@ figNorm = makeNormalizedComparisonFigure(plotData, metricTbl);
 saveFigureOutputs(figNorm, 'normalized_component_comparison', run_output_dir);
 close(figNorm);
 
-reportText = buildReportText(metricTbl, dataTbl, cfgRun.source_dataset);
+reportText = buildReportText(metricTbl, dataTbl, datasetPath);
 reportPath = save_run_report(reportText, 'aging_component_clock_report.md', run_output_dir);
 
 zipPath = createReviewZip(run_output_dir);
