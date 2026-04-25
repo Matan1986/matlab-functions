@@ -34,6 +34,7 @@ Required behavior:
 - persist normalized findings and advisory summary to documented GitHub-visible publication targets; do not leave findings only in chat output
 - when platform supports branch/PR publication, publish via approved maintenance route (draft PR preferred, otherwise dedicated automation branch)
 - publish maintenance artifacts under `reports/maintenance/` as normal tracked files; do not rely on force-add for this path
+- for Governor minimal compatibility, Run Output Audit must also emit a second simplified CSV at `reports/maintenance/agent_outputs/<yyyy_mm_dd>/run_output_audit_findings.csv` with columns exactly `finding_id,module,severity,description` and one row per normalized finding (`finding_id = finding_key`)
 
 Efficiency and scope bounding (mandatory):
 
@@ -338,6 +339,13 @@ Assess run artifact completeness and consistency under the run system, with modu
    - `SUSPICIOUS RUNS`
    - `MISSING ARTIFACT GUIDANCE`
 2. Normalized findings rows (CSV-like block)
+3. Additive Governor-minimal CSV output:
+   - path: `reports/maintenance/agent_outputs/<yyyy_mm_dd>/run_output_audit_findings.csv`
+   - schema/order: `finding_id,module,severity,description`
+   - mapping: `finding_id = finding_key` (full value, no truncation), `module = module`, `severity = severity`, `description = description`
+   - one row per normalized finding, no deduplication
+   - create directory if missing, overwrite file, UTF-8
+   - if no findings, write empty CSV with headers only
 
 ### Normalized finding row schema
 

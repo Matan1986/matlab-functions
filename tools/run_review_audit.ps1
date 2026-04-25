@@ -682,6 +682,43 @@ foreach ($record in $records) {
 $flagged = $flagRows.ToArray() |
     Sort-Object @{ Expression = 'severity'; Descending = $true }, experiment, label, timestamp, run_id
 
+$maintenanceDateToken = Get-Date -Format 'yyyy_MM_dd'
+$maintenanceOutputDir = Join-Path $repoRootPath ("reports\maintenance\agent_outputs\{0}" -f $maintenanceDateToken)
+if (-not (Test-Path -LiteralPath $maintenanceOutputDir)) {
+    New-Item -ItemType Directory -Path $maintenanceOutputDir -Force | Out-Null
+}
+$maintenanceFindingsCsv = Join-Path $maintenanceOutputDir 'run_output_audit_findings.csv'
+
+$governorRows = New-Object System.Collections.Generic.List[object]
+foreach ($row in $flagged) {
+    [void]$governorRows.Add([pscustomobject][ordered]@{
+        finding_id = [string]$row.run_id
+        module = [string]$row.experiment
+        severity = ([string](Get-SeverityLabel -Severity ([int]$row.severity))).ToUpperInvariant()
+        description = [string]$row.reason
+    })
+}
+
+if ($governorRows.Count -eq 0) {
+    @([pscustomobject][ordered]@{
+        finding_id = ''
+        module = ''
+        severity = ''
+        description = ''
+    }) | Export-Csv -LiteralPath $maintenanceFindingsCsv -NoTypeInformation -Encoding UTF8
+    (Import-Csv -LiteralPath $maintenanceFindingsCsv | Where-Object {
+            -not [string]::IsNullOrWhiteSpace([string]$_.finding_id) -or
+            -not [string]::IsNullOrWhiteSpace([string]$_.module) -or
+            -not [string]::IsNullOrWhiteSpace([string]$_.severity) -or
+            -not [string]::IsNullOrWhiteSpace([string]$_.description)
+        }) | Export-Csv -LiteralPath $maintenanceFindingsCsv -NoTypeInformation -Encoding UTF8
+} else {
+    $governorRows | Export-Csv -LiteralPath $maintenanceFindingsCsv -NoTypeInformation -Encoding UTF8
+}
+
+Write-Output "Governor CSV output: $maintenanceFindingsCsv"
+Write-Output "Governor CSV rows written: $($governorRows.Count)"
+
 $flagSummaryByRun = @{}
 foreach ($row in $flagged) {
     if (-not $flagSummaryByRun.ContainsKey($row.run_id)) {

@@ -66,6 +66,11 @@ Publishing requirements (mandatory):
 Pre-governor artifact targets:
 - reports/maintenance/agent_outputs/<yyyy_mm_dd>/<agent_name>_findings.csv
 - reports/maintenance/agent_outputs/<yyyy_mm_dd>/<agent_name>_report.md
+- Run Output Audit additive Governor-minimal CSV:
+  - reports/maintenance/agent_outputs/<yyyy_mm_dd>/run_output_audit_findings.csv
+  - schema/order: finding_id,module,severity,description
+  - mapping: finding_id=finding_key (full), module=module, severity=severity, description=description
+  - one row per normalized finding, no deduplication
 
 Forbidden actions:
 - no mutation of tables/system_backlog_registry.csv
