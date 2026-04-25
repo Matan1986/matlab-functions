@@ -5,6 +5,17 @@ Status: Deployment preparation document (manual rollout required)
 
 ## 1) Deployment Status
 
+Live prompt source-of-truth note:
+
+- Repository prompt documents are template/contract references and are not the live Codex Automation UI prompt source of truth.
+- Prompt changes in this repository do not auto-sync to scheduled Codex automations.
+- After each template update, operators must manually update the corresponding Codex Automation UI prompt.
+- Track sync status per automation:
+  - `PROMPT_DOC_UPDATED = YES/NO`
+  - `LIVE_CODEX_PROMPT_UPDATED = YES/NO`
+  - `LIVE_PROMPT_LAST_SYNCED = <date or UNKNOWN>`
+- If `LIVE_CODEX_PROMPT_UPDATED = NO`, morning review must treat automation behavior drift as possible.
+
 Existing automations to update:
 
 1. Repository Drift Guard
@@ -63,6 +74,11 @@ Publishing requirements (mandatory):
 - Chat-only output is incomplete for maintenance-loop purposes.
 - For Run Output Audit in artifact-limited Codex workspace, absence of run roots is coverage limitation, not canonical failure.
 - `reports/maintenance/` artifacts are expected to be tracked publication targets (no force-add workflow expected for this path).
+- Writes only under `.codex/worktrees` are not publication completion.
+- Final automation response must include:
+  - `PUBLICATION_COMPLETED = YES/NO`
+  - `PUBLICATION_ROUTE = <draft_pr|automation_branch|issue_comment|pr_comment|none>`
+  - `PUBLICATION_URL = <url or NONE>`
 
 Pre-governor artifact targets:
 - reports/maintenance/agent_outputs/<yyyy_mm_dd>/<agent_name>_findings.csv
@@ -339,6 +355,8 @@ Publication target (mandatory):
 Policy:
 - advisory-only, report-only, no canonical closure
 - no file edits, no MATLAB execution, no backlog mutation
+- live prompt must be manually synced in Codex UI after any repo template change
+- publication completion requires GitHub-visible route and final publication verdict fields
 
 Output sections:
 - RUN SUMMARY
@@ -419,6 +437,15 @@ Switching Analysis Steward publication path (module steward lane):
 7. Confirm outputs are visible to GitHub/ChatGPT review readers.
 8. Confirm normalized rows include mandatory `confidence`.
 9. Confirm final verdict block is present in each automation output.
+10. For each automation, record prompt sync status:
+    - `PROMPT_DOC_UPDATED = YES/NO`
+    - `LIVE_CODEX_PROMPT_UPDATED = YES/NO`
+    - `LIVE_PROMPT_LAST_SYNCED = <date or UNKNOWN>`
+11. If any automation has `LIVE_CODEX_PROMPT_UPDATED = NO`, mark morning review with behavior-drift risk.
+12. For `switching_analysis_steward`, verify publication completion fields are present in final response:
+    - `PUBLICATION_COMPLETED`
+    - `PUBLICATION_ROUTE`
+    - `PUBLICATION_URL`
 
 ## 8) Deployment Readiness Verdict
 

@@ -7,6 +7,17 @@ These prompts modernize existing maintenance automations so their outputs are co
 
 They are input producers only. They are not the maintenance governor.
 
+Live Codex automation sync note:
+
+- This document is a template/contract source and is not the live Codex Automation UI prompt source of truth.
+- Updating prompt text here does not automatically update scheduled Codex automations.
+- After changing any prompt template, update the corresponding Codex Automation UI prompt manually.
+- Maintain per-automation sync status records:
+  - `PROMPT_DOC_UPDATED = YES/NO`
+  - `LIVE_CODEX_PROMPT_UPDATED = YES/NO`
+  - `LIVE_PROMPT_LAST_SYNCED = <date or UNKNOWN>`
+- If `LIVE_CODEX_PROMPT_UPDATED = NO`, morning review must treat behavior drift as possible until sync is completed.
+
 ## Global Execution Rules (All Prompts)
 
 Before any scan work, read these operational anchors first:
@@ -431,6 +442,16 @@ Publication enforcement (all prompts):
 
 - maintainers and scheduled reviewers must be able to see outputs in GitHub-visible artifacts (branch/PR/Issue comment).
 - if outputs are only emitted in chat/automation logs, treat run as incomplete for maintenance-loop purposes.
+- writes inside `.codex/worktrees` are local execution artifacts and are not publication completion by themselves.
+- final automation response must include:
+  - `PUBLICATION_COMPLETED = YES/NO`
+  - `PUBLICATION_ROUTE = <draft_pr|automation_branch|issue_comment|pr_comment|none>`
+  - `PUBLICATION_URL = <url or NONE>`
+
+Switching Analysis Steward sync/publication note:
+
+- `switching_analysis_steward` follows the same manual live-prompt sync rule; repo prompt updates require explicit Codex UI prompt update.
+- For `switching_analysis_steward`, publication is complete only after GitHub-visible artifact publication and final response publication verdict fields are present.
 
 Minimal fix suggestion policy (all prompts):
 
