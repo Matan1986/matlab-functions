@@ -155,9 +155,9 @@ try
     pointsDerivedTbl = table('Size', [0 20], ...
         'VariableTypes', {'double','double','double','double','double','double','double','double','double','double','double','double','double','double','double','string','double','string','double','string'}, ...
         'VariableNames', {'file_id','row_index','T_K','H_Oe','time_s','M_emu_clean','sample_mass_g','time_rel_s','M_over_H_emu_per_Oe','M_norm_emu_per_g','chi_mass_emu_per_g_per_Oe','dM_dT_emu_per_K','dM_dt_emu_per_s','dT_dt_K_per_s','segment_id','segment_type','segment_progress_01','segment_direction_sign','derived_valid_flag','derived_missing_reason'});
-    observablesTbl = table('Size', [0 14], ...
-        'VariableTypes', {'string','string','double','double','string','string','string','string','string','double','string','double','string','string'}, ...
-        'VariableNames', {'observable_name','observable_variant','file_id','segment_id','segment_type','definition','source_columns','aggregation_method','temperature_dependence','value_numeric','value_unit','n_points_used','quality_flag','notes'});
+    observablesTbl = table('Size', [0 15], ...
+        'VariableTypes', {'string','string','double','double','string','string','string','string','string','string','double','string','double','string','string'}, ...
+        'VariableNames', {'observable_name','observable_variant','file_id','segment_id','segment_type','definition','source_table','source_columns','aggregation_method','temperature_dependence','value_numeric','value_unit','n_points_used','quality_flag','notes'});
     gateSummaryTbl = table('Size', [0 8], ...
         'VariableTypes', {'string','string','string','string','string','string','string','string'}, ...
         'VariableNames', {'gate_id','gate_name','status','severity','blocks_full_canonical','blocks_production_release','blocks_advanced_analysis','details'});
@@ -184,6 +184,10 @@ try
     pointTablesWritten = "NO";
     pointTableGateSummary = "NOT_RUN";
     fullCanonicalDataProduct = "NO";
+    mtBasicSummaryObservablesWritten = "NO";
+    mtForbiddenObservableGroupsEmitted = "NO";
+    mtBasicSummaryObservablesGateSummary = "NOT_RUN";
+    hAbsGtEpsOe = 1e-9;
 
     importedOk = 0;
     importedFail = 0;
@@ -674,24 +678,94 @@ try
         for kk = 1:numel(uf)
             fid = uf(kk);
             idx = pointsDerivedTbl.file_id == fid;
-            vals = pointsDerivedTbl.M_over_H_emu_per_Oe(idx);
-            vals = vals(isfinite(vals));
-            nUsed = numel(vals);
-            v = NaN;
-            qf = "LOW";
-            notes = "No finite derived points";
-            if nUsed > 0
-                v = mean(vals);
-                qf = "MEDIUM";
-                notes = "Stage 4.2 minimal observable from derived";
+            fileRows = pointsDerivedTbl(idx, :);
+            nFile = height(fileRows);
+
+            tVals = fileRows.T_K(isfinite(fileRows.T_K));
+            hVals = fileRows.H_Oe(isfinite(fileRows.H_Oe));
+            mVals = fileRows.M_emu_clean(isfinite(fileRows.M_emu_clean));
+            hNom = mode(round(hVals, 9));
+            if isempty(hNom)
+                hNom = NaN;
             end
-            observablesTbl = [observablesTbl; table("mean_M_over_H", "file_level", double(fid), double(0), "unknown", ...
-                "File-level mean of M_over_H from derived points", "M_over_H_emu_per_Oe", "mean", "scalar", double(v), "emu_per_Oe", double(nUsed), qf, notes, ...
-                'VariableNames', {'observable_name','observable_variant','file_id','segment_id','segment_type','definition','source_columns','aggregation_method','temperature_dependence','value_numeric','value_unit','n_points_used','quality_flag','notes'})];
+
+            obsRows = table('Size', [0 15], ...
+                'VariableTypes', {'string','string','double','double','string','string','string','string','string','string','double','string','double','string','string'}, ...
+                'VariableNames', {'observable_name','observable_variant','file_id','segment_id','segment_type','definition','source_table','source_columns','aggregation_method','temperature_dependence','value_numeric','value_unit','n_points_used','quality_flag','notes'});
+
+            obsRows = [obsRows; table("row_count", "file_level", double(fid), 0, "file", ...
+                "Diagnostic file-level row count in DERIVED points table", "mt_points_derived", "row_index", "count", "none", double(nFile), "count", double(nFile), "OK", "coverage_only; source=derived", ...
+                'VariableNames', obsRows.Properties.VariableNames)];
+
+            if ~isempty(tVals)
+                tMin = min(tVals); tMax = max(tVals); tSpan = tMax - tMin;
+                obsRows = [obsRows; table("T_K_summary", "file_level_min", double(fid), 0, "file", ...
+                    "Diagnostic file-level minimum temperature from DERIVED", "mt_points_derived", "T_K", "min", "explicit", double(tMin), "K", double(numel(tVals)), "OK", "coverage_only; source=derived", ...
+                    'VariableNames', obsRows.Properties.VariableNames)];
+                obsRows = [obsRows; table("T_K_summary", "file_level_max", double(fid), 0, "file", ...
+                    "Diagnostic file-level maximum temperature from DERIVED", "mt_points_derived", "T_K", "max", "explicit", double(tMax), "K", double(numel(tVals)), "OK", "coverage_only; source=derived", ...
+                    'VariableNames', obsRows.Properties.VariableNames)];
+                obsRows = [obsRows; table("T_K_summary", "file_level_span", double(fid), 0, "file", ...
+                    "Diagnostic file-level temperature span from DERIVED", "mt_points_derived", "T_K", "max_minus_min", "explicit", double(tSpan), "K", double(numel(tVals)), "OK", "coverage_only; source=derived", ...
+                    'VariableNames', obsRows.Properties.VariableNames)];
+            end
+
+            if ~isempty(hVals)
+                hMin = min(hVals); hMax = max(hVals); hSpan = hMax - hMin;
+                obsRows = [obsRows; table("H_Oe_summary", "file_level_nominal", double(fid), 0, "file", ...
+                    "Diagnostic file-level nominal field from DERIVED", "mt_points_derived", "H_Oe", "mode_rounded_1e-9", "none", double(hNom), "Oe", double(numel(hVals)), "OK", "coverage_only; source=derived", ...
+                    'VariableNames', obsRows.Properties.VariableNames)];
+                obsRows = [obsRows; table("H_Oe_summary", "file_level_min", double(fid), 0, "file", ...
+                    "Diagnostic file-level minimum field from DERIVED", "mt_points_derived", "H_Oe", "min", "none", double(hMin), "Oe", double(numel(hVals)), "OK", "coverage_only; source=derived", ...
+                    'VariableNames', obsRows.Properties.VariableNames)];
+                obsRows = [obsRows; table("H_Oe_summary", "file_level_max", double(fid), 0, "file", ...
+                    "Diagnostic file-level maximum field from DERIVED", "mt_points_derived", "H_Oe", "max", "none", double(hMax), "Oe", double(numel(hVals)), "OK", "coverage_only; source=derived", ...
+                    'VariableNames', obsRows.Properties.VariableNames)];
+                obsRows = [obsRows; table("H_Oe_summary", "file_level_span", double(fid), 0, "file", ...
+                    "Diagnostic file-level field span from DERIVED", "mt_points_derived", "H_Oe", "max_minus_min", "none", double(hSpan), "Oe", double(numel(hVals)), "OK", "coverage_only; source=derived", ...
+                    'VariableNames', obsRows.Properties.VariableNames)];
+            end
+
+            if ~isempty(mVals)
+                mMin = min(mVals); mMax = max(mVals); mSpan = mMax - mMin;
+                obsRows = [obsRows; table("M_emu_clean_summary", "file_level_min", double(fid), 0, "file", ...
+                    "Diagnostic file-level minimum clean moment from DERIVED", "mt_points_derived", "M_emu_clean", "min", "implicit_via_T", double(mMin), "emu", double(numel(mVals)), "OK", "coverage_only; source=derived", ...
+                    'VariableNames', obsRows.Properties.VariableNames)];
+                obsRows = [obsRows; table("M_emu_clean_summary", "file_level_max", double(fid), 0, "file", ...
+                    "Diagnostic file-level maximum clean moment from DERIVED", "mt_points_derived", "M_emu_clean", "max", "implicit_via_T", double(mMax), "emu", double(numel(mVals)), "OK", "coverage_only; source=derived", ...
+                    'VariableNames', obsRows.Properties.VariableNames)];
+                obsRows = [obsRows; table("M_emu_clean_summary", "file_level_span", double(fid), 0, "file", ...
+                    "Diagnostic file-level clean moment span from DERIVED", "mt_points_derived", "M_emu_clean", "max_minus_min", "implicit_via_T", double(mSpan), "emu", double(numel(mVals)), "OK", "coverage_only; source=derived", ...
+                    'VariableNames', obsRows.Properties.VariableNames)];
+            end
+
+            mhMask = isfinite(fileRows.M_over_H_emu_per_Oe) & isfinite(fileRows.H_Oe) & abs(fileRows.H_Oe) > hAbsGtEpsOe;
+            mhVals = fileRows.M_over_H_emu_per_Oe(mhMask);
+            mhN = numel(mhVals);
+            if mhN > 0
+                mhMin = min(mhVals); mhMax = max(mhVals); mhSpan = mhMax - mhMin;
+                mhNotes = "coverage_only; source=derived; nonzero_field_guard=abs(H_Oe)>H_ABS_GT_EPS_Oe; H_ABS_GT_EPS_Oe=" + string(hAbsGtEpsOe);
+                obsRows = [obsRows; table("M_over_H_emu_per_Oe_summary", "file_level_min", double(fid), 0, "file", ...
+                    "Diagnostic file-level minimum M/H with nonzero-field guard from DERIVED", "mt_points_derived", "M_over_H_emu_per_Oe,H_Oe", "min_guarded", "implicit_via_T", double(mhMin), "emu_per_Oe", double(mhN), "OK", mhNotes, ...
+                    'VariableNames', obsRows.Properties.VariableNames)];
+                obsRows = [obsRows; table("M_over_H_emu_per_Oe_summary", "file_level_max", double(fid), 0, "file", ...
+                    "Diagnostic file-level maximum M/H with nonzero-field guard from DERIVED", "mt_points_derived", "M_over_H_emu_per_Oe,H_Oe", "max_guarded", "implicit_via_T", double(mhMax), "emu_per_Oe", double(mhN), "OK", mhNotes, ...
+                    'VariableNames', obsRows.Properties.VariableNames)];
+                obsRows = [obsRows; table("M_over_H_emu_per_Oe_summary", "file_level_span", double(fid), 0, "file", ...
+                    "Diagnostic file-level M/H span with nonzero-field guard from DERIVED", "mt_points_derived", "M_over_H_emu_per_Oe,H_Oe", "max_minus_min_guarded", "implicit_via_T", double(mhSpan), "emu_per_Oe", double(mhN), "OK", mhNotes, ...
+                    'VariableNames', obsRows.Properties.VariableNames)];
+            else
+                obsRows = [obsRows; table("M_over_H_emu_per_Oe_summary", "file_level_guarded_status", double(fid), 0, "file", ...
+                    "Diagnostic guard status: no valid nonzero-field finite M/H rows", "mt_points_derived", "M_over_H_emu_per_Oe,H_Oe", "guard_status", "none", NaN, "emu_per_Oe", double(0), "BLOCKED_FIELD_ZERO_OR_INVALID", ...
+                    "coverage_only; no_value_emitted; nonzero_field_guard=abs(H_Oe)>H_ABS_GT_EPS_Oe; H_ABS_GT_EPS_Oe=" + string(hAbsGtEpsOe), ...
+                    'VariableNames', obsRows.Properties.VariableNames)];
+            end
+
+            observablesTbl = [observablesTbl; obsRows];
         end
     end
 
-    gNames = ["schema_columns_present","required_fields_nonmissing","row_parity_raw_clean_derived","key_uniqueness","no_float_coordinate_joins","clean_raw_traceability","smooth_not_clean_replacement","derived_source_isolation","time_channel_assumption_check","segmentation_annotation_check","observables_provenance_check"]';
+    gNames = ["schema_columns_present","required_fields_nonmissing","row_parity_raw_clean_derived","key_uniqueness","no_float_coordinate_joins","clean_raw_traceability","smooth_not_clean_replacement","derived_source_isolation","time_channel_assumption_check","segmentation_annotation_check","observables_policy_and_provenance_check"]';
     gIds = ["G01","G02","G03","G04","G05","G06","G07","G08","G09","G10","G11"]';
     gSeverity = ["HIGH","HIGH","HIGH","HIGH","HIGH","HIGH","MEDIUM","HIGH","MEDIUM","MEDIUM","HIGH"]';
     gBlockFull = ["YES","YES","YES","YES","YES","YES","YES","YES","NO","NO","YES"]';
@@ -703,7 +777,7 @@ try
     reqRaw = ["file_id","row_index","T_K","H_Oe","time_s","M_emu","sample_mass_g","import_status","time_quality","time_warning_class"];
     reqClean = ["file_id","row_index","T_K","H_Oe","time_s","M_emu_raw","M_emu_clean","M_emu_smooth","cleaning_branch","cleaning_reason_code","points_changed_flag","raw_clean_abs_delta","raw_smooth_abs_delta","cleaning_effect_class","cleaning_warning_class","cleaning_trust","segment_id","segment_type","segment_source"];
     reqDer = ["file_id","row_index","T_K","H_Oe","time_s","M_emu_clean","sample_mass_g","time_rel_s","M_over_H_emu_per_Oe","M_norm_emu_per_g","chi_mass_emu_per_g_per_Oe","dM_dT_emu_per_K","dM_dt_emu_per_s","dT_dt_K_per_s","segment_id","segment_type","segment_progress_01","segment_direction_sign","derived_valid_flag","derived_missing_reason"];
-    reqObs = ["observable_name","observable_variant","file_id","segment_id","segment_type","definition","source_columns","aggregation_method","temperature_dependence","value_numeric","value_unit","n_points_used","quality_flag","notes"];
+    reqObs = ["observable_name","observable_variant","file_id","segment_id","segment_type","definition","source_table","source_columns","aggregation_method","temperature_dependence","value_numeric","value_unit","n_points_used","quality_flag","notes"];
     rawCols = string(pointsRawTbl.Properties.VariableNames);
     cleanCols = string(pointsCleanTbl.Properties.VariableNames);
     derCols = string(pointsDerivedTbl.Properties.VariableNames);
@@ -721,7 +795,7 @@ try
     reqStrClean = ["cleaning_branch","cleaning_reason_code","cleaning_effect_class","cleaning_warning_class","cleaning_trust","segment_type","segment_source"];
     reqNumDerNoNaN = ["file_id","row_index","T_K","H_Oe","time_s","M_emu_clean","derived_valid_flag"];
     reqStrDer = ["segment_type","segment_direction_sign","derived_missing_reason"];
-    reqStrObs = ["observable_name","observable_variant","segment_type","definition","source_columns","aggregation_method","temperature_dependence","value_unit","quality_flag"];
+    reqStrObs = ["observable_name","observable_variant","segment_type","definition","source_table","source_columns","aggregation_method","temperature_dependence","value_unit","quality_flag","notes"];
     for jj = 1:numel(reqNumRaw)
         cn = char(reqNumRaw(jj));
         if any(~isfinite(pointsRawTbl.(cn)))
@@ -861,12 +935,33 @@ try
     end
     gDetails(10) = "segmentation_is_cleaning=" + string(segmentation_is_cleaning) + ", segment_source_populated=" + string(segment_source_populated);
 
+    forbiddenNames = ["dM_dT_peak","transition_width","transition_midpoint","T_at_max_slope","M_norm","chi_mass","zfc_fcc_fcw_split","hysteresis_like","Tc_inferred","advanced_analysis"];
+    allowedSummaryNames = ["row_count","T_K_summary","H_Oe_summary","M_emu_clean_summary","M_over_H_emu_per_Oe_summary"];
+    hasForbidden = false;
     if height(observablesTbl) > 0
-        missObs = any(observablesTbl.source_columns == "" | observablesTbl.aggregation_method == "" | observablesTbl.definition == "");
-        if missObs
-            gStatus(11) = "FAIL"; gDetails(11) = "observable provenance missing";
+        hasForbidden = any(ismember(observablesTbl.observable_name, forbiddenNames));
+    end
+    mtForbiddenObservableGroupsEmitted = "NO";
+    if hasForbidden
+        mtForbiddenObservableGroupsEmitted = "YES";
+    end
+    if height(observablesTbl) > 0
+        missObs = any(observablesTbl.source_columns == "" | observablesTbl.aggregation_method == "" | observablesTbl.definition == "" | observablesTbl.source_table == "");
+        sourceDerivedOnly = all(observablesTbl.source_table == "mt_points_derived");
+        allowedOnly = all(ismember(observablesTbl.observable_name, allowedSummaryNames));
+        qfPopulated = ~any(ismissing(observablesTbl.quality_flag) | strlength(observablesTbl.quality_flag) == 0);
+        mhRows = observablesTbl.observable_name == "M_over_H_emu_per_Oe_summary";
+        mhGuardNoted = true;
+        if any(mhRows)
+            mhNotes = observablesTbl.notes(mhRows);
+            mhGuardNoted = all(contains(mhNotes, "H_ABS_GT_EPS_Oe"));
+        end
+        if missObs || ~sourceDerivedOnly || ~allowedOnly || ~qfPopulated || hasForbidden || ~mhGuardNoted
+            gStatus(11) = "FAIL";
+            gDetails(11) = "obs_policy: miss=" + string(missObs) + ", derived_only=" + string(sourceDerivedOnly) + ", allowed_only=" + string(allowedOnly) + ...
+                ", qf_populated=" + string(qfPopulated) + ", forbidden=" + string(hasForbidden) + ", mh_guard_noted=" + string(mhGuardNoted);
         else
-            gDetails(11) = "observable provenance complete";
+            gDetails(11) = "observables provenance+policy pass (derived-only/basic-summary/guarded)";
         end
     else
         gDetails(11) = "empty but schema-valid observables";
@@ -883,6 +978,14 @@ try
         end
     else
         pointTableGateSummary = "PASS";
+    end
+    if height(observablesTbl) > 0
+        mtBasicSummaryObservablesWritten = "YES";
+    end
+    if pointTableGateSummary == "PASS" && mtForbiddenObservableGroupsEmitted == "NO"
+        mtBasicSummaryObservablesGateSummary = "PASS";
+    else
+        mtBasicSummaryObservablesGateSummary = "FAIL";
     end
 
     inventoryPath = fullfile(tablesDir, 'mt_file_inventory.csv');
@@ -957,6 +1060,9 @@ try
         "POINT_TABLES_WRITTEN"; ...
         "RAW_CLEAN_DERIVED_SEPARATION"; ...
         "FULL_CANONICAL_DATA_PRODUCT"; ...
+        "MT_BASIC_SUMMARY_OBSERVABLES_WRITTEN"; ...
+        "MT_FORBIDDEN_OBSERVABLE_GROUPS_EMITTED"; ...
+        "MT_BASIC_SUMMARY_OBSERVABLES_GATE_SUMMARY"; ...
         "MT_READY_FOR_PRODUCTION_CANONICAL_RELEASE"; ...
         "MT_READY_FOR_ADVANCED_ANALYSIS"; ...
         "DIAGNOSTIC_ONLY"];
@@ -987,6 +1093,9 @@ try
         pointTablesWritten; ...
         "TABLE_LEVEL"; ...
         fullCanonicalDataProduct; ...
+        mtBasicSummaryObservablesWritten; ...
+        mtForbiddenObservableGroupsEmitted; ...
+        mtBasicSummaryObservablesGateSummary; ...
         mtReadyForProductionRelease; ...
         mtReadyForAdvancedAnalysis; ...
         "YES"];
@@ -1034,6 +1143,9 @@ try
     fprintf(fidReport, '- POINT_TABLES_WRITTEN=%s\n', pointTablesWritten);
     fprintf(fidReport, '- RAW_CLEAN_DERIVED_SEPARATION=TABLE_LEVEL\n');
     fprintf(fidReport, '- FULL_CANONICAL_DATA_PRODUCT=%s\n', fullCanonicalDataProduct);
+    fprintf(fidReport, '- MT_BASIC_SUMMARY_OBSERVABLES_WRITTEN=%s\n', mtBasicSummaryObservablesWritten);
+    fprintf(fidReport, '- MT_FORBIDDEN_OBSERVABLE_GROUPS_EMITTED=%s\n', mtForbiddenObservableGroupsEmitted);
+    fprintf(fidReport, '- MT_BASIC_SUMMARY_OBSERVABLES_GATE_SUMMARY=%s\n', mtBasicSummaryObservablesGateSummary);
     fprintf(fidReport, '- MT_READY_FOR_PRODUCTION_CANONICAL_RELEASE=%s\n', mtReadyForProductionRelease);
     fprintf(fidReport, '- MT_READY_FOR_ADVANCED_ANALYSIS=%s\n\n', mtReadyForAdvancedAnalysis);
 
