@@ -7,15 +7,23 @@ p = '';
 identityPath = fullfile(repoRoot, 'tables', 'switching_canonical_identity.csv');
 if exist(identityPath, 'file') == 2
     try
-        idTbl = readtable(identityPath, 'VariableNamingRule', 'preserve');
-        if ~all(ismember({'field', 'value'}, idTbl.Properties.VariableNames))
+        idTbl = readtable(identityPath, 'VariableNamingRule', 'preserve', 'TextType', 'string');
+        if ~all(ismember({'field', 'value'}, string(idTbl.Properties.VariableNames)))
             warning('Switching:IdentityResolverFallback', ...
                 'Identity table malformed (missing field/value columns): %s. Falling back to mtime resolver.', ...
                 identityPath);
         else
-            fields = string(idTbl.field);
+            fields = normalizeIdentityToken(string(idTbl.field));
             values = string(idTbl.value);
-            idx = find(strtrim(fields) == "CANONICAL_RUN_ID", 1, 'first');
+            idx = find(fields == "CANONICAL_RUN_ID", 1, 'first');
+            if isempty(idx)
+                % Fallback parser for identity files with blank rows/BOM quirks.
+                idRaw = readcell(identityPath, 'Delimiter', ',');
+                rawFields = normalizeIdentityToken(string(idRaw(:,1)));
+                rawValues = string(idRaw(:,2));
+                idx = find(rawFields == "CANONICAL_RUN_ID", 1, 'first');
+                values = rawValues;
+            end
             if isempty(idx)
                 warning('Switching:IdentityResolverFallback', ...
                     'CANONICAL_RUN_ID not found in identity table: %s. Falling back to mtime resolver.', ...
@@ -60,4 +68,11 @@ end
 if isempty(paths), return; end
 [~, idx] = max(cellfun(@(x) dir(x).datenum, paths));
 p = paths{idx};
+end
+
+function out = normalizeIdentityToken(in)
+out = strtrim(in);
+if isempty(out), return; end
+% Drop UTF-8 BOM if present at first token position.
+out = regexprep(out, "^\xFEFF", "");
 end
