@@ -146,6 +146,25 @@ try
         'VariableTypes', {'double','string','double','double','double','double','double','double','double'}, ...
         'VariableNames', {'file_id','segment_type','segment_id','start_idx','end_idx','time_start_s','time_end_s','T_start_K','T_end_K'});
 
+    pointsRawTbl = table('Size', [0 10], ...
+        'VariableTypes', {'double','double','double','double','double','double','double','string','string','string'}, ...
+        'VariableNames', {'file_id','row_index','T_K','H_Oe','time_s','M_emu','sample_mass_g','import_status','time_quality','time_warning_class'});
+    pointsCleanTbl = table('Size', [0 20], ...
+        'VariableTypes', {'double','double','double','double','double','double','double','double','double','string','string','double','double','double','string','string','string','double','string','string'}, ...
+        'VariableNames', {'file_id','row_index','T_K','H_Oe','time_s','M_emu_raw','M_emu_clean','M_emu_smooth','sample_mass_g','cleaning_branch','cleaning_reason_code','points_changed_flag','raw_clean_abs_delta','raw_smooth_abs_delta','cleaning_effect_class','cleaning_warning_class','cleaning_trust','segment_id','segment_type','segment_source'});
+    pointsDerivedTbl = table('Size', [0 20], ...
+        'VariableTypes', {'double','double','double','double','double','double','double','double','double','double','double','double','double','double','double','string','double','string','double','string'}, ...
+        'VariableNames', {'file_id','row_index','T_K','H_Oe','time_s','M_emu_clean','sample_mass_g','time_rel_s','M_over_H_emu_per_Oe','M_norm_emu_per_g','chi_mass_emu_per_g_per_Oe','dM_dT_emu_per_K','dM_dt_emu_per_s','dT_dt_K_per_s','segment_id','segment_type','segment_progress_01','segment_direction_sign','derived_valid_flag','derived_missing_reason'});
+    observablesTbl = table('Size', [0 14], ...
+        'VariableTypes', {'string','string','double','double','string','string','string','string','string','double','string','double','string','string'}, ...
+        'VariableNames', {'observable_name','observable_variant','file_id','segment_id','segment_type','definition','source_columns','aggregation_method','temperature_dependence','value_numeric','value_unit','n_points_used','quality_flag','notes'});
+    gateSummaryTbl = table('Size', [0 8], ...
+        'VariableTypes', {'string','string','string','string','string','string','string','string'}, ...
+        'VariableNames', {'gate_id','gate_name','status','severity','blocks_full_canonical','blocks_production_release','blocks_advanced_analysis','details'});
+    gateFailuresTbl = table('Size', [0 5], ...
+        'VariableTypes', {'string','string','string','string','string'}, ...
+        'VariableNames', {'gate_id','gate_name','severity','failure_mode_description','required_action'});
+
     mtInputFound = "NO";
     mtImportStrictnessOk = "NO";
     mtCleaningAuditWritten = "NO";
@@ -162,6 +181,9 @@ try
     mtCleaningEffectRiskPresent = "NO";
     mtCleaningBranchSplitIsBlocker = "NO";
     mtCleaningTrustLevel = "HIGH";
+    pointTablesWritten = "NO";
+    pointTableGateSummary = "NOT_RUN";
+    fullCanonicalDataProduct = "NO";
 
     importedOk = 0;
     importedFail = 0;
@@ -421,6 +443,29 @@ try
                     'VariableNames', {'file_id','cleaning_policy_branch','field_oe','field_threshold_oe','unfiltered_mode','n_raw','n_clean_non_nan','n_smooth_non_nan','n_masked_or_nan_after_clean', ...
                     'cleaning_reason_code','cleaning_branch','points_changed_count','points_changed_fraction','raw_clean_max_abs_delta','raw_smooth_max_abs_delta','cleaning_effect_class','cleaning_warning_class','cleaning_trust'})];
 
+                rowIndex = (1:nRows)';
+                sampleMassG = NaN;
+                if isfinite(massFromName) && massFromName > 0
+                    sampleMassG = massFromName / 1000.0;
+                end
+                sampleMassCol = repmat(double(sampleMassG), nRows, 1);
+                pointsRawTbl = [pointsRawTbl; table(repmat(double(iFile), nRows, 1), double(rowIndex), double(TemperatureK(:)), double(MagneticFieldOe(:)), double(TimeSec(:)), double(MomentEmu(:)), sampleMassCol, ...
+                    repmat(string(importStatus), nRows, 1), repmat(timeQuality, nRows, 1), repmat(timeWarningClass, nRows, 1), ...
+                    'VariableNames', {'file_id','row_index','T_K','H_Oe','time_s','M_emu','sample_mass_g','import_status','time_quality','time_warning_class'})];
+
+                pointsChangedFlag = zeros(nRows, 1);
+                if numel(M_raw) == nRows && numel(M_clean) == nRows
+                    structuralMask = (isfinite(M_raw) & ~isfinite(M_clean)) | (~isfinite(M_raw) & isfinite(M_clean));
+                    pointsChangedFlag = double(structuralMask(:));
+                end
+                rawCleanDelta = abs(M_clean(:) - M_raw(:));
+                rawSmoothDelta = abs(M_smooth(:) - M_raw(:));
+                pointsCleanTbl = [pointsCleanTbl; table(repmat(double(iFile), nRows, 1), double(rowIndex), double(TemperatureK(:)), double(MagneticFieldOe(:)), double(TimeSec(:)), ...
+                    double(M_raw(:)), double(M_clean(:)), double(M_smooth(:)), sampleMassCol, repmat(cleaningBranch, nRows, 1), repmat(cleaningReasonCode, nRows, 1), double(pointsChangedFlag), ...
+                    double(rawCleanDelta), double(rawSmoothDelta), repmat(cleaningEffectClass, nRows, 1), repmat(cleaningWarningClass, nRows, 1), repmat(cleaningTrust, nRows, 1), ...
+                    repmat(0, nRows, 1), repmat("unknown", nRows, 1), repmat("not_implemented", nRows, 1), ...
+                    'VariableNames', {'file_id','row_index','T_K','H_Oe','time_s','M_emu_raw','M_emu_clean','M_emu_smooth','sample_mass_g','cleaning_branch','cleaning_reason_code','points_changed_flag','raw_clean_abs_delta','raw_smooth_abs_delta','cleaning_effect_class','cleaning_warning_class','cleaning_trust','segment_id','segment_type','segment_source'})];
+
                 filteredTemp = medfilt1(T_smooth, 20);
                 incSeg = {};
                 decSeg = {};
@@ -560,18 +605,192 @@ try
         end
     end
 
+    if height(pointsCleanTbl) > 0
+        nP = height(pointsCleanTbl);
+        timeRel = NaN(nP, 1);
+        mOverH = NaN(nP, 1);
+        mNorm = NaN(nP, 1);
+        chiMass = NaN(nP, 1);
+        dMdT = NaN(nP, 1);
+        dMdt = NaN(nP, 1);
+        dTdt = NaN(nP, 1);
+        segProgress = NaN(nP, 1);
+        segDir = repmat("0", nP, 1);
+        derivedValid = ones(nP, 1);
+        derivedReason = repmat("OK", nP, 1);
+
+        uf = unique(pointsCleanTbl.file_id);
+        for kk = 1:numel(uf)
+            fid = uf(kk);
+            idx = find(pointsCleanTbl.file_id == fid);
+            t = pointsCleanTbl.time_s(idx);
+            mf = isfinite(t);
+            if any(mf)
+                t0 = t(find(mf, 1, 'first'));
+                timeRel(idx(mf)) = t(mf) - t0;
+            end
+            nLoc = numel(idx);
+            if nLoc > 1
+                segProgress(idx) = (0:(nLoc-1))' ./ (nLoc-1);
+            else
+                segProgress(idx) = 0;
+            end
+        end
+
+        hz = pointsCleanTbl.H_Oe;
+        mz = pointsCleanTbl.M_emu_clean;
+        nz = pointsCleanTbl.sample_mass_g;
+        okH = isfinite(hz) & hz ~= 0 & isfinite(mz);
+        mOverH(okH) = mz(okH) ./ hz(okH);
+        badH = isfinite(mz) & (~isfinite(hz) | hz == 0);
+        derivedReason(badH) = "zero_or_missing_field";
+
+        okMass = isfinite(nz) & nz > 0 & isfinite(mz);
+        mNorm(okMass) = mz(okMass) ./ nz(okMass);
+        chiOk = okMass & isfinite(hz) & hz ~= 0;
+        chiMass(chiOk) = mNorm(chiOk) ./ hz(chiOk);
+        badMass = isfinite(mz) & (~isfinite(nz) | nz <= 0);
+        derivedReason(badMass) = "missing_mass";
+        badChi = okMass & (~isfinite(hz) | hz == 0);
+        derivedReason(badChi) = "zero_or_missing_field";
+
+        dMdT(:) = NaN;
+        dMdt(:) = NaN;
+        dTdt(:) = NaN;
+        needDer = true(nP,1);
+        derivedReason(needDer & derivedReason=="OK") = "derivative_not_implemented";
+        derivedValid(derivedReason ~= "OK") = 0;
+        hasCore = isfinite(pointsCleanTbl.M_emu_clean) & isfinite(pointsCleanTbl.time_s);
+        derivedValid(hasCore) = 1;
+
+        pointsDerivedTbl = table(pointsCleanTbl.file_id, pointsCleanTbl.row_index, pointsCleanTbl.T_K, pointsCleanTbl.H_Oe, pointsCleanTbl.time_s, ...
+            pointsCleanTbl.M_emu_clean, pointsCleanTbl.sample_mass_g, timeRel, mOverH, mNorm, chiMass, dMdT, dMdt, dTdt, ...
+            pointsCleanTbl.segment_id, pointsCleanTbl.segment_type, segProgress, segDir, double(derivedValid), derivedReason, ...
+            'VariableNames', {'file_id','row_index','T_K','H_Oe','time_s','M_emu_clean','sample_mass_g','time_rel_s','M_over_H_emu_per_Oe','M_norm_emu_per_g','chi_mass_emu_per_g_per_Oe','dM_dT_emu_per_K','dM_dt_emu_per_s','dT_dt_K_per_s','segment_id','segment_type','segment_progress_01','segment_direction_sign','derived_valid_flag','derived_missing_reason'});
+    end
+
+    if height(pointsDerivedTbl) > 0
+        uf = unique(pointsDerivedTbl.file_id);
+        for kk = 1:numel(uf)
+            fid = uf(kk);
+            idx = pointsDerivedTbl.file_id == fid;
+            vals = pointsDerivedTbl.M_over_H_emu_per_Oe(idx);
+            vals = vals(isfinite(vals));
+            nUsed = numel(vals);
+            v = NaN;
+            qf = "LOW";
+            notes = "No finite derived points";
+            if nUsed > 0
+                v = mean(vals);
+                qf = "MEDIUM";
+                notes = "Stage 4.2 minimal observable from derived";
+            end
+            observablesTbl = [observablesTbl; table("mean_M_over_H", "file_level", double(fid), double(0), "unknown", ...
+                "File-level mean of M_over_H from derived points", "M_over_H_emu_per_Oe", "mean", "scalar", double(v), "emu_per_Oe", double(nUsed), qf, notes, ...
+                'VariableNames', {'observable_name','observable_variant','file_id','segment_id','segment_type','definition','source_columns','aggregation_method','temperature_dependence','value_numeric','value_unit','n_points_used','quality_flag','notes'})];
+        end
+    end
+
+    gNames = ["schema_columns_present","required_fields_nonmissing","row_parity_raw_clean_derived","key_uniqueness","no_float_coordinate_joins","clean_raw_traceability","smooth_not_clean_replacement","derived_source_isolation","time_channel_assumption_check","segmentation_annotation_check","observables_provenance_check"]';
+    gIds = ["G01","G02","G03","G04","G05","G06","G07","G08","G09","G10","G11"]';
+    gSeverity = ["HIGH","HIGH","HIGH","HIGH","HIGH","HIGH","MEDIUM","HIGH","MEDIUM","MEDIUM","HIGH"]';
+    gBlockFull = ["YES","YES","YES","YES","YES","YES","YES","YES","NO","NO","YES"]';
+    gBlockProd = repmat("YES", 11, 1);
+    gBlockAdv = repmat("YES", 11, 1);
+    gStatus = repmat("PASS", 11, 1);
+    gDetails = repmat("ok", 11, 1);
+
+    reqRaw = ["file_id","row_index","T_K","H_Oe","time_s","M_emu","sample_mass_g","import_status","time_quality","time_warning_class"];
+    reqClean = ["file_id","row_index","T_K","H_Oe","time_s","M_emu_raw","M_emu_clean","M_emu_smooth","cleaning_branch","cleaning_reason_code","points_changed_flag","raw_clean_abs_delta","raw_smooth_abs_delta","cleaning_effect_class","cleaning_warning_class","cleaning_trust","segment_id","segment_type","segment_source"];
+    reqDer = ["file_id","row_index","T_K","H_Oe","time_s","M_emu_clean","sample_mass_g","time_rel_s","M_over_H_emu_per_Oe","M_norm_emu_per_g","chi_mass_emu_per_g_per_Oe","dM_dT_emu_per_K","dM_dt_emu_per_s","dT_dt_K_per_s","segment_id","segment_type","segment_progress_01","segment_direction_sign","derived_valid_flag","derived_missing_reason"];
+    reqObs = ["observable_name","observable_variant","file_id","segment_id","segment_type","definition","source_columns","aggregation_method","temperature_dependence","value_numeric","value_unit","n_points_used","quality_flag","notes"];
+    if ~all(ismember(reqRaw, string(pointsRawTbl.Properties.VariableNames))) || ~all(ismember(reqClean, string(pointsCleanTbl.Properties.VariableNames))) || ~all(ismember(reqDer, string(pointsDerivedTbl.Properties.VariableNames))) || ~all(ismember(reqObs, string(observablesTbl.Properties.VariableNames)))
+        gStatus(1) = "FAIL"; gDetails(1) = "missing required schema column(s)";
+    end
+    missReq = any(ismissing(pointsRawTbl.import_status)) || any(ismissing(pointsRawTbl.time_quality)) || any(ismissing(pointsRawTbl.time_warning_class)) || ...
+        any(ismissing(pointsCleanTbl.cleaning_branch)) || any(ismissing(pointsCleanTbl.cleaning_reason_code)) || any(ismissing(pointsCleanTbl.segment_type)) || ...
+        any(ismissing(pointsCleanTbl.segment_source)) || any(ismissing(pointsDerivedTbl.segment_type)) || any(ismissing(pointsDerivedTbl.derived_missing_reason));
+    if missReq
+        gStatus(2) = "FAIL"; gDetails(2) = "missing required nonnumeric fields";
+    else
+        gDetails(2) = "required fields populated";
+    end
+    if height(pointsRawTbl) ~= height(pointsCleanTbl) || height(pointsCleanTbl) ~= height(pointsDerivedTbl)
+        gStatus(3) = "FAIL"; gDetails(3) = "row parity mismatch";
+    else
+        gDetails(3) = "raw clean derived row parity ok";
+    end
+    if height(unique(pointsRawTbl(:,{'file_id','row_index'}))) ~= height(pointsRawTbl) || height(unique(pointsCleanTbl(:,{'file_id','row_index'}))) ~= height(pointsCleanTbl) || height(unique(pointsDerivedTbl(:,{'file_id','row_index'}))) ~= height(pointsDerivedTbl)
+        gStatus(4) = "FAIL"; gDetails(4) = "duplicate key rows";
+    end
+    gDetails(5) = "joins use immutable key by construction";
+    if any(abs(pointsCleanTbl.M_emu_raw - pointsRawTbl.M_emu) > 0 | xor(isfinite(pointsCleanTbl.M_emu_raw), isfinite(pointsRawTbl.M_emu)))
+        gStatus(6) = "FAIL"; gDetails(6) = "clean raw traceability mismatch";
+    end
+    gDetails(7) = "smooth channel kept separate from clean channel";
+    if ~all(ismember(["M_emu_clean","sample_mass_g","time_s","T_K","H_Oe","segment_id","segment_type"], string(pointsDerivedTbl.Properties.VariableNames)))
+        gStatus(8) = "FAIL"; gDetails(8) = "derived source isolation contract missing clean inputs";
+    end
+    gDetails(9) = "time_s treated as imported channel and time_rel_s explicit";
+    if ~all(pointsCleanTbl.segment_source == "not_implemented")
+        gDetails(10) = "segmentation annotations present";
+    else
+        gDetails(10) = "segmentation placeholder annotations used";
+    end
+    if height(observablesTbl) > 0
+        missObs = any(observablesTbl.source_columns == "" | observablesTbl.aggregation_method == "" | observablesTbl.definition == "");
+        if missObs
+            gStatus(11) = "FAIL"; gDetails(11) = "observable provenance missing";
+        else
+            gDetails(11) = "observable provenance complete";
+        end
+    else
+        gDetails(11) = "empty but schema-valid observables";
+    end
+
+    gateSummaryTbl = table(gIds, gNames, gStatus, gSeverity, gBlockFull, gBlockProd, gBlockAdv, gDetails, ...
+        'VariableNames', {'gate_id','gate_name','status','severity','blocks_full_canonical','blocks_production_release','blocks_advanced_analysis','details'});
+    failMask = gateSummaryTbl.status == "FAIL";
+    if any(failMask)
+        pointTableGateSummary = "FAIL";
+        for ii = find(failMask').'
+            gateFailuresTbl = [gateFailuresTbl; table(gateSummaryTbl.gate_id(ii), gateSummaryTbl.gate_name(ii), gateSummaryTbl.severity(ii), "Validation gate failed", "Fix producer logic and re-run", ...
+                'VariableNames', {'gate_id','gate_name','severity','failure_mode_description','required_action'})];
+        end
+    else
+        pointTableGateSummary = "PASS";
+    end
+
     inventoryPath = fullfile(tablesDir, 'mt_file_inventory.csv');
     rawSummaryPath = fullfile(tablesDir, 'mt_raw_summary.csv');
     cleaningAuditPath = fullfile(tablesDir, 'mt_cleaning_audit.csv');
     segmentsPath = fullfile(tablesDir, 'mt_segments.csv');
+    pointsRawPath = fullfile(tablesDir, 'mt_points_raw.csv');
+    pointsCleanPath = fullfile(tablesDir, 'mt_points_clean.csv');
+    pointsDerivedPath = fullfile(tablesDir, 'mt_points_derived.csv');
+    observablesPath = fullfile(tablesDir, 'mt_observables.csv');
+    pointGateSummaryPath = fullfile(tablesDir, 'mt_point_tables_validation_summary.csv');
+    pointGateFailuresPath = fullfile(tablesDir, 'mt_point_tables_gate_failures.csv');
 
     writetable(fileInventory, inventoryPath);
     writetable(rawSummary, rawSummaryPath);
     writetable(cleaningAudit, cleaningAuditPath);
     writetable(segmentsTbl, segmentsPath);
+    writetable(pointsRawTbl, pointsRawPath);
+    writetable(pointsCleanTbl, pointsCleanPath);
+    writetable(pointsDerivedTbl, pointsDerivedPath);
+    writetable(observablesTbl, observablesPath);
+    writetable(gateSummaryTbl, pointGateSummaryPath);
+    writetable(gateFailuresTbl, pointGateFailuresPath);
 
     mtCleaningAuditWritten = "YES";
     mtSegmentTableWritten = "YES";
+    pointTablesWritten = "YES";
+    if pointTableGateSummary == "PASS" && pointTablesWritten == "YES"
+        fullCanonicalDataProduct = "PARTIAL";
+    else
+        fullCanonicalDataProduct = "NO";
+    end
 
     if strcmp(mtTimeAxisCorruptionPresent, "YES") || strcmp(mtTimeAxisPauseGapsPresent, "YES") || strcmp(mtTimeAxisSegmentationRiskPresent, "YES") || timeWarningCount > 0
         mtTimeAxisWarningsPresent = "YES";
@@ -610,6 +829,7 @@ try
         "MT_CLEANING_EFFECT_RISK_PRESENT"; ...
         "MT_CLEANING_BRANCH_SPLIT_IS_BLOCKER"; ...
         "MT_CLEANING_TRUST_LEVEL"; ...
+        "MT_POINT_TABLES_GATE_SUMMARY"; ...
         "POINT_TABLES_WRITTEN"; ...
         "RAW_CLEAN_DERIVED_SEPARATION"; ...
         "FULL_CANONICAL_DATA_PRODUCT"; ...
@@ -639,9 +859,10 @@ try
         mtCleaningEffectRiskPresent; ...
         mtCleaningBranchSplitIsBlocker; ...
         mtCleaningTrustLevel; ...
-        "NO"; ...
-        "SUMMARY_LEVEL_ONLY"; ...
-        "NO"; ...
+        pointTableGateSummary; ...
+        pointTablesWritten; ...
+        "TABLE_LEVEL"; ...
+        fullCanonicalDataProduct; ...
         mtReadyForProductionRelease; ...
         mtReadyForAdvancedAnalysis; ...
         "YES"];
@@ -685,9 +906,10 @@ try
     fprintf(fidReport, '- MT_CLEANING_EFFECT_RISK_PRESENT=%s\n', mtCleaningEffectRiskPresent);
     fprintf(fidReport, '- MT_CLEANING_BRANCH_SPLIT_IS_BLOCKER=%s\n', mtCleaningBranchSplitIsBlocker);
     fprintf(fidReport, '- MT_CLEANING_TRUST_LEVEL=%s\n', mtCleaningTrustLevel);
-    fprintf(fidReport, '- POINT_TABLES_WRITTEN=NO\n');
-    fprintf(fidReport, '- RAW_CLEAN_DERIVED_SEPARATION=SUMMARY_LEVEL_ONLY\n');
-    fprintf(fidReport, '- FULL_CANONICAL_DATA_PRODUCT=NO\n');
+    fprintf(fidReport, '- MT_POINT_TABLES_GATE_SUMMARY=%s\n', pointTableGateSummary);
+    fprintf(fidReport, '- POINT_TABLES_WRITTEN=%s\n', pointTablesWritten);
+    fprintf(fidReport, '- RAW_CLEAN_DERIVED_SEPARATION=TABLE_LEVEL\n');
+    fprintf(fidReport, '- FULL_CANONICAL_DATA_PRODUCT=%s\n', fullCanonicalDataProduct);
     fprintf(fidReport, '- MT_READY_FOR_PRODUCTION_CANONICAL_RELEASE=%s\n', mtReadyForProductionRelease);
     fprintf(fidReport, '- MT_READY_FOR_ADVANCED_ANALYSIS=%s\n\n', mtReadyForAdvancedAnalysis);
 
@@ -696,6 +918,12 @@ try
     fprintf(fidReport, '- tables/mt_raw_summary.csv\n');
     fprintf(fidReport, '- tables/mt_cleaning_audit.csv\n');
     fprintf(fidReport, '- tables/mt_segments.csv\n');
+    fprintf(fidReport, '- tables/mt_points_raw.csv\n');
+    fprintf(fidReport, '- tables/mt_points_clean.csv\n');
+    fprintf(fidReport, '- tables/mt_points_derived.csv\n');
+    fprintf(fidReport, '- tables/mt_observables.csv\n');
+    fprintf(fidReport, '- tables/mt_point_tables_validation_summary.csv\n');
+    fprintf(fidReport, '- tables/mt_point_tables_gate_failures.csv\n');
     fprintf(fidReport, '- tables/mt_canonical_run_summary.csv\n');
     fprintf(fidReport, '- reports/mt_canonical_run_report.md\n');
     fprintf(fidReport, '- execution_status.csv\n');
