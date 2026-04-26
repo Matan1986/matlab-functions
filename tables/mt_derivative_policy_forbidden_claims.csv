@@ -1,0 +1,10 @@
+claim_id,forbidden_claim,reason,allowed_replacement_language
+FC01,Tc claim,Derivative candidates are algorithm dependent and not validated as equilibrium transition estimators,Candidate temperature feature under declared derivative method and quality gates
+FC02,phase transition temperature claim,Stage 5.1 defines diagnostics not phase-boundary inference,Transition-shape candidate indicator only no phase assignment
+FC03,equilibrium transition claim,Nonequilibrium protocol and scope constraints are not resolved by derivative policy,Protocol-scoped feature in observed data channel
+FC04,critical behavior claim,Critical scaling analysis requirements are out of scope and blocked,Descriptive slope or width candidate without critical interpretation
+FC05,latent heat claim,Calorimetric evidence is absent and derivative of M versus T is insufficient,Sharpness candidate in magnetic response only
+FC06,universality class claim,Universality requires validated scaling collapse and multi-condition evidence not present,Method-bounded candidate trend only
+FC07,cross_module_claim,Derivative candidate outputs cannot infer coupling to Switching Relaxation or Aging modules,Module-local MT candidate diagnostic only
+FC08,first_order_vs_second_order_classification,Order classification requires stronger thermodynamic and hysteresis evidence,Unclassified transition-shape candidate feature
+FC09,publication_ready_physics_claim,Readiness remains below advanced-analysis and implementation thresholds,Internal diagnostic candidate pending future policy gates

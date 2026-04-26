@@ -1,0 +1,20 @@
+rule_id,rule_name,policy_statement,required_for,blocks_if_violated
+R01,default_independent_variable_T_K,Use T_K as the default independent variable for transition-shape derivative candidates,all_transition_shape_candidates,YES
+R02,dM_dt_not_transition_substitute,dM_dt_emu_per_s may be reported as timing diagnostic only and must not replace dM_dT for transition-shape outputs,all_transition_shape_candidates,YES
+R03,time_s_not_elapsed_by_default,time_s must not be treated as elapsed time and elapsed semantics require explicit time_rel_s,time_based_diagnostics_and_derivative_context,YES
+R04,segment_scoped_derivative_only,Compute derivatives only within file_id plus segment_id scoped windows,all_derivative_candidates,YES
+R05,no_cross_segment_derivative,Cross-segment derivative construction is forbidden,all_derivative_candidates,YES
+R06,unknown_segment_type_restriction,segment_type UNKNOWN may support basic diagnostic derivative checks only and cannot support ZFC FCC FCW interpretation,segment_aware_derivative_interpretation,YES
+R07,default_source_clean,Default derivative source channel is M_emu_clean,all_derivative_candidates,YES
+R08,smooth_exception_only,M_emu_smooth may be used only when explicitly declared in provenance with method and smoothing parameters,all_derivative_candidates,YES
+R09,allowed_method_local_central_difference,Allow local central finite difference with declared window and boundary behavior,derivative_value_generation,YES
+R10,allowed_method_local_robust_slope,Allow local robust slope over declared T window with declared robust fit option,derivative_value_generation,YES
+R11,minimum_window_points,Minimum local window is 3 points for central difference and 5 for robust slope,derivative_value_generation,YES
+R12,minimum_scope_points,Minimum points per segment derivative scope is 7,all_derivative_candidates,YES
+R13,nonuniform_T_spacing_report_required,T spacing nonuniformity metrics must be reported per derivative scope,all_derivative_candidates,YES
+R14,pause_gaps_not_auto_invalidating,pause gaps in time_s do not alone invalidate dM_dT if T ordering and spacing gates pass,all_derivative_candidates,NO
+R15,block_on_degenerate_or_sparse_T,Block derivative output when T deltas are repeated near-zero beyond tolerance or too sparse for method,all_derivative_candidates,YES
+R16,nonmonotonic_T_requires_block_or_split,If T_K is nonmonotonic in scope derivative is blocked unless policy-split into monotonic subscopes is declared,all_derivative_candidates,YES
+R17,no_silent_interpolation,Do not silently interpolate or regrid T for derivative computations,all_derivative_candidates,YES
+R18,interpolation_requires_separate_policy,Interpolation is forbidden unless separately approved interpolation policy and provenance declaration exist,all_derivative_candidates,YES
+R19,candidate_output_scope_limit,Transition outputs are candidate-only diagnostics and not physics claims,all_transition_shape_candidates,YES

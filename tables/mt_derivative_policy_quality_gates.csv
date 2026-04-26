@@ -1,0 +1,16 @@
+gate_id,gate_name,condition_summary,applies_to,blocks_if_failed
+DG01,point_table_gates_pass,G01 through G11 point-table gates must pass before derivative candidates are published,all_derivative_candidates,YES
+DG02,segment_scope_valid,Derivative scope must include valid file_id and segment_id grouping,all_derivative_candidates,YES
+DG03,minimum_points_scope,Scope point count must satisfy N_points greater than or equal to 7,all_derivative_candidates,YES
+DG04,T_finite_and_variable,T_K must be finite and have nontrivial variation in each derivative scope,all_derivative_candidates,YES
+DG05,T_monotonic_or_policy_split,T_K must be monotonic in scope or explicit policy-split into monotonic subscopes must be declared,all_derivative_candidates,YES
+DG06,no_cross_segment_derivative,No derivative estimate may use points from different segment_id scopes,all_derivative_candidates,YES
+DG07,source_channel_declared,Provenance must declare whether derivative used M_emu_clean or M_emu_smooth,all_derivative_candidates,YES
+DG08,nonuniform_spacing_reported,T spacing nonuniformity statistics and risk class must be reported,all_derivative_candidates,YES
+DG09,derivative_method_declared,Provenance must declare derivative method and window parameters,all_derivative_candidates,YES
+DG10,no_interpolation_without_policy,No interpolation or T regridding unless a separate approved interpolation policy is referenced,all_derivative_candidates,YES
+DG11,dm_dt_diagnostic_only,dM_dt channel usage must be marked diagnostic-only and not used as transition-shape substitute,all_transition_shape_candidates,YES
+DG12,unknown_segment_type_limited,segment_type UNKNOWN may be used only for basic diagnostics and not for ZFC FCC FCW interpretation,segment_interpretation_outputs,YES
+DG13,time_axis_semantics_guard,time_s cannot be assumed elapsed and elapsed interpretations require explicit time_rel_s,time_dependent_derivative_context,YES
+DG14,pause_gap_nonblock_rule,pause gaps in time_s do not automatically block dM_dT when T-based gates pass,dM_dT_transition_candidates,NO
+DG15,candidate_only_interpretation_gate,All transition outputs must be labeled candidate and blocked from Tc or phase-transition claim language,all_transition_shape_candidates,YES
