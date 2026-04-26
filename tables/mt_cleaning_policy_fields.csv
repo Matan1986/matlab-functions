@@ -1,0 +1,27 @@
+artifact,field_name,field_type,level,description,decision_role
+mt_cleaning_audit.csv,cleaning_reason_code,string,file,RAW_MODE BYPASS_LOW_FIELD FULL_CLEAN,policy_trace
+mt_cleaning_audit.csv,point_count_delta_clean,double,file,n_clean_non_nan minus n_raw,change_signal
+mt_cleaning_audit.csv,point_count_delta_smooth,double,file,n_smooth_non_nan minus n_raw,change_signal
+mt_cleaning_audit.csv,masked_points_count,double,file,Explicit masked or NaN after clean count,change_signal
+mt_cleaning_audit.csv,masked_points_fraction,double,file,masked_points_count divided by n_raw,risk_signal
+mt_cleaning_audit.csv,points_changed_count,double,file,Point-wise changed count raw to clean over finite overlap,primary_change_signal
+mt_cleaning_audit.csv,points_changed_fraction,double,file,points_changed_count divided by n_raw,primary_change_signal
+mt_cleaning_audit.csv,interp_or_fill_count,double,file,Count of points reconstructed by interpolation or fill,processing_trace
+mt_cleaning_audit.csv,hampel_replaced_count,double_or_string,file,Count replaced by Hampel or UNAVAILABLE if not exposed,processing_trace
+mt_cleaning_audit.csv,smooth_changed_count,double,file,Count changed from clean to smooth over finite overlap,processing_trace
+mt_cleaning_audit.csv,max_abs_delta_raw_clean,double,file,Maximum absolute delta raw to clean over finite overlap,effect_strength
+mt_cleaning_audit.csv,max_abs_delta_clean_smooth,double,file,Maximum absolute delta clean to smooth over finite overlap,effect_strength
+mt_cleaning_audit.csv,mean_abs_delta_raw_clean,double,file,Mean absolute delta raw to clean over finite overlap,effect_strength
+mt_cleaning_audit.csv,mean_abs_delta_clean_smooth,double,file,Mean absolute delta clean to smooth over finite overlap,effect_strength
+mt_cleaning_audit.csv,cleaning_effect_class,string,file,NONE LOW MEDIUM HIGH,effect_class
+mt_cleaning_audit.csv,cleaning_policy_warning_class,string,file,NONE BRANCH_SPLIT_ONLY CHANGED_POINTS HIGH_EFFECT,policy_warning
+mt_canonical_run_summary.csv,MT_CLEANING_POLICY_BRANCH_SPLIT_PRESENT,string,run,YES when multiple policy branches appear,policy_gate
+mt_canonical_run_summary.csv,MT_CLEANING_CHANGED_POINTS_PRESENT,string,run,YES NO or POSSIBLY_UNRESOLVED,policy_gate
+mt_canonical_run_summary.csv,MT_CLEANING_EFFECT_RISK_PRESENT,string,run,YES when effect class indicates comparability risk,policy_gate
+mt_canonical_run_summary.csv,MT_CLEANING_BRANCH_SPLIT_IS_BLOCKER,string,run,YES when split plus changed-point risk exceeds gate,blocker_gate
+mt_canonical_run_summary.csv,MT_CLEANING_TRUST_LEVEL,string,run,HIGH MEDIUM LOW FAIL,trust_output
+mt_canonical_run_summary.csv,MT_CLEANING_BYPASS_FILE_COUNT,double,run,Count of BYPASS_LOW_FIELD files,reporting
+mt_canonical_run_summary.csv,MT_CLEANING_FULL_CLEAN_FILE_COUNT,double,run,Count of FULL_CLEAN files,reporting
+mt_canonical_run_summary.csv,MT_CLEANING_CHANGED_POINTS_TOTAL,double,run,Sum of points_changed_count across files,reporting
+mt_canonical_run_summary.csv,MT_CLEANING_MAX_POINT_CHANGE_FRACTION,double,run,Maximum per-file points_changed_fraction,reporting
+mt_canonical_run_report.md,Cleaning Policy Diagnostics Section,markdown,run,Human-readable branch split changed points and trust rationale,reporting
