@@ -1,0 +1,11 @@
+claim_id,category,forbidden_item,reason,policy_stage,enforcement_action
+F01,derivative,dM_dT_plots,Derivative/transition policy blocks derivative interpretation in current MT scope,5.1,block_render_and_flag
+F02,transition,transition_markers,Transition candidates are blocked for current readiness boundary,5.0,block_render_and_flag
+F03,transition,Tc_markers,Tc inference is forbidden in controlled canonical development stage,5.0,block_render_and_flag
+F04,physics,phase_transition_claims,Phase claims exceed allowed diagnostic summary semantics,5.0,block_render_and_flag
+F05,physics,critical_behavior_claims,Critical behavior claims are out of scope for Stage 5.7 diagnostics,5.0,block_render_and_flag
+F06,mass_normalized,mass_normalized_plots,Mass provenance policy blocks normalization-dependent views without approved provenance pipeline,5.2,block_render_and_flag
+F07,mass_normalized,chi_mass_plots,chi_mass is blocked by mass provenance and guard policy in current scope,5.2,block_render_and_flag
+F08,segments,zfc_fcc_fcw_splitting,Segment comparison outputs are blocked at readiness stage,5.3,block_render_and_flag
+F09,segments,hysteresis_like_comparisons,Hysteresis-style interpretation is out of scope and blocked,5.3,block_render_and_flag
+F10,cross_module,cross_module_claims,Cross-module claims are forbidden in MT basic summary review,5.0,block_render_and_flag
