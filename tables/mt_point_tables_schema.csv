@@ -1,0 +1,64 @@
+table_name,column_name,type,unit,definition,source,required
+mt_points_raw.csv,file_id,int,1,File identity from canonical file inventory,raw,YES
+mt_points_raw.csv,row_index,int,1,1-based row index within imported file,raw,YES
+mt_points_raw.csv,T_K,numeric,K,Raw sample temperature,raw,YES
+mt_points_raw.csv,H_Oe,numeric,Oe,Raw magnetic field,raw,YES
+mt_points_raw.csv,time_s,numeric,s,Imported time channel in seconds not assumed elapsed,raw,YES
+mt_points_raw.csv,M_emu,numeric,emu,Raw magnetic moment,raw,YES
+mt_points_raw.csv,sample_mass_g,numeric,g,Effective sample mass used for normalization if known,raw,NO
+mt_points_raw.csv,import_status,string,1,Per-row import status code,raw,YES
+mt_points_raw.csv,time_quality,string,1,Time-axis quality classification inherited from diagnostics,raw,YES
+mt_points_raw.csv,time_warning_class,string,1,Time-axis warning classification,raw,YES
+mt_points_clean.csv,file_id,int,1,File identity copied from raw,raw,YES
+mt_points_clean.csv,row_index,int,1,Row identity copied from raw without recomputation,raw,YES
+mt_points_clean.csv,T_K,numeric,K,Temperature carried from raw identity row,raw,YES
+mt_points_clean.csv,H_Oe,numeric,Oe,Field carried from raw identity row,raw,YES
+mt_points_clean.csv,time_s,numeric,s,Imported time channel carried from raw identity row,raw,YES
+mt_points_clean.csv,M_emu_raw,numeric,emu,Original raw magnetic moment for traceability,raw,YES
+mt_points_clean.csv,M_emu_clean,numeric,emu,Structural cleaned magnetic moment after deterministic cleaning transform,clean,YES
+mt_points_clean.csv,M_emu_smooth,numeric,emu,Optional smoothed analysis or diagnostic channel from clean path,clean,YES
+mt_points_clean.csv,cleaning_branch,string,1,Policy branch selected for this row or file,clean,YES
+mt_points_clean.csv,cleaning_reason_code,string,1,Explicit reason code describing cleaning path,clean,YES
+mt_points_clean.csv,points_changed_flag,int,1,1 if clean value structurally differs from raw else 0,clean,YES
+mt_points_clean.csv,raw_clean_abs_delta,numeric,emu,Absolute delta between raw and clean channels per row,clean,YES
+mt_points_clean.csv,raw_smooth_abs_delta,numeric,emu,Absolute delta between raw and smooth channels per row,clean,YES
+mt_points_clean.csv,cleaning_effect_class,string,1,Per-row or inherited effect severity class,clean,YES
+mt_points_clean.csv,cleaning_warning_class,string,1,Per-row or inherited warning class,clean,YES
+mt_points_clean.csv,cleaning_trust,string,1,Per-row or inherited trust level class,clean,YES
+mt_points_clean.csv,segment_id,int,1,Deterministic segment identifier annotation within file,derived_annotation,NO
+mt_points_clean.csv,segment_type,string,1,Segment class annotation increasing/decreasing/zfc/fcc/fcw/unknown,derived_annotation,NO
+mt_points_clean.csv,segment_source,string,1,Segment annotation source algorithm/metadata/hybrid not cleaning logic,derived_annotation,YES
+mt_points_derived.csv,file_id,int,1,File identity copied from clean,clean,YES
+mt_points_derived.csv,row_index,int,1,Row identity copied from clean without recomputation,clean,YES
+mt_points_derived.csv,T_K,numeric,K,Temperature identity carried from clean,clean,YES
+mt_points_derived.csv,H_Oe,numeric,Oe,Field identity carried from clean,clean,YES
+mt_points_derived.csv,time_s,numeric,s,Time identity carried from clean,clean,YES
+mt_points_derived.csv,time_rel_s,numeric,s,Optional relative or elapsed time derived from imported time channel,derived,NO
+mt_points_derived.csv,M_emu_clean,numeric,emu,Clean magnetization input carried for transparent derivation context,clean,YES
+mt_points_derived.csv,sample_mass_g,numeric,g,Mass input used by mass-normalized derived quantities,clean,NO
+mt_points_derived.csv,M_over_H_emu_per_Oe,numeric,emu_per_Oe,Clean magnetization divided by field with zero-field guards,derived,NO
+mt_points_derived.csv,M_norm_emu_per_g,numeric,emu_per_g,Clean magnetization normalized by sample mass,derived,NO
+mt_points_derived.csv,chi_mass_emu_per_g_per_Oe,numeric,emu_per_g_per_Oe,Mass-normalized susceptibility proxy from clean channel,derived,NO
+mt_points_derived.csv,dM_dT_emu_per_K,numeric,emu_per_K,Temperature derivative of clean magnetization,derived,NO
+mt_points_derived.csv,dM_dt_emu_per_s,numeric,emu_per_s,Time derivative of clean magnetization,derived,NO
+mt_points_derived.csv,dT_dt_K_per_s,numeric,K_per_s,Time derivative of temperature channel,derived,NO
+mt_points_derived.csv,segment_id,int,1,Segment identifier propagated from clean table,clean,NO
+mt_points_derived.csv,segment_type,string,1,Segment label propagated from clean table,clean,NO
+mt_points_derived.csv,segment_progress_01,numeric,1,Normalized progress coordinate within segment [0,1],derived,NO
+mt_points_derived.csv,segment_direction_sign,int,1,Segment direction sign +1/-1/0,derived,NO
+mt_points_derived.csv,derived_valid_flag,int,1,1 if required clean inputs existed for selected derived set else 0,derived,YES
+mt_points_derived.csv,derived_missing_reason,string,1,Reason code when derived outputs are NaN,derived,NO
+mt_observables.csv,observable_name,string,1,Canonical observable identifier,derived,YES
+mt_observables.csv,observable_variant,string,1,Variant label for method scope or conditioning,derived,NO
+mt_observables.csv,file_id,int,1,File scope for file-level observables blank for run-level aggregates,derived,NO
+mt_observables.csv,segment_id,int,1,Segment scope for segment observables blank when not applicable,derived,NO
+mt_observables.csv,segment_type,string,1,Segment type for scoped observables,derived,NO
+mt_observables.csv,definition,string,1,Human-readable physical definition of observable,derived,YES
+mt_observables.csv,source_columns,string,1,Delimited list of input columns used for observable computation default from derived exceptions from clean must be explicit,derived,YES
+mt_observables.csv,aggregation_method,string,1,Method mean/max/median/fit/slope/integral etc,derived,YES
+mt_observables.csv,temperature_dependence,string,1,Temperature dependence descriptor function_of_T windowed_or_scalar,derived,YES
+mt_observables.csv,value_numeric,numeric,1,Observable numeric value dimensionless or with value_unit,derived,YES
+mt_observables.csv,value_unit,string,1,Unit of value_numeric including 1 for dimensionless quantities,derived,YES
+mt_observables.csv,n_points_used,int,1,Number of point rows contributing to aggregation,derived,YES
+mt_observables.csv,quality_flag,string,1,Quality class for observable reliability and gating,derived,YES
+mt_observables.csv,notes,string,1,Optional explanatory note for audit/debug context,derived,NO

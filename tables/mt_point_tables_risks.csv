@@ -1,0 +1,11 @@
+risk_id,description,severity,mitigation
+RISK_01,RAW_CLEAN_MISALIGNMENT due to unintended row drops or row_index recomputation,HIGH,Enforce row-preserving transforms with immutable file_id+row_index identity and automated row-count parity checks
+RISK_02,CLEANING_BRANCH_INCONSISTENCY where branch labels differ between point rows and cleaning audit summary,MEDIUM,Derive branch and reason fields from a single policy mapping source and validate one-to-many consistency per file_id
+RISK_03,TIME_AXIS_NONUNIFORMITY_PROPAGATION contaminates derivatives and segment metrics,MEDIUM,Carry time_quality and warning flags into point tables and gate derivative observables by quality_flag and minimum dt criteria
+RISK_04,METADATA_PROVENANCE_INCOMPLETENESS for mass or labeling causes normalization ambiguity,MEDIUM,Keep provenance columns explicit allow NaN for unsupported normalized outputs and require derived_missing_reason codes
+RISK_05,SEGMENT_MISCLASSIFICATION between increasing/decreasing and zfc/fcc/fcw classes,MEDIUM,Persist segment_source with reproducible segmentation parameters and add audit checks against metadata labels when available
+RISK_06,HIDDEN_RAW_USAGE_IN_DERIVED breaks isolation contract,HIGH,Restrict derived computations to clean table interface and lint dependencies using declared source_columns metadata
+RISK_07,UNITS_DRIFT_ACROSS_TABLES causes invalid cross-table comparisons,MEDIUM,Require explicit unit per numeric column and schema validation against mt_point_tables_schema.csv before publishing
+RISK_08,OBSERVABLE_METHOD_AMBIGUITY reduces reproducibility of scientific outputs,MEDIUM,Require aggregation_method temperature_dependence and n_points_used for every observable row
+RISK_09,FLOAT_COORDINATE_JOIN_DRIFT from using T_K or H_Oe or time_s as join keys,HIGH,Enforce immutable joins on file_id plus row_index only and treat coordinates as validation fields
+RISK_10,SMOOTH_CHANNEL_MISUSE where M_emu_smooth is treated as canonical truth,MEDIUM,Keep M_emu_clean as structural truth and require explicit downstream method declaration before using smooth channel

@@ -1,0 +1,11 @@
+target_table,source_table,dependency_type,description
+mt_points_raw.csv,mt_file_inventory.csv,identity_reference,file_id and file provenance originate from inventory table
+mt_points_raw.csv,imported_DAT_rows,ingestion,raw point channels are direct imported rows with no cleaning transforms
+mt_points_clean.csv,mt_points_raw.csv,deterministic_transform,clean table is deterministic row-preserving transform of raw by cleaning policy
+mt_points_clean.csv,mt_cleaning_audit.csv,policy_annotation,cleaning branch reason trust and warning codes are mapped from cleaning audit outputs
+mt_points_clean.csv,mt_segments.csv,segmentation_annotation,segment columns are annotations for context and are not part of cleaning transforms
+mt_points_derived.csv,mt_points_clean.csv,pure_function,derived variables are computed only from clean inputs and carried identity columns
+mt_points_derived.csv,units_contract,semantic_contract,derived units and dimensionless rules are enforced by explicit unit contract
+mt_observables.csv,mt_points_derived.csv,aggregation_default,default observables source is derived channels with declared methods and provenance fields
+mt_observables.csv,mt_points_clean.csv,aggregation_exception,direct clean based observables are explicit exceptions with source_columns and method provenance
+mt_observables.csv,observable_definitions_registry,schema_contract,observable_name definition source_columns and method descriptors must be explicit
