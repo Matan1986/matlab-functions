@@ -187,6 +187,10 @@ try
     mtBasicSummaryObservablesWritten = "NO";
     mtForbiddenObservableGroupsEmitted = "NO";
     mtBasicSummaryObservablesGateSummary = "NOT_RUN";
+    mtBasicSummaryVisualizationWritten = "NO";
+    mtBasicSummaryVisualizationGateSummary = "NOT_RUN";
+    mtBasicSummaryVisualizationForbiddenContent = "NO";
+    mtBasicSummaryVisualizationFiguresWritten = "NO";
     hAbsGtEpsOe = 1e-9;
 
     importedOk = 0;
@@ -988,6 +992,164 @@ try
         mtBasicSummaryObservablesGateSummary = "FAIL";
     end
 
+    % Stage 5.8: Guarded basic summary review table implementation (no figures).
+    reviewTbl = table('Size', [0 9], ...
+        'VariableTypes', {'string','double','string','double','string','string','string','string','string'}, ...
+        'VariableNames', {'review_name','file_id','metric_name','metric_value','metric_unit','source_observable_name','source_variant','quality_flag','guard_note'});
+    reviewStatusTbl = table('Size', [0 3], ...
+        'VariableTypes', {'string','string','string'}, ...
+        'VariableNames', {'metric','value','notes'});
+
+    allowedReviewNames = ["row_count","T_K_summary","H_Oe_summary","M_emu_clean_summary","M_over_H_emu_per_Oe_summary"];
+    visForbiddenNames = ["dM_dT_peak","transition_width","transition_midpoint","T_at_max_slope","M_norm","chi_mass","zfc_fcc_fcw_split","hysteresis_like","Tc_inferred","advanced_analysis"];
+    visDiagnosticGuard = "Diagnostic summary only - not valid for Tc/transition/critical/hysteresis interpretation.";
+    preReviewGateReasons = strings(0,1);
+
+    preGateExecutionSuccess = true;
+    preGateInputFound = (mtInputFound == "YES");
+    preGatePointGatesPass = pointTableGateSummary == "PASS";
+    preGateGateFailuresZero = (height(gateFailuresTbl) == 0);
+    preGateBasicObsWritten = (mtBasicSummaryObservablesWritten == "YES");
+    preGateForbiddenObsAbsent = (mtForbiddenObservableGroupsEmitted == "NO");
+    preGateBasicObsGatePass = (mtBasicSummaryObservablesGateSummary == "PASS");
+
+    if ~preGateExecutionSuccess
+        preReviewGateReasons(end+1) = "EXECUTION_STATUS_NOT_SUCCESS";
+    end
+    if ~preGateInputFound
+        preReviewGateReasons(end+1) = "INPUT_FOUND_NOT_YES";
+    end
+    if ~preGatePointGatesPass
+        preReviewGateReasons(end+1) = "POINT_TABLE_GATES_NOT_PASS";
+    end
+    if ~preGateGateFailuresZero
+        preReviewGateReasons(end+1) = "POINT_TABLE_GATE_FAILURES_NONZERO";
+    end
+    if ~preGateBasicObsWritten
+        preReviewGateReasons(end+1) = "MT_BASIC_SUMMARY_OBSERVABLES_WRITTEN_NOT_YES";
+    end
+    if ~preGateForbiddenObsAbsent
+        preReviewGateReasons(end+1) = "MT_FORBIDDEN_OBSERVABLE_GROUPS_EMITTED_NOT_NO";
+    end
+    if ~preGateBasicObsGatePass
+        preReviewGateReasons(end+1) = "MT_BASIC_SUMMARY_OBSERVABLES_GATE_SUMMARY_NOT_PASS";
+    end
+
+    visGatePass = isempty(preReviewGateReasons);
+    visAllowedOnly = true;
+    visSourceAllowedOnly = true;
+    visForbiddenPresent = false;
+    visMhGuardNoted = true;
+    visObsRows = table('Size', [0 15], ...
+        'VariableTypes', {'string','string','double','double','string','string','string','string','string','string','double','string','double','string','string'}, ...
+        'VariableNames', {'observable_name','observable_variant','file_id','segment_id','segment_type','definition','source_table','source_columns','aggregation_method','temperature_dependence','value_numeric','value_unit','n_points_used','quality_flag','notes'});
+    if height(observablesTbl) > 0
+        visForbiddenPresent = any(ismember(observablesTbl.observable_name, visForbiddenNames));
+        visAllowedOnly = all(ismember(observablesTbl.observable_name, allowedReviewNames));
+        visSourceAllowedOnly = all(observablesTbl.source_table == "mt_points_derived");
+        visObsRows = observablesTbl(ismember(observablesTbl.observable_name, allowedReviewNames), :);
+        visMhRows = visObsRows.observable_name == "M_over_H_emu_per_Oe_summary";
+        if any(visMhRows)
+            visMhNotes = visObsRows.notes(visMhRows);
+            visMhGuardNoted = all(contains(visMhNotes, "H_ABS_GT_EPS_Oe"));
+        end
+    end
+    mtBasicSummaryVisualizationForbiddenContent = "NO";
+    if visForbiddenPresent || ~visAllowedOnly || ~visSourceAllowedOnly || ~visMhGuardNoted
+        mtBasicSummaryVisualizationForbiddenContent = "YES";
+    end
+    if mtBasicSummaryVisualizationForbiddenContent == "YES"
+        visGatePass = false;
+        if visForbiddenPresent
+            preReviewGateReasons(end+1) = "FORBIDDEN_OBSERVABLE_CONTENT_PRESENT";
+        end
+        if ~visAllowedOnly
+            preReviewGateReasons(end+1) = "NON_ALLOWED_OBSERVABLE_GROUP_PRESENT";
+        end
+        if ~visSourceAllowedOnly
+            preReviewGateReasons(end+1) = "NON_DERIVED_SOURCE_TABLE_PRESENT";
+        end
+        if ~visMhGuardNoted
+            preReviewGateReasons(end+1) = "M_OVER_H_GUARD_PROVENANCE_MISSING";
+        end
+    end
+
+    if visGatePass
+        visKeys = unique(visObsRows(:, {'file_id'}), 'rows');
+        for vk = 1:height(visKeys)
+            rf = visKeys.file_id(vk);
+            visFile = visObsRows(visObsRows.file_id == rf, :);
+
+            rRow = visFile(visFile.observable_name == "row_count" & visFile.observable_variant == "file_level", :);
+            if height(rRow) > 0
+                reviewTbl = [reviewTbl; table("row_coverage_per_file", double(rf), "row_count", double(rRow.value_numeric(1)), "count", "row_count", "file_level", rRow.quality_flag(1), visDiagnosticGuard, ...
+                    'VariableNames', reviewTbl.Properties.VariableNames)];
+            end
+
+            tRows = visFile(visFile.observable_name == "T_K_summary", :);
+            for tr = 1:height(tRows)
+                reviewTbl = [reviewTbl; table("T_K_summary_per_file", double(rf), tRows.observable_variant(tr), double(tRows.value_numeric(tr)), tRows.value_unit(tr), "T_K_summary", tRows.observable_variant(tr), tRows.quality_flag(tr), visDiagnosticGuard, ...
+                    'VariableNames', reviewTbl.Properties.VariableNames)];
+            end
+
+            hRows = visFile(visFile.observable_name == "H_Oe_summary", :);
+            for hr = 1:height(hRows)
+                reviewTbl = [reviewTbl; table("H_Oe_summary_per_file", double(rf), hRows.observable_variant(hr), double(hRows.value_numeric(hr)), hRows.value_unit(hr), "H_Oe_summary", hRows.observable_variant(hr), hRows.quality_flag(hr), visDiagnosticGuard, ...
+                    'VariableNames', reviewTbl.Properties.VariableNames)];
+            end
+
+            mRows = visFile(visFile.observable_name == "M_emu_clean_summary", :);
+            for mr = 1:height(mRows)
+                reviewTbl = [reviewTbl; table("M_emu_clean_summary_per_file", double(rf), mRows.observable_variant(mr), double(mRows.value_numeric(mr)), mRows.value_unit(mr), "M_emu_clean_summary", mRows.observable_variant(mr), mRows.quality_flag(mr), visDiagnosticGuard, ...
+                    'VariableNames', reviewTbl.Properties.VariableNames)];
+            end
+
+            mhRows = visFile(visFile.observable_name == "M_over_H_emu_per_Oe_summary", :);
+            if height(mhRows) > 0
+                mhRows = mhRows(contains(mhRows.notes, "H_ABS_GT_EPS_Oe"), :);
+                for mhr = 1:height(mhRows)
+                    reviewTbl = [reviewTbl; table("M_over_H_emu_per_Oe_summary_per_file", double(rf), mhRows.observable_variant(mhr), double(mhRows.value_numeric(mhr)), mhRows.value_unit(mhr), ...
+                        "M_over_H_emu_per_Oe_summary", mhRows.observable_variant(mhr), mhRows.quality_flag(mhr), visDiagnosticGuard + " nonzero-field guard required and satisfied.", ...
+                        'VariableNames', reviewTbl.Properties.VariableNames)];
+                end
+            end
+        end
+        mtBasicSummaryVisualizationWritten = "YES";
+        mtBasicSummaryVisualizationGateSummary = "PASS";
+    else
+        mtBasicSummaryVisualizationWritten = "NO";
+        mtBasicSummaryVisualizationGateSummary = "FAIL";
+    end
+
+    if isempty(preReviewGateReasons)
+        visGateReasonText = "none";
+    else
+        visGateReasonText = strjoin(unique(preReviewGateReasons), "|");
+    end
+
+    reviewStatusTbl = [reviewStatusTbl; table("MT_BASIC_SUMMARY_VISUALIZATION_WRITTEN", mtBasicSummaryVisualizationWritten, "Stage 5.8 review tables from mt_observables.csv only", ...
+        'VariableNames', reviewStatusTbl.Properties.VariableNames)];
+    reviewStatusTbl = [reviewStatusTbl; table("MT_BASIC_SUMMARY_VISUALIZATION_GATE_SUMMARY", mtBasicSummaryVisualizationGateSummary, "Pre-review gates and policy checks", ...
+        'VariableNames', reviewStatusTbl.Properties.VariableNames)];
+    reviewStatusTbl = [reviewStatusTbl; table("MT_BASIC_SUMMARY_VISUALIZATION_FORBIDDEN_CONTENT", mtBasicSummaryVisualizationForbiddenContent, "YES means forbidden/non-allowed review content detected", ...
+        'VariableNames', reviewStatusTbl.Properties.VariableNames)];
+    reviewStatusTbl = [reviewStatusTbl; table("MT_BASIC_SUMMARY_VISUALIZATION_FIGURES_WRITTEN", mtBasicSummaryVisualizationFiguresWritten, "Stage 5.8 writes review tables only; figures are blocked", ...
+        'VariableNames', reviewStatusTbl.Properties.VariableNames)];
+    reviewStatusTbl = [reviewStatusTbl; table("MT_BASIC_SUMMARY_VISUALIZATION_GATE_FAILURE_REASONS", visGateReasonText, "Gate reasons when review table writing is blocked", ...
+        'VariableNames', reviewStatusTbl.Properties.VariableNames)];
+    fullCanonicalDataProductForVis = "NO";
+    if pointTableGateSummary == "PASS"
+        fullCanonicalDataProductForVis = "PARTIAL";
+    end
+    reviewStatusTbl = [reviewStatusTbl; table("FULL_CANONICAL_DATA_PRODUCT", fullCanonicalDataProductForVis, "Must remain PARTIAL in this stage", ...
+        'VariableNames', reviewStatusTbl.Properties.VariableNames)];
+    reviewStatusTbl = [reviewStatusTbl; table("MT_READY_FOR_PRODUCTION_CANONICAL_RELEASE", mtReadyForProductionRelease, "Readiness remains blocked", ...
+        'VariableNames', reviewStatusTbl.Properties.VariableNames)];
+    reviewStatusTbl = [reviewStatusTbl; table("MT_READY_FOR_ADVANCED_ANALYSIS", mtReadyForAdvancedAnalysis, "Readiness remains blocked", ...
+        'VariableNames', reviewStatusTbl.Properties.VariableNames)];
+    reviewStatusTbl = [reviewStatusTbl; table("GUARD_NOTE", "APPLIED", visDiagnosticGuard, ...
+        'VariableNames', reviewStatusTbl.Properties.VariableNames)];
+
     inventoryPath = fullfile(tablesDir, 'mt_file_inventory.csv');
     rawSummaryPath = fullfile(tablesDir, 'mt_raw_summary.csv');
     cleaningAuditPath = fullfile(tablesDir, 'mt_cleaning_audit.csv');
@@ -998,6 +1160,8 @@ try
     observablesPath = fullfile(tablesDir, 'mt_observables.csv');
     pointGateSummaryPath = fullfile(tablesDir, 'mt_point_tables_validation_summary.csv');
     pointGateFailuresPath = fullfile(tablesDir, 'mt_point_tables_gate_failures.csv');
+    visReviewPath = fullfile(tablesDir, 'mt_basic_summary_visualization_review.csv');
+    visStatusPath = fullfile(tablesDir, 'mt_basic_summary_visualization_status.csv');
 
     writetable(fileInventory, inventoryPath);
     writetable(rawSummary, rawSummaryPath);
@@ -1009,6 +1173,8 @@ try
     writetable(observablesTbl, observablesPath);
     writetable(gateSummaryTbl, pointGateSummaryPath);
     writetable(gateFailuresTbl, pointGateFailuresPath);
+    writetable(reviewTbl, visReviewPath);
+    writetable(reviewStatusTbl, visStatusPath);
 
     mtCleaningAuditWritten = "YES";
     mtSegmentTableWritten = "YES";
@@ -1063,6 +1229,10 @@ try
         "MT_BASIC_SUMMARY_OBSERVABLES_WRITTEN"; ...
         "MT_FORBIDDEN_OBSERVABLE_GROUPS_EMITTED"; ...
         "MT_BASIC_SUMMARY_OBSERVABLES_GATE_SUMMARY"; ...
+        "MT_BASIC_SUMMARY_VISUALIZATION_WRITTEN"; ...
+        "MT_BASIC_SUMMARY_VISUALIZATION_GATE_SUMMARY"; ...
+        "MT_BASIC_SUMMARY_VISUALIZATION_FORBIDDEN_CONTENT"; ...
+        "MT_BASIC_SUMMARY_VISUALIZATION_FIGURES_WRITTEN"; ...
         "MT_READY_FOR_PRODUCTION_CANONICAL_RELEASE"; ...
         "MT_READY_FOR_ADVANCED_ANALYSIS"; ...
         "DIAGNOSTIC_ONLY"];
@@ -1096,6 +1266,10 @@ try
         mtBasicSummaryObservablesWritten; ...
         mtForbiddenObservableGroupsEmitted; ...
         mtBasicSummaryObservablesGateSummary; ...
+        mtBasicSummaryVisualizationWritten; ...
+        mtBasicSummaryVisualizationGateSummary; ...
+        mtBasicSummaryVisualizationForbiddenContent; ...
+        mtBasicSummaryVisualizationFiguresWritten; ...
         mtReadyForProductionRelease; ...
         mtReadyForAdvancedAnalysis; ...
         "YES"];
@@ -1146,6 +1320,10 @@ try
     fprintf(fidReport, '- MT_BASIC_SUMMARY_OBSERVABLES_WRITTEN=%s\n', mtBasicSummaryObservablesWritten);
     fprintf(fidReport, '- MT_FORBIDDEN_OBSERVABLE_GROUPS_EMITTED=%s\n', mtForbiddenObservableGroupsEmitted);
     fprintf(fidReport, '- MT_BASIC_SUMMARY_OBSERVABLES_GATE_SUMMARY=%s\n', mtBasicSummaryObservablesGateSummary);
+    fprintf(fidReport, '- MT_BASIC_SUMMARY_VISUALIZATION_WRITTEN=%s\n', mtBasicSummaryVisualizationWritten);
+    fprintf(fidReport, '- MT_BASIC_SUMMARY_VISUALIZATION_GATE_SUMMARY=%s\n', mtBasicSummaryVisualizationGateSummary);
+    fprintf(fidReport, '- MT_BASIC_SUMMARY_VISUALIZATION_FORBIDDEN_CONTENT=%s\n', mtBasicSummaryVisualizationForbiddenContent);
+    fprintf(fidReport, '- MT_BASIC_SUMMARY_VISUALIZATION_FIGURES_WRITTEN=%s\n', mtBasicSummaryVisualizationFiguresWritten);
     fprintf(fidReport, '- MT_READY_FOR_PRODUCTION_CANONICAL_RELEASE=%s\n', mtReadyForProductionRelease);
     fprintf(fidReport, '- MT_READY_FOR_ADVANCED_ANALYSIS=%s\n\n', mtReadyForAdvancedAnalysis);
 
@@ -1160,6 +1338,8 @@ try
     fprintf(fidReport, '- tables/mt_observables.csv\n');
     fprintf(fidReport, '- tables/mt_point_tables_validation_summary.csv\n');
     fprintf(fidReport, '- tables/mt_point_tables_gate_failures.csv\n');
+    fprintf(fidReport, '- tables/mt_basic_summary_visualization_review.csv\n');
+    fprintf(fidReport, '- tables/mt_basic_summary_visualization_status.csv\n');
     fprintf(fidReport, '- tables/mt_canonical_run_summary.csv\n');
     fprintf(fidReport, '- reports/mt_canonical_run_report.md\n');
     fprintf(fidReport, '- execution_status.csv\n');
