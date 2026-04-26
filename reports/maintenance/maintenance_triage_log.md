@@ -26,6 +26,31 @@ This log records advisory triage decisions only. It is not the durable backlog a
 - Advisory triage only; no lifecycle closure semantics are applied here.
 - No finding is marked `RESOLVED` or `WONTFIX` in this log.
 
+## 2026-04-26 Consolidated Maintenance Triage
+
+Consolidated advisory findings from Issues #19-#23 into deduplicated triage rows, merging overlaps with existing Issue #18 triage where the same underlying maintenance risk was already captured. This update records actionable consolidation only rather than replaying each raw finding as a separate row.
+
+### Consolidated Rows Added
+
+- `CONSOLIDATED_SWITCHING_OUTPUT_SOURCE_OF_TRUTH_2026_04_26` (`Issue #18/#19/#21`) - root mirrors, flat fallback paths, and canonical-looking root outputs collapsed into one source-of-truth cleanup track.
+- `CONSOLIDATED_SWITCHING_IDENTITY_ROUTE_2026_04_26` (`Issue #18/#21`) - latest-by-mtime and mixed canonical identity routes collapsed into one identity-locator decision track.
+- `CONSOLIDATED_AGING_RELAXATION_STATUS_CONTRADICTION_2026_04_26` (`Issue #22`) - Aging/Relaxation canonicalization status contradictions elevated for wording alignment.
+- `CONSOLIDATED_SWITCHING_HELPER_DUPLICATION_2026_04_26` (`Issue #23`) - helper-duplication scope narrowed to buildSwitchingMapRounded migration audit only.
+- `CONSOLIDATED_RUN_OUTPUT_COVERAGE_LIMITATION_2026_04_26` (`Issue #20`) - run-output audit visibility limitation tracked as watch-only until local run-root truth is published.
+
+### Raw Issues Covered
+
+- `Issue #19` (Repository Drift Guard)
+- `Issue #20` (Run Output Audit)
+- `Issue #21` (Switching Analysis Steward)
+- `Issue #22` (Canonicalization Progress Guard)
+- `Issue #23` (Helper Duplication Guard)
+- Overlap baseline retained: `Issue #18` (for dedupe anchors only)
+
+Advisory triage only: this section does not mutate backlog lifecycle state and does not close findings.
+
+No code fixes were performed; this update is log-only consolidation within approved maintenance triage scope.
+
 ## Next Review
 
 - Revisit all entries in the next weekly maintenance review cycle.
