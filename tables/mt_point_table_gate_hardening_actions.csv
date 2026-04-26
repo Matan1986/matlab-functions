@@ -1,0 +1,9 @@
+action_id,priority,description,required_before_stage,notes
+A01,HIGH,Add explicit key-set equality gate across RAW CLEAN DERIVED on file_id_plus_row_index,Stage_4_5,Closes parity-without-identity gap
+A02,HIGH,Implement non-superficial no-float-join audit evidence for producer joins,Stage_4_5,Current G05 is declarative only
+A03,HIGH,Harden derived-source isolation with lineage checks against raw data usage,Stage_4_5,Current G08 checks presence not lineage
+A04,HIGH,Enforce smooth-vs-clean semantic gate ensuring smooth is never implicit truth channel,Stage_4_5,Current G07 is policy text not semantic test
+A05,MEDIUM,Expand required-fields gate to full schema-required contract including numeric columns,Stage_4_5,Current G02 is partial
+A06,MEDIUM,Add explicit time_s misuse detector requiring time_rel_s for elapsed semantics,Stage_4_5,Current G09 is descriptive
+A07,MEDIUM,Strengthen segmentation annotation gate to verify semantics independent of placeholder values,Stage_4_5,Current G10 is placeholder-oriented
+A08,LOW,Enhance observables provenance gate with controlled vocabulary and source-column whitelist,Stage_4_6,Improves reproducibility but not immediate blocker

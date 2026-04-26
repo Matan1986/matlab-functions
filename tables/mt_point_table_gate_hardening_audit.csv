@@ -1,0 +1,12 @@
+gate_id,gate_name,current_status,audit_strength,issue_found,recommended_action,blocks_next_stage
+G01,schema_columns_present,PASS,ADEQUATE,NO,Keep schema presence gate and extend with type checks for required columns,NO
+G02,required_fields_nonmissing,PASS,WEAK,YES,Implement full requiredness checks including numeric required fields and per-table required contract mapping,YES
+G03,row_parity_raw_clean_derived,PASS,ADEQUATE,NO,Keep parity gate and add explicit key-set equality gate across RAW CLEAN DERIVED,YES
+G04,key_uniqueness,PASS,STRONG,NO,Retain current uniqueness check and include duplicate report rows in failure details,NO
+G05,no_float_coordinate_joins,PASS,SUPERFICIAL,YES,Replace declarative pass with join-path audit evidence and explicit rejection if coordinate-based joins detected,YES
+G06,clean_raw_traceability,PASS,ADEQUATE,NO,Expand traceability checks beyond M channel to identity and selected additional channels,NO
+G07,smooth_not_clean_replacement,PASS,SUPERFICIAL,YES,Add semantic checks proving derived and default observables consume M_emu_clean not M_emu_smooth unless declared exception,YES
+G08,derived_source_isolation,PASS,SUPERFICIAL,YES,Add lineage assertions that derived computations do not reference raw buffers or raw table columns directly,YES
+G09,time_channel_assumption_check,PASS,SUPERFICIAL,YES,Add explicit guard detecting elapsed-time assumptions on time_s unless using dedicated time_rel_s derivation path,YES
+G10,segmentation_annotation_check,PASS,SUPERFICIAL,YES,Require segmentation source and semantics checks that prevent treating segmentation as cleaning logic,YES
+G11,observables_provenance_check,PASS,ADEQUATE,NO,Keep provenance nonempty checks and add controlled vocabulary validation for methods and source columns,NO
