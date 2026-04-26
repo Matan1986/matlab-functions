@@ -1,0 +1,13 @@
+gate_id,gate_name,condition_summary,applies_to,blocks_if_failed
+MG01,point_table_gates_pass,G01 through G11 point-table gates must pass before normalization-dependent observables are publishable,all_normalization_dependent_observables,YES
+MG02,mass_source_class_accepted,Mass provenance source class must be accepted primary or accepted provisional with explicit flag,all_normalization_dependent_observables,YES
+MG03,sample_file_mapping_valid,sample_id linkage or curated file_id_to_sample_id mapping must be valid and complete for scoped outputs,all_normalization_dependent_observables,YES
+MG04,mass_finite_positive,sample_mass_g must be finite and greater than zero,all_normalization_dependent_observables,YES
+MG05,mass_consistency_across_files,Mass values for files assigned to same sample must be consistent within declared tolerance,all_normalization_dependent_observables,YES
+MG06,mass_unit_verified_g,Mass unit must be explicitly verified as grams,all_normalization_dependent_observables,YES
+MG07,filename_mass_requires_audit,Filename-derived mass cannot be used unless audit waiver is present and recorded,all_normalization_dependent_observables,YES
+MG08,no_silent_default_mass,No silent default mass value is permitted at sample file or row level,all_normalization_dependent_observables,YES
+MG09,normalized_outputs_blocked_if_mass_missing,If mass missing or rejected then M_norm and chi_mass outputs are NaN or blocked and derived observables remain blocked pending provenance,all_normalization_dependent_observables,YES
+MG10,chi_mass_nonzero_field_guard,chi_mass requires abs(H_Oe) greater than configured epsilon for contributing rows,normalized_quantity_chi_mass_and_derived_observables,YES
+MG11,provenance_source_recorded,Each normalized output must carry provenance source class and identity mapping reference,all_normalization_dependent_observables,YES
+MG12,row_mass_is_propagated_metadata,Row-level mass must be traceable to mapped sample/file assignment and not independent row measurement,all_normalization_dependent_observables,YES

@@ -1,0 +1,19 @@
+rule_id,rule_name,policy_statement,required_for,blocks_if_violated
+MP01,accepted_source_classes_defined,Mass provenance must be classified as metadata_table curated_registry instrument_header_provisional or filename_derived_audited_only,all_normalization_dependent_observables,YES
+MP02,filename_mass_forbidden_without_audit,Filename-derived mass is forbidden unless explicit audited waiver exists,all_normalization_dependent_observables,YES
+MP03,identity_prefer_sample_id,Mass assignment must prefer sample_id or curated file_id_to_sample_id mapping,all_normalization_dependent_observables,YES
+MP04,run_id_not_sole_mass_key,run_id may scope audit context but cannot be sole key for mass identity assignment,all_normalization_dependent_observables,YES
+MP05,row_mass_propagated_only,Row-level sample_mass_g is propagated metadata and not independent per-row measurement,all_normalization_dependent_observables,YES
+MP06,mass_finite_required,sample_mass_g must be finite,all_normalization_dependent_observables,YES
+MP07,mass_positive_required,sample_mass_g must be strictly positive,all_normalization_dependent_observables,YES
+MP08,mass_unit_must_be_g,Mass provenance unit must be explicitly grams,all_normalization_dependent_observables,YES
+MP09,source_recorded,Mass provenance source class must be explicitly recorded,all_normalization_dependent_observables,YES
+MP10,no_silent_default_mass,No implicit default mass values are allowed,all_normalization_dependent_observables,YES
+MP11,within_sample_consistency,Mass must be consistent across files mapped to the same sample under declared tolerance,all_normalization_dependent_observables,YES
+MP12,row_replication_consistency,Replicated row-level mass values must match mapped sample/file mass,all_normalization_dependent_observables,YES
+MP13,missing_mass_blocks_M_norm,If mass missing or rejected then M_norm_emu_per_g is NaN or blocked,normalized_quantity_M_norm,YES
+MP14,missing_mass_blocks_chi_mass,If mass missing or rejected then chi_mass_emu_per_g_per_Oe is NaN or blocked,normalized_quantity_chi_mass,YES
+MP15,no_fallback_as_normalized,Raw M_emu or M_over_H cannot be relabeled as normalized quantities when mass missing,all_normalization_dependent_observables,YES
+MP16,allowed_outputs_descriptive_only,Allowed normalized outputs are descriptive proxies only and not absolute material constants,all_normalization_dependent_observables,YES
+MP17,chi_mass_requires_nonzero_field,chi_mass usage requires nonzero-field guard in addition to mass provenance gates,normalized_quantity_chi_mass,YES
+MP18,observables_blocked_pending_provenance,Normalization-dependent observables remain BLOCKED_PENDING_PROVENANCE until mass policy gates pass,normalization_dependent_observables_registry_rows,YES

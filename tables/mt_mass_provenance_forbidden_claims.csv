@@ -1,0 +1,9 @@
+claim_id,forbidden_claim,reason,allowed_replacement_language
+MC01,spin_only_moment_per_Co,Composition-resolved conversion policy is not defined and mass provenance alone is insufficient,Mass-normalized proxy reported in emu_per_g under current provenance gates
+MC02,muB_per_Co_claim,muB per atom requires composition stoichiometry and conversion constants policy beyond Stage 5.2,Descriptive normalized signal only with no atom-scale conversion claim
+MC03,stoichiometric_magnetization_claim,Stoichiometric magnetization inference requires composition calibration and sample chemistry policy,Observed M_norm proxy with provenance-qualified limitations
+MC04,absolute_susceptibility_claim,chi_mass proxy lacks full calibration and demagnetization corrections,Mass-normalized susceptibility-like proxy only
+MC05,demag_corrected_susceptibility_claim,Demagnetization correction policy is not yet defined or gated,Uncorrected chi_mass proxy under nonzero-field and provenance guards
+MC06,theoretical_moment_comparison_claim,Theoretical comparisons require composition and model alignment not available in this stage,Internal descriptive comparison between runs or files only
+MC07,sample_homogeneity_claim_from_mass_norm,Homogeneity cannot be inferred from normalized proxies without dedicated heterogeneity policy and sampling design,Observed variance pattern only no homogeneity conclusion
+MC08,production_ready_normalization_claim,Readiness remains blocked pending implementation and broader policy closure,Normalization-dependent outputs remain candidate descriptive proxies only
