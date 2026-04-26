@@ -1,0 +1,10 @@
+blocker_id,observable_group,blocker,required_resolution,blocks_implementation
+B01,basic_summaries,Observables row producer and provenance emission not yet wired for minimal summary outputs,Implement mt_observables emission path with source_columns aggregation_method quality flags and gate traces,NO
+B02,derivative_transition_candidates,Derivative computation methods from Stage 5.1 are not implemented or validated in observable pipeline,Implement derivative method wiring with monotonicity nonuniformity and no-interpolation gates then validate,YES
+B03,derivative_transition_candidates,Transition outputs remain candidate-only and must retain interpretation constraints,Add explicit candidate labeling and forbidden-claim enforcement in emitted observables,YES
+B04,mass_normalized_observables,Mass provenance attachment and accepted-source validation are not implemented end-to-end,Implement sample/file mass mapping accepted-source capture and consistency checks,YES
+B05,mass_normalized_observables,Missing-mass behavior for M_norm and chi_mass requires hard-block or NaN enforcement,Implement mandatory missing-mass block behavior and status propagation,YES
+B06,segment_zfc_fcc_fcw_comparisons,Segment source class vocabulary and evidence validation are not enforced in output pipeline,Implement segment source/type/direction validation and unknown-segment restrictions,YES
+B07,segment_zfc_fcc_fcw_comparisons,Overlap and pairing gates for comparisons are not implemented with declared method policy,Implement overlap fraction minimum points H compatibility and pairing/method declaration gates,YES
+B08,segment_zfc_fcc_fcw_comparisons,Interpolation policy dependency for comparison alignment is unresolved,Keep interpolation disabled until separate approved policy is defined and referenced,YES
+B09,advanced_analysis,Global readiness policy explicitly forbids advanced analysis promotion at current stage,Maintain MT_READY_FOR_ADVANCED_ANALYSIS as NO until future stage closure,YES
