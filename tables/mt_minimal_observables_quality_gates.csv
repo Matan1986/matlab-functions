@@ -1,0 +1,20 @@
+gate_id,gate_name,applies_to_observable_categories,applies_to_observable_name_patterns,condition_summary,blocks_if_failed
+G01,schema_contract_present,all,*,Required columns exist for each point table per tables/mt_point_tables_schema.csv,YES
+G02,required_fields_populated,all,*,Required fields populated within allowed NaN semantics per FM02,YES
+G03,raw_clean_derived_row_parity,all,*,Row counts and keys align across layers per FM03,YES
+G04,immutable_key_uniqueness,all,*,No duplicate file_id row_index within a table per FM04,YES
+G05,no_float_coordinate_joins,all,*,Joins use immutable keys not floating T or H equality per FM05,YES
+G06,clean_to_raw_traceability,all,*,Clean outputs traceable to raw identity rows per FM06,YES
+G07,smooth_not_implicit_truth,basic_summary;transition_shape_candidate;normalization_dependent,*,Smooth channel never substitutes for clean truth without explicit method flag per FM07,YES
+G08,derived_isolation_from_raw,all on derived-sourced observables,*,Derived rows must not depend on hidden raw-only reads violating isolation per FM08,YES
+G09,elapsed_time_semantics,transition_shape_candidate;zfc_fcc_fcw_placeholder,*,time_s versus time_rel_s semantics explicit before time-based slopes per FM09,MEDIUM_for_derivative_time_paths
+G10,segmentation_is_annotation_not_cleaning,zfc_fcc_fcw_placeholder;basic_summary per_segment,*,segment fields treated as annotation layer per FM10,YES_for_segment_scoped_comparisons
+G11,observables_provenance_metadata,all future mt_observables.csv rows,*,Each emitted observable records source_columns aggregation_method definition per FM11,YES
+QG_FIELD_NONZERO,basic_summary M_over_H;normalization_dependent chi,mt_M_over_H_*;mt_chi_mass_*,abs(H_Oe)>H_ABS_GT_EPS_Oe for every contributing row in M/H and chi_mass summaries,YES
+QG_MASS_PROVENANCE,normalization_dependent,mt_M_norm_*;mt_chi_mass_*,sample_mass_g finite positive and provenance-checked per file or sample policy,YES_until_unblocked
+QG_SEGMENT_ANNOTATION,zfc_fcc_fcw_placeholder;basic_summary per_segment,mt_*segment*;mt_zfc_*;mt_hysteresis_*;mt_segment_*,segment_type not UNKNOWN where required segment_source trusted per segmentation policy,YES
+QG_ZFC_FCW_OVERLAP,zfc_fcc_fcw_placeholder,mt_zfc_*;mt_segment_pair_T_overlap*,ZFC and FCW (and FCC when used) T supports overlap at least policy fraction,YES
+QG_OVERLAP_RAMP_DIRECTION,zfc_fcc_fcw_placeholder,mt_hysteresis_like_*,Increasing and decreasing segments share overlapping T window at least policy fraction,YES
+QG_DERIVATIVE_POLICY,transition_shape_candidate,mt_dM_dT_*;mt_transition_*;mt_T_at_max_*,Versioned derivative policy artifact approved and run-scoped flag DERIVATIVE_POLICY_APPROVED=YES,YES
+QG_MIN_POINTS,all,*,N_points in aggregation scope meets or exceeds N_min published in run config,YES
+QG_TIME_AXIS,transition_shape_candidate,mt_dM_dT_*;mt_transition_*;mt_T_at_max_*,time_quality_class not BLOCKER for file and MT_TIME_AXIS_BLOCKER_PRESENT=NO at run scope when derivative uses temperature ordering,YES
