@@ -1,0 +1,12 @@
+component,status,evidence_commit_or_run,notes
+canonical_point_tables,IMPLEMENTED,e1cca81,Canonical point tables are implemented for MT module outputs.
+point_table_gates,HARDENED,e1cca81,Point-table gates are hardened to protect canonical review table integrity.
+basic_summary_observables,IMPLEMENTED,e1cca81,Guarded basic summary observables are implemented for table outputs.
+basic_summary_review_tables,IMPLEMENTED,e1cca81,Table-only basic summary review outputs are implemented.
+figures,NOT_IMPLEMENTED,e1cca81,Figure implementation is intentionally pending and not part of current checkpoint release state.
+derivative_transition_observables,NOT_IMPLEMENTED,e1cca81,Derivative/transition observables are blocked pending dedicated implementation and validation.
+mass_normalized_observables,NOT_IMPLEMENTED,e1cca81,Mass-normalized observables are blocked pending provenance implementation and validation.
+segment_zfc_fcc_fcw_comparisons,NOT_IMPLEMENTED,e1cca81,Segment/ZFC/FCC/FCW comparison capability is not implemented.
+advanced_analysis,NOT_READY,e1cca81,Advanced analysis remains blocked until required upstream stages are completed and reviewed.
+canonical_data_product,PARTIAL,e1cca81,Current canonical MT data product is partial and review-oriented.
+production_canonical_release,NOT_READY,e1cca81,Production canonical release is not allowed at this checkpoint.

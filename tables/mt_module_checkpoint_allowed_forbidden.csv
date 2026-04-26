@@ -1,0 +1,13 @@
+category,item,status,reason,next_required_stage
+allowed,diagnostic_canonical_review_tables,ALLOWED,Current MT implementation supports table-only diagnostic and canonical review outputs,none
+allowed,module_pause_resume_checkpointing,ALLOWED,Checkpoint state is explicit and can be resumed without ambiguity,none
+allowed,non_claim_internal_review,ALLOWED,Current outputs are suitable for non-claim internal review workflows,none
+forbidden,figure_based_canonical_product,FORBIDDEN,Figures are not implemented at this checkpoint,figure implementation if desired
+forbidden,derivative_transition_observable_claims,FORBIDDEN,Derivative/transition observables are not implemented or validated,derivative implementation + validation
+forbidden,mass_normalized_observable_claims,FORBIDDEN,Mass provenance and normalization pathway is not implemented or validated,mass provenance implementation + validation
+forbidden,segment_zfc_fcc_fcw_comparison_claims,FORBIDDEN,Segment comparison pathway is not implemented or validated,segment implementation + validation
+forbidden,production_canonical_release_claims,FORBIDDEN,Canonical data product is partial and release gate is closed,production release review
+forbidden,advanced_analysis_claims,FORBIDDEN,Advanced analysis readiness gate is closed,advanced analysis review
+forbidden,phase_transition_claims,FORBIDDEN,Derivative and segment pathways needed for claim support are not complete,derivative implementation + validation
+forbidden,tc_claims,FORBIDDEN,Tc claims are blocked until required observables and validations are complete,derivative implementation + validation
+forbidden,cross_module_claims,FORBIDDEN,Cross-module interpretive claims are blocked in partial checkpoint state,production release review
