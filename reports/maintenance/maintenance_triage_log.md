@@ -51,6 +51,8 @@ Advisory triage only: this section does not mutate backlog lifecycle state and d
 
 No code fixes were performed; this update is log-only consolidation within approved maintenance triage scope.
 
+Remediation follow-up (governance wording only): updated `tables/project_workstream_status.csv` Aging/Relaxation canonicalization rows to mark `canonical_code_status=WIP` and explicitly state that workstream progress is not module canonical closure while module status remains `NOT_CANONICAL`.
+
 ## Next Review
 
 - Revisit all entries in the next weekly maintenance review cycle.
