@@ -1,0 +1,19 @@
+rule_id,rule_name,policy_statement,required_for,blocks_if_violated
+SP01,segment_not_measurement_identity,segment_id is annotation scope only and not part of raw measurement identity,all_segment_scoped_observables,YES
+SP02,segment_assignment_does_not_modify_row_identity,Segment assignment must not alter RAW CLEAN DERIVED row identity keys file_id plus row_index,all_segment_scoped_observables,YES
+SP03,segment_assignment_reproducible,Segment assignment must be reproducible from documented source class and policy version,all_segment_scoped_observables,YES
+SP04,segment_source_classes_allowed,Allowed source classes are algorithmic_ramp metadata_label curated_registry hybrid and placeholder_not_implemented_preimplementation_only,all_segment_scoped_observables,YES
+SP05,segment_type_controlled_vocabulary,segment_type must be one of zfc fcc fcw increasing_T decreasing_T constant_T unknown,all_segment_scoped_observables,YES
+SP06,segment_direction_required,segment_direction field is required and must use increasing_T decreasing_T constant_T unknown,all_segment_scoped_observables,YES
+SP07,protocol_label_requires_evidence,ZFC FCC FCW labels require metadata/header evidence or curated registry evidence,protocol_labeled_segment_outputs,YES
+SP08,ramp_direction_not_protocol_inference,Ramp direction alone cannot infer zfc fcc fcw labels,protocol_labeled_segment_outputs,YES
+SP09,unknown_not_promoted,segment_type unknown must not be promoted to zfc fcc fcw,protocol_labeled_segment_outputs,YES
+SP10,overlap_required_for_comparison,Comparison outputs require overlapping T_K support,comparison_candidate_outputs,YES
+SP11,minimum_overlap_fraction_required,Comparison outputs require declared minimum overlap fraction threshold,comparison_candidate_outputs,YES
+SP12,minimum_overlap_points_required,Comparison outputs require declared minimum overlap-point count,comparison_candidate_outputs,YES
+SP13,compatible_field_scope_required,Comparison outputs require same or compatible H_Oe scope,comparison_candidate_outputs,YES
+SP14,compatible_sample_or_pairing_required,Comparison outputs require same sample/file context or explicit pairing policy,comparison_candidate_outputs,YES
+SP15,comparison_method_declared,Comparison outputs require declared method and declared binning/interpolation policy reference,comparison_candidate_outputs,YES
+SP16,no_interpolation_without_policy,No interpolation regridding or implicit alignment unless separately approved interpolation policy exists,comparison_candidate_outputs,YES
+SP17,unknown_segment_limited_usage,Unknown segments may support coverage diagnostics only and not ZFC/FCC/FCW comparison metrics,unknown_segment_scoped_outputs,YES
+SP18,candidate_only_output_interpretation,ZFC FCC FCW comparison outputs remain diagnostic candidate only and not physics claims,comparison_candidate_outputs,YES

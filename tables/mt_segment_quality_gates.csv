@@ -1,0 +1,15 @@
+gate_id,gate_name,condition_summary,applies_to,blocks_if_failed
+SG01,point_table_gates_pass,G01 through G11 point-table gates must pass before segment comparison outputs are publishable,all_segment_scoped_observables,YES
+SG02,segment_source_accepted,segment_source class must be in allowed source-class vocabulary,all_segment_scoped_observables,YES
+SG03,segment_type_vocab_valid,segment_type must be within controlled vocabulary zfc fcc fcw increasing_T decreasing_T constant_T unknown,all_segment_scoped_observables,YES
+SG04,segment_direction_vocab_valid,segment_direction must be present and within increasing_T decreasing_T constant_T unknown,all_segment_scoped_observables,YES
+SG05,zfc_fcc_fcw_label_evidence,Protocol labels zfc fcc fcw require metadata/header or curated registry evidence,protocol_labeled_segment_outputs,YES
+SG06,unknown_not_promoted,segment_type unknown must not be treated as zfc fcc fcw in comparisons,protocol_labeled_segment_outputs,YES
+SG07,overlap_fraction_threshold_met,Overlap fraction between compared segment supports must meet declared threshold,comparison_candidate_outputs,YES
+SG08,minimum_overlap_points_met,Overlap-point count must meet declared minimum threshold,comparison_candidate_outputs,YES
+SG09,compatible_field_scope,Compared segments must share same or policy-defined compatible H_Oe scope,comparison_candidate_outputs,YES
+SG10,compatible_sample_or_pairing_scope,Compared segments must be from same sample/file context or explicit approved pairing policy,comparison_candidate_outputs,YES
+SG11,comparison_method_declared,Comparison method and binning/interpolation treatment must be declared in provenance,comparison_candidate_outputs,YES
+SG12,no_interpolation_without_policy,Interpolation/regridding is blocked unless separate policy approval is referenced,comparison_candidate_outputs,YES
+SG13,unknown_segment_usage_limited,Unknown segments may be used for coverage diagnostics only,unknown_segment_scoped_outputs,YES
+SG14,candidate_only_claim_gate,Comparison outputs must be labeled candidate diagnostic and blocked from hysteresis or irreversibility physics claims,comparison_candidate_outputs,YES

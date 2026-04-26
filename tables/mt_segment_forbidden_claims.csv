@@ -1,0 +1,9 @@
+claim_id,forbidden_claim,reason,allowed_replacement_language
+SC01,thermodynamic_irreversibility_claim,Segment-labeled comparisons are candidate diagnostics without thermodynamic closure,Protocol-conditioned candidate difference only
+SC02,memory_effect_claim,Memory-effect inference requires dedicated protocol and evidence gates not defined here,Observed segment contrast candidate only
+SC03,equilibrium_path_difference_claim,Equilibrium-path claims require stronger equilibrium validation than segment labels provide,Path-dependent diagnostic candidate under declared method
+SC04,first_order_hysteresis_claim,First-order hysteresis classification requires additional evidence and policy not present,Hysteresis-like candidate difference only
+SC05,metastability_claim,Metastability requires time-dependent and thermodynamic evidence outside this policy scope,Diagnostic segment discrepancy only
+SC06,cross_module_aging_relaxation_switching_claim,Cross-module coupling cannot be inferred from MT segment comparisons in this stage,MT-local segment candidate result only
+SC07,protocol_label_inferred_from_ramp_direction,Direction-only evidence is insufficient to assert zfc fcc fcw protocol labels,Ramp-direction diagnostic label only
+SC08,unknown_segment_physics_claim,Unknown segments lack sufficient protocol identity for physics interpretation,Coverage or quality diagnostic only
