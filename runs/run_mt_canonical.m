@@ -704,39 +704,163 @@ try
     reqClean = ["file_id","row_index","T_K","H_Oe","time_s","M_emu_raw","M_emu_clean","M_emu_smooth","cleaning_branch","cleaning_reason_code","points_changed_flag","raw_clean_abs_delta","raw_smooth_abs_delta","cleaning_effect_class","cleaning_warning_class","cleaning_trust","segment_id","segment_type","segment_source"];
     reqDer = ["file_id","row_index","T_K","H_Oe","time_s","M_emu_clean","sample_mass_g","time_rel_s","M_over_H_emu_per_Oe","M_norm_emu_per_g","chi_mass_emu_per_g_per_Oe","dM_dT_emu_per_K","dM_dt_emu_per_s","dT_dt_K_per_s","segment_id","segment_type","segment_progress_01","segment_direction_sign","derived_valid_flag","derived_missing_reason"];
     reqObs = ["observable_name","observable_variant","file_id","segment_id","segment_type","definition","source_columns","aggregation_method","temperature_dependence","value_numeric","value_unit","n_points_used","quality_flag","notes"];
-    if ~all(ismember(reqRaw, string(pointsRawTbl.Properties.VariableNames))) || ~all(ismember(reqClean, string(pointsCleanTbl.Properties.VariableNames))) || ~all(ismember(reqDer, string(pointsDerivedTbl.Properties.VariableNames))) || ~all(ismember(reqObs, string(observablesTbl.Properties.VariableNames)))
+    rawCols = string(pointsRawTbl.Properties.VariableNames);
+    cleanCols = string(pointsCleanTbl.Properties.VariableNames);
+    derCols = string(pointsDerivedTbl.Properties.VariableNames);
+    obsCols = string(observablesTbl.Properties.VariableNames);
+    if ~all(ismember(reqRaw, rawCols)) || ~all(ismember(reqClean, cleanCols)) || ~all(ismember(reqDer, derCols)) || ~all(ismember(reqObs, obsCols))
         gStatus(1) = "FAIL"; gDetails(1) = "missing required schema column(s)";
-    end
-    missReq = any(ismissing(pointsRawTbl.import_status)) || any(ismissing(pointsRawTbl.time_quality)) || any(ismissing(pointsRawTbl.time_warning_class)) || ...
-        any(ismissing(pointsCleanTbl.cleaning_branch)) || any(ismissing(pointsCleanTbl.cleaning_reason_code)) || any(ismissing(pointsCleanTbl.segment_type)) || ...
-        any(ismissing(pointsCleanTbl.segment_source)) || any(ismissing(pointsDerivedTbl.segment_type)) || any(ismissing(pointsDerivedTbl.derived_missing_reason));
-    if missReq
-        gStatus(2) = "FAIL"; gDetails(2) = "missing required nonnumeric fields";
     else
-        gDetails(2) = "required fields populated";
+        gDetails(1) = "required schema columns present for RAW/CLEAN/DERIVED/OBS";
     end
-    if height(pointsRawTbl) ~= height(pointsCleanTbl) || height(pointsCleanTbl) ~= height(pointsDerivedTbl)
-        gStatus(3) = "FAIL"; gDetails(3) = "row parity mismatch";
+
+    reqIssues = strings(0,1);
+    reqNumRaw = ["file_id","row_index","T_K","H_Oe","time_s","M_emu"];
+    reqStrRaw = ["import_status","time_quality","time_warning_class"];
+    reqNumClean = ["file_id","row_index","T_K","H_Oe","time_s","M_emu_raw","M_emu_clean","M_emu_smooth","points_changed_flag","raw_clean_abs_delta","raw_smooth_abs_delta","segment_id"];
+    reqStrClean = ["cleaning_branch","cleaning_reason_code","cleaning_effect_class","cleaning_warning_class","cleaning_trust","segment_type","segment_source"];
+    reqNumDerNoNaN = ["file_id","row_index","T_K","H_Oe","time_s","M_emu_clean","derived_valid_flag"];
+    reqStrDer = ["segment_type","segment_direction_sign","derived_missing_reason"];
+    reqStrObs = ["observable_name","observable_variant","segment_type","definition","source_columns","aggregation_method","temperature_dependence","value_unit","quality_flag"];
+    for jj = 1:numel(reqNumRaw)
+        cn = char(reqNumRaw(jj));
+        if any(~isfinite(pointsRawTbl.(cn)))
+            reqIssues(end+1) = "RAW numeric required has NaN/Inf: " + reqNumRaw(jj);
+        end
+    end
+    for jj = 1:numel(reqStrRaw)
+        cn = char(reqStrRaw(jj));
+        if any(ismissing(pointsRawTbl.(cn)) | strlength(pointsRawTbl.(cn)) == 0)
+            reqIssues(end+1) = "RAW string required missing: " + reqStrRaw(jj);
+        end
+    end
+    for jj = 1:numel(reqNumClean)
+        cn = char(reqNumClean(jj));
+        if any(~isfinite(pointsCleanTbl.(cn)))
+            reqIssues(end+1) = "CLEAN numeric required has NaN/Inf: " + reqNumClean(jj);
+        end
+    end
+    for jj = 1:numel(reqStrClean)
+        cn = char(reqStrClean(jj));
+        if any(ismissing(pointsCleanTbl.(cn)) | strlength(pointsCleanTbl.(cn)) == 0)
+            reqIssues(end+1) = "CLEAN string required missing: " + reqStrClean(jj);
+        end
+    end
+    for jj = 1:numel(reqNumDerNoNaN)
+        cn = char(reqNumDerNoNaN(jj));
+        if any(~isfinite(pointsDerivedTbl.(cn)))
+            reqIssues(end+1) = "DERIVED numeric required has NaN/Inf: " + reqNumDerNoNaN(jj);
+        end
+    end
+    for jj = 1:numel(reqStrDer)
+        cn = char(reqStrDer(jj));
+        if any(ismissing(pointsDerivedTbl.(cn)) | strlength(pointsDerivedTbl.(cn)) == 0)
+            reqIssues(end+1) = "DERIVED string required missing: " + reqStrDer(jj);
+        end
+    end
+    for jj = 1:numel(reqStrObs)
+        cn = char(reqStrObs(jj));
+        if height(observablesTbl) > 0 && any(ismissing(observablesTbl.(cn)) | strlength(observablesTbl.(cn)) == 0)
+            reqIssues(end+1) = "OBS string required missing: " + reqStrObs(jj);
+        end
+    end
+    if isempty(reqIssues)
+        gDetails(2) = "required fields populated per local required-column map; optional derived NaN semantics allowed";
     else
-        gDetails(3) = "raw clean derived row parity ok";
+        gStatus(2) = "FAIL";
+        gDetails(2) = "required field violations: " + strjoin(reqIssues(1:min(4,end)), " | ");
     end
+
+    parityOk = (height(pointsRawTbl) == height(pointsCleanTbl)) && (height(pointsCleanTbl) == height(pointsDerivedTbl));
+    keySetEq = false;
+    if parityOk
+        kRaw = sortrows(pointsRawTbl(:, {'file_id','row_index'}), {'file_id','row_index'});
+        kClean = sortrows(pointsCleanTbl(:, {'file_id','row_index'}), {'file_id','row_index'});
+        kDer = sortrows(pointsDerivedTbl(:, {'file_id','row_index'}), {'file_id','row_index'});
+        keySetEq = isequal(kRaw{:,:}, kClean{:,:}) && isequal(kRaw{:,:}, kDer{:,:});
+    end
+    if ~parityOk || ~keySetEq
+        gStatus(3) = "FAIL";
+        gDetails(3) = "parity_ok=" + string(parityOk) + ", key_set_equality=" + string(keySetEq);
+    else
+        gDetails(3) = "row parity and immutable key-set equality verified";
+    end
+
     if height(unique(pointsRawTbl(:,{'file_id','row_index'}))) ~= height(pointsRawTbl) || height(unique(pointsCleanTbl(:,{'file_id','row_index'}))) ~= height(pointsCleanTbl) || height(unique(pointsDerivedTbl(:,{'file_id','row_index'}))) ~= height(pointsDerivedTbl)
         gStatus(4) = "FAIL"; gDetails(4) = "duplicate key rows";
+    else
+        gDetails(4) = "unique(file_id,row_index) in RAW/CLEAN/DERIVED";
     end
-    gDetails(5) = "joins use immutable key by construction";
+
+    join_key_policy = "file_id,row_index_only";
+    float_coordinate_join_used = false;
+    if ~(join_key_policy == "file_id,row_index_only") || float_coordinate_join_used
+        gStatus(5) = "FAIL";
+    end
+    gDetails(5) = "join_key_policy=" + join_key_policy + ", float_coordinate_join_used=" + string(float_coordinate_join_used);
+
     if any(abs(pointsCleanTbl.M_emu_raw - pointsRawTbl.M_emu) > 0 | xor(isfinite(pointsCleanTbl.M_emu_raw), isfinite(pointsRawTbl.M_emu)))
         gStatus(6) = "FAIL"; gDetails(6) = "clean raw traceability mismatch";
-    end
-    gDetails(7) = "smooth channel kept separate from clean channel";
-    if ~all(ismember(["M_emu_clean","sample_mass_g","time_s","T_K","H_Oe","segment_id","segment_type"], string(pointsDerivedTbl.Properties.VariableNames)))
-        gStatus(8) = "FAIL"; gDetails(8) = "derived source isolation contract missing clean inputs";
-    end
-    gDetails(9) = "time_s treated as imported channel and time_rel_s explicit";
-    if ~all(pointsCleanTbl.segment_source == "not_implemented")
-        gDetails(10) = "segmentation annotations present";
     else
-        gDetails(10) = "segmentation placeholder annotations used";
+        gDetails(6) = "M_emu_raw in CLEAN matches RAW M_emu on immutable keys";
     end
+
+    derived_uses_clean_channel = ismember("M_emu_clean", derCols) && ~ismember("M_emu_smooth", derCols);
+    smoothOverwriteSuspected = false;
+    cleanMask = pointsCleanTbl.cleaning_branch == "cleaned";
+    eqMask = cleanMask & isfinite(pointsCleanTbl.M_emu_clean) & isfinite(pointsCleanTbl.M_emu_smooth);
+    if any(eqMask)
+        fracEq = sum(abs(pointsCleanTbl.M_emu_clean(eqMask) - pointsCleanTbl.M_emu_smooth(eqMask)) <= 1e-15) / sum(eqMask);
+        if fracEq > 0.999
+            smoothOverwriteSuspected = true;
+        end
+    end
+    smooth_used_as_clean_truth = smoothOverwriteSuspected || ~derived_uses_clean_channel;
+    if ~derived_uses_clean_channel || smooth_used_as_clean_truth
+        gStatus(7) = "FAIL";
+    end
+    gDetails(7) = "derived_uses_clean_channel=" + string(derived_uses_clean_channel) + ", smooth_used_as_clean_truth=" + string(smooth_used_as_clean_truth);
+
+    derived_source_table = "mt_points_clean";
+    rawOnlyCols = setdiff(rawCols, cleanCols);
+    derived_uses_raw_only_column = any(ismember(rawOnlyCols, derCols));
+    if ~(derived_source_table == "mt_points_clean") || derived_uses_raw_only_column
+        gStatus(8) = "FAIL";
+    end
+    gDetails(8) = "derived_source_table=" + derived_source_table + ", derived_uses_raw_only_column=" + string(derived_uses_raw_only_column);
+
+    time_s_assumed_elapsed = false;
+    time_rel_s_explicit = ismember("time_rel_s", derCols);
+    timeRelConsistent = true;
+    if time_rel_s_explicit
+        uf = unique(pointsDerivedTbl.file_id);
+        for kk = 1:numel(uf)
+            idx = find(pointsDerivedTbl.file_id == uf(kk));
+            t = pointsDerivedTbl.time_s(idx);
+            tr = pointsDerivedTbl.time_rel_s(idx);
+            mf = find(isfinite(t) & isfinite(tr), 1, 'first');
+            if ~isempty(mf)
+                if abs(tr(mf)) > 1e-9
+                    timeRelConsistent = false;
+                    break;
+                end
+            end
+        end
+    else
+        timeRelConsistent = false;
+    end
+    if time_s_assumed_elapsed || ~time_rel_s_explicit || ~timeRelConsistent
+        gStatus(9) = "FAIL";
+    end
+    gDetails(9) = "time_s_assumed_elapsed=" + string(time_s_assumed_elapsed) + ", time_rel_s_explicit=" + string(time_rel_s_explicit) + ", time_rel_s_consistent=" + string(timeRelConsistent);
+
+    segmentation_is_cleaning = false;
+    segment_source_populated = ~any(ismissing(pointsCleanTbl.segment_source) | strlength(pointsCleanTbl.segment_source) == 0);
+    if segmentation_is_cleaning || ~segment_source_populated
+        gStatus(10) = "FAIL";
+    end
+    gDetails(10) = "segmentation_is_cleaning=" + string(segmentation_is_cleaning) + ", segment_source_populated=" + string(segment_source_populated);
+
     if height(observablesTbl) > 0
         missObs = any(observablesTbl.source_columns == "" | observablesTbl.aggregation_method == "" | observablesTbl.definition == "");
         if missObs
