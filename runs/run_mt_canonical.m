@@ -31,6 +31,9 @@ cfg.cleaning.sgOrder = 2;
 cfg.cleaning.sgFrame = 41;
 cfg.cleaning.movingAvgWindow = 15;
 cfg.cleaning.field_threshold = 20000;
+% When true, runner passes cleaning options with field_threshold forced to 0 so
+% clean_MT_data does not take the low-field bypass (field-dependent preprocessing gate).
+cfg.cleaning_disable_low_field_bypass = false;
 
 cfg.segmentation = struct();
 cfg.segmentation.delta_T = 0.7;
@@ -134,9 +137,10 @@ try
         'VariableTypes', {'double','double','double','double','double','double','double','double','logical','double','double','double','double','double','double','double','double','double','double','double','double','string','string','string','string'}, ...
         'VariableNames', {'file_id','n_rows','T_min_K','T_max_K','H_min_Oe','H_max_Oe','M_min_emu','M_max_emu','time_regular_warning','dt_mean_s','dt_std_s','dt_cv','dt_median_s','dt_q90_s','dt_q99_s','dt_max_s','negative_dt_count','zero_dt_count','pause_gap_count','pause_gap_fraction','dt_count','time_quality','time_warning_class','time_blocker_reason','segmentation_trust'});
 
-    cleaningAudit = table('Size', [0 9], ...
-        'VariableTypes', {'double','string','double','double','logical','double','double','double','double'}, ...
-        'VariableNames', {'file_id','cleaning_policy_branch','field_oe','field_threshold_oe','unfiltered_mode','n_raw','n_clean_non_nan','n_smooth_non_nan','n_masked_or_nan_after_clean'});
+    cleaningAudit = table('Size', [0 18], ...
+        'VariableTypes', {'double','string','double','double','logical','double','double','double','double','string','string','double','double','double','double','string','string','string'}, ...
+        'VariableNames', {'file_id','cleaning_policy_branch','field_oe','field_threshold_oe','unfiltered_mode','n_raw','n_clean_non_nan','n_smooth_non_nan','n_masked_or_nan_after_clean', ...
+        'cleaning_reason_code','cleaning_branch','points_changed_count','points_changed_fraction','raw_clean_max_abs_delta','raw_smooth_max_abs_delta','cleaning_effect_class','cleaning_warning_class','cleaning_trust'});
 
     segmentsTbl = table('Size', [0 9], ...
         'VariableTypes', {'double','string','double','double','double','double','double','double','double'}, ...
@@ -153,6 +157,11 @@ try
     mtSegmentationTrustLevel = "HIGH";
     mtReadyForProductionRelease = "NO";
     mtReadyForAdvancedAnalysis = "NO";
+    mtCleaningPolicyBranchSplitPresent = "NO";
+    mtCleaningChangedPointsPresent = "NO";
+    mtCleaningEffectRiskPresent = "NO";
+    mtCleaningBranchSplitIsBlocker = "NO";
+    mtCleaningTrustLevel = "HIGH";
 
     importedOk = 0;
     importedFail = 0;
@@ -329,22 +338,88 @@ try
                     timeQuality, timeWarningClass, timeBlockerReason, segmentationTrust, ...
                     'VariableNames', {'file_id','n_rows','T_min_K','T_max_K','H_min_Oe','H_max_Oe','M_min_emu','M_max_emu','time_regular_warning','dt_mean_s','dt_std_s','dt_cv','dt_median_s','dt_q90_s','dt_q99_s','dt_max_s','negative_dt_count','zero_dt_count','pause_gap_count','pause_gap_fraction','dt_count','time_quality','time_warning_class','time_blocker_reason','segmentation_trust'})];
 
-                [~, ~, ~, M_clean, T_smooth, M_smooth] = clean_MT_data(TemperatureK, MomentEmu, thisField, cfg.cleaning, cfg.Unfiltered);
+                cleaningOpts = cfg.cleaning;
+                if isfield(cfg, 'cleaning_disable_low_field_bypass') && logical(cfg.cleaning_disable_low_field_bypass)
+                    cleaningOpts.field_threshold = 0;
+                end
+                [~, M_raw, ~, M_clean, T_smooth, M_smooth] = clean_MT_data(TemperatureK, MomentEmu, thisField, cleaningOpts, cfg.Unfiltered);
 
                 branchLabel = "cleaned";
                 if cfg.Unfiltered
                     branchLabel = "unfiltered";
-                elseif thisField < cfg.cleaning.field_threshold
+                elseif thisField < cleaningOpts.field_threshold
                     branchLabel = "low_field_bypass";
                 end
 
-                nRaw = numel(MomentEmu);
+                if cfg.Unfiltered
+                    cleaningReasonCode = "RAW_MODE";
+                elseif thisField < cleaningOpts.field_threshold
+                    cleaningReasonCode = "BYPASS_LOW_FIELD";
+                else
+                    cleaningReasonCode = "FULL_CLEAN";
+                end
+                cleaningBranch = branchLabel;
+
+                nRaw = numel(M_raw);
                 nClean = sum(isfinite(M_clean));
                 nSmooth = sum(isfinite(M_smooth));
                 nMasked = nRaw - nClean;
 
+                % Point-wise deltas on aligned rows. M_smooth (SG+moving-avg) is reported separately and is not used
+                % for points_changed_* (would flag essentially every row). points_changed_* counts structural edits:
+                % finite↔NaN transitions on the raw→clean channel (masking / gap handling), not Hampel micro-replacements.
+                % cleaningTolMaterial: small relative floor for classifying max raw→clean delta as NONE vs LOW/MEDIUM/HIGH.
+                pointsChangedCount = 0;
+                pointsChangedFraction = 0;
+                rawCleanMaxAbsDelta = NaN;
+                rawSmoothMaxAbsDelta = NaN;
+                cleaningEffectClass = "UNRESOLVED";
+                cleaningWarningClass = "NONE";
+                cleaningTrust = "HIGH";
+
+                if numel(M_raw) ~= numel(M_clean) || numel(M_raw) ~= numel(M_smooth)
+                    cleaningEffectClass = "UNRESOLVED";
+                    cleaningWarningClass = "CHANGED_POINTS";
+                    cleaningTrust = "LOW";
+                else
+                    finiteRC = isfinite(M_raw) & isfinite(M_clean);
+                    finiteRS = isfinite(M_raw) & isfinite(M_smooth);
+                    if ~any(finiteRC)
+                        cleaningEffectClass = "UNRESOLVED";
+                        cleaningWarningClass = "CHANGED_POINTS";
+                        cleaningTrust = "LOW";
+                    else
+                        delRc = abs(M_clean - M_raw);
+                        rawCleanMaxAbsDelta = max(delRc(finiteRC));
+                        scaleSig = max(abs(M_raw(finiteRC)));
+                        if ~isfinite(scaleSig) || scaleSig <= 0
+                            scaleSig = 1;
+                        end
+                        cleaningTolMaterial = max(1e-15, 1e-6 * scaleSig);
+                        structuralMask = (isfinite(M_raw) & ~isfinite(M_clean)) | (~isfinite(M_raw) & isfinite(M_clean));
+                        pointsChangedCount = sum(structuralMask);
+                        if any(finiteRS)
+                            delRs = abs(M_smooth - M_raw);
+                            rawSmoothMaxAbsDelta = max(delRs(finiteRS));
+                        end
+                        mxClean = rawCleanMaxAbsDelta;
+                        if pointsChangedCount == 0 && mxClean <= cleaningTolMaterial
+                            cleaningEffectClass = "NONE";
+                        elseif mxClean / scaleSig <= 0.01
+                            cleaningEffectClass = "LOW";
+                        elseif mxClean / scaleSig <= 0.25
+                            cleaningEffectClass = "MEDIUM";
+                        else
+                            cleaningEffectClass = "HIGH";
+                        end
+                        pointsChangedFraction = pointsChangedCount / max(nRaw, 1);
+                    end
+                end
+
                 cleaningAudit = [cleaningAudit; table(double(iFile), branchLabel, double(thisField), double(cfg.cleaning.field_threshold), logical(cfg.Unfiltered), double(nRaw), double(nClean), double(nSmooth), double(nMasked), ...
-                    'VariableNames', {'file_id','cleaning_policy_branch','field_oe','field_threshold_oe','unfiltered_mode','n_raw','n_clean_non_nan','n_smooth_non_nan','n_masked_or_nan_after_clean'})];
+                    cleaningReasonCode, cleaningBranch, double(pointsChangedCount), double(pointsChangedFraction), double(rawCleanMaxAbsDelta), double(rawSmoothMaxAbsDelta), cleaningEffectClass, cleaningWarningClass, cleaningTrust, ...
+                    'VariableNames', {'file_id','cleaning_policy_branch','field_oe','field_threshold_oe','unfiltered_mode','n_raw','n_clean_non_nan','n_smooth_non_nan','n_masked_or_nan_after_clean', ...
+                    'cleaning_reason_code','cleaning_branch','points_changed_count','points_changed_fraction','raw_clean_max_abs_delta','raw_smooth_max_abs_delta','cleaning_effect_class','cleaning_warning_class','cleaning_trust'})];
 
                 filteredTemp = medfilt1(T_smooth, 20);
                 incSeg = {};
@@ -414,6 +489,77 @@ try
         mtImportStrictnessOk = "NO";
     end
 
+    if height(cleaningAudit) > 0
+        ub = unique(cleaningAudit.cleaning_policy_branch);
+        splitPresent = numel(ub) > 1;
+        if splitPresent
+            mtCleaningPolicyBranchSplitPresent = "YES";
+        end
+        worstCleaningTrustRank = 1;
+        for r = 1:height(cleaningAudit)
+            eff = char(cleaningAudit.cleaning_effect_class(r));
+            ch = cleaningAudit.points_changed_count(r);
+            warnClass = "NONE";
+            trust = "HIGH";
+            if strcmp(eff, 'UNRESOLVED')
+                warnClass = "CHANGED_POINTS";
+                trust = "LOW";
+            elseif ch > 0
+                warnClass = "CHANGED_POINTS";
+                trust = "LOW";
+            elseif strcmp(eff, 'HIGH')
+                warnClass = "HIGH_EFFECT";
+                trust = "LOW";
+            elseif strcmp(eff, 'MEDIUM')
+                warnClass = "HIGH_EFFECT";
+                trust = "MEDIUM";
+            elseif strcmp(eff, 'LOW')
+                warnClass = "NONE";
+                trust = "MEDIUM";
+            else
+                if splitPresent
+                    warnClass = "BRANCH_SPLIT_ONLY";
+                    trust = "MEDIUM";
+                else
+                    warnClass = "NONE";
+                    trust = "HIGH";
+                end
+            end
+            cleaningAudit.cleaning_warning_class(r) = string(warnClass);
+            cleaningAudit.cleaning_trust(r) = string(trust);
+            if strcmp(trust, 'LOW')
+                rk = 3;
+            elseif strcmp(trust, 'MEDIUM')
+                rk = 2;
+            else
+                rk = 1;
+            end
+            worstCleaningTrustRank = max(worstCleaningTrustRank, rk);
+        end
+        if any(cleaningAudit.points_changed_count > 0)
+            mtCleaningChangedPointsPresent = "YES";
+        elseif any(strcmp(cleaningAudit.cleaning_effect_class, "UNRESOLVED"))
+            mtCleaningChangedPointsPresent = "POSSIBLY_UNRESOLVED";
+        else
+            mtCleaningChangedPointsPresent = "NO";
+        end
+        if any(strcmp(cleaningAudit.cleaning_effect_class, "HIGH"))
+            mtCleaningEffectRiskPresent = "YES";
+        else
+            mtCleaningEffectRiskPresent = "NO";
+        end
+        if strcmp(mtCleaningPolicyBranchSplitPresent, "YES") && strcmp(mtCleaningChangedPointsPresent, "YES") && strcmp(mtCleaningEffectRiskPresent, "YES")
+            mtCleaningBranchSplitIsBlocker = "YES";
+        end
+        if worstCleaningTrustRank >= 3
+            mtCleaningTrustLevel = "LOW";
+        elseif worstCleaningTrustRank >= 2
+            mtCleaningTrustLevel = "MEDIUM";
+        else
+            mtCleaningTrustLevel = "HIGH";
+        end
+    end
+
     inventoryPath = fullfile(tablesDir, 'mt_file_inventory.csv');
     rawSummaryPath = fullfile(tablesDir, 'mt_raw_summary.csv');
     cleaningAuditPath = fullfile(tablesDir, 'mt_cleaning_audit.csv');
@@ -459,6 +605,11 @@ try
         "MT_TIME_AXIS_PAUSE_GAPS_PRESENT"; ...
         "MT_TIME_AXIS_SEGMENTATION_RISK_PRESENT"; ...
         "MT_SEGMENTATION_TRUST_LEVEL"; ...
+        "MT_CLEANING_POLICY_BRANCH_SPLIT_PRESENT"; ...
+        "MT_CLEANING_CHANGED_POINTS_PRESENT"; ...
+        "MT_CLEANING_EFFECT_RISK_PRESENT"; ...
+        "MT_CLEANING_BRANCH_SPLIT_IS_BLOCKER"; ...
+        "MT_CLEANING_TRUST_LEVEL"; ...
         "POINT_TABLES_WRITTEN"; ...
         "RAW_CLEAN_DERIVED_SEPARATION"; ...
         "FULL_CANONICAL_DATA_PRODUCT"; ...
@@ -483,6 +634,11 @@ try
         mtTimeAxisPauseGapsPresent; ...
         mtTimeAxisSegmentationRiskPresent; ...
         mtSegmentationTrustLevel; ...
+        mtCleaningPolicyBranchSplitPresent; ...
+        mtCleaningChangedPointsPresent; ...
+        mtCleaningEffectRiskPresent; ...
+        mtCleaningBranchSplitIsBlocker; ...
+        mtCleaningTrustLevel; ...
         "NO"; ...
         "SUMMARY_LEVEL_ONLY"; ...
         "NO"; ...
@@ -524,6 +680,11 @@ try
     fprintf(fidReport, '- MT_TIME_AXIS_PAUSE_GAPS_PRESENT=%s\n', mtTimeAxisPauseGapsPresent);
     fprintf(fidReport, '- MT_TIME_AXIS_SEGMENTATION_RISK_PRESENT=%s\n', mtTimeAxisSegmentationRiskPresent);
     fprintf(fidReport, '- MT_SEGMENTATION_TRUST_LEVEL=%s\n', mtSegmentationTrustLevel);
+    fprintf(fidReport, '- MT_CLEANING_POLICY_BRANCH_SPLIT_PRESENT=%s\n', mtCleaningPolicyBranchSplitPresent);
+    fprintf(fidReport, '- MT_CLEANING_CHANGED_POINTS_PRESENT=%s\n', mtCleaningChangedPointsPresent);
+    fprintf(fidReport, '- MT_CLEANING_EFFECT_RISK_PRESENT=%s\n', mtCleaningEffectRiskPresent);
+    fprintf(fidReport, '- MT_CLEANING_BRANCH_SPLIT_IS_BLOCKER=%s\n', mtCleaningBranchSplitIsBlocker);
+    fprintf(fidReport, '- MT_CLEANING_TRUST_LEVEL=%s\n', mtCleaningTrustLevel);
     fprintf(fidReport, '- POINT_TABLES_WRITTEN=NO\n');
     fprintf(fidReport, '- RAW_CLEAN_DERIVED_SEPARATION=SUMMARY_LEVEL_ONLY\n');
     fprintf(fidReport, '- FULL_CANONICAL_DATA_PRODUCT=NO\n');
