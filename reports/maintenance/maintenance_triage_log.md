@@ -53,6 +53,8 @@ No code fixes were performed; this update is log-only consolidation within appro
 
 Remediation follow-up (governance wording only): updated `tables/project_workstream_status.csv` Aging/Relaxation canonicalization rows to mark `canonical_code_status=WIP` and explicitly state that workstream progress is not module canonical closure while module status remains `NOT_CANONICAL`.
 
+Remediation follow-up (doc-only clarification): updated `docs/project_control_board.md` to remove stale Switching identity-table missing wording, name the canonical run-root source-of-truth explicitly, and label repo-root `switching_*` tables/reports as reference-mirror/operational summaries pending owner-decision routing alignment.
+
 ## Next Review
 
 - Revisit all entries in the next weekly maintenance review cycle.

@@ -51,7 +51,10 @@ See `tables/project_workstream_status.csv` (one row per active workstream).
 - Aging and Relaxation remain `NOT_CANONICAL` at module level; workstream `canonical_code_status=YES` must not be read as full module canonicalization closure.
 - Aging/Relaxation cross-module outputs are `WIP` / `ADVISORY` / `NOT_CANONICAL_SOURCE` until explicit module-level closure is recorded in canonical status tables.
 - Canonical/paper-ready wording in non-canonical module outputs is governance-risk phrasing, not closure evidence.
-- `tables/switching_canonical_identity.csv` is currently missing; treat any reference to it as downgraded/non-authoritative until evidence-backed restoration is approved.
+- `tables/switching_canonical_identity.csv` is present, but Switching identity routing still requires consumer alignment; consumers must not infer canonical truth from newest-by-mtime selection or repo-root mirror filenames alone.
+- Canonical Switching data truth is the canonical run root: `results/switching/runs/run_2026_04_03_000147_switching_canonical/`.
+- Repo-root `tables/`/`reports/` named `switching_*` are reference mirrors or operational summaries unless explicitly tied back to canonical run identity and run-root provenance.
+- This clarification is documentation-only; resolver behavior, newest-by-mtime selection, root mirror production, and cross-module output ownership remain under owner-decision review.
 - `analysis/knowledge/run_registry.csv` is a query/discovery registry and is not a complete filesystem inventory of every run directory.
 - Do not build a new Switching context bundle before micro-integration is planned and executed.
 
