@@ -74,3 +74,35 @@ Therefore:
 SYSTEM_STRUCTURE =
 SINGLE PIPELINE + CHANNEL-AWARE BEHAVIOR
 
+---
+
+## 2026-04-26 Canonical scientific status update (append-only)
+
+- This section is appended after the earlier survey-based structural notes above.
+- The earlier sections remain historical repository-fact context and are not deleted or rewritten here.
+- Current canonical scientific authority for Switching interpretation now comes from the Stage D4, Stage E, Stage E5, Stage E5B, and limited claim-readiness outputs under `tables/` and `reports/`.
+
+### Current canonical model status
+
+- The current canonical Switching model is the leading-order interpretable hierarchy:
+  `S ~= S_backbone + kappa1 Phi1 + kappa2 Phi2`.
+- Stage D4 resolved the current canonical mode relationship as:
+  - `Phi1 = backbone_error`
+  - `Phi2 = backbone_tail_residual`
+  - `Kappa2 = tail_burden_tracker`
+- Stage E passed canonical static observable mapping for `kappa1` and `kappa2`.
+
+### Caveat and claims boundary
+
+- The current rank-2 canonical model is not a full closure.
+- Stage E5 and E5B keep a rank-3 branch open as `weak_structured_residual`.
+- Rank-3 is documented only as an open residual branch and is not promoted as a physical mode.
+- Limited canonical claims are allowed only with the explicit leading-order / not-full-closure caveat attached.
+- Full-closure claims remain blocked.
+
+### Canonical vs noncanonical separation rule
+
+- Legacy or noncanonical `kappa1`, `kappa2`, `Phi1`, or `Phi2` findings remain historical / noncanonical unless they are revalidated in the canonical pipeline.
+- Deprecated or historical files such as `docs/switching_canonical_definition.md` and older noncanonical Switching reports must not be treated as the current canonical scientific authority.
+- Older noncanonical analysis history is preserved for provenance, but it must be read as historical context rather than current canonical truth.
+

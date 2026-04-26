@@ -1,0 +1,12 @@
+check,result,detail
+STAGE_E5_COMPLETED,YES,"Stage E.5 canonical mode-order sufficiency audit completed."
+RANK2_RECONSTRUCTION_SUFFICIENT,PARTIAL,"Full-domain rank3 diagnostic gain=0.2530, high-rank gain=0.0953."
+RANK3_SIGNIFICANT,PARTIAL,"Rank3 significance from after-phi2 residual: sigma p=0.8164, gain p=0.0020, energy fraction=0.4356."
+RANK3_STABLE,PARTIAL,"Phi3 diagnostic stability: LOTO median |cos|=0.9987, LOTO min=0.3426, subset min=0.3426, amplitude median corr=0.9995."
+RANK3_OBSERVABLE_LINKED,NO,"Best canonical observable linkage for diagnostic rank3 amplitude: |rho|=0.3912, shuffled-T p=0.1397; producer-control kappa3 rho=0.9912 (p=0.0020)."
+HIGHER_ORDER_MODES_BLOCK_CLAIMS,PARTIAL,"Tail localization fraction=0.1149 (p=0.4990), total-variation p=0.2635."
+READY_FOR_CLAIM_READINESS_REVIEW,NO,"Claim-readiness review allowed only if higher-order modes do not block interpretation."
+CANONICAL_RUN_ID,run_2026_04_03_000147_switching_canonical,"Identity-locked canonical run used throughout Stage E.5."
+PHI1_CLASSIFICATION_D4,backbone_error,"Imported from D4 status for context only."
+PHI2_CLASSIFICATION_D4,backbone_tail_residual,"Imported from D4 status for context only."
+KAPPA2_CLASSIFICATION_D4,tail_burden_tracker,"Imported from D4 status for context only."

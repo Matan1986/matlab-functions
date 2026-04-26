@@ -1,0 +1,109 @@
+mode_id,holdout_type,holdout_label,metric_name,observed_value,aggregate_median,aggregate_min,aggregate_max,detail
+phi1,leave_one_temperature_out,omit_4K,abs_cosine_to_full_mode,0.999421211966636,0.999957726082741,0.590317750085824,0.999999999917511,Leave-one-temperature-out excluding T=4 K.
+phi1,leave_one_temperature_out,omit_4K,aligned_amplitude_corr,0.999923264262488,0.999995436699772,0.621628233376416,0.999999999989098,Leave-one-temperature-out excluding T=4 K.
+phi1,leave_one_temperature_out,omit_6K,abs_cosine_to_full_mode,0.999563319713749,0.999957726082741,0.590317750085824,0.999999999917511,Leave-one-temperature-out excluding T=6 K.
+phi1,leave_one_temperature_out,omit_6K,aligned_amplitude_corr,0.999934687714431,0.999995436699772,0.621628233376416,0.999999999989098,Leave-one-temperature-out excluding T=6 K.
+phi1,leave_one_temperature_out,omit_8K,abs_cosine_to_full_mode,0.999916619285697,0.999957726082741,0.590317750085824,0.999999999917511,Leave-one-temperature-out excluding T=8 K.
+phi1,leave_one_temperature_out,omit_8K,aligned_amplitude_corr,0.999983999214389,0.999995436699772,0.621628233376416,0.999999999989098,Leave-one-temperature-out excluding T=8 K.
+phi1,leave_one_temperature_out,omit_10K,abs_cosine_to_full_mode,0.999983808191049,0.999957726082741,0.590317750085824,0.999999999917511,Leave-one-temperature-out excluding T=10 K.
+phi1,leave_one_temperature_out,omit_10K,aligned_amplitude_corr,0.999998877413904,0.999995436699772,0.621628233376416,0.999999999989098,Leave-one-temperature-out excluding T=10 K.
+phi1,leave_one_temperature_out,omit_12K,abs_cosine_to_full_mode,0.999976517646004,0.999957726082741,0.590317750085824,0.999999999917511,Leave-one-temperature-out excluding T=12 K.
+phi1,leave_one_temperature_out,omit_12K,aligned_amplitude_corr,0.99999933056363,0.999995436699772,0.621628233376416,0.999999999989098,Leave-one-temperature-out excluding T=12 K.
+phi1,leave_one_temperature_out,omit_14K,abs_cosine_to_full_mode,0.999973141391642,0.999957726082741,0.590317750085824,0.999999999917511,Leave-one-temperature-out excluding T=14 K.
+phi1,leave_one_temperature_out,omit_14K,aligned_amplitude_corr,0.99999927035254,0.999995436699772,0.621628233376416,0.999999999989098,Leave-one-temperature-out excluding T=14 K.
+phi1,leave_one_temperature_out,omit_16K,abs_cosine_to_full_mode,0.999967676626551,0.999957726082741,0.590317750085824,0.999999999917511,Leave-one-temperature-out excluding T=16 K.
+phi1,leave_one_temperature_out,omit_16K,aligned_amplitude_corr,0.999998796877111,0.999995436699772,0.621628233376416,0.999999999989098,Leave-one-temperature-out excluding T=16 K.
+phi1,leave_one_temperature_out,omit_18K,abs_cosine_to_full_mode,0.999969180991769,0.999957726082741,0.590317750085824,0.999999999917511,Leave-one-temperature-out excluding T=18 K.
+phi1,leave_one_temperature_out,omit_18K,aligned_amplitude_corr,0.999998421699787,0.999995436699772,0.621628233376416,0.999999999989098,Leave-one-temperature-out excluding T=18 K.
+phi1,leave_one_temperature_out,omit_20K,abs_cosine_to_full_mode,0.999980466488076,0.999957726082741,0.590317750085824,0.999999999917511,Leave-one-temperature-out excluding T=20 K.
+phi1,leave_one_temperature_out,omit_20K,aligned_amplitude_corr,0.999998709981338,0.999995436699772,0.621628233376416,0.999999999989098,Leave-one-temperature-out excluding T=20 K.
+phi1,leave_one_temperature_out,omit_22K,abs_cosine_to_full_mode,0.99999069915184,0.999957726082741,0.590317750085824,0.999999999917511,Leave-one-temperature-out excluding T=22 K.
+phi1,leave_one_temperature_out,omit_22K,aligned_amplitude_corr,0.999999374442484,0.999995436699772,0.621628233376416,0.999999999989098,Leave-one-temperature-out excluding T=22 K.
+phi1,leave_one_temperature_out,omit_24K,abs_cosine_to_full_mode,0.999869350431819,0.999957726082741,0.590317750085824,0.999999999917511,Leave-one-temperature-out excluding T=24 K.
+phi1,leave_one_temperature_out,omit_24K,aligned_amplitude_corr,0.999985817705847,0.999995436699772,0.621628233376416,0.999999999989098,Leave-one-temperature-out excluding T=24 K.
+phi1,leave_one_temperature_out,omit_26K,abs_cosine_to_full_mode,0.999909945937234,0.999957726082741,0.590317750085824,0.999999999917511,Leave-one-temperature-out excluding T=26 K.
+phi1,leave_one_temperature_out,omit_26K,aligned_amplitude_corr,0.999989923140381,0.999995436699772,0.621628233376416,0.999999999989098,Leave-one-temperature-out excluding T=26 K.
+phi1,leave_one_temperature_out,omit_28K,abs_cosine_to_full_mode,0.999947775538932,0.999957726082741,0.590317750085824,0.999999999917511,Leave-one-temperature-out excluding T=28 K.
+phi1,leave_one_temperature_out,omit_28K,aligned_amplitude_corr,0.999992451699757,0.999995436699772,0.621628233376416,0.999999999989098,Leave-one-temperature-out excluding T=28 K.
+phi1,leave_one_temperature_out,omit_30K,abs_cosine_to_full_mode,0.99989291568023,0.999957726082741,0.590317750085824,0.999999999917511,Leave-one-temperature-out excluding T=30 K.
+phi1,leave_one_temperature_out,omit_30K,aligned_amplitude_corr,0.999992344691993,0.999995436699772,0.621628233376416,0.999999999989098,Leave-one-temperature-out excluding T=30 K.
+phi1,leave_one_temperature_out,omit_32K,abs_cosine_to_full_mode,0.999999845467877,0.999957726082741,0.590317750085824,0.999999999917511,Leave-one-temperature-out excluding T=32 K.
+phi1,leave_one_temperature_out,omit_32K,aligned_amplitude_corr,0.999999997842065,0.999995436699772,0.621628233376416,0.999999999989098,Leave-one-temperature-out excluding T=32 K.
+phi1,leave_one_temperature_out,omit_34K,abs_cosine_to_full_mode,0.999999999917511,0.999957726082741,0.590317750085824,0.999999999917511,Leave-one-temperature-out excluding T=34 K.
+phi1,leave_one_temperature_out,omit_34K,aligned_amplitude_corr,0.999999999989098,0.999995436699772,0.621628233376416,0.999999999989098,Leave-one-temperature-out excluding T=34 K.
+phi1,subset_exclusion,exclude_transition,abs_cosine_to_full_mode,0.998782289319955,0.999957726082741,0.590317750085824,0.999999999917511,Subset fit excluding transition-flagged temperatures.
+phi1,subset_exclusion,exclude_transition,aligned_amplitude_corr,0.999953671508752,0.999995436699772,0.621628233376416,0.999999999989098,Subset fit excluding transition-flagged temperatures.
+phi1,subset_exclusion,exclude_pretransition,abs_cosine_to_full_mode,0.590317750085824,0.999957726082741,0.590317750085824,0.999999999917511,Subset fit using transition-flagged temperatures only.
+phi1,subset_exclusion,exclude_pretransition,aligned_amplitude_corr,0.621628233376416,0.999995436699772,0.621628233376416,0.999999999989098,Subset fit using transition-flagged temperatures only.
+phi2,leave_one_temperature_out,omit_4K,abs_cosine_to_full_mode,0.999319826482634,0.999865879294469,0.700283894723182,0.999999998050452,Leave-one-temperature-out excluding T=4 K.
+phi2,leave_one_temperature_out,omit_4K,aligned_amplitude_corr,0.999280684512081,0.999509835823186,0.996498666209275,0.999652845028155,Leave-one-temperature-out excluding T=4 K.
+phi2,leave_one_temperature_out,omit_6K,abs_cosine_to_full_mode,0.999739632847645,0.999865879294469,0.700283894723182,0.999999998050452,Leave-one-temperature-out excluding T=6 K.
+phi2,leave_one_temperature_out,omit_6K,aligned_amplitude_corr,0.999350022982104,0.999509835823186,0.996498666209275,0.999652845028155,Leave-one-temperature-out excluding T=6 K.
+phi2,leave_one_temperature_out,omit_8K,abs_cosine_to_full_mode,0.999996026755789,0.999865879294469,0.700283894723182,0.999999998050452,Leave-one-temperature-out excluding T=8 K.
+phi2,leave_one_temperature_out,omit_8K,aligned_amplitude_corr,0.999494893432085,0.999509835823186,0.996498666209275,0.999652845028155,Leave-one-temperature-out excluding T=8 K.
+phi2,leave_one_temperature_out,omit_10K,abs_cosine_to_full_mode,0.999999619180661,0.999865879294469,0.700283894723182,0.999999998050452,Leave-one-temperature-out excluding T=10 K.
+phi2,leave_one_temperature_out,omit_10K,aligned_amplitude_corr,0.999541696094915,0.999509835823186,0.996498666209275,0.999652845028155,Leave-one-temperature-out excluding T=10 K.
+phi2,leave_one_temperature_out,omit_12K,abs_cosine_to_full_mode,0.999999628375733,0.999865879294469,0.700283894723182,0.999999998050452,Leave-one-temperature-out excluding T=12 K.
+phi2,leave_one_temperature_out,omit_12K,aligned_amplitude_corr,0.999553346330787,0.999509835823186,0.996498666209275,0.999652845028155,Leave-one-temperature-out excluding T=12 K.
+phi2,leave_one_temperature_out,omit_14K,abs_cosine_to_full_mode,0.999999998050452,0.999865879294469,0.700283894723182,0.999999998050452,Leave-one-temperature-out excluding T=14 K.
+phi2,leave_one_temperature_out,omit_14K,aligned_amplitude_corr,0.999557235001646,0.999509835823186,0.996498666209275,0.999652845028155,Leave-one-temperature-out excluding T=14 K.
+phi2,leave_one_temperature_out,omit_16K,abs_cosine_to_full_mode,0.99999775245397,0.999865879294469,0.700283894723182,0.999999998050452,Leave-one-temperature-out excluding T=16 K.
+phi2,leave_one_temperature_out,omit_16K,aligned_amplitude_corr,0.999553433922592,0.999509835823186,0.996498666209275,0.999652845028155,Leave-one-temperature-out excluding T=16 K.
+phi2,leave_one_temperature_out,omit_18K,abs_cosine_to_full_mode,0.999994524402753,0.999865879294469,0.700283894723182,0.999999998050452,Leave-one-temperature-out excluding T=18 K.
+phi2,leave_one_temperature_out,omit_18K,aligned_amplitude_corr,0.999545567799546,0.999509835823186,0.996498666209275,0.999652845028155,Leave-one-temperature-out excluding T=18 K.
+phi2,leave_one_temperature_out,omit_20K,abs_cosine_to_full_mode,0.999992152982838,0.999865879294469,0.700283894723182,0.999999998050452,Leave-one-temperature-out excluding T=20 K.
+phi2,leave_one_temperature_out,omit_20K,aligned_amplitude_corr,0.999534637402862,0.999509835823186,0.996498666209275,0.999652845028155,Leave-one-temperature-out excluding T=20 K.
+phi2,leave_one_temperature_out,omit_22K,abs_cosine_to_full_mode,0.999992125741293,0.999865879294469,0.700283894723182,0.999999998050452,Leave-one-temperature-out excluding T=22 K.
+phi2,leave_one_temperature_out,omit_22K,aligned_amplitude_corr,0.999524778214287,0.999509835823186,0.996498666209275,0.999652845028155,Leave-one-temperature-out excluding T=22 K.
+phi2,leave_one_temperature_out,omit_24K,abs_cosine_to_full_mode,0.999024570050616,0.999865879294469,0.700283894723182,0.999999998050452,Leave-one-temperature-out excluding T=24 K.
+phi2,leave_one_temperature_out,omit_24K,aligned_amplitude_corr,0.999397006313838,0.999509835823186,0.996498666209275,0.999652845028155,Leave-one-temperature-out excluding T=24 K.
+phi2,leave_one_temperature_out,omit_26K,abs_cosine_to_full_mode,0.999010046027743,0.999865879294469,0.700283894723182,0.999999998050452,Leave-one-temperature-out excluding T=26 K.
+phi2,leave_one_temperature_out,omit_26K,aligned_amplitude_corr,0.999436119117492,0.999509835823186,0.996498666209275,0.999652845028155,Leave-one-temperature-out excluding T=26 K.
+phi2,leave_one_temperature_out,omit_28K,abs_cosine_to_full_mode,0.993157199081466,0.999865879294469,0.700283894723182,0.999999998050452,Leave-one-temperature-out excluding T=28 K.
+phi2,leave_one_temperature_out,omit_28K,aligned_amplitude_corr,0.998810251939259,0.999509835823186,0.996498666209275,0.999652845028155,Leave-one-temperature-out excluding T=28 K.
+phi2,leave_one_temperature_out,omit_30K,abs_cosine_to_full_mode,0.943710091465828,0.999865879294469,0.700283894723182,0.999999998050452,Leave-one-temperature-out excluding T=30 K.
+phi2,leave_one_temperature_out,omit_30K,aligned_amplitude_corr,0.997059054256229,0.999509835823186,0.996498666209275,0.999652845028155,Leave-one-temperature-out excluding T=30 K.
+phi2,leave_one_temperature_out,omit_32K,abs_cosine_to_full_mode,0.999291385686125,0.999865879294469,0.700283894723182,0.999999998050452,Leave-one-temperature-out excluding T=32 K.
+phi2,leave_one_temperature_out,omit_32K,aligned_amplitude_corr,0.999652845028155,0.999509835823186,0.996498666209275,0.999652845028155,Leave-one-temperature-out excluding T=32 K.
+phi2,leave_one_temperature_out,omit_34K,abs_cosine_to_full_mode,0.999999985791839,0.999865879294469,0.700283894723182,0.999999998050452,Leave-one-temperature-out excluding T=34 K.
+phi2,leave_one_temperature_out,omit_34K,aligned_amplitude_corr,0.999530067522303,0.999509835823186,0.996498666209275,0.999652845028155,Leave-one-temperature-out excluding T=34 K.
+phi2,subset_exclusion,exclude_transition,abs_cosine_to_full_mode,0.700283894723182,0.999865879294469,0.700283894723182,0.999999998050452,Subset fit excluding transition-flagged temperatures.
+phi2,subset_exclusion,exclude_transition,aligned_amplitude_corr,0.996498666209275,0.999509835823186,0.996498666209275,0.999652845028155,Subset fit excluding transition-flagged temperatures.
+phi2,subset_exclusion,exclude_pretransition,abs_cosine_to_full_mode,0.997545014808078,0.999865879294469,0.700283894723182,0.999999998050452,Subset fit using transition-flagged temperatures only.
+phi2,subset_exclusion,exclude_pretransition,aligned_amplitude_corr,0.999294105655992,0.999509835823186,0.996498666209275,0.999652845028155,Subset fit using transition-flagged temperatures only.
+phi3_diag,leave_one_temperature_out,omit_4K,abs_cosine_to_full_mode,0.991971858379823,0.998691731262156,0.342593786427378,0.999999738586733,Leave-one-temperature-out excluding T=4 K.
+phi3_diag,leave_one_temperature_out,omit_4K,aligned_amplitude_corr,0.99740902235635,0.999488284544598,0.930818842840475,0.999999888279634,Leave-one-temperature-out excluding T=4 K.
+phi3_diag,leave_one_temperature_out,omit_6K,abs_cosine_to_full_mode,0.997763094944478,0.998691731262156,0.342593786427378,0.999999738586733,Leave-one-temperature-out excluding T=6 K.
+phi3_diag,leave_one_temperature_out,omit_6K,aligned_amplitude_corr,0.999142456649952,0.999488284544598,0.930818842840475,0.999999888279634,Leave-one-temperature-out excluding T=6 K.
+phi3_diag,leave_one_temperature_out,omit_8K,abs_cosine_to_full_mode,0.999990371391112,0.998691731262156,0.342593786427378,0.999999738586733,Leave-one-temperature-out excluding T=8 K.
+phi3_diag,leave_one_temperature_out,omit_8K,aligned_amplitude_corr,0.999995731667583,0.999488284544598,0.930818842840475,0.999999888279634,Leave-one-temperature-out excluding T=8 K.
+phi3_diag,leave_one_temperature_out,omit_10K,abs_cosine_to_full_mode,0.999995109800286,0.998691731262156,0.342593786427378,0.999999738586733,Leave-one-temperature-out excluding T=10 K.
+phi3_diag,leave_one_temperature_out,omit_10K,aligned_amplitude_corr,0.999997620798641,0.999488284544598,0.930818842840475,0.999999888279634,Leave-one-temperature-out excluding T=10 K.
+phi3_diag,leave_one_temperature_out,omit_12K,abs_cosine_to_full_mode,0.999973087671234,0.998691731262156,0.342593786427378,0.999999738586733,Leave-one-temperature-out excluding T=12 K.
+phi3_diag,leave_one_temperature_out,omit_12K,aligned_amplitude_corr,0.999986824151002,0.999488284544598,0.930818842840475,0.999999888279634,Leave-one-temperature-out excluding T=12 K.
+phi3_diag,leave_one_temperature_out,omit_14K,abs_cosine_to_full_mode,0.99991687746796,0.998691731262156,0.342593786427378,0.999999738586733,Leave-one-temperature-out excluding T=14 K.
+phi3_diag,leave_one_temperature_out,omit_14K,aligned_amplitude_corr,0.999960602791575,0.999488284544598,0.930818842840475,0.999999888279634,Leave-one-temperature-out excluding T=14 K.
+phi3_diag,leave_one_temperature_out,omit_16K,abs_cosine_to_full_mode,0.999988609549717,0.998691731262156,0.342593786427378,0.999999738586733,Leave-one-temperature-out excluding T=16 K.
+phi3_diag,leave_one_temperature_out,omit_16K,aligned_amplitude_corr,0.999994972774874,0.999488284544598,0.930818842840475,0.999999888279634,Leave-one-temperature-out excluding T=16 K.
+phi3_diag,leave_one_temperature_out,omit_18K,abs_cosine_to_full_mode,0.999857424089815,0.998691731262156,0.342593786427378,0.999999738586733,Leave-one-temperature-out excluding T=18 K.
+phi3_diag,leave_one_temperature_out,omit_18K,aligned_amplitude_corr,0.999936946233062,0.999488284544598,0.930818842840475,0.999999888279634,Leave-one-temperature-out excluding T=18 K.
+phi3_diag,leave_one_temperature_out,omit_20K,abs_cosine_to_full_mode,0.999905163321238,0.998691731262156,0.342593786427378,0.999999738586733,Leave-one-temperature-out excluding T=20 K.
+phi3_diag,leave_one_temperature_out,omit_20K,aligned_amplitude_corr,0.999957297462669,0.999488284544598,0.930818842840475,0.999999888279634,Leave-one-temperature-out excluding T=20 K.
+phi3_diag,leave_one_temperature_out,omit_22K,abs_cosine_to_full_mode,0.999620367579833,0.998691731262156,0.342593786427378,0.999999738586733,Leave-one-temperature-out excluding T=22 K.
+phi3_diag,leave_one_temperature_out,omit_22K,aligned_amplitude_corr,0.999834112439244,0.999488284544598,0.930818842840475,0.999999888279634,Leave-one-temperature-out excluding T=22 K.
+phi3_diag,leave_one_temperature_out,omit_24K,abs_cosine_to_full_mode,0.986788791095128,0.998691731262156,0.342593786427378,0.999999738586733,Leave-one-temperature-out excluding T=24 K.
+phi3_diag,leave_one_temperature_out,omit_24K,aligned_amplitude_corr,0.994630739343207,0.999488284544598,0.930818842840475,0.999999888279634,Leave-one-temperature-out excluding T=24 K.
+phi3_diag,leave_one_temperature_out,omit_26K,abs_cosine_to_full_mode,0.992022287149324,0.998691731262156,0.342593786427378,0.999999738586733,Leave-one-temperature-out excluding T=26 K.
+phi3_diag,leave_one_temperature_out,omit_26K,aligned_amplitude_corr,0.996646157258377,0.999488284544598,0.930818842840475,0.999999888279634,Leave-one-temperature-out excluding T=26 K.
+phi3_diag,leave_one_temperature_out,omit_28K,abs_cosine_to_full_mode,0.994944025767018,0.998691731262156,0.342593786427378,0.999999738586733,Leave-one-temperature-out excluding T=28 K.
+phi3_diag,leave_one_temperature_out,omit_28K,aligned_amplitude_corr,0.998264368911843,0.999488284544598,0.930818842840475,0.999999888279634,Leave-one-temperature-out excluding T=28 K.
+phi3_diag,leave_one_temperature_out,omit_30K,abs_cosine_to_full_mode,0.98962244643299,0.998691731262156,0.342593786427378,0.999999738586733,Leave-one-temperature-out excluding T=30 K.
+phi3_diag,leave_one_temperature_out,omit_30K,aligned_amplitude_corr,0.996565457141523,0.999488284544598,0.930818842840475,0.999999888279634,Leave-one-temperature-out excluding T=30 K.
+phi3_diag,leave_one_temperature_out,omit_32K,abs_cosine_to_full_mode,0.580641169303786,0.998691731262156,0.342593786427378,0.999999738586733,Leave-one-temperature-out excluding T=32 K.
+phi3_diag,leave_one_temperature_out,omit_32K,aligned_amplitude_corr,0.97292710689996,0.999488284544598,0.930818842840475,0.999999888279634,Leave-one-temperature-out excluding T=32 K.
+phi3_diag,leave_one_temperature_out,omit_34K,abs_cosine_to_full_mode,0.999999738586733,0.998691731262156,0.342593786427378,0.999999738586733,Leave-one-temperature-out excluding T=34 K.
+phi3_diag,leave_one_temperature_out,omit_34K,aligned_amplitude_corr,0.999999888279634,0.999488284544598,0.930818842840475,0.999999888279634,Leave-one-temperature-out excluding T=34 K.
+phi3_diag,subset_exclusion,exclude_transition,abs_cosine_to_full_mode,0.342593786427378,0.998691731262156,0.342593786427378,0.999999738586733,Subset fit excluding transition-flagged temperatures.
+phi3_diag,subset_exclusion,exclude_transition,aligned_amplitude_corr,0.930818842840475,0.999488284544598,0.930818842840475,0.999999888279634,Subset fit excluding transition-flagged temperatures.
+phi3_diag,subset_exclusion,exclude_pretransition,abs_cosine_to_full_mode,0.98391229187882,0.998691731262156,0.342593786427378,0.999999738586733,Subset fit using transition-flagged temperatures only.
+phi3_diag,subset_exclusion,exclude_pretransition,aligned_amplitude_corr,0.998423083434906,0.999488284544598,0.930818842840475,0.999999888279634,Subset fit using transition-flagged temperatures only.
