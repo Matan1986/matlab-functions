@@ -1,0 +1,12 @@
+failure_id,trigger_gate_id,failure_mode_description,severity,required_action,blocks_full_canonical,blocks_production_release,blocks_advanced_analysis
+FM01,G01,Schema drift missing required columns in one or more point tables,HIGH,Stop publication fix producer mapping and regenerate tables,YES,YES,YES
+FM02,G02,Required fields missing beyond allowed NaN semantics,HIGH,Stop publication repair field population and rerun validation,YES,YES,YES
+FM03,G03,Row parity mismatch between RAW CLEAN DERIVED,HIGH,Stop publication diagnose row drop or duplication and enforce row preserving transform,YES,YES,YES
+FM04,G04,Duplicate immutable keys within a point table,HIGH,Stop publication enforce unique file_id_plus_row_index and rebuild table,YES,YES,YES
+FM05,G05,Float coordinate joins detected,HIGH,Stop publication refactor joins to immutable key only and rerun gates,YES,YES,YES
+FM06,G06,Clean to raw traceability incomplete,HIGH,Stop publication add missing traceability channels and diagnostics columns,YES,YES,YES
+FM07,G07,Smooth channel implicitly used as clean truth,MEDIUM,Block readiness until method provenance explicitly declares smooth usage or revert to clean channel,YES,YES,YES
+FM08,G08,Derived table reads raw channels directly,HIGH,Stop publication isolate derived computation to clean inputs only,YES,YES,YES
+FM09,G09,time_s treated as elapsed without explicit derived field,MEDIUM,Block production or advanced readiness until time_rel_s semantics are explicit,NO,YES,YES
+FM10,G10,Segmentation treated as cleaning semantics instead of annotation,MEDIUM,Block production or advanced readiness until segmentation role is corrected,NO,YES,YES
+FM11,G11,Observables missing provenance metadata,HIGH,Stop publication require source_columns aggregation_method definition and temperature_dependence,YES,YES,YES

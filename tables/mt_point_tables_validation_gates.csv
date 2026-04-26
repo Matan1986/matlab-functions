@@ -1,0 +1,12 @@
+gate_id,gate_name,scope,rule_definition,pass_criteria,failure_severity,blocks_full_canonical,blocks_production_release,blocks_advanced_analysis
+G01,schema_columns_present,all_tables,Every required column from mt_point_tables_schema contract exists in produced tables,All required columns present,HIGH,YES,YES,YES
+G02,required_fields_nonmissing,all_tables,Columns marked required YES must be populated according to contract except allowed NaN semantics for derived optional outputs,No missing required fields violating contract,HIGH,YES,YES,YES
+G03,row_parity_raw_clean_derived,point_tables,Row counts must match exactly across RAW CLEAN DERIVED,N_raw_equals_n_clean_and_n_clean_equals_n_derived,HIGH,YES,YES,YES
+G04,key_uniqueness,point_tables,Immutable key file_id_plus_row_index unique within each point table,No duplicate key rows,HIGH,YES,YES,YES
+G05,no_float_coordinate_joins,producer_logic,Joins performed only on file_id and row_index not on T_K H_Oe time_s,Join audit confirms immutable key only,HIGH,YES,YES,YES
+G06,clean_raw_traceability,mt_points_clean,Clean rows must carry M_emu_raw M_emu_clean and diagnostic trace fields enabling backtrace to raw,Traceability fields complete and consistent,HIGH,YES,YES,YES
+G07,smooth_not_clean_replacement,mt_points_clean_and_observables,M_emu_smooth cannot replace M_emu_clean unless explicitly declared by downstream method provenance,No implicit smooth replacement,MEDIUM,YES,YES,YES
+G08,derived_source_isolation,mt_points_derived,Derived computations consume only clean columns and explicit metadata columns present in clean table,No direct raw dependency,HIGH,YES,YES,YES
+G09,time_channel_assumption_check,raw_clean_derived,time_s treated as imported seconds channel and not implicitly elapsed,No implicit elapsed assumption without time_rel_s,MEDIUM,NO,YES,YES
+G10,segmentation_annotation_check,mt_points_clean,Segment fields are annotation layer and not part of cleaning transform semantics,Segmentation role documented and respected,MEDIUM,NO,YES,YES
+G11,observables_provenance_check,mt_observables,Each observable row includes source_columns aggregation_method definition and temperature_dependence,Observable provenance complete,HIGH,YES,YES,YES
