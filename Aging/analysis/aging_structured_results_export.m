@@ -3,7 +3,9 @@
 % Reuses the existing Aging pipeline stages and computes observables
 % directly from stage4/stage5 outputs, without relying on legacy summaries.
 
-clearvars -except preferredTpK tpTolK nCommonGrid;
+if ~(exist('AGING_EXPORT_SKIP_CLEAR', 'var') == 1 && isequal(AGING_EXPORT_SKIP_CLEAR, true))
+    clearvars -except preferredTpK tpTolK nCommonGrid AGING_EXPORT_SKIP_CLEAR;
+end
 clc;
 
 thisFile = mfilename('fullpath');

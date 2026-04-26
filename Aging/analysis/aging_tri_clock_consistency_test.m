@@ -66,15 +66,15 @@ figRecon = makeReconstructionFigure(factorDetails, factorTbl, cfg);
 reconPaths = save_run_figure(figRecon, 'reconstructed_vs_original_matrices_around_26K', runDir);
 close(figRecon);
 
-figDip = makeCollapseFigure(scenarioMap, 'tau_dip_native');
+figDip = makeCollapseFigure(scenarioMap, 'tau_dip_native', 'clock_alignment_tau_dip');
 dipPaths = save_run_figure(figDip, 'clock_alignment_tau_dip', runDir);
 close(figDip);
 
-figFm = makeCollapseFigure(scenarioMap, 'tau_fm_native');
+figFm = makeCollapseFigure(scenarioMap, 'tau_fm_native', 'clock_alignment_tau_FM');
 fmPaths = save_run_figure(figFm, 'clock_alignment_tau_FM', runDir);
 close(figFm);
 
-figLocal = makeCollapseFigure(scenarioMap, 'local_all');
+figLocal = makeCollapseFigure(scenarioMap, 'local_all', 'clock_alignment_local_clock');
 localPaths = save_run_figure(figLocal, 'clock_alignment_local_clock', runDir);
 close(figLocal);
 
@@ -850,7 +850,7 @@ function fig = makeAmplitudeObservableFigure(details, factorTbl, cfg)
 selected = details(ismember([details.Tp], cfg.selectedTpValues));
 selected = sortStructByTp(selected);
 
-fig = create_figure('Visible', 'off', 'Position', [2 2 21.5 7.5]);
+fig = create_figure('Visible', 'off', 'Position', [2 2 21.5 7.5], 'Name', 'amplitude_observable_alignment_around_26K');
 tlo = tiledlayout(fig, 1, numel(selected), 'TileSpacing', 'compact', 'Padding', 'compact');
 
 legendHandles = gobjects(0);
@@ -910,7 +910,7 @@ title(tlo, 'Rank-1 amplitude compared with scalar observables around 26 K');
 end
 
 function fig = makeFactorizationMetricFigure(factorTbl, cfg)
-fig = create_figure('Visible', 'off', 'Position', [2 2 22 7.2]);
+fig = create_figure('Visible', 'off', 'Position', [2 2 22 7.2], 'Name', 'factorization_metrics_vs_Tp');
 tlo = tiledlayout(fig, 1, 3, 'TileSpacing', 'compact', 'Padding', 'compact');
 
 ax1 = nexttile(tlo, 1);
@@ -973,7 +973,7 @@ if ~(isfinite(resLimit) && resLimit > 0)
     resLimit = mapLimit;
 end
 
-fig = create_figure('Visible', 'off', 'Position', [2 2 23.5 16.8]);
+fig = create_figure('Visible', 'off', 'Position', [2 2 23.5 16.8], 'Name', 'reconstructed_vs_original_matrices_around_26K');
 tlo = tiledlayout(fig, numel(selected), 3, 'TileSpacing', 'compact', 'Padding', 'compact');
 
 for i = 1:numel(selected)
@@ -1004,12 +1004,12 @@ end
 title(tlo, 'Original, reconstructed, and residual matrices around 26 K');
 end
 
-function fig = makeCollapseFigure(scenarioMap, scenarioName)
+function fig = makeCollapseFigure(scenarioMap, scenarioName, figBaseName)
 assert(isKey(scenarioMap, scenarioName), 'Missing collapse scenario: %s', scenarioName);
 scenario = scenarioMap(scenarioName);
 curveCount = numel(scenario.selected);
 
-fig = create_figure('Visible', 'off', 'Position', [2 2 18.8 8.2]);
+fig = create_figure('Visible', 'off', 'Position', [2 2 18.8 8.2], 'Name', figBaseName);
 ax = axes(fig);
 hold(ax, 'on');
 
@@ -1066,7 +1066,7 @@ end
 end
 
 function fig = makeDiagnosticFigure(collapseTbl, windowTbl, cfg)
-fig = create_figure('Visible', 'off', 'Position', [2 2 22.5 15.6]);
+fig = create_figure('Visible', 'off', 'Position', [2 2 22.5 15.6], 'Name', 'time_rescaling_diagnostics');
 tlo = tiledlayout(fig, 2, 2, 'TileSpacing', 'compact', 'Padding', 'compact');
 
 overlapNames = ["raw_overlap", "tau_dip_overlap", "tau_fm_overlap", "local_overlap"];

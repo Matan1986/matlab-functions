@@ -485,7 +485,7 @@ row.max_leave_one_out_rmse_delta_pct = dominance.max_impact_rmse_delta_pct;
 end
 
 function fig = makeRawFigure(validCurves, missingCurves, rawDiag, cfg)
-fig = create_figure('Visible', 'off', 'Position', cfg.rawFigurePosition);
+fig = create_figure('Visible', 'off', 'Position', cfg.rawFigurePosition, 'Name', 'fm_raw_vs_tw');
 ax = axes(fig);
 hold(ax, 'on');
 colors = lines(numel(validCurves));
@@ -519,7 +519,7 @@ annotation(fig, 'textbox', [0.12 0.02 0.72 0.11], 'String', sprintf(['Peak t_w s
 end
 
 function fig = makeRescaledFigure(curves, baseline, cfg)
-fig = create_figure('Visible', 'off', 'Position', cfg.rescaledFigurePosition);
+fig = create_figure('Visible', 'off', 'Position', cfg.rescaledFigurePosition, 'Name', 'fm_rescaled_vs_tw_over_tau_dip');
 tlo = tiledlayout(fig, 1, 2, 'TileSpacing', 'compact', 'Padding', 'compact');
 colors = lines(numel(curves));
 allTw = unique(collectAllTw(curves));
@@ -568,7 +568,7 @@ title(tlo, sprintf('Transferred Dip clock for FM: RMSE improvement %.1f%%, varia
 end
 
 function fig = makeTauFigure(tauTbl, cfg)
-fig = create_figure('Visible', 'off', 'Position', cfg.tauFigurePosition);
+fig = create_figure('Visible', 'off', 'Position', cfg.tauFigurePosition, 'Name', 'tau_dip_vs_Tp');
 ax = axes(fig);
 hold(ax, 'on');
 valid = isfinite(tauTbl.Tp) & isfinite(tauTbl.tau_estimate_seconds) & tauTbl.tau_estimate_seconds > 0;

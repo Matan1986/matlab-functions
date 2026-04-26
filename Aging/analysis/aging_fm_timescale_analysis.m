@@ -686,7 +686,7 @@ end
 
 function fig = makeRawFmFigure(curves, missingCurves, cfg)
 validCurves = curves([curves.has_fm]);
-fig = create_figure('Visible', 'off', 'Position', cfg.rawFigurePosition);
+fig = create_figure('Visible', 'off', 'Position', cfg.rawFigurePosition, 'Name', 'fm_vs_tw_by_Tp');
 ax = axes(fig);
 hold(ax, 'on');
 colors = lines(max(numel(validCurves), 1));
@@ -717,7 +717,7 @@ end
 end
 
 function fig = makeRescaledFmFigure(curves, baseline, fmCollapse, cfg)
-fig = create_figure('Visible', 'off', 'Position', cfg.rescaledFigurePosition);
+fig = create_figure('Visible', 'off', 'Position', cfg.rescaledFigurePosition, 'Name', 'fm_rescaled_vs_tw_over_tau_FM');
 tlo = tiledlayout(fig, 1, 2, 'TileSpacing', 'compact', 'Padding', 'compact');
 colors = lines(numel(curves));
 allTw = unique(collectAllTw(curves));
@@ -760,7 +760,7 @@ title(tlo, 'FM collapse under extracted tau_FM(T_p)');
 end
 
 function fig = makeFmTauFigure(fmTauTbl, cfg)
-fig = create_figure('Visible', 'off', 'Position', cfg.tauFigurePosition);
+fig = create_figure('Visible', 'off', 'Position', cfg.tauFigurePosition, 'Name', 'tau_FM_vs_Tp');
 ax = axes(fig);
 hold(ax, 'on');
 plot(ax, fmTauTbl.Tp, fmTauTbl.tau_logistic_half_seconds, '-o', 'Color', [0.00 0.45 0.74], 'MarkerFaceColor', [0.00 0.45 0.74], 'MarkerSize', 5.5, 'LineWidth', 2.0, 'DisplayName', 'Logistic fit in log(t_w)');
@@ -781,7 +781,7 @@ legend(ax, 'Location', 'eastoutside', 'FontSize', 10.5, 'Box', 'off');
 end
 
 function fig = makeTauComparisonFigure(fmTauTbl, dipTauTbl, comparison, cfg)
-fig = create_figure('Visible', 'off', 'Position', cfg.compareFigurePosition);
+fig = create_figure('Visible', 'off', 'Position', cfg.compareFigurePosition, 'Name', 'tau_FM_vs_tau_dip');
 tlo = tiledlayout(fig, 1, 2, 'TileSpacing', 'compact', 'Padding', 'compact');
 ax1 = nexttile(tlo, 1);
 hold(ax1, 'on');
