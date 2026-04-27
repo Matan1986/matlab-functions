@@ -1,0 +1,5 @@
+forbidden_item,source_file,expected_absent,observed_count,status,notes
+transition_width_candidate,tables/mt_observables.csv,TRUE,0,PASS,No matching observable_name
+transition_midpoint_candidate,tables/mt_observables.csv,TRUE,0,PASS,No matching observable_name
+segment_level_derivative_candidate_rows,tables/mt_observables.csv,TRUE,0,PASS,Stage 8.2 candidate rows use observable_variant=file_level segment_id=0 only
+affirmative_Tc_phase_critical_in_observable_name,tables/mt_observables.csv,TRUE,0,PASS,No observable_name asserting Tc/phase/critical as measured quantity

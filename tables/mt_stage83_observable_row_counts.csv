@@ -1,0 +1,6 @@
+observable_name,expected_count,observed_count,status,notes
+dM_dT_peak_abs_candidate,11,11,PASS,
+T_at_max_abs_dM_dT_candidate,11,11,PASS,
+dM_dT_quality_fraction_finite,11,11,PASS,
+dM_dT_quality_min_delta_T_K,11,11,PASS,
+dM_dT_quality_monotonic_T,11,11,PASS,
