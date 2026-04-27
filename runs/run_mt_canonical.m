@@ -193,6 +193,25 @@ try
     mtBasicSummaryVisualizationFiguresWritten = "NO";
     hAbsGtEpsOe = 1e-9;
 
+    stage82MethodStr = "CENTRAL_FINITE_DIFFERENCE_WITH_EDGE_ONE_SIDED";
+    nMinDerivCandidate = 5;
+    mtStage82DerivativeCandidatesImplemented = "NO";
+    mtStage82FileLevelOnly = "YES";
+    mtStage82SegmentLevelImplemented = "NO";
+    mtStage82WidthMidpointImplemented = "NO";
+    mtStage82RecomputeDerivativeDefault = "YES";
+    mtStage82InterpolationUsed = "NO";
+    mtStage82SmoothingUsed = "NO";
+    mtStage82TcClaimsAllowed = "NO";
+    mtStage82PhaseClaimsAllowed = "NO";
+
+    derivativeValidationTbl = table('Size', [0 8], ...
+        'VariableTypes', {'double','double','double','double','double','double','string','string'}, ...
+        'VariableNames', {'file_id','n_rows_scope','n_points_finite','strictly_monotonic_T_K','min_delta_T_K','dM_dT_fraction_finite','derivative_scope_status','block_reason'});
+    derivativeCandidateGateFailuresTbl = table('Size', [0 5], ...
+        'VariableTypes', {'string','string','string','string','string'}, ...
+        'VariableNames', {'gate_id','gate_name','severity','failure_mode_description','required_action'});
+
     importedOk = 0;
     importedFail = 0;
     timeWarningCount = 0;
@@ -765,8 +784,97 @@ try
                     'VariableNames', obsRows.Properties.VariableNames)];
             end
 
+            derivNotesBase = "stage82_candidate_only; method=" + string(stage82MethodStr) + "; source=M_emu_clean; indep=T_K; interp=NO; smooth=NO; recompute=YES; file_level_only=YES";
+            Tcol = fileRows.T_K(:);
+            Mcol = fileRows.M_emu_clean(:);
+            [tSort, ixSort] = sort(Tcol);
+            mSort = Mcol(ixSort);
+            nScope = numel(tSort);
+            nFiniteTm = sum(isfinite(Tcol) & isfinite(Mcol));
+            blockReasonDc = "";
+            qMonoNum = NaN;
+            qMinDt = NaN;
+            qFracFinite = NaN;
+            peakAbsVal = NaN;
+            tPeakVal = NaN;
+            qualPeakFlag = "BLOCKED";
+            qualFracFlag = "BLOCKED";
+            qualMinDtFlag = "BLOCKED";
+            qualMonoFlag = "BLOCKED";
+            scopeStatus = "BLOCKED";
+
+            if nScope < nMinDerivCandidate
+                blockReasonDc = "N_LT_NMIN";
+                qMonoNum = 0;
+                qFracFinite = 0;
+            elseif any(~isfinite(tSort)) || any(~isfinite(mSort))
+                blockReasonDc = "NONFINITE_T_OR_M";
+                qMonoNum = 0;
+                qFracFinite = 0;
+            else
+                dtStep = diff(tSort);
+                if isempty(dtStep)
+                    blockReasonDc = "NO_STEPS";
+                    qMonoNum = 0;
+                    qFracFinite = 0;
+                elseif any(dtStep <= 0)
+                    blockReasonDc = "T_K_NOT_STRICTLY_MONOTONIC_OR_NONPOSITIVE_DELTA";
+                    qMonoNum = 0;
+                    qMinDt = NaN;
+                    qFracFinite = 0;
+                else
+                    qMonoNum = 1;
+                    qMinDt = min(dtStep);
+                    nLoc = nScope;
+                    dMdT_loc = NaN(nLoc, 1);
+                    if nLoc >= 2
+                        dMdT_loc(1) = (mSort(2) - mSort(1)) / (tSort(2) - tSort(1));
+                        dMdT_loc(nLoc) = (mSort(nLoc) - mSort(nLoc - 1)) / (tSort(nLoc) - tSort(nLoc - 1));
+                    end
+                    for ii = 2:(nLoc - 1)
+                        dMdT_loc(ii) = (mSort(ii + 1) - mSort(ii - 1)) / (tSort(ii + 1) - tSort(ii - 1));
+                    end
+                    qFracFinite = sum(isfinite(dMdT_loc)) / max(nLoc, 1);
+                    absD = abs(dMdT_loc);
+                    [peakAbsVal, idxPk] = max(absD);
+                    tPeakVal = tSort(idxPk);
+                    qualPeakFlag = "OK";
+                    qualFracFlag = "OK";
+                    qualMinDtFlag = "OK";
+                    qualMonoFlag = "OK";
+                    scopeStatus = "OK";
+                    blockReasonDc = "";
+                end
+            end
+
+            if strcmp(scopeStatus, "BLOCKED")
+                derivativeCandidateGateFailuresTbl = [derivativeCandidateGateFailuresTbl; table("DGC_BLOCK", "derivative_candidate_file_scope", "MEDIUM", ...
+                    "file_id=" + string(fid) + "; " + blockReasonDc, "resolve_file_scope_T_K_M_clean_monotonicity_and_N_min", ...
+                    'VariableNames', {'gate_id','gate_name','severity','failure_mode_description','required_action'})];
+            end
+
+            derivativeValidationTbl = [derivativeValidationTbl; table(double(fid), double(nScope), double(nFiniteTm), double(qMonoNum), double(qMinDt), double(qFracFinite), string(scopeStatus), string(blockReasonDc), ...
+                'VariableNames', {'file_id','n_rows_scope','n_points_finite','strictly_monotonic_T_K','min_delta_T_K','dM_dT_fraction_finite','derivative_scope_status','block_reason'})];
+
+            obsRows = [obsRows; table("dM_dT_peak_abs_candidate", "file_level", double(fid), 0, "file", ...
+                "Stage 8.2 candidate max abs(dM/dT) recomputed from M_emu_clean vs T_K; not a transition claim", "mt_points_derived", "M_emu_clean,T_K", "max_abs_recomputed_dM_dT", "implicit_via_T", double(peakAbsVal), "emu_per_K", double(nScope), qualPeakFlag, derivNotesBase + "; block=" + string(blockReasonDc), ...
+                'VariableNames', obsRows.Properties.VariableNames)];
+            obsRows = [obsRows; table("T_at_max_abs_dM_dT_candidate", "file_level", double(fid), 0, "file", ...
+                "Stage 8.2 candidate T_K at argmax abs(dM/dT); not Tc claim", "mt_points_derived", "M_emu_clean,T_K", "T_at_argmax_abs_dM_dT", "explicit", double(tPeakVal), "K", double(nScope), qualPeakFlag, derivNotesBase + "; block=" + string(blockReasonDc), ...
+                'VariableNames', obsRows.Properties.VariableNames)];
+            obsRows = [obsRows; table("dM_dT_quality_fraction_finite", "file_level", double(fid), 0, "file", ...
+                "Stage 8.2 fraction of finite recomputed dM/dT samples in file scope", "mt_points_derived", "M_emu_clean,T_K", "fraction_finite", "none", double(qFracFinite), "1", double(nScope), qualFracFlag, derivNotesBase + "; block=" + string(blockReasonDc), ...
+                'VariableNames', obsRows.Properties.VariableNames)];
+            obsRows = [obsRows; table("dM_dT_quality_min_delta_T_K", "file_level", double(fid), 0, "file", ...
+                "Stage 8.2 minimum positive delta T_K along sorted curve", "mt_points_derived", "T_K", "min_positive_delta", "explicit", double(qMinDt), "K", double(nScope), qualMinDtFlag, derivNotesBase + "; block=" + string(blockReasonDc), ...
+                'VariableNames', obsRows.Properties.VariableNames)];
+            obsRows = [obsRows; table("dM_dT_quality_monotonic_T", "file_level", double(fid), 0, "file", ...
+                "Stage 8.2 strict monotonicity flag for sorted T_K (1=yes 0=no)", "mt_points_derived", "T_K", "strict_monotonic_after_sort", "explicit", double(qMonoNum), "flag", double(nScope), qualMonoFlag, derivNotesBase + "; block=" + string(blockReasonDc), ...
+                'VariableNames', obsRows.Properties.VariableNames)];
+
             observablesTbl = [observablesTbl; obsRows];
         end
+        mtStage82DerivativeCandidatesImplemented = "YES";
     end
 
     gNames = ["schema_columns_present","required_fields_nonmissing","row_parity_raw_clean_derived","key_uniqueness","no_float_coordinate_joins","clean_raw_traceability","smooth_not_clean_replacement","derived_source_isolation","time_channel_assumption_check","segmentation_annotation_check","observables_policy_and_provenance_check"]';
@@ -940,7 +1048,9 @@ try
     gDetails(10) = "segmentation_is_cleaning=" + string(segmentation_is_cleaning) + ", segment_source_populated=" + string(segment_source_populated);
 
     forbiddenNames = ["dM_dT_peak","transition_width","transition_midpoint","T_at_max_slope","M_norm","chi_mass","zfc_fcc_fcw_split","hysteresis_like","Tc_inferred","advanced_analysis"];
+    derivativeCandidateObsNames = ["dM_dT_peak_abs_candidate","T_at_max_abs_dM_dT_candidate","dM_dT_quality_fraction_finite","dM_dT_quality_min_delta_T_K","dM_dT_quality_monotonic_T"];
     allowedSummaryNames = ["row_count","T_K_summary","H_Oe_summary","M_emu_clean_summary","M_over_H_emu_per_Oe_summary"];
+    allowedSummaryNames = [allowedSummaryNames; derivativeCandidateObsNames];
     hasForbidden = false;
     if height(observablesTbl) > 0
         hasForbidden = any(ismember(observablesTbl.observable_name, forbiddenNames));
@@ -1001,6 +1111,7 @@ try
         'VariableNames', {'metric','value','notes'});
 
     allowedReviewNames = ["row_count","T_K_summary","H_Oe_summary","M_emu_clean_summary","M_over_H_emu_per_Oe_summary"];
+    allowedReviewNamesExt = [allowedReviewNames; derivativeCandidateObsNames];
     visForbiddenNames = ["dM_dT_peak","transition_width","transition_midpoint","T_at_max_slope","M_norm","chi_mass","zfc_fcc_fcw_split","hysteresis_like","Tc_inferred","advanced_analysis"];
     visDiagnosticGuard = "Diagnostic summary only - not valid for Tc/transition/critical/hysteresis interpretation.";
     preReviewGateReasons = strings(0,1);
@@ -1045,7 +1156,7 @@ try
         'VariableNames', {'observable_name','observable_variant','file_id','segment_id','segment_type','definition','source_table','source_columns','aggregation_method','temperature_dependence','value_numeric','value_unit','n_points_used','quality_flag','notes'});
     if height(observablesTbl) > 0
         visForbiddenPresent = any(ismember(observablesTbl.observable_name, visForbiddenNames));
-        visAllowedOnly = all(ismember(observablesTbl.observable_name, allowedReviewNames));
+        visAllowedOnly = all(ismember(observablesTbl.observable_name, allowedReviewNamesExt));
         visSourceAllowedOnly = all(observablesTbl.source_table == "mt_points_derived");
         visObsRows = observablesTbl(ismember(observablesTbl.observable_name, allowedReviewNames), :);
         visMhRows = visObsRows.observable_name == "M_over_H_emu_per_Oe_summary";
@@ -1160,6 +1271,8 @@ try
     observablesPath = fullfile(tablesDir, 'mt_observables.csv');
     pointGateSummaryPath = fullfile(tablesDir, 'mt_point_tables_validation_summary.csv');
     pointGateFailuresPath = fullfile(tablesDir, 'mt_point_tables_gate_failures.csv');
+    derivativeValidationPath = fullfile(tablesDir, 'mt_derivative_candidate_validation.csv');
+    derivativeCandidateGateFailuresPath = fullfile(tablesDir, 'mt_derivative_candidate_gate_failures.csv');
     visReviewPath = fullfile(tablesDir, 'mt_basic_summary_visualization_review.csv');
     visStatusPath = fullfile(tablesDir, 'mt_basic_summary_visualization_status.csv');
 
@@ -1173,6 +1286,8 @@ try
     writetable(observablesTbl, observablesPath);
     writetable(gateSummaryTbl, pointGateSummaryPath);
     writetable(gateFailuresTbl, pointGateFailuresPath);
+    writetable(derivativeValidationTbl, derivativeValidationPath);
+    writetable(derivativeCandidateGateFailuresTbl, derivativeCandidateGateFailuresPath);
     writetable(reviewTbl, visReviewPath);
     writetable(reviewStatusTbl, visStatusPath);
 
@@ -1235,6 +1350,16 @@ try
         "MT_BASIC_SUMMARY_VISUALIZATION_FIGURES_WRITTEN"; ...
         "MT_READY_FOR_PRODUCTION_CANONICAL_RELEASE"; ...
         "MT_READY_FOR_ADVANCED_ANALYSIS"; ...
+        "MT_STAGE82_DERIVATIVE_CANDIDATES_IMPLEMENTED"; ...
+        "MT_STAGE82_FILE_LEVEL_ONLY"; ...
+        "MT_STAGE82_SEGMENT_LEVEL_IMPLEMENTED"; ...
+        "MT_STAGE82_WIDTH_MIDPOINT_IMPLEMENTED"; ...
+        "MT_STAGE82_RECOMPUTE_DERIVATIVE_DEFAULT"; ...
+        "MT_STAGE82_METHOD"; ...
+        "MT_STAGE82_INTERPOLATION_USED"; ...
+        "MT_STAGE82_SMOOTHING_USED"; ...
+        "MT_STAGE82_TC_CLAIMS_ALLOWED"; ...
+        "MT_STAGE82_PHASE_CLAIMS_ALLOWED"; ...
         "DIAGNOSTIC_ONLY"];
 
     valueCol = [ ...
@@ -1272,6 +1397,16 @@ try
         mtBasicSummaryVisualizationFiguresWritten; ...
         mtReadyForProductionRelease; ...
         mtReadyForAdvancedAnalysis; ...
+        mtStage82DerivativeCandidatesImplemented; ...
+        mtStage82FileLevelOnly; ...
+        mtStage82SegmentLevelImplemented; ...
+        mtStage82WidthMidpointImplemented; ...
+        mtStage82RecomputeDerivativeDefault; ...
+        string(stage82MethodStr); ...
+        mtStage82InterpolationUsed; ...
+        mtStage82SmoothingUsed; ...
+        mtStage82TcClaimsAllowed; ...
+        mtStage82PhaseClaimsAllowed; ...
         "YES"];
 
     canonicalSummary = table(metricCol, valueCol, ...
@@ -1338,6 +1473,8 @@ try
     fprintf(fidReport, '- tables/mt_observables.csv\n');
     fprintf(fidReport, '- tables/mt_point_tables_validation_summary.csv\n');
     fprintf(fidReport, '- tables/mt_point_tables_gate_failures.csv\n');
+    fprintf(fidReport, '- tables/mt_derivative_candidate_validation.csv\n');
+    fprintf(fidReport, '- tables/mt_derivative_candidate_gate_failures.csv\n');
     fprintf(fidReport, '- tables/mt_basic_summary_visualization_review.csv\n');
     fprintf(fidReport, '- tables/mt_basic_summary_visualization_status.csv\n');
     fprintf(fidReport, '- tables/mt_canonical_run_summary.csv\n');
