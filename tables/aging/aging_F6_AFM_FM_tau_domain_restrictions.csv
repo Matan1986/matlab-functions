@@ -1,0 +1,8 @@
+restriction_id,restriction_text
+F5_PARTIAL_ONLY,"Comparison authorized only as PARTIAL per F5; not full-stack alignment."
+SHARED_TP_ONLY,"Quantities computed only for F5 shared selected Tp rows."
+NO_TP_14_18_34,"Tp 14, 18, and 34 excluded from this comparison by contract."
+NO_EXTRAPOLATION,"No extrapolation beyond Tp = 22, 26, 30."
+NO_MECHANISM,"Not interpreted as mechanism validation."
+NO_CROSS_MODULE,"No Switching, Relaxation, or MT comparison."
+LEVEL_2_CAP,"Maximum claim level for this step: LEVEL_2 within-Aging descriptive/quantitative only."
