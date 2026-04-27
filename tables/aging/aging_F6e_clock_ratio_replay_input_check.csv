@@ -1,0 +1,8 @@
+input_id,absolute_path,exists
+dip_tau_results_old,C:\Dev\matlab-functions\results_old\aging\runs\run_2026_03_12_223709_aging_timescale_extraction\tables\tau_vs_Tp.csv,YES
+fm_tau_results_old,C:\Dev\matlab-functions\results_old\aging\runs\run_2026_03_13_013634_aging_fm_timescale_analysis\tables\tau_FM_vs_Tp.csv,YES
+bridge_aligned_results_old,C:\Dev\matlab-functions\results_old\cross_experiment\runs\run_2026_03_13_122404_aging_timescale_bridge\tables\aligned_dynamical_timescale_dataset.csv,YES
+recovered_table_clock_ratio,C:\Dev\matlab-functions\results_old\aging\runs\run_2026_03_14_074613_aging_clock_ratio_analysis\tables\table_clock_ratio.csv,YES
+recovered_clock_ratio_data,C:\Dev\matlab-functions\results_old\aging\runs\run_2026_03_16_023652_aging_clock_ratio_temperature_scaling\tables\clock_ratio_data.csv,YES
+recovered_temperature_scaling_metrics,C:\Dev\matlab-functions\results_old\aging\runs\run_2026_03_16_023652_aging_clock_ratio_temperature_scaling\tables\aging_clock_ratio_temperature_scaling.csv,YES
+primary_default_dip_shadow_check,C:\Dev\matlab-functions\results\aging\runs\run_2026_03_12_223709_aging_timescale_extraction\tables\tau_vs_Tp.csv,NO

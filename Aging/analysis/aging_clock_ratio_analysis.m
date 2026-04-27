@@ -61,19 +61,23 @@ observablesPath = exportClockRatioObservables(runDir, run.run_id, clockTbl, sour
 
 figDip = makeTauTemperatureFigure(clockTbl.Tp, clockTbl.tau_dip_seconds, cfg.colors.dip, ...
     '\tau_{dip} (s)', 'Dip-sector clock vs stopping temperature', cfg.crossoverTemperatureK);
+set(figDip, 'Name', 'tau_dip_vs_Tp');
 figDipPaths = save_run_figure(figDip, 'tau_dip_vs_Tp', runDir);
 close(figDip);
 
 figFm = makeTauTemperatureFigure(clockTbl.Tp, clockTbl.tau_FM_seconds, cfg.colors.fm, ...
     '\tau_{FM} (s)', 'FM-sector clock vs stopping temperature', cfg.crossoverTemperatureK);
+set(figFm, 'Name', 'tau_FM_vs_Tp');
 figFmPaths = save_run_figure(figFm, 'tau_FM_vs_Tp', runDir);
 close(figFm);
 
 figRatio = makeRatioFigure(clockTbl, cfg);
+set(figRatio, 'Name', 'ratio_R_vs_Tp');
 figRatioPaths = save_run_figure(figRatio, 'ratio_R_vs_Tp', runDir);
 close(figRatio);
 
 figLogLog = makeLogLogFigure(clockTbl, fitStats, cfg);
+set(figLogLog, 'Name', 'loglog_clock_relation');
 figLogLogPaths = save_run_figure(figLogLog, 'loglog_clock_relation', runDir);
 close(figLogLog);
 

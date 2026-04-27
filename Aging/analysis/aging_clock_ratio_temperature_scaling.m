@@ -81,10 +81,12 @@ metricsTablePath = save_run_table(metricsTbl, ...
 
 % --- Step 7: generate figures ---
 figRvsT = makeRvsTFigure(dataTbl, cfg);
+set(figRvsT, 'Name', 'R_vs_T');
 figRvsTpaths = save_run_figure(figRvsT, 'R_vs_T', runDir);
 close(figRvsT);
 
 figLogLog = makeLogLogFigure(dataTbl, fitResult, cfg);
+set(figLogLog, 'Name', 'logR_vs_logT');
 figLogLogPaths = save_run_figure(figLogLog, 'logR_vs_logT', runDir);
 close(figLogLog);
 
