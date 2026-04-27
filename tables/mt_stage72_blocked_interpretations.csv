@@ -1,0 +1,8 @@
+blocked_id,interpretation,why_blocked,required_future_stage
+B1,Tc inference from Stage 7.1 summaries,Derivative transition candidate family is not yet implemented or validated,Derivative transition candidate implementation and validation
+B2,Transition temperature claim from current MT summaries,Current outputs are descriptive basic summaries with explicit non-claim guard boundaries,Derivative transition candidate implementation and validation
+B3,Phase or critical behavior claim,No advanced feature family or claim-grade evidence pathway exists yet,Advanced analysis pathway after prerequisite feature implementations
+B4,Hysteresis or memory interpretation from current artifacts,Segment protocol comparison pathway is not implemented,Segment ZFC FCC FCW implementation and validation
+B5,Cross-module mechanism conclusion,Cross-module alignment/testing is deferred and MT readiness remains partial,Cross-module alignment design after richer MT features then controlled testing
+B6,Production canonical release inference,FULL_CANONICAL_DATA_PRODUCT remains PARTIAL and production readiness flag is NO,Production release review after required implementation and validation stages
+B7,Advanced analysis readiness inference,MT_READY_FOR_ADVANCED_ANALYSIS remains NO and richer feature families are incomplete,Advanced analysis review after prerequisite feature implementations

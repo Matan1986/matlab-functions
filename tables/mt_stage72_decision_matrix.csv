@@ -1,0 +1,9 @@
+criterion,derivative_path,mass_provenance_path,segment_path,cross_module_alignment_path,figures_path,notes
+Scientific_feature_unlock,High,Medium,Medium,Low,Low,Derivative path is first major MT feature-family expansion after basic summaries.
+Dependence_on_current_allowed_inputs,High,Medium,Low,Low,High,Current Stage 7.1 descriptive baseline most directly motivates derivative next-step design.
+Near_term_implementation_readiness,Medium,Medium,Low,Low,High,Figures are easiest but lower scientific unlock.
+Risk_of_premature_claim_pressure,Medium,Low,Medium,High,Low,Cross-module alignment now risks implicit claim pressure before MT enrichment.
+Relevance_to_future_temperature_regime_alignment,High,Medium,Medium,Medium,Low,Derivative candidates most directly enrich temperature-structure representation.
+Need_for_new_policy_and_gates,High,High,High,Medium,Medium,All nontrivial paths require explicit claim-boundary guards.
+Support_for_cross_module_readiness_later,High,Medium,Medium,Medium,Low,Cross-module readiness should be built after richer MT features exist.
+Priority_recommendation,Primary,Secondary_conditional,Deferred,Deferred,Secondary_optional,Primary derivative then either mass provenance or basic figures depending on immediate objective.
