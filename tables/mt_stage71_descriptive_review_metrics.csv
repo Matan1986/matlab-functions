@@ -1,0 +1,34 @@
+metric,value,source_artifact,notes
+review_run_id,run_2026_04_26_145743_mt_real_data_diagnostic,mt_canonical_run_summary.csv,Source run reviewed for Stage 7.1.
+execution_success,YES,mt_canonical_run_summary.csv,DAT_FILE_COUNT=11 IMPORTED_OK=11 IMPORTED_FAIL=0.
+g01_to_g11_all_pass,YES,mt_point_tables_validation_summary.csv,All listed gates G01 through G11 are PASS.
+gate_failure_count,0,mt_point_tables_gate_failures.csv,Header-only table indicates no recorded gate failures.
+basic_visualization_status,PASS,mt_basic_summary_visualization_status.csv,MT_BASIC_SUMMARY_VISUALIZATION_GATE_SUMMARY=PASS.
+basic_visualization_forbidden_content,NO,mt_basic_summary_visualization_status.csv,MT_BASIC_SUMMARY_VISUALIZATION_FORBIDDEN_CONTENT=NO.
+basic_visualization_figures_written,NO,mt_basic_summary_visualization_status.csv,Figures remain blocked at this stage.
+full_canonical_data_product,PARTIAL,mt_canonical_run_summary.csv,Readiness state remains partial.
+ready_for_production_release,NO,mt_canonical_run_summary.csv,Production release remains blocked.
+ready_for_advanced_analysis,NO,mt_canonical_run_summary.csv,Advanced analysis remains blocked.
+file_group_count,11,mt_observables.csv,Distinct file_id groups in allowed observables.
+row_count_total,6719,mt_observables.csv,Sum of row_count file-level values.
+row_count_mean,610.818182,mt_observables.csv,Mean row_count across files.
+row_count_min,604,mt_observables.csv,Smallest row_count at file_id=9.
+row_count_max,615,mt_observables.csv,Largest row_count at file_id=1.
+t_k_global_min,1.9976412653923,mt_observables.csv,Minimum T_K_summary file_level_min at file_id=10.
+t_k_global_max,99.9886131286621,mt_observables.csv,Maximum T_K_summary file_level_max at file_id=1.
+t_k_span_min,97.986690223217,mt_observables.csv,Smallest T_K_summary file_level_span at file_id=11.
+t_k_span_max,97.9903435111046,mt_observables.csv,Largest T_K_summary file_level_span at file_id=3.
+h_oe_nominal_min,499.677978516,mt_observables.csv,Minimum H_Oe_summary file_level_nominal at file_id=1.
+h_oe_nominal_max,69999.890625,mt_observables.csv,Maximum H_Oe_summary file_level_nominal at file_id=11.
+h_oe_span_min,0,mt_observables.csv,Minimum H_Oe_summary file_level_span across files.
+h_oe_span_max,0,mt_observables.csv,Maximum H_Oe_summary file_level_span across files.
+h_oe_nonzero_span_file_count,0,mt_observables.csv,No file shows nonzero within-file H span.
+m_emu_clean_global_min,9.43841010817514e-05,mt_observables.csv,Minimum M_emu_clean_summary file_level_min at file_id=1.
+m_emu_clean_global_max,0.0183641038723991,mt_observables.csv,Maximum M_emu_clean_summary file_level_max at file_id=11.
+m_emu_clean_span_min,4.81486062014486e-05,mt_observables.csv,Smallest M_emu_clean_summary span at file_id=1.
+m_emu_clean_span_max,0.0046933404101658,mt_observables.csv,Largest M_emu_clean_summary span at file_id=11.
+m_over_h_nonzero_field_guard,APPLIED,mt_observables.csv,notes field declares abs(H_Oe)>H_ABS_GT_EPS_Oe with H_ABS_GT_EPS_Oe=1e-09.
+m_over_h_global_min,1.88889855346707e-07,mt_observables.csv,Minimum M_over_H_emu_per_Oe_summary file_level_min at file_id=1.
+m_over_h_global_max,2.88951566293379e-07,mt_observables.csv,Maximum M_over_H_emu_per_Oe_summary file_level_max at file_id=2.
+m_over_h_span_min,6.70478249074521e-08,mt_observables.csv,Smallest M_over_H_emu_per_Oe_summary span at file_id=11.
+m_over_h_span_max,9.63592719144476e-08,mt_observables.csv,Largest M_over_H_emu_per_Oe_summary span at file_id=1.
