@@ -95,3 +95,40 @@ These are the **smallest** sequencing steps toward legacy parity **without** bro
 | `READY_TO_IMPLEMENT_STAGE2` | **YES** — gated reconstruction/residual maps are the next visualization spine after extending Stage 1 panels |
 
 Duplicate machine-readable verdict rows: **`VERDICT`** stage in `tables/switching_canonical_analysis_plan_expanded.csv`.
+
+---
+
+## Decision-gated scientific roadmap (strict)
+
+This roadmap is **additive** and stricter than the legacy-family checklist above. Legacy parity remains tracked, but scientific progression is now controlled by **decision gates A-G**. A later phase cannot produce canonical claims if an upstream gate fails.
+
+### Governing rules (hard constraints)
+
+1. **Observable mapping is provisional** until **Mode admissibility audit (Gate C)** passes.
+2. **Dynamic plateau-drift mapping is conditional**, not default; run only after explicit trigger conditions in Gate F.
+3. **Reconstruction success is not collapse success**; map-level residual fit does not replace collapse hierarchy gate metrics.
+4. **Old width collapse is diagnostic only**, never canonical truth.
+5. **Phi1/Phi2 cannot be called physical modes** until admissibility gates pass (Gate C, then Gate D classification).
+6. **No claims/context/snapshot updates** before **Interpretation lock (Gate G)**.
+
+### Phases and decision gates
+
+| Phase | Scientific question | Required inputs | Forbidden inputs | Required artifacts | Status flags | Pass/fail gate | Blocking dependencies | Agent mode | Parallel? |
+|------|----------------------|-----------------|------------------|--------------------|--------------|----------------|-----------------------|------------|-----------|
+| **A. Current canonical truth freeze** | What is the frozen canonical evidence boundary for this run lineage? | Canonical run-manifested outputs (`switching_canonical_S_long.csv`, hierarchy CSVs, gate-status table, run metadata sidecars) | Width/full-scaling collapse tables as truth; legacy alignment cores as canonical sources | Frozen input manifest, canonical scope note, gate inventory table | `TRUTH_FREEZE_DONE`, `INPUT_MANIFEST_LOCKED` | **PASS** if frozen set is complete and reproducible; **FAIL** if any canonical source ambiguity remains | None (entry phase) | **Narrow** | **No** |
+| **B. Backbone validity audit** | Does PT/CDF backbone explain the baseline structure on frozen canonical tensors? | Frozen set from A; backbone terms (`S_model_pt_percent`, residual decomposition columns) | Any width-based scaling; ungated replacement backbones | Backbone validity memo, error-vs-T backbone table, failure taxonomy | `BACKBONE_AUDIT_DONE`, `BACKBONE_VALID` | **PASS** if backbone validity criteria met over canonical domain; **FAIL** blocks physical mode claims | A pass required | **Narrow** | **Yes** (by temperature/regime slices) |
+| **C. Mode admissibility audit** | Are Phi1/Phi2 mathematically stable and empirically admissible as model modes? | A freeze + B outputs + hierarchy dominance/error tables + mode-amplitude diagnostics | Any physical interpretation labels for Phi1/Phi2 before gate pass | Admissibility report, admissibility scorecard, reject/accept decision log | `MODE_ADMISSIBILITY_AUDITED`, `MODE_ADMISSIBLE` | **PASS** if admissibility thresholds pass; **FAIL** forces non-physical labeling and blocks D-G physical claims | A and B pass required | **Narrow** | **Partial** (subtests parallel, final decision serial) |
+| **D. Mode relationship / mechanism classification** | If admissible, what relationship class (complementary/competitive/orthogonal/etc.) is supported? | C-pass admissible modes + hierarchy and residual rank structure tables | Mechanistic claims without C pass; width/alignment-derived mechanism evidence | Mechanism classification matrix, evidence map, uncertainty register | `MECHANISM_CLASSIFIED`, `MECHANISM_CONFIDENCE_SET` | **PASS** if one bounded class is supported with uncertainty; **FAIL** reverts to descriptive-only framing | C pass required | **Broad** | **Yes** |
+| **E. Static observable mapping** | Which static observables map to canonical mode/backbone structure at fixed conditions? | C pass (required), D outputs (if available), canonical observables + S_long crosswalks | Final observable claims before C pass; snapshot/context publication updates | Provisional-to-final observable mapping table, crosswalk note, exclusions list | `OBSERVABLE_MAPPING_PROVISIONAL`, `OBSERVABLE_MAPPING_FINAL` | **PASS** only if C has passed and mapping quality checks pass; **FAIL** keeps provisional-only status | C pass required; D recommended | **Broad** | **Yes** |
+| **F. Conditional dynamic plateau-drift mapping** | Under explicit triggers, how do plateau/drift dynamics relate to admitted modes and backbone? | A-E outputs + transition/regime tables + explicit trigger declaration | Running as default phase; dynamic claims when trigger criteria unmet | Conditional dynamic appendix, trigger record, drift/plateau diagnostics | `DYNAMIC_MAPPING_TRIGGERED`, `DYNAMIC_MAPPING_COMPLETE` | **PASS** if trigger criteria documented and diagnostics are coherent; **FAIL** means dynamic branch is skipped or quarantined | E pass required; trigger required | **Broad** | **Yes** (conditional branch workstreams) |
+| **G. Interpretation lock / paper boundary** | What exact claims are locked, and what remains out-of-scope for paper/context updates? | All prior passed gates, uncertainty registers, provenance bundle | Any claims/context/snapshot updates before lock; un-gated evidence | Interpretation lock file, claims matrix, publication boundary statement | `INTERPRETATION_LOCKED`, `CLAIMS_UPDATE_ALLOWED` | **PASS** locks claim set and allows updates; **FAIL** keeps update embargo | A-E required; F only if triggered | **Narrow** | **No** |
+
+### Decision-gated status rows (required)
+
+| Status | Value |
+|--------|-------|
+| `DECISION_GATED_ROADMAP_DEFINED` | **YES** |
+| `MODE_ADMISSIBILITY_REQUIRED_BEFORE_FINAL_OBSERVABLES` | **YES** |
+| `BACKBONE_VALIDITY_REQUIRED_BEFORE_MODE_PHYSICS` | **YES** |
+| `DYNAMIC_MAPPING_CONDITIONAL` | **YES** |
+| `CLAIMS_UPDATE_BLOCKED_UNTIL_INTERPRETATION_LOCK` | **YES** |
