@@ -1,0 +1,7 @@
+Tp,exclusion_category,exclusion_detail
+14,EXCLUDED_FROM_PAIRWISE,AFM physical tau present; FM branch missing or no FM physical tau for this Tp.
+18,EXCLUDED_BOTH_FAILED,Neither channel produced physical tau at this Tp per F4A/F4B failure tables.
+22,IN_SHARED_DOMAIN,Both AFM and FM physical tau selected; eligible for constrained comparison.
+26,IN_SHARED_DOMAIN,Both AFM and FM physical tau selected; eligible for constrained comparison.
+30,IN_SHARED_DOMAIN,Both AFM and FM physical tau selected; eligible for constrained comparison.
+34,EXCLUDED_FROM_PAIRWISE,AFM physical tau present; FM branch missing or no FM physical tau for this Tp.

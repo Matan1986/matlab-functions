@@ -1,0 +1,6 @@
+claim_level,definition
+LEVEL_0,Bookkeeping inventory of which Tp have AFM/FM physical tau.
+LEVEL_1,Descriptive side-by-side listing on shared Tp only.
+LEVEL_2,Quantitative within-Aging comparison on shared selected Tp only; no mechanism claim.
+LEVEL_3,Mechanism-supporting Aging claim not authorized by F5.
+LEVEL_4,Cross-module mechanism claim not authorized.
