@@ -1,0 +1,4 @@
+Tp,tau_FM_physical_canon_replay,selected_model,n_points,r2_primary,selection_status,selection_note
+22,625726477.464033,single_exponential_approach_primary,4,0.919845407058831,SELECTED,Passed tw-domain and fit-quality gates
+26,2674.06849631512,single_exponential_approach_primary,4,0.995748480175219,SELECTED,Passed tw-domain and fit-quality gates
+30,5830.05587173932,single_exponential_approach_primary,3,1,SELECTED,Passed tw-domain and fit-quality gates
