@@ -1,0 +1,12 @@
+file_id,risk_class,sorting_by_T_K_interleaves_segments,sorting_by_T_K_interleaves_T_blocks,duplicate_T_across_segments_or_blocks,stage82_peak_scope_risk,required_action,notes
+1,UNSAFE_TRACE_MIXING,NO,YES,NO,HIGH,NEEDS_TRACE_LEVEL_RECOMPUTE,"segment_id column does not indicate multiple traces (always 0); sorting by T_K pairs adjacent ranks across different row-order monotonic-T legs—file-level Stage 8.2 ordering can stitch legs."
+2,UNSAFE_TRACE_MIXING,NO,YES,NO,HIGH,NEEDS_TRACE_LEVEL_RECOMPUTE,"Same structural signal as file 1 for this diagnostic bundle."
+3,UNSAFE_TRACE_MIXING,NO,YES,NO,HIGH,NEEDS_TRACE_LEVEL_RECOMPUTE,"Same structural signal as file 1 for this diagnostic bundle."
+4,UNSAFE_TRACE_MIXING,NO,YES,NO,HIGH,NEEDS_TRACE_LEVEL_RECOMPUTE,"Nine monotonic legs; T_K sort crosses leg boundaries."
+5,UNSAFE_TRACE_MIXING,NO,YES,NO,HIGH,NEEDS_TRACE_LEVEL_RECOMPUTE,"Same structural signal as file 1 for this diagnostic bundle."
+6,UNSAFE_TRACE_MIXING,NO,YES,NO,HIGH,NEEDS_TRACE_LEVEL_RECOMPUTE,"Same structural signal as file 1 for this diagnostic bundle."
+7,UNSAFE_TRACE_MIXING,NO,YES,NO,HIGH,NEEDS_TRACE_LEVEL_RECOMPUTE,"Nine monotonic legs; T_K sort crosses leg boundaries."
+8,UNSAFE_TRACE_MIXING,NO,YES,NO,HIGH,NEEDS_TRACE_LEVEL_RECOMPUTE,"Same structural signal as file 1 for this diagnostic bundle."
+9,UNSAFE_TRACE_MIXING,NO,YES,NO,HIGH,NEEDS_TRACE_LEVEL_RECOMPUTE,"Same structural signal as file 1 for this diagnostic bundle."
+10,UNSAFE_TRACE_MIXING,NO,YES,NO,HIGH,NEEDS_TRACE_LEVEL_RECOMPUTE,"Same structural signal as file 1 for this diagnostic bundle."
+11,UNSAFE_TRACE_MIXING,NO,YES,NO,HIGH,NEEDS_TRACE_LEVEL_RECOMPUTE,"Same structural signal as file 1 for this diagnostic bundle."

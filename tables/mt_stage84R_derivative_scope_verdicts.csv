@@ -1,0 +1,9 @@
+verdict_key,verdict_value,notes
+TRACE_MIXING_RISK,YES,"Every file shows multiple row-order monotonic-T_K legs while Stage 8.2 sorts all rows by T_K within file_id; consecutive T-sorted pairs can span different legs."
+SAFE_TO_INTERPRET_STAGE82_DERIVATIVES,NO,"Interpretation remains blocked for file-level sorted-T_K derivative candidates pending trace-safe scope."
+STAGE82_DERIVATIVE_SCOPE_STATUS,FILE_LEVEL_TECHNICAL_ONLY,"mt_derivative_candidate_validation.csv reports OK finite-difference gates; scope is not asserted safe for physics-style interpretation across temperature sweeps."
+DERIVATIVE_SCOPE_SHOULD_BE,file_id_plus_trace_or_segment,"Recompute or restate candidates within monotonic legs or explicit protocol/segment identifiers before interpretive use."
+MT_STAGE84R_SEGMENT_DISCRIMINATION_IN_DERIVED,INSUFFICIENT,"segment_id unique count is 1 and segment_type is only 'unknown' in mt_points_derived.csv; no segment_source column in this table."
+PER_FILE_TECHNICAL_VALIDITY,TECHNICALLY_VALID_FILE_LEVEL,"All eleven file_ids: derivative_scope_status=OK in mt_derivative_candidate_validation.csv from the same run."
+PER_FILE_INTERPRETATION_STATUS,NOT_SAFE_FOR_INTERPRETATION,"Aligned with UNSAFE_TRACE_MIXING in mt_stage84R_trace_mixing_risk.csv for all file_id values."
+NEXT_STEP,STAGE85_REDESIGN_REQUIRED,"TRACE_MIXING_RISK=YES triggers trace/segment-scoped redesign before interpretive derivative review."

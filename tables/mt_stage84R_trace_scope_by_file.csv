@@ -1,0 +1,12 @@
+file_id,n_rows,n_unique_segment_id,n_unique_segment_type,n_unique_segment_source,segment_id_list,segment_type_list,segment_source_list,n_time_monotonic_blocks,n_T_K_monotonic_blocks,time_reset_or_gap_flag,T_direction_change_flag,preliminary_trace_count_estimate,notes
+1,615,1,1,0,0,unknown,(no segment_source column in mt_points_derived.csv),1,7,NO,YES,7,"Row-order T_K reverses direction multiple times (7 monotonic legs). time_s increases monotonically on consecutive rows (one time-ordered run). Segment fields do not split traces."
+2,614,1,1,0,0,unknown,(no segment_source column in mt_points_derived.csv),1,5,NO,YES,5,"Same pattern: single segment_id/type in DERIVED; 5 row-order monotonic T_K legs; time_s strictly increasing between consecutive rows."
+3,614,1,1,0,0,unknown,(no segment_source column in mt_points_derived.csv),1,5,NO,YES,5,"Same pattern as file 2."
+4,608,1,1,0,0,unknown,(no segment_source column in mt_points_derived.csv),1,9,NO,YES,9,"Largest row-order monotonic-leg count in this run (9); segment metadata still single-valued in DERIVED."
+5,614,1,1,0,0,unknown,(no segment_source column in mt_points_derived.csv),1,7,NO,YES,7,"Seven monotonic T legs in acquisition order."
+6,613,1,1,0,0,unknown,(no segment_source column in mt_points_derived.csv),1,7,NO,YES,7,"Seven monotonic T legs in acquisition order."
+7,611,1,1,0,0,unknown,(no segment_source column in mt_points_derived.csv),1,9,NO,YES,9,"Nine monotonic T legs; single segment_id in DERIVED."
+8,610,1,1,0,0,unknown,(no segment_source column in mt_points_derived.csv),1,7,NO,YES,7,"Seven monotonic T legs in row order."
+9,604,1,1,0,0,unknown,(no segment_source column in mt_points_derived.csv),1,5,NO,YES,5,"Five monotonic T legs."
+10,609,1,1,0,0,unknown,(no segment_source column in mt_points_derived.csv),1,7,NO,YES,7,"Seven monotonic T legs."
+11,607,1,1,0,0,unknown,(no segment_source column in mt_points_derived.csv),1,5,NO,YES,5,"Five monotonic T legs."
