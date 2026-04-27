@@ -1,385 +1,320 @@
 %% RUN_RELAXATION_CANONICAL
-% Canonical runnable script (no interactive, no debug)
+% Curve-first Relaxation creation-layer entrypoint (R4).
+% No scalar canonical observable is produced in this script.
 
 clear; clc;
 
-% === CONFIG ===
 cfg = struct();
+scriptName = 'run_relaxation_canonical.m';
+creationContract = 'CURVE_FIRST';
+maxPointsPerTrace = 500;
 
 experiment_name = 'relaxation_canonical';
 run = createRunContext(experiment_name, struct());
-disp('CHECKPOINT: after createRunContext');
-try
 if ~isfield(run, 'dir') || isempty(run.dir)
     run.dir = run.run_dir;
 end
 
-% run_relaxation_canonical - Minimal canonical wrapper for Relaxation v3
-% 
-% Purpose: orchestrate Relaxation analysis under explicit config control
-% for audit readiness. Produces audit-ready output bundles and explicitly
-% records all key choices.
-%
-% Execution: tools/run_matlab_safe.bat "path/to/run_relaxation_canonical.m"
-%
-% This is a PURE SCRIPT (no local defs). All logic is inline.
+execution_status = "FAILED";
+failure_summary = "";
 
-%% ======================================================================
-%% REPO ROOT DETECTION
-%% ======================================================================
-
-current_dir = pwd;
-temp_dir = current_dir;
-repoRoot = '';
-for level = 1:15
-    if exist(fullfile(temp_dir, 'README.md'), 'file') && ...
-       exist(fullfile(temp_dir, 'Aging'), 'dir') && ...
-       exist(fullfile(temp_dir, 'Switching'), 'dir')
-        repoRoot = temp_dir;
-        break;
-    end
-    parent_dir = fileparts(temp_dir);
-    if strcmp(parent_dir, temp_dir)
-        break;
-    end
-    temp_dir = parent_dir;
-end
-
-if isempty(repoRoot)
-    error('Could not detect repo root - README.md not found');
-end
-
-%% ======================================================================
-%% PATH SETUP
-%% ======================================================================
-
-addpath(fullfile(repoRoot, 'Aging', 'utils'));
-addpath(fullfile(repoRoot, 'Relaxation ver3'));
-addpath(fullfile(repoRoot, 'General ver2'));
-addpath(fullfile(repoRoot, 'Tools ver1'));
-
-%% ======================================================================
-%% USER CONFIGURATION (AUDIT ENTRY POINT)
-%% ======================================================================
-
-dataDir = 'L:\My Drive\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\MG 119 M2 in plane along long edge relax aging\Relaxation TRM';
-if isempty(dataDir)
-    error('dataDir must be explicitly provided. No fallback allowed.');
-end
-
-%% ======================================================================
-%% CONFIG SETUP (CANONICAL DEFAULTS)
-%% ======================================================================
-
-% Start with defaults from helper
-config = relaxation_config_helper(cfg);
-
-%% ======================================================================
-%% RUN CONTEXT SETUP
-%% ======================================================================
-
-runDir = run.dir;
-
-if ~isfolder(runDir)
-    mkdir(runDir);
-end
-
-outDir = fullfile(run.dir, 'tables');
-if ~exist(outDir, 'dir')
-    mkdir(outDir);
-end
-
-logPath = run.log_path;
-fprintf('Relaxation canonical run directory:\n%s\n', runDir);
-
-%% ======================================================================
-%% DATA LOADING (DELEGATED TO EXISTING HELPERS)
-%% ======================================================================
-
-disp('CHECKPOINT: before data loading');
-try
-    [fileList, temps, fields, types, colors, mass] = ...
-        getFileList_relaxation(dataDir, config.color_scheme);
-    disp('CHECKPOINT: after file list');
-    assert(~isempty(fileList), 'File list is empty');
-    
-    fileListLower = lower(string(fileList));
-    containsTRM = any(contains(fileListLower, 'trm'));
-    containsIRM = any(contains(fileListLower, 'irm'));
-    
-    [Time_table, Temp_table, Field_table, Moment_table, massHeader] = ...
-        importFiles_relaxation(dataDir, fileList, config.normalize_by_mass, false);
-    disp('CHECKPOINT: after data read');
-    assert(~isempty(Moment_table), 'Data is empty after load');
-    
-    if ~isnan(massHeader)
-        mass = massHeader;
-    end
-    
-    nfiles = numel(Time_table);
-    fprintf('Loaded %d files\n', nfiles);
-    
-catch ME
-    fid = fopen(logPath, 'a');
-    fprintf(fid, '[ERROR] Data loading failed: %s\n', ME.message);
-    fclose(fid);
-    rethrow(ME);
-end
-
-%% ======================================================================
-%% UNIT CONVERSION (BOHAR MAGNETON)
-%% ======================================================================
-
-if config.use_bohar_units
-    x_Co = 1/3;
-    m_mol = 58.9332/3 + 180.948 + 2*32.066;
-    muB = 9.274e-21;
-    NA = 6.022e23;
-    convFactor = m_mol / (NA * muB * x_Co);
-    
-    for i = 1:numel(Moment_table)
-        Moment_table{i} = Moment_table{i} * convFactor;
-    end
-end
-
-%% ======================================================================
-%% RELAXATION FITTING (MAIN ANALYSIS)
-%% ======================================================================
-
-disp('CHECKPOINT: before processing');
-fprintf('\nStarting relaxation fitting...\n');
-
-fitParams = struct();
-fitParams.betaBoost = config.beta_boost;
-fitParams.tauBoost = config.tau_boost;
-fitParams.timeWeight = config.time_weight;
-fitParams.timeWeightFactor = config.time_weight_factor;
-fitParams.debugFit = false;
-
-allFits = table();
-branch_usage = struct('field_based', 0, 'derivative_fallback', 0);
+num_input_files = 0;
+num_loaded_traces = 0;
+num_failed_traces = 0;
+num_valid_creation_curves = 0;
 
 try
-    allFits = fitAllRelaxations(Time_table, Moment_table, Temp_table, Field_table, ...
-        false, config.field_threshold_Oe, fitParams, ...
-        0, 0, config.abs_threshold, config.slope_threshold, ...
-        fileList, config.model_family);
-    
-    nFits = height(allFits);
-    fprintf('Completed %d fits\n', nFits);
-    
-catch ME
-    fid = fopen(logPath, 'a');
-    fprintf(fid, '[ERROR] Fitting failed: %s\n', ME.message);
+    %% ==================================================================
+    %% REPO ROOT + PATH SETUP
+    %% ==================================================================
+    current_dir = pwd;
+    temp_dir = current_dir;
+    repoRoot = '';
+    for level = 1:15
+        if exist(fullfile(temp_dir, 'README.md'), 'file') && ...
+           exist(fullfile(temp_dir, 'Aging'), 'dir') && ...
+           exist(fullfile(temp_dir, 'Switching'), 'dir')
+            repoRoot = temp_dir;
+            break;
+        end
+        parent_dir = fileparts(temp_dir);
+        if strcmp(parent_dir, temp_dir)
+            break;
+        end
+        temp_dir = parent_dir;
+    end
+    if isempty(repoRoot)
+        error('Could not detect repo root - README.md not found');
+    end
+
+    addpath(fullfile(repoRoot, 'Aging', 'utils'));
+    addpath(fullfile(repoRoot, 'Relaxation ver3'));
+
+    %% ==================================================================
+    %% USER CONFIG
+    %% ==================================================================
+    dataDir = 'L:\My Drive\Quantum materials lab\Analysis Lab measurments\Magnetic Intercalated TMD\Co1_3TaS2\MG 119\MG 119 M2 in plane along long edge relax aging\Relaxation TRM';
+    if isempty(dataDir) || exist(dataDir, 'dir') ~= 7
+        error('dataDir must exist and be explicitly provided: %s', dataDir);
+    end
+    config = relaxation_config_helper(cfg);
+
+    %% ==================================================================
+    %% RUN DIR
+    %% ==================================================================
+    runDir = run.dir;
+    if ~isfolder(runDir), mkdir(runDir); end
+    tablesDir = fullfile(runDir, 'tables');
+    if ~isfolder(tablesDir), mkdir(tablesDir); end
+    reportsDir = fullfile(runDir, 'reports');
+    if ~isfolder(reportsDir), mkdir(reportsDir); end
+
+    %% ==================================================================
+    %% LOADER INPUTS (RAW TRACE SOURCE OF TRUTH)
+    %% ==================================================================
+    [fileList, ~, ~, ~, ~, ~, traceListing] = getFileList_relaxation(dataDir, config.color_scheme);
+    num_input_files = numel(fileList);
+    if num_input_files == 0
+        error('No input files discovered by getFileList_relaxation.');
+    end
+
+    loadOpts = struct('run_id', run.run_id, 'n_min_points', 3, 'traceListing', traceListing);
+    [Time_table, ~, ~, Moment_table, ~, loaderAudit] = ...
+        importFiles_relaxation(dataDir, fileList, config.normalize_by_mass, false, loadOpts);
+
+    manifestT = loaderAudit.manifest;
+    metricsT = loaderAudit.metrics;
+    writetable(manifestT, fullfile(tablesDir, 'relaxation_raw_trace_manifest.csv'));
+    writetable(metricsT, fullfile(tablesDir, 'relaxation_raw_trace_metrics.csv'));
+
+    loaderStatus = string(manifestT.loader_status);
+    num_loaded_traces = sum(loaderStatus == "LOADED");
+    num_failed_traces = sum(loaderStatus ~= "LOADED");
+    if num_loaded_traces == 0
+        error('No LOADED traces available for curve-first outputs.');
+    end
+
+    %% ==================================================================
+    %% CURVE SAMPLES (BOUNDED, DETERMINISTIC)
+    %% ==================================================================
+    sampleRows = table();
+    samplePolicyLabel = "UNIFORM_INDEX_MAX500_NON_AUTHORITATIVE_NORM";
+    curveSampleTableName = "relaxation_curve_samples.csv";
+
+    for i = 1:height(manifestT)
+        if loaderStatus(i) ~= "LOADED"
+            continue;
+        end
+        if i > numel(Time_table) || i > numel(Moment_table)
+            continue;
+        end
+        t = Time_table{i};
+        m = Moment_table{i};
+        if isempty(t) || isempty(m)
+            continue;
+        end
+        t = t(:);
+        m = m(:);
+        n = numel(t);
+        if n == 0
+            continue;
+        end
+
+        k = min(maxPointsPerTrace, n);
+        if k == n
+            idx = (1:n)';
+        else
+            idx = unique(round(linspace(1, n, k)))';
+            if idx(end) ~= n
+                idx(end) = n;
+            end
+        end
+
+        mNorm = nan(size(idx));
+        den = m(1) - m(end);
+        if abs(den) > 1e-12
+            mNorm = (m(idx) - m(end)) ./ den;
+        end
+
+        tmp = table( ...
+            repmat(string(manifestT.trace_id{i}), numel(idx), 1), ...
+            (1:numel(idx))', ...
+            idx, ...
+            t(idx), ...
+            m(idx), ...
+            mNorm, ...
+            repmat(samplePolicyLabel, numel(idx), 1), ...
+            'VariableNames', {'trace_id', 'sample_index', 'original_index', ...
+            'time', 'moment', 'moment_normalized', 'sample_policy'});
+        sampleRows = [sampleRows; tmp]; %#ok<AGROW>
+    end
+    writetable(sampleRows, fullfile(tablesDir, curveSampleTableName));
+
+    %% ==================================================================
+    %% CURVE QUALITY
+    %% ==================================================================
+    signal_valid = isfinite(metricsT.delta_M) & (metricsT.n_points > 0);
+    timebase_valid = logical(metricsT.time_monotonic) & (metricsT.nonpositive_dt_count == 0);
+    curve_valid = (loaderStatus == "LOADED") & signal_valid & timebase_valid;
+    num_valid_creation_curves = sum(curve_valid);
+
+    quality_flags = strings(height(metricsT), 1);
+    for i = 1:height(metricsT)
+        flags = strings(0, 1);
+        if loaderStatus(i) ~= "LOADED"
+            flags(end+1) = "LOADER_FAILED"; %#ok<AGROW>
+        end
+        if ~signal_valid(i)
+            flags(end+1) = "SIGNAL_INVALID"; %#ok<AGROW>
+        end
+        if ~timebase_valid(i)
+            flags(end+1) = "TIMEBASE_INVALID"; %#ok<AGROW>
+        end
+        if metricsT.duplicate_time_count(i) > 0
+            flags(end+1) = "HAS_DUPLICATES"; %#ok<AGROW>
+        end
+        if isempty(flags)
+            quality_flags(i) = "OK";
+        else
+            quality_flags(i) = strjoin(flags, ';');
+        end
+    end
+
+    qualityT = table( ...
+        string(metricsT.trace_id), metricsT.n_points, metricsT.duration, metricsT.delta_M, ...
+        metricsT.std_M, logical(metricsT.time_monotonic), metricsT.duplicate_time_count, ...
+        metricsT.nonpositive_dt_count, logical(signal_valid), logical(timebase_valid), ...
+        logical(curve_valid), quality_flags, ...
+        'VariableNames', {'trace_id', 'n_points', 'duration', 'delta_M', 'std_M', ...
+        'time_monotonic', 'duplicate_time_count', 'nonpositive_dt_count', ...
+        'signal_valid', 'timebase_valid', 'curve_valid', 'quality_flags'});
+    writetable(qualityT, fullfile(tablesDir, 'relaxation_curve_quality.csv'));
+
+    %% ==================================================================
+    %% CURVE INDEX
+    %% ==================================================================
+    curve_status = repmat("SKIPPED_FAILED", height(manifestT), 1);
+    curve_status(curve_valid) = "CREATED";
+
+    curve_sample_file_or_table = strings(height(manifestT), 1);
+    curve_sample_file_or_table(curve_valid) = curveSampleTableName;
+
+    is_creation_curve = curve_valid;
+
+    temperature = nan(height(manifestT), 1);
+    if ismember('table_median_T_K', metricsT.Properties.VariableNames)
+        temperature = metricsT.table_median_T_K;
+    end
+    parsed_temperature = manifestT.parsed_temperature_K;
+
+    field_condition = strings(height(manifestT), 1);
+    for i = 1:height(manifestT)
+        if isfinite(manifestT.parsed_field_Oe(i))
+            field_condition(i) = sprintf('FC_%g_Oe', manifestT.parsed_field_Oe(i));
+        else
+            field_condition(i) = "UNKNOWN_FIELD";
+        end
+    end
+
+    indexT = table( ...
+        string(manifestT.trace_id), manifestT.file_index, string(manifestT.file_name), ...
+        temperature, parsed_temperature, field_condition, metricsT.n_points, ...
+        string(manifestT.loader_status), string(manifestT.failure_reason), ...
+        curve_status, curve_sample_file_or_table, logical(is_creation_curve), ...
+        'VariableNames', {'trace_id', 'file_index', 'file_name', 'temperature', ...
+        'parsed_temperature', 'field_condition', 'n_points', 'loader_status', ...
+        'failure_reason', 'curve_status', 'curve_sample_file_or_table', ...
+        'is_creation_curve'});
+    writetable(indexT, fullfile(tablesDir, 'relaxation_curve_index.csv'));
+
+    %% ==================================================================
+    %% CREATION STATUS + REPORT
+    %% ==================================================================
+    curve_outputs_written = ...
+        exist(fullfile(tablesDir, 'relaxation_raw_trace_manifest.csv'), 'file') == 2 && ...
+        exist(fullfile(tablesDir, 'relaxation_raw_trace_metrics.csv'), 'file') == 2 && ...
+        exist(fullfile(tablesDir, 'relaxation_curve_index.csv'), 'file') == 2 && ...
+        exist(fullfile(tablesDir, 'relaxation_curve_samples.csv'), 'file') == 2 && ...
+        exist(fullfile(tablesDir, 'relaxation_curve_quality.csv'), 'file') == 2;
+
+    creationStatus = table( ...
+        "CURVE_FIRST", "NO", "NO", "NO", "NO", "YES", "NO", "NO", ...
+        string(curve_outputs_written), string(num_valid_creation_curves > 0), ...
+        'VariableNames', {'CREATION_CONTRACT', 'SCALAR_CANONICAL_OUTPUT', ...
+        'FIT_TAU_BETA_CANONICAL', 'LOG_SLOPE_CANONICAL', 'HALF_TIME_CANONICAL', ...
+        'RAW_TRACE_SOURCE', 'PRECOMPUTED_INPUTS_USED', 'ROOT_OUTPUTS_WRITTEN', ...
+        'CURVE_OUTPUTS_WRITTEN', 'READY_FOR_R5_REPLAY_DECISION'});
+    writetable(creationStatus, fullfile(tablesDir, 'relaxation_creation_status.csv'));
+
+    reportPath = fullfile(reportsDir, 'relaxation_canonical_curve_first_report.md');
+    reportLines = {
+        '# Relaxation Canonical Curve-First Run'
+        ''
+        sprintf('- Run ID: `%s`', run.run_id)
+        sprintf('- Run directory: `%s`', runDir)
+        sprintf('- Data source: `%s`', dataDir)
+        sprintf('- Creation contract: `%s`', creationContract)
+        ''
+        '## Input/Loader Summary'
+        sprintf('- Input files discovered: %d', num_input_files)
+        sprintf('- Loaded traces: %d', num_loaded_traces)
+        sprintf('- Failed traces: %d', num_failed_traces)
+        sprintf('- Valid creation curves: %d', num_valid_creation_curves)
+        ''
+        '## Canonical Policy'
+        '- Scalar canonical output: NO'
+        '- Fit tau/beta canonical: NO'
+        '- Log-slope canonical: NO'
+        '- Half-time canonical: NO'
+        '- Precomputed inputs used: NO'
+        '- Root outputs written: NO'
+        ''
+        '## Run-Scoped Outputs'
+        '- `tables/relaxation_raw_trace_manifest.csv`'
+        '- `tables/relaxation_raw_trace_metrics.csv`'
+        '- `tables/relaxation_curve_index.csv`'
+        '- `tables/relaxation_curve_samples.csv`'
+        '- `tables/relaxation_curve_quality.csv`'
+        '- `tables/relaxation_creation_status.csv`'
+        '- `execution_status.csv`'
+        ''
+        'Diagnostic fit summaries are intentionally omitted in this curve-first R4 path.'
+        };
+    fid = fopen(reportPath, 'w');
+    if fid < 0
+        error('Could not write report: %s', reportPath);
+    end
+    for i = 1:numel(reportLines)
+        fprintf(fid, '%s\n', reportLines{i});
+    end
     fclose(fid);
-    rethrow(ME);
-end
 
-%% ======================================================================
-%% AUDIT OUTPUT BUNDLE CONSTRUCTION
-%% ======================================================================
-
-auditData = struct();
-
-% Inputs
-auditData.raw_source_identifier = dataDir;
-auditData.n_files_loaded = nfiles;
-auditData.n_files_fit = nFits;
-auditData.contains_trm = containsTRM;
-auditData.contains_irm = containsIRM;
-
-% Config used (9 key parameters + supplementary)
-auditData.config = config;
-
-% Output handles (primary deliverables)
-auditData.fit_table = allFits;
-auditData.fit_table_path = fullfile(outDir, 'relaxation_results.csv');
-writetable(allFits, auditData.fit_table_path);
-
-% Branch identity explicit
-auditData.branch_identity = 'core_fit_pipeline';
-auditData.window_detection_strategy = config.fit_window_mode;
-auditData.model_selection_strategy = config.model_family;
-if strcmpi(config.model_family, 'compare')
-    auditData.model_selection_criterion = config.model_selection_criterion;
-else
-    auditData.model_selection_criterion = 'N/A (single model only)';
-end
-
-% Canonical summary observables
-if ~isempty(allFits)
-    auditData.n_good_fits = sum(allFits.R2 >= 0.90, 'omitnan');
-    auditData.n_no_relax = sum(isnan(allFits.tau), 'omitnan');
-    auditData.median_tau = nanmedian(allFits.tau);
-    auditData.median_beta = nanmedian(allFits.n);
-    auditData.median_R2 = nanmedian(allFits.R2);
-else
-    auditData.n_good_fits = 0;
-    auditData.n_no_relax = 0;
-    auditData.median_tau = NaN;
-    auditData.median_beta = NaN;
-    auditData.median_R2 = NaN;
-end
-
-% Status flags
-auditData.execution_status = 'SUCCESS';
-auditData.data_loaded_ok = ~isempty(Moment_table);
-auditData.fits_produced_ok = ~isempty(allFits);
-auditData.audit_bundle_complete = true;
-
-% Time-origin rule used
-auditData.time_origin_rule = config.time_origin_mode;
-
-% Window rule used
-auditData.window_rule = config.fit_window_mode;
-
-%% ======================================================================
-%% WRITE AUDIT OUTPUT FILES
-%% ======================================================================
-
-disp('CHECKPOINT: before output write');
-% 1. Save fit table (already done above)
-
-% 2. Save config snapshot
-configPath = fullfile(runDir, 'config_snapshot.m');
-fid = fopen(configPath, 'w');
-if fid < 0
-    error('could not write config snapshot');
-end
-fprintf(fid, '%%%% CONFIG SNAPSHOT - %s\n', datetime('now'));
-fprintf(fid, '%%%% This file documents all choices made for this relaxation canonical run\n\n');
-fprintf(fid, 'cfg = struct();\n\n');
-fprintf(fid, '%%%% === 9 KEY AUDIT PARAMETERS ===\n');
-fprintf(fid, 'cfg.time_origin_mode = ''%s'';\n', config.time_origin_mode);
-fprintf(fid, 'cfg.fit_window_mode = ''%s'';\n', config.fit_window_mode);
-fprintf(fid, 'cfg.baseline_mode = ''%s'';\n', config.baseline_mode);
-fprintf(fid, 'cfg.interpolation_mode = ''%s'';\n', config.interpolation_mode);
-fprintf(fid, 'cfg.smoothing_mode = ''%s'';\n', config.smoothing_mode);
-fprintf(fid, 'cfg.derivative_mode = ''%s'';\n', config.derivative_mode);
-fprintf(fid, 'cfg.model_family = ''%s'';\n', config.model_family);
-fprintf(fid, 'cfg.model_selection_criterion = ''%s'';\n', config.model_selection_criterion);
-fprintf(fid, 'cfg.no_relax_threshold_mode = ''%s'';\n', config.no_relax_threshold_mode);
-fprintf(fid, '\n%%%% === SUPPLEMENTARY NUMERIC PARAMETERS ===\n');
-fprintf(fid, 'cfg.field_threshold_Oe = %.2f;\n', config.field_threshold_Oe);
-fprintf(fid, 'cfg.derivative_fallback_fraction = %.2f;\n', config.derivative_fallback_fraction);
-fprintf(fid, 'cfg.abs_threshold = %.2e;\n', config.abs_threshold);
-fprintf(fid, 'cfg.slope_threshold = %.2e;\n', config.slope_threshold);
-fclose(fid);
-
-% 3. Save audit summary table
-summaryPath = fullfile(outDir, 'audit_summary.csv');
-summaryT = table();
-summaryT.parameter = {
-    'execution_status';
-    'n_files_loaded';
-    'n_files_fit';
-    'n_good_fits';
-    'n_no_relax';
-    'median_tau';
-    'median_beta';
-    'median_R2';
-    'model_family';
-    'model_selection_criterion';
-    'window_mode';
-    'time_origin_mode';
-    'data_source'
-};
-summaryT.value = {
-    auditData.execution_status;
-    num2str(auditData.n_files_loaded);
-    num2str(auditData.n_files_fit);
-    num2str(auditData.n_good_fits);
-    num2str(auditData.n_no_relax);
-    num2str(auditData.median_tau);
-    num2str(auditData.median_beta);
-    num2str(auditData.median_R2);
-    config.model_family;
-    auditData.model_selection_criterion;
-    config.fit_window_mode;
-    config.time_origin_mode;
-    dataDir
-};
-writetable(summaryT, summaryPath);
-
-% 4. Write run manifest (standard Aging infrastructure)
-manifestPath = fullfile(runDir, 'run_manifest.json');
-outputsList = {
-    auditData.fit_table_path;
-    configPath;
-    summaryPath;
-    logPath
-};
-manifest = struct('outputs', {outputsList}, 'audit_ready', true);
-jsonStr = jsonencode(manifest);
-fid = fopen(manifestPath, 'w');
-if fid < 0
-    error('failed to write manifest');
-end
-fprintf(fid, '%s', jsonStr);
-fclose(fid);
-
-% 5. Write execution status artifact
-statusPath = fullfile(runDir, 'execution_status.csv');
-status = table("OK", 'VariableNames', {'status'});
-writetable(status, statusPath);
-
-% 6. Add run_dir_pointer for infrastructure consistency
-runDirPointerPath = fullfile(repoRoot, 'run_dir_pointer.txt');
-fidp = fopen(runDirPointerPath, 'w');
-if fidp < 0
-    error('failed to write run_dir_pointer');
-end
-nw = fprintf(fidp, '%s', runDir);
-fclose(fidp);
-if nw <= 0
-    error('run_dir_pointer write failed');
-end
-
-%% ======================================================================
-%% EXECUTION SUMMARY
-%% ======================================================================
-
-fprintf('\n');
-fprintf('===== RELAXATION CANONICAL RUN COMPLETE =====\n');
-fprintf('Run ID: %s\n', run.run_id);
-fprintf('Run dir: %s\n', runDir);
-fprintf('\nAUDIT SUMMARY:\n');
-fprintf('  Data source: %s\n', dataDir);
-fprintf('  Files loaded: %d\n', auditData.n_files_loaded);
-fprintf('  Files fit: %d\n', auditData.n_files_fit);
-fprintf('  Good fits (R2 >= 0.90): %d\n', auditData.n_good_fits);
-fprintf('  No-relax curves: %d\n', auditData.n_no_relax);
-fprintf('\nCONFIG USED:\n');
-fprintf('  time_origin_mode: %s\n', config.time_origin_mode);
-fprintf('  fit_window_mode: %s\n', config.fit_window_mode);
-fprintf('  model_family: %s\n', config.model_family);
-fprintf('  model_selection_criterion: %s\n', auditData.model_selection_criterion);
-fprintf('  window rule: %s\n', config.fit_window_mode);
-fprintf('\nOUTPUT FILES:\n');
-fprintf('  fit_table: %s\n', auditData.fit_table_path);
-fprintf('  config_snapshot: %s\n', configPath);
-fprintf('  audit_summary: %s\n', summaryPath);
-fprintf('  run_manifest: %s\n', manifestPath);
-fprintf('  execution_status: %s\n', statusPath);
-fprintf('\n');
-
-    disp('CHECKPOINT: end of script');
-    execution_status = 'SUCCESS';
+    %% ==================================================================
+    %% EXECUTION STATUS
+    %% ==================================================================
+    execution_status = "SUCCESS";
+    failure_summary = "";
 
 catch ME
-    execution_status = 'FAILED';
-
-    % PRINT error to console
+    execution_status = "FAILED";
+    failure_summary = string(ME.message);
+    try
+        fid = fopen(fullfile(run.run_dir, 'error_report.txt'), 'w');
+        if fid >= 0
+            fprintf(fid, '%s\n', getReport(ME, 'extended'));
+            fclose(fid);
+        end
+    catch
+    end
     disp('=== MATLAB ERROR ===');
     disp(getReport(ME, 'extended'));
-
-    % WRITE error to run folder
-    error_file = fullfile(run.run_dir, 'error_report.txt');
-    fid = fopen(error_file, 'w');
-    fprintf(fid, '%s\n', getReport(ME, 'extended'));
-    fclose(fid);
 end
 
-status_file = fullfile(run.run_dir, 'execution_status.csv');
-T = table({execution_status}, 'VariableNames', {'status'});
-writetable(T, status_file);
+statusT = table( ...
+    string(execution_status), string(run.run_id), string(scriptName), string(creationContract), ...
+    num_input_files, num_loaded_traces, num_failed_traces, num_valid_creation_curves, ...
+    string(failure_summary), ...
+    'VariableNames', {'status', 'run_id', 'script', 'creation_contract', ...
+    'num_input_files', 'num_loaded_traces', 'num_failed_traces', ...
+    'num_valid_creation_curves', 'failure_summary'});
+writetable(statusT, fullfile(run.run_dir, 'execution_status.csv'));
