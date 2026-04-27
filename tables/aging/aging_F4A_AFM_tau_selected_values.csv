@@ -1,0 +1,6 @@
+"Tp","tau_AFM_physical_canon_replay","selected_model","n_points","r2_primary","selection_status","selection_note"
+"14","80","single_exponential_approach_primary","4","0.844976246253189","SELECTED","Passed tw-domain and fit-quality gates"
+"22","20000","single_exponential_approach_primary","4","0.606196649693528","SELECTED","Passed tw-domain and fit-quality gates"
+"26","8000","single_exponential_approach_primary","4","0.936029609480968","SELECTED","Passed tw-domain and fit-quality gates"
+"30","500","single_exponential_approach_primary","3","0.997909808685575","SELECTED","Passed tw-domain and fit-quality gates"
+"34","5","single_exponential_approach_primary","3","0.819099070306087","SELECTED","Passed tw-domain and fit-quality gates"
