@@ -1,0 +1,13 @@
+Tp,sector,legacy_tw_list,canonical_tw_list,intersection_tw_list,n_legacy_tw,n_canonical_tw,n_intersection,missing_in_canonical_relative_to_legacy,missing_in_legacy_relative_to_canonical,domains_directly_comparable,notes
+14,DIP,"3,36,360,3600","3,36,360,3600","3,36,360,3600",4,4,4,"",,YES,legacy Dip_depth vs TrackB Dip_depth_direct; intersection n=4
+14,FM,"3,36,360,3600","","",4,0,0,"3,36,360,3600",,NO,legacy FM_abs vs signed TrackB FM; intersection n=0
+18,DIP,"3,36,360,3600","3,36,360,3600","3,36,360,3600",4,4,4,"",,YES,legacy Dip_depth vs TrackB Dip_depth_direct; intersection n=4
+18,FM,"3,36,360,3600","3,36,360,3600","3,36,360,3600",4,4,4,"",,YES,legacy FM_abs vs signed TrackB FM; intersection n=4
+22,DIP,"3,36,360,3600","3,36,360,3600","3,36,360,3600",4,4,4,"",,YES,legacy Dip_depth vs TrackB Dip_depth_direct; intersection n=4
+22,FM,"3,36,360,3600","3,36,360,3600","3,36,360,3600",4,4,4,"",,YES,legacy FM_abs vs signed TrackB FM; intersection n=4
+26,DIP,"3,36,360,3600","3,36,360,3600","3,36,360,3600",4,4,4,"",,YES,legacy Dip_depth vs TrackB Dip_depth_direct; intersection n=4
+26,FM,"3,36,360,3600","3,36,360,3600","3,36,360,3600",4,4,4,"",,YES,legacy FM_abs vs signed TrackB FM; intersection n=4
+30,DIP,"36,360,3600","36,360,3600","36,360,3600",3,3,3,"",,YES,legacy Dip_depth vs TrackB Dip_depth_direct; intersection n=3
+30,FM,"36,360,3600","36,360,3600","36,360,3600",3,3,3,"",,YES,legacy FM_abs vs signed TrackB FM; intersection n=3
+34,DIP,"36,360,3600","36,360,3600","36,360,3600",3,3,3,"",,YES,legacy Dip_depth vs TrackB Dip_depth_direct; intersection n=3
+34,FM,"36,360,3600","","",3,0,0,"36,360,3600",,NO,legacy FM_abs vs signed TrackB FM; intersection n=0

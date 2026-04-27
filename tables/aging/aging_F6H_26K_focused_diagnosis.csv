@@ -1,0 +1,14 @@
+metric,value_26K
+legacy_dip_y_tw,"tw:[3,36,360,3600] y:[2.312464e-07 1.036912e-06 9.625914e-07 9.104078e-07]"
+canonical_afm_y_tw,"tw:[3,36,360,3600] y:[7.941211e-07 5.197899e-07 7.894150e-07 1.589533e-06]"
+legacy_fm_y_tw,"tw:[3,36,360,3600] y:[6.014472e-07 7.326403e-07 8.861816e-07 2.074272e-06]"
+canonical_fm_y_tw,"tw:[3,36,360,3600] y:[6.014472e-07 7.326403e-07 8.861816e-07 2.074272e-06]"
+dip_scale_r2,-0.675856811310747
+dip_affine_r2,0.00328631898424137
+fm_scale_r2,1
+fm_affine_r2,1
+dip_tau_mismatch_visible_prefit,YES
+fm_tau_mismatch_visible_prefit,NO
+canonical_afm_late_point_dominated,YES
+canonical_afm_nonmonotonic,YES
+legacy_dip_fast_half_rise_heuristic,YES
