@@ -1,0 +1,11 @@
+failure_id,failure_mode,trigger_condition,required_behavior,claim_risk_prevented
+FM01,insufficient_points,N_points < N_min in scope,Emit row with quality_flag BLOCKED or omit value with explicit note; no numeric peak,width,midpoint,implicit Tc from empty data
+FM02,non_monotonic_T,Unsorted or non-monotonic T without resolved split,Block derivative for that scope or split per policy; no unsorted diff,artifactual peak from wrong order
+FM03,duplicate_T_rows,Repeated T_K with incompatible M rows,Block or aggregate per written policy before diff; no silent duplicate-T derivative,phantom spikes
+FM04,degenerate_spacing,Zero or below-threshold delta T,Block per-point dM/dT or mark unusable spans,divide-by-zero and false peaks
+FM05,cross_segment_stitch_attempt,Derivative would use points from two segment_id values,Forbidden; BLOCKED with note,cross_segment transition claim
+FM06,reuse_stale_dM_dT_column,Existing dM_dT column inconsistent with declared method,Recompute or gate out reuse with explicit mismatch note,hidden method inconsistency
+FM07,interpolation_requested_or_detected,Any interpolation path triggered,FAIL gate DG08; no outputs claiming derivatives on interpolated grids,false smooth transition claims
+FM08,smooth_used_without_exception,M_emu_smooth used without approved exception,FAIL gate DG09,no physics claim but misleading smoothing path
+FM09,peak_without_abs_policy,Ambiguity signed vs abs peak for max structure,Declare policy in notes; consistent variant naming only,candidate peak mislabeled as transition
+FM10,width_midpoint_without_definition,width or midpoint computed without frozen definition,Do not emit width/midpoint until definition is versioned in code notes,spurious transition width or T inference

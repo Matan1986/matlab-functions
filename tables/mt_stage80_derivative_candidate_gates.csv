@@ -1,0 +1,13 @@
+gate_id,gate_name,condition_summary,blocks_output,blocks_readiness,notes
+DG00,point_table_gates_pass,Upstream G01-G11 or equivalent PASS for run,YES,YES,No derivative observables if point tables fail
+DG01,allowed_inputs_only,Only policy-allowed columns and observable groups used,YES,YES,Forbidden groups must not enter derivative path
+DG02,min_points_per_scope,n_points_used >= policy N_min for file or segment scope,YES,NO,Insufficient data yields BLOCKED not silent success
+DG03,finite_T_K_and_M,All T_K and M_emu_clean finite where differenced,YES,NO,NaN propagation must be explicit
+DG04,T_K_ordering_policy,T_K sorted; if non_monotonic split into blocks per policy,YES,NO,No derivative across reordering or duplicates without block split
+DG05,nondegenerate_T_spacing,min positive delta_T > threshold or BLOCKED,YES,NO,Degenerate spacing invalidates local derivative
+DG06,no_cross_segment_derivative,No derivative across segment_id boundaries,YES,YES,Aligns Stage 5.1 cross-segment rule
+DG07,method_declared,Derivative method and parameters recorded in provenance,YES,YES,Undeclared method is invalid output
+DG08,no_interpolation,Interpolation or regridding not used,YES,YES,Stage 8.0 forbids interpolation
+DG09,no_default_smoothing,Smoothing off unless explicit M_emu_smooth exception policy,YES,NO,Aligns Stage 5.1
+DG10,candidate_only_labeling,All transition-shaped outputs tagged candidate-only in definition and notes,YES,YES,Prevents implicit Tc claims
+DG11,forbidden_claim_language,Outputs and notes must not assert Tc phase critical transition,YES,YES,Policy enforcement in text and schema

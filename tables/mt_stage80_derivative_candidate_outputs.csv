@@ -1,0 +1,8 @@
+output_name,output_variant,source_table,source_columns,method,unit,scope,quality_flag_required,claim_boundary
+dM_dT_emu_per_K,per_point_local_slope,mt_points_derived,"M_emu_clean,T_K",local_finite_difference_or_robust_local_slope_declared,emu_per_K,file_id (+ segment_id optional if segment gates pass),YES,candidate_diagnostic_only; no Tc phase or critical claim
+dM_dT_peak_abs,dM_dT_abs_max,mt_points_derived,"M_emu_clean,T_K",max_abs_of_computed_dM_dT,emu_per_K,file_id (+ segment_id optional),YES,candidate_peak_only; not physical transition peak claim
+T_at_max_abs_dM_dT,T_at_argmax_abs_dM_dT,mt_points_derived,"M_emu_clean,T_K",T_K_at_maximum_abs_dM_dT,K,file_id (+ segment_id optional),YES,candidate_location_only; not Tc claim
+transition_width_candidate,width_from_defined_policy,mt_points_derived,"M_emu_clean,T_K",width_proxy_on_dM_dT_per_implementation_policy,K,file_id (+ segment_id optional),YES,candidate_width_only; not correlation length or phase boundary claim
+transition_midpoint_candidate,T_center_of_width_proxy,mt_points_derived,"M_emu_clean,T_K",midpoint_proxy_on_dM_dT_per_implementation_policy,K,file_id (+ segment_id optional),YES,candidate_midpoint_only; not transition temperature claim
+derivative_quality,file_level_coverage,mt_points_derived,"M_emu_clean,T_K",fraction_finite_spacing_monotonicity,1,file_id,YES,QC_metric_only; no physics interpretation
+derivative_quality,per_segment_coverage,mt_points_derived,"M_emu_clean,T_K",fraction_finite_spacing_monotonicity,1,file_id segment_id,YES,QC_metric_only; no cross_segment_stitch
