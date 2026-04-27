@@ -1,0 +1,11 @@
+blocked_id,item,reason_blocked,required_future_gate_or_policy,claim_risk_prevented
+B01,transition_width_candidate,Deferred until peak and location candidates validated and width definition frozen,Stage after first implementation validates peak path,spurious_transition_width_claim
+B02,transition_midpoint_candidate,Deferred with width; requires frozen definition,B01 plus midpoint definition policy,spurious_transition_temperature_claim
+B03,per_segment_dM_dT_candidates,Segment trust not validated for derivative path separate from file-level,D08 segment_trust_gate plus DG06,incorrect_segment_stitch_claim
+B04,reuse_point_table_dM_dT_without_provenance_match,Could hide method/version mismatch,D04 provenance equivalence gate,false_derivative_claim
+B05,nonmonotonic_T_derivative_without_split,Produces artifactual slopes,DG04 split_block_policy_implementation,artifactual_peak_claim
+B06,interpolation_or_regridding_of_T_or_M,Forbidden by Stage 8.0 and 8.1,DG08,smooth_false_transition_claim
+B07,default_smoothing_of_M,Forbidden unless M_emu_smooth exception,DG09,misleading_slope_claim
+B08,production_canonical_release_from_derivative_candidates,Readiness remains NO by policy,D11 readiness_review_only,premature_release_claim
+B09,advanced_analysis_unlock_from_derivatives,Readiness remains NO by policy,D11,premature_advanced_claim
+B10,Tc_phase_critical_language_in_outputs,Forbidden in all candidate stages,DG11 schema_review,physics_claim

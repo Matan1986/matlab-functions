@@ -1,0 +1,12 @@
+decision_id,decision_topic,decision,recommended_policy,implementation_status,claim_boundary
+D01,peak_policy,Primary abs peak candidate; signed peaks diagnostic-only if emitted,Emit dM_dT_peak_abs_candidate as primary; any signed peak variants labeled diagnostic-only,CLOSED_FOR_FIRST_IMPLEMENTATION,candidate_diagnostic_only; no Tc transition phase claim
+D02,min_points_per_file,N_min equals 5 for file-level scope,N_min>=5 else BLOCKED for derivative numeric candidates,CLOSED_FOR_FIRST_IMPLEMENTATION,prevents spurious peaks from undersampled scopes
+D03,min_points_per_segment,N_min equals 5 when segment path enabled,Per-segment N_min>=5 else BLOCKED; segment path not in first implementation,CLOSED_FOR_POLICY_WHEN_SEGMENT_ENABLED,candidate_diagnostic_only
+D04,derivative_source_reuse,Recompute default; reuse stored dM_dT only with matching provenance,Recompute from M_emu_clean and T_K unless stored column passes provenance equivalence gate,CLOSED_FOR_FIRST_IMPLEMENTATION,no hidden method mismatch claims
+D05,derivative_method,Central FD interior one-sided edges sort T_K no smoothing no interpolation,Freeze method CENTRAL_FINITE_DIFFERENCE_WITH_EDGE_ONE_SIDED per Stage 8.1,CLOSED_FOR_FIRST_IMPLEMENTATION,candidate_slope_only
+D06,T_K_duplicates_nonmonotonic,No derivative across duplicate or non-monotonic T without split policy,Block scope or split policy required; first implementation blocks if unresolved,CLOSED_FOR_FIRST_IMPLEMENTATION,artifactual peak prevention
+D07,width_midpoint_scope,Defer width and midpoint to later stage,First implementation emits peak location quality only,CLOSED_DEFERRED,candidate_width_midpoint_not_tc
+D08,segment_scope_first_impl,File-level only first; per-segment blocked until segment trust gate,First implementation file_id scope only,CLOSED_FOR_FIRST_IMPLEMENTATION,no cross_segment_derivative
+D09,gate_failure_numeric_behavior,Emit blocked rows with BLOCKED and NaN for numeric candidates when blocked; always record failures,Quality rows always; numeric peak location NaN with BLOCKED when gated,CLOSED_FOR_FIRST_IMPLEMENTATION,no silent_success_claims
+D10,output_row_names,Freeze first implementation observable names per Stage 8.1,dM_dT_peak_abs_candidate T_at_max_abs_dM_dT_candidate dM_dT_quality_*,CLOSED_FOR_FIRST_IMPLEMENTATION,candidate_labeling_only
+D11,readiness_unlock,Stage 8.1 does not unlock production advanced Tc phase cross-module,No readiness flags elevated by this review,CLOSED_REVIEW_ONLY,policy_boundary

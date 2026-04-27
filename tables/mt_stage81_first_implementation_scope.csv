@@ -1,0 +1,15 @@
+item_id,output_or_behavior,include_in_first_implementation,reason,required_gate,notes
+S01,dM_dT_peak_abs_candidate,YES,Primary abs peak candidate per file,DG00 DG01 DG02 DG03 DG04 DG05 DG06 DG07 DG08 DG09 DG10 DG11,file_level scope only
+S02,T_at_max_abs_dM_dT_candidate,YES,T_K at maximum abs dM_dT per file,same as S01,candidate_location_not_tc
+S03,dM_dT_quality_fraction_finite,YES,QC metric for finite derivative fraction,same as S01,always_emit_when_scope_attempted
+S04,dM_dT_quality_min_delta_T_K,YES,QC minimum positive delta T along sorted curve,same as S01,spacing diagnostic
+S05,dM_dT_quality_monotonic_T,YES,QC flag for monotonic T after sort,same as S01,blocks derivative if false without split
+S06,per_point_dM_dT_series_in_observables,NO,Defer row explosion or separate table policy,TBD,future_stage_optional
+S07,signed_peak_positive_negative_diagnostic,NO,Diagnostic-only secondary; omit unless explicitly needed later,policy,if_added_must_be_diagnostic_only
+S08,transition_width_candidate,NO,Deferred until peak location validated,D07,width_not_in_first_impl
+S09,transition_midpoint_candidate,NO,Deferred until peak location validated,D07,midpoint_not_in_first_impl
+S10,per_segment_derivative_candidates,NO,Blocked until segment trust validated,D08,file_level_only_first
+S11,reuse_stored_dM_dT_without_provenance,NO,Default recompute,D04,reuse_only_if_provenance_match
+S12,interpolation_regridding,NO,Forbidden Stage 8.0,DG08,policy
+S13,smoothing_default,NO,Forbidden default,DG09,M_emu_smooth_exception_separate_policy
+S14,gate_failure_table_recording,YES,Required audit trail,D09,paired_with_BLOCKED_rows
