@@ -1,0 +1,7 @@
+stop_condition,enforced,details
+MIN_3_FINITE_SIGNED_TW_PER_TP,YES,"Gate requirement for FM physical tau replay candidates."
+GLOBAL_SIGN_CONVENTION_ONLY,YES,"Sign correction must be single global orientation, not per row."
+PER_ROW_SIGN_FLIPPING_FORBIDDEN,YES,"Per-row sign flipping is disallowed by contract."
+FM_ABS_AS_SIGNED_REPLACEMENT_FORBIDDEN,YES,"FM_abs channel is context only, not signed replacement."
+TRACKA_DIRECT_TAU_SOURCE_FORBIDDEN,YES,"Track A cannot be used as direct FM tau source."
+CROSS_MODULE_ANALYSIS_FORBIDDEN,YES,"This audit remains Aging-only and module-local."

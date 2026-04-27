@@ -1,0 +1,3 @@
+sign_convention_candidate,multiplier_vs_FM_step_mag,equivalent_to_current_FM_step_mag,finite_rows_total,finite_rows_short_tw,short_tw_rows_excluded_in_F1b_contract,exclusion_due_to_sign_convention,global_sign_convention_correction_valid,notes
+left_minus_right,1,YES,22,10,10,NO,YES,Matches FM_step_mag orientation directly.
+right_minus_left,-1,NO_GLOBAL_FLIP,22,10,10,NO,YES,Global sign flip only; finite coverage unchanged.

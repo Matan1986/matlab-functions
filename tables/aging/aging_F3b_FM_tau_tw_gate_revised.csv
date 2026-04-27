@@ -1,0 +1,7 @@
+Tp,tw_values_sign_aligned,finite_sign_aligned_tw_count,eligible_min3,gate_result,lowT_or_tp34_flag,tp_scope_allowed_for_physical_tau
+14,3;36;360;3600,4,YES,ELIGIBLE_MIN3,YES,NO
+18,3;36;360;3600,4,YES,ELIGIBLE_MIN3,NO,YES
+22,3;36;360;3600,4,YES,ELIGIBLE_MIN3,NO,YES
+26,3;36;360;3600,4,YES,ELIGIBLE_MIN3,NO,YES
+30,36;360;3600,3,YES,ELIGIBLE_MIN3,NO,YES
+34,36;360;3600,3,YES,ELIGIBLE_MIN3,YES,NO
