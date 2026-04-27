@@ -1,0 +1,8 @@
+claim_id,blocked_claim,reason,required_future_evidence
+C001,MT identifies Curie or transition temperature from summaries alone,Derivative/transition candidates not implemented or validated,Validated dM/dT or equivalent with gates and independent QC artifacts
+C002,MT proves ZFC vs FCW splitting or training-field memory,Segment and protocol comparisons blocked,Segment labels; ZFC/FCC/FCW implementation; validation runs and review tables
+C003,MT normalized per gram compares across samples or modules,Mass-normalized path blocked,Mass provenance chain; unit tests or validation reports; signed review
+C004,MT explains Switching barriers or switching mechanism,Cross-module analysis and mechanism testing not performed,Alignment design doc; Switching observables; joint test plan; no claim without run bundle
+C005,MT explains Aging clock or scaling exponent,Aging is time-domain; MT point product partial; no alignment,Aging time series; MT baseline at matched (T,H); alignment and controlled comparison protocol
+C006,MT substitutes Relaxation spectrum or tau inference,MT lacks time-domain relaxation observables,Relaxation canonical outputs; alignment at (T,H); joint analysis only after both sides ready
+C007,Production canonical release or advanced analysis sign-off from Stage 7.0 plan,Readiness flags NO for production and advanced analysis,Explicit later-stage review artifacts and FULL_CANONICAL_DATA_PRODUCT advancement per module policy

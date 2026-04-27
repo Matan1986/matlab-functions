@@ -1,0 +1,9 @@
+target_module,potential_connection,required_MT_feature,current_status,required_before_testing,claim_status
+Switching,Field-temperature regime context for switching models,(T_K H_Oe) point tables with hardened gates,IMPLEMENTED,"cross-module alignment design; derivative or local M(H) features if model needs slopes",PLANNED_NOT_EVIDENCED
+Switching,Shared sample/run identifiers for joins,Stable canonical keys in point tables,PARTIAL,"written alignment spec; tolerance rules for T and H",PLANNED_NOT_EVIDENCED
+Switching,Threshold-adjacent local structure,dM/dH or comparable validated derivatives,NOT_IMPLEMENTED,derivative/transition implementation and validation,FORBIDDEN_UNTIL_IMPLEMENTED
+Aging,Baseline M at hold (T,H) for time-series context,M_emu_clean_summary at matching conditions,PARTIAL,"mass provenance if per-mass comparisons; Aging time index linkage",PLANNED_NOT_EVIDENCED
+Aging,Normalized moment trends vs aging observables,mass-normalized MT path,NOT_IMPLEMENTED,mass provenance implementation and validation,FORBIDDEN_UNTIL_IMPLEMENTED
+Relaxation,Reference equilibrium M at (T,H) for relaxation windows,Point-table M summaries,PARTIAL,"Relaxation metadata match; interpolation policy in alignment design",PLANNED_NOT_EVIDENCED
+Relaxation,Inferring tau or distributions from MT tables alone,None applicable,NOT_APPLICABLE,"Relaxation time-domain data; MT cannot substitute",FORBIDDEN_FROM_MT_ALONE
+CROSS_MODULE,Any mechanism or pathway claim,Full pipeline plus alignment plus module-specific evidence,NOT_READY,mechanism testing stage with explicit evidence bundles,FORBIDDEN_UNTIL_TESTING

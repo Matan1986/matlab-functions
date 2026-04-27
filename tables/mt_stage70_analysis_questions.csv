@@ -1,0 +1,13 @@
+question_id,module_scope,question,currently_answerable,allowed_inputs,blocked_reason,next_required_stage
+Q001,MT_ONLY,What row counts and coverage does each canonical point table report?,YES,"row_count",none,MT-only descriptive review
+Q002,MT_ONLY,What are the summarized T_K ranges and basic sanity implied by T_K_summary?,YES,"T_K_summary",none,MT-only descriptive review
+Q003,MT_ONLY,What are the summarized H_Oe ranges from H_Oe_summary?,YES,"H_Oe_summary",none,MT-only descriptive review
+Q004,MT_ONLY,What do M_emu_clean_summary statistics indicate descriptively (no phase labels)?,YES,"M_emu_clean_summary",none,MT-only descriptive review
+Q005,MT_ONLY,What does M_over_H_emu_per_Oe_summary show where defined and gated?,YES,"M_over_H_emu_per_Oe_summary",none,MT-only descriptive review
+Q006,MT_ONLY,Which hardened gates failed and what do failures imply for data quality?,PARTIAL,"row_count;T_K_summary;H_Oe_summary;gate outputs as documented in run artifacts",Full answer may require specific run CSV paths and gate documentation,MT-only descriptive review
+Q007,CROSS_MODULE_PLANNED,Does MT M(T) at field H match a Switching threshold narrative?,NO,"none for claims","derivatives; hysteresis-like metrics; cross-module alignment not implemented",cross-module alignment design then mechanism testing
+Q008,CROSS_MODULE_PLANNED,Can MT alone identify Tc or a first-order transition?,NO,"T_K_summary;M_emu_clean_summary","derivative/transition candidates blocked; physics claims forbidden",derivative/transition candidate implementation
+Q009,CROSS_MODULE_PLANNED,Can normalized MT moments be compared to Aging rates without extra provenance?,NO,"M_emu_clean_summary","mass-normalized observables blocked",mass provenance implementation
+Q010,CROSS_MODULE_PLANNED,Can ZFC vs FCW behavior be concluded from current MT tables?,NO,"T_K_summary;M summaries","segment/ZFC/FCC/FCW comparisons blocked",segment/ZFC-FCW implementation
+Q011,CROSS_MODULE_PLANNED,Does MT replace Relaxation time-domain inference?,NO,"point summaries only","Relaxation is time-domain; MT point tables insufficient; no alignment spec",cross-module alignment design
+Q012,CROSS_MODULE_PLANNED,Is a cross-module switching barrier validated by MT summaries alone?,NO,"allowed MT summaries only","mechanism claims forbidden; Switching observables not joined",mechanism testing after all prerequisite stages
