@@ -1,0 +1,9 @@
+path,currently_exposed,referenced_by_committed_doc,durable_value,size_risk,recommendation,reasoning
+tables/maintenance_artifact_atlas_locations.csv,YES,NO,HIGH_INPUT_LOW_DURABLE,HIGH,FORCE_ADD_ONLY_WHEN_EXPLICITLY_REQUIRED_BY_AUDIT,"Very large raw evidence dump (6.0MB, 18k+ lines); policy README says huge local raw evidence is not durable by default."
+tables/maintenance_artifact_writer_patterns.csv,YES,YES,HIGH_INPUT_LOW_DURABLE,HIGH,FORCE_ADD_ONLY_WHEN_EXPLICITLY_REQUIRED_BY_AUDIT,"Referenced by committed atlas report but functions as large operational input evidence (2.7MB, 10k+ lines), not a concise governance table."
+tables/maintenance_findings_events.csv,YES,NO,LOW,LOW,KEEP_IGNORED_TRANSIENT,"Small event log-like table currently tied to tooling/governor fixtures; not referenced by committed maintenance governance reports."
+tables/maintenance_repo_structure_inconsistencies.csv,YES,NO,MEDIUM,LOW,COMMIT_AS_DURABLE_GOVERNANCE_ARTIFACT,"Curated governance table (15 rows) aligned with repo-structure audit findings; small and policy-facing."
+tables/maintenance_repo_structure_transition_backlog.csv,YES,NO,MEDIUM,LOW,COMMIT_AS_DURABLE_GOVERNANCE_ARTIFACT,"Curated transition backlog (16 rows) with phased actions and blockers; small and durable by intent."
+tables/maintenance_repo_target_structure_proposal.csv,YES,NO,MEDIUM,LOW,COMMIT_AS_DURABLE_GOVERNANCE_ARTIFACT,"Curated target structure contract table (22 rows), policy-facing and stable enough for durable tracking."
+tables/maintenance_root_folder_cleanup_blockers.csv,YES,YES,HIGH,LOW,COMMIT_AS_DURABLE_GOVERNANCE_ARTIFACT,"Explicitly referenced by committed root declutter audit; curated blocker registry (157 rows) with governance decision value."
+tables/maintenance_root_folder_relocation_backlog.csv,YES,YES,HIGH,LOW,COMMIT_AS_DURABLE_GOVERNANCE_ARTIFACT,"Explicitly referenced by committed root declutter audit; curated relocation planning backlog (160 rows) and durable governance relevance."
