@@ -72,7 +72,10 @@ reports/**
 !reports/
 !reports/README.md
 !reports/maintenance/
-!reports/maintenance/**
+!reports/maintenance/*.md
+reports/maintenance/agent_outputs/**
+reports/maintenance/logs/**
+reports/maintenance/status_pack_latest.md
 
 figures/**
 !figures/
@@ -85,6 +88,7 @@ status/**
 tables/**
 !tables/
 !tables/README.md
+!tables/maintenance_*.csv
 
 tables_old/**
 !tables_old/
