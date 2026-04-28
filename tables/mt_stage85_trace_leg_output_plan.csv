@@ -1,0 +1,8 @@
+output_name,output_scope,key_columns,source_columns,method,quality_flag_required,interpretation_boundary
+dM_dT_peak_abs_trace_leg_candidate,trace_leg_per_file,"file_id,trace_leg_id_candidate","M_emu_clean,T_K (row order within leg)",max abs of leg-internal recomputed dM/dT (central interior one-sided edges),YES,"Numeric diagnostic only; not phase-transition strength; not cross-file physics claim."
+T_at_max_abs_dM_dT_trace_leg_candidate,trace_leg_per_file,"file_id,trace_leg_id_candidate","M_emu_clean,T_K",T_K at argmax abs(dM/dT) along leg order,YES,"Coordinate-like candidate only; not Tc; not transition temperature."
+dM_dT_quality_fraction_finite_trace_leg,trace_leg_per_file,"file_id,trace_leg_id_candidate","M_emu_clean,T_K",count finite leg dM/dT samples divided by leg row count minus edges per stencil policy,YES,"Coverage metric for leg finite-difference stencil only."
+dM_dT_quality_min_delta_T_K_trace_leg,trace_leg_per_file,"file_id,trace_leg_id_candidate",T_K,min positive delta T_K along leg row order,YES,"Sampling resolution descriptor for leg; not instrument audit."
+dM_dT_quality_monotonic_T_trace_leg,trace_leg_per_file,"file_id,trace_leg_id_candidate",T_K,strict monotonic flag after jitter policy inside leg,YES,"Boolean gate outcome only."
+mt_trace_leg_derivative_gate_failures,run_table_trace_leg,"file_id,trace_leg_id_candidate,gate_id",derived construction inputs,blocked-leg enumeration when eligibility fails,YES (severity in gate table),"Failure is scope/eligibility bookkeeping not physical anomaly claim."
+mt_trace_leg_count_summary,file_aggregate,file_id,"trace_leg_id_candidate list",count eligible vs blocked legs per file,YES (summary row),"Counts are structural; not protocol identification."

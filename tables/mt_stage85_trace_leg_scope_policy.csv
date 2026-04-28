@@ -1,0 +1,11 @@
+policy_id,policy_topic,policy_decision,implementation_requirement,claim_boundary
+TL01,Trace unit definition,Temporary units are row-order monotonic T_K legs; assign trace_leg_id_candidate 1..L per file_id along row_index.,Partition legs when sign(diff(T_K)) changes after epsilon_T_K jitter suppression for boundary detection.,Does not define physical protocol names or phases.
+TL02,Acquisition order,Legs follow row_index / time order; global T_K sort must not define legs or derivative adjacency.,Sort by row_index within file_id only for leg detection and differencing paths.,No statement that legs match vendor segments or thermal programs.
+TL03,Jitter epsilon,Default epsilon_T_K = 1e-6 K for slope-sign and leg-boundary detection.,Document epsilon in run summary; optional override from instrument resolution tables only with manifest note.,Epsilon is numerical hygiene only.
+TL04,Cross-leg prohibition,No finite-difference stencil may span two trace_leg_id_candidate values.,Assert in code paths and validation tables; gate failure if violated.,Prevents stitched derivatives across legs only.
+TL05,Leg eligibility N_min,Each leg must have N_min >= 5 usable points after gates.,Emit BLOCKED row + gate failure entry when N_min fails.,Blocked leg is engineering status not sample judgment.
+TL06,Monotonicity within leg,T_K strictly monotonic along row_index inside leg after jitter policy.,Reject or block legs with interior reversals.,Monotonicity is algebraic gate only.
+TL07,Interpolation smoothing,No interpolation regridding or smoothing on M or T for trace-leg candidates.,Hard-disable same as Stage 8.2 trace-safe branch.,No alteration of measured sample semantics beyond finite differences.
+TL08,Derivative method,Central interior one-sided edges along leg row order per Stage 8.2 math family.,Mirror Stage 8.2 finite-difference kernel scoped to leg rows only.,Method choice is numerical not mechanistic.
+TL09,Abs peak naming,Primary published peaks remain abs-based trace_leg_candidate names.,Expose sign-aware dM/dT only if needed as secondary diagnostic with distinct naming.,Peak location is not Tc or transition temperature.
+TL10,Readiness,Global NO production and NO advanced until implementation + validation complete.,Do not flip readiness flags in planning artifacts.,Planning documents carry no release authority.
