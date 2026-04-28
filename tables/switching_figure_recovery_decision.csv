@@ -1,0 +1,11 @@
+decision_id,candidate_id,decision,main_or_supplement,reason,blocking_items
+D1,C1,APPROVE,main_text,Canonical S-map cuts are directly tied to locked canonical S_long with no width-scaling claim surface,NONE
+D2,C2,APPROVE,main_text,Canonical collapse visualization is the strongest primary-domain hierarchy figure,NONE
+D3,C3,APPROVE,supplement,PT-CDF overlay supports collapse diagnostics while keeping width-uniqueness and X_canon claims off,NONE
+D4,C4,APPROVE,supplement,X_eff can be shown as an effective gauge coordinate with explicit non-canonical claim language,NONE
+D5,C5,APPROVE,supplement,Decomposition into I_peak/W_I/S_peak is available from canonical P0 materialization,NONE
+D6,C6,APPROVE,supplement,P1 asymmetry/LR replay outputs are canonical-compatible and closed,NONE
+D7,C7,APPROVE,supplement,P2 T22 crossover evidence is canonical-compatible and keeps 32/34K diagnostic-only,NONE
+D8,C8,KEEP_DIAGNOSTIC,diagnostic_only,Old WI replay is useful for recovery verification but not for final narrative claims,NONE
+D9,C9,REJECT,reject/do_not_use,Required legacy old-output artifacts are missing in workspace and cannot be relied on directly,MISSING_LEGACY_OUTPUT_FILES
+D10,C10,KEEP_DIAGNOSTIC,diagnostic_only,Old X replay is useful inventory evidence but must remain non-canonical claim surface,NONE

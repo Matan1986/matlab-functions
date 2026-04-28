@@ -1,0 +1,14 @@
+verdict_key,verdict_value,detail
+SWITCHING_FIGURE_RECOVERY_INVENTORY_COMPLETE,YES,Inventory completed over requested switching scope and outputs written.
+OLD_CUT_FIGURES_FOUND,YES,Old/canonical cut-capable scripts identified in switching map/collapse family.
+OLD_COLLAPSE_FIGURES_FOUND,YES,Old collapse scripts and audit references identified including WI recipe replay and deep replay audit.
+OLD_X_FIGURES_FOUND,YES,Old X replay and effective observable X scripts identified.
+OLD_X_COMPONENT_FIGURES_FOUND,YES,I_peak/W_I/S_peak decomposition-producing scripts identified.
+CANONICAL_REPLOT_FEASIBLE,YES,Canonical inputs for S/P0/P1/P2 are defined and mapped to candidate scripts.
+MAIN_TEXT_FIGURE_CANDIDATE_IDENTIFIED,YES,Canonical map visualization and canonical collapse visualization selected.
+SUPPLEMENT_FIGURE_CANDIDATES_IDENTIFIED,YES,PT-CDF overlay plus P0/P1/P2-derived figures selected for supplement.
+SAFE_TO_GENERATE_CANONICAL_FIGURES,YES,No analysis logic changes required; generation can use existing canonical scripts only.
+X_CANON_CLAIMED,NO,X_eff treated only as an effective gauge coordinate.
+UNIQUE_W_CLAIMED,NO,No unique width claim accepted; W_I remains recipe-based.
+SAFE_TO_WRITE_SCALING_CLAIM,NO,Recovery inventory does not justify global scaling-law claims.
+CROSS_MODULE_SYNTHESIS_PERFORMED,NO,No Relaxation/Aging/PT cross-module synthesis performed.

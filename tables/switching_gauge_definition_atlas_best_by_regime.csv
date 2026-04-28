@@ -1,0 +1,4 @@
+﻿"regime","combo_id","I0_candidate","W_candidate","S0_candidate","metric_value","criterion"
+"best_primary","G254","I_peak_smoothed_across_T","W_sigma_positive","S_area_positive","0.0238037865165766","min primary_metric_mean_std"
+"best_high_primary","G254","I_peak_smoothed_across_T","W_sigma_positive","S_area_positive","0.02204131352717","min high_primary_metric_mean_std"
+"best_balanced","G254","I_peak_smoothed_across_T","W_sigma_positive","S_area_positive","0.02204131352717","min high+low-penalty"
