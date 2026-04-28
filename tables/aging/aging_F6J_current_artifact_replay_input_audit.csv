@@ -1,0 +1,2 @@
+structured_run_dir,table_used,n_rows_input,n_rows_after_contract_filter,tp_min,tp_max,tp_list,tw_list,n_finite_dip,n_finite_fm,replay_note
+C:\Dev\matlab-functions\tables\aging\aggregate_structured_export_aging_Tp_tw_2026_04_26_085033,observable_matrix.csv,30,22,14,34,"14, 18, 22, 26, 30, 34","3, 36, 360, 3600",22,22,identity_consolidation_like_finite_FM_required rows 30->22 from C:\Dev\matlab-functions\tables\aging\aggregate_structured_export_aging_Tp_tw_2026_04_26_085033\tables\observable_matrix.csv
