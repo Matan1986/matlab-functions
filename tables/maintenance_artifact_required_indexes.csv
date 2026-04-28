@@ -1,0 +1,21 @@
+﻿index_id,required_index_or_readme,target_path,owning_module_or_layer,purpose,required_columns_or_sections,priority,blocks_cleanup,notes
+IDX-001,Module artifact index,Aging/ARTIFACT_INDEX.md,aging,Family and lineage navigation,"families; writer scripts; run roots; legacy roots; diagnostics; canonical candidates",P0,YES,Clean Aging rerun evidence baseline
+IDX-002,Module artifact policy,Aging/ARTIFACT_POLICY.md,aging,Define Aging canonical/replay/diagnostic/legacy handling,"scope rules; excluded cross-module policy; naming and promotion rules",P0,YES,Must keep cross-module candidates excluded
+IDX-003,Durable tables README,tables/aging/README.md,aging,Schema + ownership of aging durable tables,"table name; producer; consumer; canonicality_status; lineage link",P1,YES,
+IDX-004,Durable reports README,reports/aging/README.md,aging,Report catalog and lifecycle,"report_id; family; source run; status",P1,YES,
+IDX-005,Run layer README,results/aging/README.md,aging,Define run contract and debug_runs policy,"run contract; debug_runs semantics; promotion rules",P1,YES,
+IDX-006,Figure layer README,figures/aging/README.md,aging,Durable figure promotion rules,"source run; transform; units; inclusion/exclusion; canonicality",P1,YES,
+IDX-007,Module artifact index,docs/switching_artifact_policy.md,switching,Preserve mandatory family separation,"legacy_old; canonical_residual_decomposition; canonical_geometric_decomposition; canonical_replay",P0,YES,Must preserve geocanon naming restrictions
+IDX-008,Durable tables README,tables/switching/README.md,switching,Switching table namespace contract,"family; owner; lineage; do_not_mix_with",P1,YES,
+IDX-009,Durable reports README,reports/switching/README.md,switching,Switching report namespace contract,"report scope; family; source lineage",P1,YES,
+IDX-010,Run layer README,results/switching/README.md,switching,Run contract and family boundaries,"run families; replay handling; canonicality",P1,YES,
+IDX-011,Figure README,figures/switching/README.md,switching,Durable figure namespace and promotion policy,"family; source run; naming constraints",P1,YES,
+IDX-012,Module artifact policy,docs/relaxation/RELAXATION_ARTIFACT_POLICY.md,relaxation,Relaxation family taxonomy and move restrictions,"RF3R vs RF3R2; family map; readiness caveats",P0,YES,Do not claim full canonical readiness
+IDX-013,View conventions policy,docs/relaxation/RELAXATION_VIEW_CONVENTIONS.md,relaxation,Map/figure transform semantics,"transform type; units; source; include/exclude rules",P0,YES,Required for figure/map families
+IDX-014,Durable tables README,tables/relaxation/README.md,relaxation,Relaxation durable table contracts,"table schema; producer/consumer; run lineage",P1,YES,
+IDX-015,Durable reports README,reports/relaxation/README.md,relaxation,Relaxation report contracts,"family scope; canonicality; diagnostics status",P1,YES,
+IDX-016,Durable figures README,figures/relaxation/README.md,relaxation,Figure family separation contract,"raw/normalized/baseline/positive/log/linear labels",P1,YES,
+IDX-017,Maintenance output contract,reports/maintenance/README.md,maintenance,Governance output destination contract,"allowed report types; force-add policy; retention",P0,YES,
+IDX-018,Maintenance table contract,tables/maintenance_README.md,maintenance,Governance table destination contract,"table naming; owners; update cadence",P0,YES,
+IDX-019,Root contract README,docs/root_artifact_contract.md,repo,Declare root allowed/forbidden contents,"allowed root files; forbidden patterns; exceptions",P0,YES,
+IDX-020,Module alias registry,docs/module_alias_registry.md,repo,Normalize source-vs-artifact module naming,"source_folder; artifact_alias; status; notes",P0,YES,

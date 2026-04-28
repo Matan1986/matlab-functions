@@ -1,0 +1,34 @@
+﻿input_path,expected,found,used_in_synthesis,missing_or_problem,notes
+reports/maintenance/repo_artifact_organization_atlas.md,YES,YES,YES,,Primary repo-wide topology evidence
+tables/maintenance_artifact_atlas_locations.csv,YES,YES,YES,PARTIAL_READ_LARGE,File too large for full in-chat read; sampled via tool
+tables/maintenance_artifact_writer_patterns.csv,YES,YES,YES,PARTIAL_READ_LARGE,File too large for full in-chat read; sampled via tool
+tables/maintenance_artifact_risk_inventory.csv,YES,YES,YES,,Used for repo-wide risk taxonomy
+reports/switching/switching_artifact_organization_audit.md,YES,YES,YES,,Used for family-separation constraints
+tables/switching/switching_artifact_inventory.csv,YES,YES,YES,PARTIAL_READ_LARGE,Header/sample used
+tables/switching/switching_artifact_writer_inventory.csv,YES,YES,YES,PARTIAL_READ_LARGE,Header/sample used
+tables/switching/switching_artifact_family_map.csv,YES,YES,YES,,Used for explicit switching family preservation
+tables/switching/switching_artifact_cleanup_risks.csv,YES,YES,YES,,Used for migration blockers
+reports/aging/aging_artifact_organization_audit.md,YES,YES,YES,,Authoritative clean Aging rerun report
+tables/aging/aging_artifact_inventory.csv,YES,YES,YES,PARTIAL_READ_LARGE,Header/sample used
+tables/aging/aging_artifact_writer_inventory.csv,YES,YES,YES,,Used for script contract requirements
+tables/aging/aging_artifact_family_map.csv,YES,YES,YES,,Used for Aging family/index requirements
+tables/aging/aging_artifact_cleanup_risks.csv,YES,YES,YES,PARTIAL_READ_LARGE,Header/sample used
+tables/aging/aging_artifact_excluded_cross_module_candidates.csv,YES,YES,YES,PARTIAL_READ_LARGE,Used to preserve exclusions
+tables/aging/aging_artifact_cross_module_status_check.csv,YES,YES,NO,SUPERSEDED_CONTAMINATION_CHECK,Held as historical contamination indicator; not used for authoritative Aging-only policy claims
+reports/relaxation/relaxation_artifact_organization_audit.md,YES,YES,YES,,Used for RF3R/RF3R2 and view-family constraints
+tables/relaxation/relaxation_artifact_inventory.csv,YES,YES,YES,PARTIAL_READ_LARGE,Header/sample used
+tables/relaxation/relaxation_artifact_writer_inventory.csv,YES,YES,YES,,Used for writer dependency risks
+tables/relaxation/relaxation_artifact_family_map.csv,YES,YES,YES,,Used for family preservation rules
+tables/relaxation/relaxation_artifact_cleanup_risks.csv,YES,YES,YES,,Used for hard blockers
+reports/maintenance/root_folder_declutter_audit.md,YES,YES,YES,,Used for root policy and phase-1 constraints
+tables/maintenance_root_folder_inventory.csv,YES,YES,YES,PARTIAL_READ_LARGE,File large; sampled evidence
+tables/maintenance_root_folder_reference_check.csv,YES,YES,YES,PARTIAL_READ_LARGE,File large; sampled evidence
+tables/maintenance_root_folder_relocation_backlog.csv,YES,YES,YES,,Used for migration phase alignment
+tables/maintenance_root_folder_cleanup_blockers.csv,YES,YES,YES,,Used for blocker registry composition
+reports/maintenance/repo_structure_governance_audit.md,YES,YES,YES,,Core governance evidence
+docs/repo_structure_governance_proposal.md,YES,YES,YES,,Used to align target topology language
+tables/maintenance_repo_directory_role_map.csv,YES,YES,YES,PARTIAL_READ_LARGE,File large; sampled evidence
+tables/maintenance_repo_structure_inconsistencies.csv,YES,YES,YES,,Used for root/mixed-role findings
+tables/maintenance_repo_same_type_scatter_map.csv,YES,YES,YES,,Used for artifact scatter rules
+tables/maintenance_repo_target_structure_proposal.csv,YES,YES,YES,,Used for path-by-path contract baseline
+tables/maintenance_repo_structure_transition_backlog.csv,YES,YES,YES,,Used for phase design
