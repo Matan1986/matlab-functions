@@ -1,0 +1,4 @@
+component,fidelity_note
+legacy_protocol_DIP,"Exact body copy from aging_timescale_extraction.m into Aging/diagnostics/aging_F6I_legacy_tau_from_curve.m (tools/assemble_F6I_legacy_diagnostic_source.m); DIP uses buildConsensusTau"
+legacy_protocol_FM,"FM sector uses Aging/diagnostics/aging_F6I_legacy_fm_tau_from_curve.m with buildEffectiveFmTau copied from aging_fm_timescale_analysis.m (half_range_primary when half-range ok)"
+canonical_protocol,"Same single-exp objective and R2>=0.6,n>=3 gate as run_aging_F4B_FM_physical_tau_replay.m in Aging/diagnostics/aging_F6I_canonical_exponential_fit.m"
