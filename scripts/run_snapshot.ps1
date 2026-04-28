@@ -14,7 +14,7 @@ if (-not (Test-Path -LiteralPath $tempRoot)) {
 }
 
 $runId     = Get-Date -Format 'yyyyMMdd_HHmmss_fff'
-$stageRoot = Join-Path $tempRoot ("snapshot_stage_" + $runId)
+$stageRoot = Join-Path 'C:' ("s_" + $runId)
 $tmpZip    = $null
 $lockStream = $null
 $lockFile = Join-Path $tempRoot 'snapshot.lock'
@@ -198,7 +198,7 @@ try {
     }
 
     # --- STAGING ---
-    $moduleStage = Join-Path $stageRoot 'modules'
+    $moduleStage = Join-Path $stageRoot 'm'
     $metaStage   = Join-Path $stageRoot 'META'
     $payload     = Join-Path $stageRoot 'payload'
 
