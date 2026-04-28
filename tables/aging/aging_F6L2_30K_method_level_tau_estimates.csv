@@ -1,0 +1,4 @@
+Tp,method_name,old_estimate_seconds,old_trusted_or_ok,old_status,replay_estimate_seconds,replay_trusted_or_ok,replay_status,enters_old_consensus,enters_replay_consensus_current_code,note
+30,logistic_log_tw,700.015522309932,1,ok,700.015522309932,1,ok,0,1,old run required half-range resolution for consensus reporting; replay code uses trusted-method median
+30,stretched_exp,502593641622.822,1,extrapolated,502593641622.822,1,extrapolated,0,1,old run required half-range resolution for consensus reporting; replay code uses trusted-method median
+30,direct_half_range,NaN,0,no_upward_crossing,NaN,0,no_upward_crossing,0,0,old run required half-range resolution for consensus reporting; replay code uses trusted-method median

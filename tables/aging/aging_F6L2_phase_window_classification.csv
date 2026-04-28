@@ -1,0 +1,9 @@
+Tp,phase_class,phase_rule
+6,IN_PHASE,Tp<=31.5 in-phase
+10,IN_PHASE,Tp<=31.5 in-phase
+14,IN_PHASE,Tp<=31.5 in-phase
+18,IN_PHASE,Tp<=31.5 in-phase
+22,IN_PHASE,Tp<=31.5 in-phase
+26,IN_PHASE,Tp<=31.5 in-phase
+30,IN_PHASE,Tp<=31.5 in-phase
+34,PHASE_EXCLUDED_DIAGNOSTIC_ONLY,Tp<=31.5 in-phase

@@ -1,0 +1,5 @@
+decision_key,decision_value
+NEXT_ACTION,F6M_ARCHIVED_VS_CURRENT_SOURCE_SELECTION_BRIDGE
+RATIONALE,Archived parity replay can be reconstructed from archived lineage; current exports are non-equivalent so bridge/selection repair is next.
+READY_FOR_F6M_SOURCE_SELECTION_BRIDGE,YES
+READY_FOR_DIRECT_NON_RMS_METHOD_SEARCH,NO

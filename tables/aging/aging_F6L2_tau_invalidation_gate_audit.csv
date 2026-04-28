@@ -1,0 +1,9 @@
+gate_name,triggered_at_30K_old,evidence,source
+insufficient_finite_points,NO,old 30K has n_points=3 (minimum allowed for fits),old tau table
+direct_half_range_no_upward_crossing,YES,old 30K tau_half_range_status=no_upward_crossing,old tau table
+logistic_untrusted,NO,old 30K tau_logistic_trusted=1,old tau table
+stretched_untrusted,NO,old 30K tau_stretched_trusted=1,old tau table
+consensus_requires_half_range_resolved,YES,old report explicitly states consensus only when direct half-range is resolved,old report
+all_trusted_methods_empty,YES,old 30K tau_consensus_method_count=0 despite fit values; indicates stricter consensus gate path,old tau table + old report
+phase_window_exclusion_highT,YES,F6L2 rule marks Tp>31.5 as phase-excluded diagnostic-only,task rule
+manual_output_mask,NOT_REQUIRED,old NaN explained by consensus reporting rule and half-range failure,audit synthesis
