@@ -1,0 +1,9 @@
+audit_check,status,expected,note
+archived_dataset_build_run_present,YES,YES,results_old aging dataset build exists
+archived_observable_identification_audit_present,YES,YES,source rows recoverable with structured source_run
+archived_structured_tp26_matrix_present,YES,YES,legacy upstream available
+current_aggregate_matrix_present,YES,YES,current replay upstream available
+bit_replay_from_current_exports_possible,NO,NO,same contract but different upstream source runs and code commit
+bit_replay_from_archived_inputs_possible,YES,YES,archived upstream structured exports still present under results_old
+source_trace_compatible_current_vs_archived,NO,NO,legacy source_run = run_2026_03_10_* vs current source_run_dir = run_2026_04_26_*
+finite_FM_filter_changes_coverage,YES,YES,F6J replay dataset excludes Tp 6/10 due to finite FM requirement

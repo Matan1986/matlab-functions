@@ -1,0 +1,7 @@
+audit_item,artifact,check,difference_detected,expected_same_for_bit_replay,impacting_dip_gap,evidence_note
+contract_identity_copy,run_aging_observable_dataset_consolidation.m,"Tp=Tp_K, tw=tw_seconds, Dip_depth identity copy, FM_abs identity copy",YES,YES,YES,current script enforces finite Dip and finite FM
+contract_script_existence_at_legacy_commit,run_aging_observable_dataset_consolidation.m,"script present at ec3ea0b commit",NO,YES,NO,git name-status shows file added after legacy commit
+structured_export_script_existence_at_legacy_commit,aging_structured_results_export.m,"script present at ec3ea0b commit",NO,YES,NO,git name-status shows file added after legacy commit
+stage4_changed_since_legacy,stage4_analyzeAFM_FM.m,"stage4 code drift vs ec3ea0b",YES,YES,YES,fallback sign/metric behavior changed and expanded
+model_changed_since_legacy,analyzeAFM_FM_components.m,"AFM_amp sign and dip metric branch changed in diff",YES,YES,YES,direct decomposition internals changed materially
+source_trace_generation_diff,run_manifest git_commit,"legacy structured exports commit=ec3ea0b499da9b7b3867a4cb07779797c2713795 vs current aggregate source commit=",YES,YES,YES,different code revision and run families

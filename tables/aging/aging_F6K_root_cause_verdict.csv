@@ -1,0 +1,10 @@
+candidate_root_cause,status,evidence,primary_root_cause
+SOURCE_TRACE_MISMATCH,YES,legacy uses run_2026_03_10_* sources; current uses run_2026_04_26_* sources,
+UPSTREAM_STAGE4_DEFINITION_CHANGE,YES,stage4/model diffs vs ec3ea0b include Dip/AFM branch changes,
+BASELINE_OR_SMOOTHING_CHANGE,POSSIBLE,robust baseline additions exist in model diff; FM remains stable in aligned rows,
+DECOMPOSITION_METHOD_CHANGE,YES,analyzeAFM_FM_components changed materially,
+TRACK_SELECTION_CHANGE,NO_EVIDENCE,F6J/F6K replay does not use TrackB,
+FILTERING_OR_FINITE_FM_REQUIREMENT,YES,current consolidation/replay requires finite FM and drops low-T rows,
+LEGACY_BUILDER_NOT_FULLY_TRACED,NO,legacy lineage traced to archived audit+structured runs,
+CURRENT_EXPORT_NOT_EQUIVALENT_TO_ARCHIVED_EXPORT,YES,same five-column contract but non-equivalent upstream exports,CURRENT_EXPORT_NOT_EQUIVALENT_TO_ARCHIVED_EXPORT
+NOT_DETERMINED,NO,primary cause determined,
