@@ -1,0 +1,11 @@
+audit_item,status,evidence,notes
+name_status_vs_archived_commit,RECORDED,A	Aging/analysis/aging_structured_results_export.m
+A	Aging/analysis/run_aging_observable_dataset_consolidation.m
+M	Aging/models/analyzeAFM_FM_components.m
+M	Aging/pipeline/stage4_analyzeAFM_FM.m
+,code/config bridge is audit-only
+structured_export_script_changed_or_added,YES,file added after archived commit in current branch history,cannot prove causality without controlled reruns
+stage4_changed_vs_archived,YES,stage4 diff non-empty,contains Dip_depth_source and DeltaM_signed path changes
+model_components_changed_vs_archived,YES,analyzeAFM_FM_components diff non-empty,contains AFM_amp branch/sign and baseline handling changes
+consolidation_contract_mapping_same,YES,both lineages map Dip_depth/FM_abs from observable_matrix to five-column contract,contract-level name equality does not imply upstream equivalence
+drift_plausibly_explains_dip_shift,YES,source run mismatch + decomposition/script drift jointly plausible,supports source selection bridge next action

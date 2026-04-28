@@ -1,0 +1,7 @@
+decision_key,decision_value
+NEXT_ACTION,F6N_ARCHIVED_SOURCE_COMPATIBILITY_REPLAY
+RATIONALE,Primary divergence is source-trace selection with concurrent stage4/model drift; bridge replay should isolate source-vs-code contributions using archived-equivalent inputs.
+ALTERNATE_NOT_CHOSEN,DIRECT_NON_RMS_METHOD_SEARCH deferred until source bridge closure
+READY_FOR_F6N_ARCHIVED_SOURCE_COMPATIBILITY_REPLAY,YES
+READY_FOR_F6N_CURRENT_SOURCE_DIP_REPAIR_AUDIT,YES
+READY_FOR_DIRECT_NON_RMS_METHOD_SEARCH,NO

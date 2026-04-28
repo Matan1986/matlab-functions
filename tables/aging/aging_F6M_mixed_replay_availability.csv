@@ -1,0 +1,6 @@
+scenario,available,evidence,blocker_or_note
+archived_source_archived_code_available,YES,results_old March structured exports + archived aggregated table exist,already demonstrated by F6L parity replay
+archived_source_current_code_available_without_rerun,PARTIAL,current code can read archived outputs but equivalence not guaranteed,diagnostic only; not canonical
+current_source_archived_code_available_without_rerun,NO,no archived-code rerun environment in this audit step,needs checkout/replay infrastructure
+archived_vs_current_source_bridge_from_existing_artifacts,YES,F6K/F6L/F6L2/F6J provide side-by-side source and value maps,sufficient to choose F6N bridge step
+full_mixed_replay_without_pipeline_rerun,NO,would require controlled reruns under archived commit/current commit matrix,out of scope for F6M by instruction
