@@ -21,3 +21,5 @@ SAFE_TO_BUILD_CORRECTED_OLD_REPLAY_NOW,NO,Authoritative corrected-old recipe out
 NEXT_STEP_RECIPE_VERIFICATION_REQUIRED,YES,Need one minimal provenance-locked corrected-old recipe verification run before any corrected-old artifact build claims.
 PHYSICS_LOGIC_CHANGED,NO,Audit was inspection and classification only.
 FILES_DELETED,NO,No deletions performed in this audit.
+CURRENT_AUTHORITATIVE_CORRECTED_OLD_ARTIFACTS_EXIST_AS_OF_REMEDIATION,YES,Supersedes interpretation of row AUTHORITATIVE_CORRECTED_OLD_ARTIFACTS_EXIST=NO for current repo state; authoritative tables live under tables/switching_corrected_old_authoritative_*.csv per switching_corrected_old_authoritative_builder_status.csv.
+SUPERSESSION_NOTE_2026_04_29,READ_STALE_ROWS_AS_HISTORICAL,Stale keys remain for audit trail; use CURRENT_* rows and reports/switching_stale_governance_supersession.md for existence/build-block interpretation.
