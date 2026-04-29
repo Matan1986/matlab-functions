@@ -1,0 +1,22 @@
+status_key,status_value,details
+FINITE_GRID_INTERPOLATION_AUDIT_COMPLETE,YES,Audit tables and report written from authoritative builder outputs and clean source view; finite fraction reproduced as global x-grid hull effect plus 50 mA exclusion.
+SWITCHING_ONLY,YES,Scope limited to Switching paths and corrected-old authoritative artifacts.
+AUDIT_ONLY,YES,No new physics reconstruction; inspection and tabulation only.
+NO_NEW_PHYSICS_RECONSTRUCTION,YES,No builder rerun and no change to backbone/residual/PT recipe.
+NO_FIGURES_REGENERATED,YES,No figure scripts executed.
+AUTHORITATIVE_BUILDER_OUTPUTS_USED,YES,Quality metrics; residual/phi1/kappa1 maps; locked observables; builder source code reviewed for definitions only.
+MIXED_CANONICAL_DIAGNOSTICS_USED,NO,No mixed canonical PT/CDF/phi/kappa diagnostic columns used as evidence.
+QUARANTINED_ARTIFACTS_USED,NO,Quarantined corrected-old replay artifacts not used.
+FINITE_FRACTION_EXPLAINED,YES,0.47273 equals count of (T,x_grid) inside per-T aligned hull over 14*220; interp1 linear with NaN outside hull on a common linspace(minX,maxX,220).
+N_CURRENT_POINTS_EXPLAINED,YES,Seven unique currents in source after T filter; one column (50 mA) dropped because S_percent is non-finite for at least one temperature in T=4:2:30 window; intersection with PT ith_* columns yields six working currents.
+CURRENT_50MA_EXCLUSION_EXPLAINED,YES,Source view has NaN S_percent at 50 mA for T=28 K and T=30 K (and higher T outside window); builder requires finite S at all 14 temperatures per current bin before inclusion.
+LOW_FINITE_FRACTION_IS_EXPECTED_SUPPORT_EFFECT,YES,Expected artifact of common aligned x-grid spanning union of per-T x ranges while per-row interpolation forbids extrapolation (NaN outside each row convex hull in x).
+LOW_FINITE_FRACTION_IS_BUG,NO,Matches documented interp1(...,'linear',NaN) and global linspace behavior in run_switching_corrected_old_authoritative_builder.m.
+EACH_T_HAS_ADEQUATE_SUPPORT,YES,Each T retains six finite source currents; per-row unique x count >=2; joint SVD uses 53 columns where all T are simultaneously finite (>>2 minimum).
+PHI1_KAPPA1_EXTRACTION_SAFE_UNDER_MASK,YES,SVD completed; svd_mode1_explained_variance=0.90334; valid column set non-degenerate; residual/mode1 RMSE gates in quality metrics are strong.
+DOWNSTREAM_RECONSTRUCTION_BLOCKED_BY_GRID,NO,Finite aligned fraction is a diagnostic mask statistic; backbone and maps on measured currents remain fully supported; TASK_002 parity bridge not blocked by this alone.
+PUBLICATION_FIGURES_BLOCKED_BY_GRID,NO,Publication gate remains PARTIAL for provenance/program reasons per reconstruction program; finite-grid audit does not add a new grid-specific publication block beyond existing documentation needs.
+NARROW_REPAIR_RECOMMENDED,PARTIAL,Report-only clarification and optional future builder-side diagnostic tables recommended; no mandatory physics or grid code change identified.
+SAFE_TO_PROCEED_TO_NEXT_RECONSTRUCTION_TASK,YES,TASK_001 closure supports proceeding to TASK_002 under existing gates; document global-grid vs per-T hull semantics for consumers.
+PHYSICS_LOGIC_CHANGED,NO,Audit did not modify builder physics.
+FILES_DELETED,NO,No deletions or renames.

@@ -1,0 +1,5 @@
+action_id,priority,action_type,description
+A1,P0,documentation,"When writing parity bridge (program TASK_002), cite authoritative quality_metrics and this closure for RMSE and explained-variance language."
+A2,P1,governance_optional,"Align naming between user TASK_002 quality closure and switching_missing_reconstruction_tasks.csv TASK_002 parity label to avoid duplicate IDs."
+A3,P2,optional_archive,"If independent replay of svd_mode1_explained_variance is required, archive alignedResidual matrix in a future gated builder diagnostic export (not required now)."
+A4,P2,downstream,"Use switching_corrected_old_quality_metrics_by_T.csv when reviewing T22 or asymmetry branches for temperature-heterogeneous fit behavior."

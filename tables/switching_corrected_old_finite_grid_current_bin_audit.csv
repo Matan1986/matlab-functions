@@ -1,0 +1,8 @@
+current_mA,n_temperatures_total,n_finite_source_values,n_nonfinite_source_values,included_in_builder,exclusion_reason,downstream_impact,notes
+15,14,14,0,YES,,low,Present for all T in 4:2:30 with finite S_percent in source view.
+20,14,14,0,YES,,low,
+25,14,14,0,YES,,low,
+30,14,14,0,YES,,low,
+35,14,14,0,YES,,low,
+45,14,14,0,YES,,low,
+50,14,12,2,NO,non_finite_S_percent_at_T28K_and_T30K_in_clean_source_view,low,"Builder rule: keep current bin only if S_percent is finite for every temperature in expectedT; 50 mA fails because canonical source view carries NaN at 28 K and 30 K (and also at 32/34 K outside builder window)."

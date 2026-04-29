@@ -1,0 +1,10 @@
+downstream_branch,depends_on_aligned_residual_grid,risk_from_current_finite_mask,risk_level,required_before_running,notes
+corrected_old_quality_metrics,YES,low,low,TASK_001,Metrics already emitted; low global finite fraction is explained as hull vs common grid not as fit failure; RMSE and explained variance are primary quality readouts on supported currents.
+collapse_reconstruction,PARTIAL,low,low,TASK_001,Collapse-style work on measured (I,T) uses backbone/residual on six currents; not blocked by aligned-grid NaNs off hull.
+X_WI_panels,PARTIAL,low,medium,TASK_005,Gauge/X work must respect ALIGNMENT_INPUT_ONLY; finite x_grid mask is documentation concern not a new hard block if panels stay on measured currents.
+asymmetry_LR,YES,low,low,TASK_001,Uses residual maps on currents; six-point ladder is sparse but unchanged by this audit outcome.
+T22_crossover,PARTIAL,low,low,TASK_004,Crossover logic should use same awareness of sparse currents and excluded 50 mA tail; not a new grid-only blocker.
+gauge_atlas,PARTIAL,low,medium,TASK_006,Atlas metrics should cite corrected-old support on six currents and phi1 NaN outside joint x hull when comparing to stabilized grids.
+rank2_or_higher_modes,YES,medium,medium,TASK_007,Higher modes are more sensitive to sparse x sampling and mask; primary rank-1 path is healthy; reaffirm claim boundaries rather than emergency repair.
+publication_figures,YES,low,low,TASK_009;TASK_012,Publication gate PARTIAL for provenance and program gates per reconstruction program; finite-grid audit adds labeling caution not an automatic figure veto.
+manuscript_claim_audit,PARTIAL,low,low,TASK_010,Claims should state aligned SVD uses common x_grid with extrapolation-forbidden phi; residual on currents is fully finite.

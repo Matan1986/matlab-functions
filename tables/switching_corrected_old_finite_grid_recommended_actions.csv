@@ -1,0 +1,5 @@
+action_id,priority,action_type,description,implements_physics_change
+A1,P0,report_only,Document that aligned SVD uses common x_grid with linear interp and NaN outside per-T x support; separate from backbone fit on measured currents.,NO
+A2,P1,diagnostic_table_optional,Optional future builder emit of per-T hull metrics for reproducibility.,NO
+A3,P2,documentation,Caption future x-aligned figures with joint hull or six-current support when regenerated outside this audit.,NO
+A4,P3,data_source_review_outside_audit,Review upstream canonical producer for NaN S_percent at 50 mA for 28-30 K if tail claims matter.,NO

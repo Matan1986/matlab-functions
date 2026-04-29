@@ -1,0 +1,18 @@
+metric_id,metric_name,old_metric_source,old_analysis_family,old_use_or_claim,requires_reconstruction,manuscript_relevance,notes
+M001,rank1_energy_fraction,residual_decomposition_quality.csv from switching_residual_decomposition_analysis runs,SVD residual collapse,Primary rank-1 strength in low-T window,NO,HIGH,Replaced in spirit by svd_mode1_explained_variance on finite aligned columns in corrected-old authoritative quality_metrics; definition differs from legacy low-window SVD.
+M002,rank12_energy_fraction,same,residual SVD / rank structure,Rank 1+2 cumulative energy diagnostic,PARTIAL,MEDIUM,No single scalar in authoritative table; rank-2+ deferred to TASK_007; not required for rank-1 closure.
+M003,dominance_ratio_1_over_2,same,residual SVD,sigma1/sigma2 diagnostic,PARTIAL,MEDIUM,Not exported in authoritative quality_metrics; optional recompute needs aligned residual matrix not shipped as CSV.
+M004,low_window_rmse,same,collapse reconstruction,RMSE rank-1 fit in canonical window,NO,HIGH,Covered by rmse_after_mode1 (global over stacked finite rows) plus per-T table in this closure.
+M005,low_window_relative_error,same,collapse reconstruction,Relative Frobenius style error,PARTIAL,MEDIUM,Not duplicated verbatim; can derive diagnostic relative norms from authoritative maps if needed.
+M006,low_window_median_curve_corr,same,collapse quality,Per-curve correlation kappa*Phi vs residual,PARTIAL,LOW,Not in authoritative metrics; optional diagnostic from tables if required later.
+M007,low_window_p10_curve_corr,same,collapse quality,Tail correlation diagnostic,PARTIAL,LOW,Same as M006.
+M008,cdf_rows_from_pt,same,CDF/PT branch,Provenance of CDF construction,NO,HIGH,Superseded by corrected-old gates OLD_AUTHORITATIVE_BRANCH_PT_ONLY and provenance tables; not a numeric quality scalar in authoritative file.
+M009,cdf_rows_from_fallback,same,CDF/PT branch,Fallback usage audit,NO,HIGH,Corrected-old path forbids fallback; authoritative builder_status FALLBACK_USED=NO.
+M010,rmse_backbone_only,switching_corrected_old_authoritative_quality_metrics.csv,corrected-old PT backbone,Global backbone error,NO,HIGH,Authoritative already_available.
+M011,rmse_after_mode1,same,corrected-old mode-1 reconstruction,Post-mode1 fit,NO,HIGH,Authoritative already_available.
+M012,improvement_factor_backbone_to_mode1,same,quality summary,Fold improvement,NO,MEDIUM,Authoritative already_available.
+M013,svd_mode1_explained_variance,same,SVD on aligned residual,Leading mode energy fraction,NO,HIGH,Authoritative already_available; replay from maps alone not_applicable without aligned matrix.
+M014,fraction_finite_aligned_residual,same,grid/mask diagnostic,Finite support on common x-grid,NO,MEDIUM,TASK_001 documented; retained as diagnostic not a fit failure indicator.
+M015,interpolation_failures_count,same,phi evaluation on currents,Phi support vs current x,NO,LOW,Documented in authoritative quality_metrics and TASK_001 audit.
+M016,missing_temperatures,same,coverage audit,Completeness,NO,HIGH,Authoritative already_available.
+M017,per_temperature_rmse_and_mean_abs,this closure script computed,diagnostic QA extension,Spot heterogeneity across T,NO,MEDIUM,Written to switching_corrected_old_quality_metrics_by_T.csv for reviewer eyeball with QA figure 4.

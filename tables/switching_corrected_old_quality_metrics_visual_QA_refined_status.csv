@@ -1,0 +1,24 @@
+status_key,status_value,details
+TASK_002A_VISUAL_QA_REFINEMENT_ALREADY_COMPLETE,YES,Verified on governance micro-pass: VISUAL_QA_REFINEMENT_COMPLETE=YES and five required PNGs present under figures/switching/diagnostics/corrected_old_task002_quality_QA_refined/.
+VISUAL_QA_REFINEMENT_COMPLETE,YES,All required refined QA PNGs were generated in corrected_old_task002_quality_QA_refined and documented.
+SWITCHING_ONLY,YES,Scope restricted to Switching artifacts only.
+VISUAL_QA_ONLY,YES,No new physics reconstruction or model re-fit executed.
+AUTHORITATIVE_TABLES_ONLY,YES,Figures built only from approved source view plus corrected-old authoritative tables and by_T metrics.
+SOURCE_S_PERCENT_MAP_INCLUDED,YES,Refined Figure 1 includes S_percent source map from run_2026_04_24_233348 source view filtered to builder window/support.
+UNSUPPORTED_NAN_MASK_RENDERED_EXPLICITLY,YES,NaN/unsupported cells are shown by axis background through AlphaData masking in light gray with explicit annotations.
+UNSUPPORTED_NOT_SHOWN_AS_ZERO,YES,Unsupported cells are not color-mapped data values and are visually separated from colormap scale.
+RESIDUAL_BEFORE_AFTER_SAME_SCALE_CREATED,YES,Refined Figure 2 uses shared symmetric scale from max absolute residual-before values.
+RESIDUAL_AFTER_ZOOMED_CREATED,YES,Refined Figure 3 uses tighter residual-after symmetric limits with explicit support mask note.
+PHI1_SUPPORT_POINTS_SHOWN,YES,Refined Figure 4 overlays markers at finite Phi1 support points and states connector-line caveat.
+KAPPA1_CAUTION_REGION_ANNOTATED,YES,Refined Figure 4 marks 22 K and 24 K local-feature region and 30 K high-temperature boundary caution.
+QUALITY_IMPROVEMENT_FACTOR_SHOWN,YES,Refined Figure 5 includes per-T improvement factor RMSE_backbone divided by RMSE_after_mode1.
+PNG_ONLY,YES,Only PNG exports were generated.
+NO_PUBLICATION_FIGURES_CREATED,YES,Outputs written only to diagnostic refined folder.
+MIXED_CANONICAL_DIAGNOSTICS_USED,NO,No mixed canonical PT/CDF diagnostics were used.
+QUARANTINED_ARTIFACTS_USED,NO,No quarantined corrected-old artifacts were used.
+OLD_FIGURES_USED_AS_DATA,NO,No old figure images used as numeric inputs.
+PHYSICS_LOGIC_CHANGED,NO,Builder or physics logic was not modified.
+AUTHORITATIVE_TABLES_MODIFIED,NO,Authoritative corrected-old CSV outputs were read-only.
+FILES_DELETED,NO,No deletions or renames performed.
+SAFE_FOR_MANUAL_VISUAL_REVIEW,YES,Refined diagnostics now clearly disclose support gaps and preserve residual magnitude context.
+SAFE_TO_CREATE_PUBLICATION_FIGURES,PARTIAL,Diagnostic refinement improves review clarity but does not satisfy publication authorization gates.

@@ -1,0 +1,10 @@
+quantity,value,notes
+n_temperatures_used,14,expectedT = 4:2:30 K from builder.
+n_current_points_after_exclusion,6,Currents 15 through 45 mA at listed steps excluding 50 mA.
+n_x_grid_points,220,linspace between global min and max of x_aligned over all T and retained currents.
+global_x_min,-1.37686203515539,Min of (I-I_peak)/W over all T and six currents.
+global_x_max,2.87251372230621,Max of (I-I_peak)/W over all T and six currents.
+finite_aligned_cells_count,1456,Sum over T of x_grid points inside each row hull; 1456 divided by 3080 matches fraction_finite_aligned_residual.
+joint_finite_columns_count,53,Columns where all 14 temperatures have finite aligned residual; builder requires at least 2 for SVD.
+phi1_NaN_band_edges,low_and_high_x_off_joint_hull,Phi1_corrected_old uses NaN off the xValid range after column masking; expected behavior.
+interpolation_failures_count_reported,50,Per authoritative quality metrics; phi1 evaluated on current-row x with linear NaN outside phi support.
