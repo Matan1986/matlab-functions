@@ -1,0 +1,8 @@
+priority,action,category,blocking_task002b_until_done
+P0,git add -f Switching/analysis/run_switching_corrected_old_authoritative_builder.m scripts/run_switching_corrected_old_authoritative_builder.ps1 (+ readiness scripts),provenance,YES_for_clean_handoff
+P0,Decide archival policy for tables/switching_corrected_old_authoritative_*.csv (force-add vs external vault),provenance,YES_if_collaborators_need_bit_identical_CSVs
+P1,Update rows in switching_corrected_old_authoritative_artifact_index.csv for TASK_002A refined manifest/status from READY_PENDING to COMPLETE,governance,NO
+P1,Align reports/switching_corrected_canonical_current_state.md TASK_002A pointer to refined_status + closure_status roles,docs,NO
+P1,Update switching_quarantine_index.csv warning_visible for run_switching_canonical.m header,governance,NO
+P2,Commit or revert 35-file canonical/gauge governance edit bundle to avoid forked script versions,hygiene,NO
+P2,Adjust switching_final_governance_micro_pass_status.csv SAFE_TO_RESUME_TASK002A when idle,governance,NO

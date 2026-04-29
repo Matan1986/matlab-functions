@@ -1,0 +1,11 @@
+check_id,check_name,result,max_or_note,source_artifact
+CHK001,backbone_residual_identity,pass,4.44e-16,switching_corrected_old_quality_metrics_consistency_check.csv
+CHK002,mode1_reconstruction_identity,pass,9.71e-16,
+CHK003,residual_after_mode1_identity,pass,4.68e-16,
+CHK004,rmse_backbone_replayed_vs_quality_metrics,pass,match 0.051777,
+CHK005,rmse_after_mode1_replayed_vs_quality_metrics,pass,match 0.009511,
+CHK006,improvement_factor_consistency,pass,5.4439 vs 5.4439313,
+CHK007,svd_mode1_explained_variance_replay,not_applicable,aligned grid not exported,
+CHK008,temperature_coverage,pass,14 distinct T 4:2:30,
+CHK009,forbidden_evidence_inputs,pass,authoritative CSV paths only per stored check,
+OVERALL_FORMULA_NUMERIC,—,PASS_WITH_LIMITATION,CHK007 N/A only,

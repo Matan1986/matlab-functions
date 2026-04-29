@@ -1,0 +1,9 @@
+aspect,finding,verdict
+S_long column families documented,reports/switching_canonical_S_long_column_namespace.md + artifact index row mixed_canonical_S_long_per_run,PARTIAL isolation — file is mixed; reads must be column-selective
+Post-run clean source view,results/.../switching_canonical_source_view.csv produced by separation workflow; indexed as clean_canonical_source_view,YES for S_percent boundary when cited with run id
+Experimental PTCDF columns,S_model_pt_percent CDF_pt PT_pdf labeled EXPERIMENTAL_PTCDF_DIAGNOSTIC in current_state and namespace doc,Documented — not embedded in CSV cells
+Diagnostic mode columns,residual_percent S_model_full_percent canonical phi/kappa outputs — DIAGNOSTIC_MODE_ANALYSIS,Documented — builder status CANON_GEN_DIAGNOSTIC_OUTPUTS_USED=NO
+run_switching_canonical.m header,Lines 4-10 NAMESPACE/EVIDENCE WARNING MIXED_OUTPUT_RUN + splitter pointer,YES visible warning on canonical driver
+Scripts named canonical,Many modified M-files in Switching/analysis; audit spot-check: run_switching_canonical.m has block; ptcdf overlay script is diagnostic class,PARTIAL — rely on doc + headers not uniform across all files
+Safe S_percent as sole manuscript input,When taken from source_view or CANON_GEN_SOURCE columns with explicit run id — yes; raw S_long requires column map,YES/PARTIAL per consumption pattern
+Accidental PTCDF use route,Agent could still load switching_canonical_S_long.csv wholesale — mitigated by governance index quarantine rows and builder input gates,BLOCKING risk if agent ignores docs — policy not mechanical lock

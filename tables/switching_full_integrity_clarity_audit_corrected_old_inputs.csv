@@ -1,0 +1,11 @@
+input_role,path,pattern_committed_in_git,artifact_index_row,in_builder_script,gates_verified_by_status_csv,ptcdf_contamination_risk
+clean_source_view,results/switching/runs/run_2026_04_24_233348_switching_canonical/tables/switching_canonical_source_view.csv,NO — results/** ignored,clean_canonical_source_view,YES line 54+,YES,S_percent only when used as source view; no S_model in view per index
+locked_effective_observables,tables/switching_corrected_old_effective_observables_locked.csv,IGNORED tables/** unless forced,locked_effective_observables,YES,YES,NO — alignment inputs only per policy
+recipe_provenance,tables/switching_corrected_old_recipe_provenance_verification.csv,IGNORED,referenced in builder,YES if exists,partial,NO
+output_separation_gate,tables/switching_canonical_output_separation_status.csv,IGNORED,separation contract,YES line 71+,YES,NO — separation proves diagnostic split exists
+readiness_gate,tables/switching_corrected_old_builder_readiness_status.csv,IGNORED,*status* ignored,YES,YES,NO
+lock_validation,tables/switching_corrected_old_effective_observable_validation_status.csv,IGNORED,*status* ignored,YES,YES,NO
+namespace_blocked_marker,tables/switching_corrected_old_namespace_blocked_marker.csv,IGNORED,namespace_blocked_marker,YES,YES,NO
+legacy_PT_matrix,results_old/switching/runs/run_2026_03_24_212033_switching_barrier_distribution_from_map/tables/PT_matrix.csv,results_old/ ignored,verified_legacy_PT_matrix_route,YES,YES,PT route is gated OLD_BARRIER_PT not PTCDF cells from S_long
+authoritative_outputs,tables/switching_corrected_old_authoritative_*.csv,Most tables gitignored; *map* extra rule,artifact index multiple rows,WRITER not reader,YES,CHK009 pass — no quarantined paths
+builder_script,Switching/analysis/run_switching_corrected_old_authoritative_builder.m,UNTRACKED in this audit,authoritative builder producer,NA,NA,Script must be committed for provenance; risk if only local

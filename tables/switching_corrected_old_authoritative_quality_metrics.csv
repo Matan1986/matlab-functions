@@ -1,0 +1,13 @@
+metric_key,metric_value,details
+n_temperatures,14,Temperature rows used in authoritative corrected-old build.
+temperature_list_K,4;6;8;10;12;14;16;18;20;22;24;26;28;30,T window locked to old recipe primary window.
+n_current_points,6,Current bins from clean source view and PT matrix intersection.
+n_x_grid_points,220,Common aligned x-grid for SVD residual decomposition.
+fraction_finite_aligned_residual,0.47273,Finite fraction over aligned residual matrix before finite-column SVD reduction.
+svd_mode1_explained_variance,0.90334,Leading singular value energy fraction over finite aligned residual columns.
+rmse_backbone_only,0.051777,RMSE between S_percent and PT-only backbone.
+rmse_after_mode1,0.009511,RMSE between S_percent and mode-1 reconstruction.
+improvement_factor_backbone_to_mode1,5.4439,rmse_backbone_only / rmse_after_mode1.
+phi1_kappa1_sign_convention,native_positive_mean_kappa,Sign lock applied to ensure positive-mean kappa1 convention.
+missing_temperatures,NONE,Missing temperatures in expected T=4:2:30 window.
+interpolation_failures_count,50,Count of NaN phi interpolation points on original current rows.

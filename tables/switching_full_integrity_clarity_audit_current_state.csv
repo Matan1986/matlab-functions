@@ -1,0 +1,7 @@
+test_id,question,answer,evidence
+A1,Is there one clear start-here document,YES,reports/switching_corrected_canonical_current_state.md section 9 names itself first
+A2,Does it say authoritative vs diagnostic vs experimental vs historical vs quarantined,YES,Sections 1-5 of current_state.md
+A3,Does it tell agents what not to use,YES,Sections 3-5; forbidden conflations section 10; quarantine pointer
+A4,Does it point to corrected-old authoritative path,YES,Section 1 + artifact index paths
+A5,Does it block PTCDF diagnostic as manuscript evidence,YES,Section 3 EXPERIMENTAL_PTCDF_DIAGNOSTIC; builder forbids mixed diagnostics per gates
+A6,Git governance note,.gitignore masks reports/** and tables/** broadly; governance CSVs require git add -f to appear in history like 72215df,.gitignore lines 71-134

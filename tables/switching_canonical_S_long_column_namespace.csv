@@ -1,0 +1,12 @@
+column_name,column_namespace_id,subclass,allowed_use,forbidden_use,relation_to_manuscript_backbone
+T_K,CANON_GEN_SOURCE,identity_axis,Citing temperature ladder for S and identity alignment,Using as physics claim without run context,
+current_mA,CANON_GEN_SOURCE,identity_axis,Defining current grid for S rows and identity columns,Treating as x=(I-I_peak)/w without explicit construction,
+S_percent,CANON_GEN_SOURCE,measured_S,Authoritative measured S for CANON_GEN_SOURCE when run id + path cited,Equating to legacy alignment S without bridge,
+S_model_pt_percent,EXPERIMENTAL_PTCDF_DIAGNOSTIC,ptcdf_backbone_column,Diagnostic overlay hierarchy scripts labeled EXPERIMENTAL,Authoritative CORRECTED_CANONICAL_OLD_ANALYSIS backbone evidence,
+CDF_pt,EXPERIMENTAL_PTCDF_DIAGNOSTIC,ptcdf_axis,Axis for diagnostic plots and monotonicity checks; CANON_COLLAPSE_FAMILY read-only context,PT-axis confused with physical current as universal coordinate without label,
+PT_pdf,EXPERIMENTAL_PTCDF_DIAGNOSTIC,ptcdf_density,Gradient-of-repaired-quasi-CDF diagnostic per map; monotonicity audits,Raw dS_dI or manuscript primary backbone under corrected-old contract,
+residual_percent,DIAGNOSTIC_MODE_ANALYSIS,mode_diagnostic,Rank/mode diagnostics derived from S - S_model_pt path,Authoritative corrected-old residual map,
+S_model_full_percent,DIAGNOSTIC_MODE_ANALYSIS,mode_diagnostic,Full model column in producer diagnostics,Authoritative corrected-old backbone or residual,
+phi1_from_canonical_phi1_csv,DIAGNOSTIC_MODE_ANALYSIS,mode_shape_diagnostic,switching_canonical_phi1.csv SVD on filled residual native I,Authoritative corrected-old Phi1 table,
+kappa1_observable_from_canonical_observables,DIAGNOSTIC_MODE_ANALYSIS,mode_amplitude_diagnostic,Observables file kappa1 tied to diagnostic decomposition path,Authoritative corrected-old kappa1 table,
+future_agent_rule,N/A,N/A,"Declare column subset in every consumer script/report header","Assume reading switching_canonical_S_long.csv implies one namespace",

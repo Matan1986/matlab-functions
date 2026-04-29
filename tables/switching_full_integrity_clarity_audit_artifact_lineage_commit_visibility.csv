@@ -1,0 +1,11 @@
+artifact_class,example_path,on_disk_expected,git_ls_files_tracked_in_HEAD,gitignore_rule_bucket,indexed_in_artifact_index,production_note
+TASK_001_finite_grid_tables,tables/switching_corrected_old_finite_grid_interpolation_status.csv,yes if present,yes in 72215df via force-add,tables/** partial exceptions,yes TASK_001 rows,72215df committed subset
+TASK_002_QA_tables_manifests,tables/switching_corrected_old_quality_metrics_visual_QA_refined_status.csv,yes,yes in 72215df,yes,yes,
+Authoritative_numerical_maps,tables/switching_corrected_old_authoritative_backbone_map.csv,yes typically,NO — not in git ls-files 2026-04-29 audit,tables/*_map* + tables/**,yes corrected_old_authoritative_*,Produced by builder; local-only unless force-add policy decided
+Authoritative_quality_metrics,tables/switching_corrected_old_authoritative_quality_metrics.csv,yes,NO,tables/*metrics*,yes,
+Builder_gate_record,tables/switching_corrected_old_authoritative_builder_status.csv,yes,NO,tables/*status*,yes,Ignored pattern masks status files
+Governance_current_state,reports/switching_corrected_canonical_current_state.md,yes,NO,reports/**,referenced docs,N/A — reports broadly ignored
+Governance_quarantine_tables,tables/switching_quarantine_index.csv,yes,NO,tables/** + possibly inventory,yes,
+Corrected_old_builder_script,Switching/analysis/run_switching_corrected_old_authoritative_builder.m,yes,NO — UNTRACKED,no,n/a,Highest provenance risk this audit
+TASK_002A_diagnostic_drivers,Switching/diagnostics/run_switching_corrected_old_task002_visual_QA_refinement.m,yes,yes,.m not ignored,n/a,Tracked in 72215df
+Canonical_driver_modified_tree,Switching/analysis/run_switching_canonical.m,yes,yes with local diff,M not ignored,n/a,Working tree contains uncommitted header/governance edits

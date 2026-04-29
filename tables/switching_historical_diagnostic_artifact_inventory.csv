@@ -1,0 +1,10 @@
+inventory_category,example_paths,governance_pointer,risk_notes
+legacy_alignment_and_scaling,"results/switching/runs/*/alignment_audit; switching_full_scaling_parameters.csv",docs/switching_analysis_map.md OLD_FULL_SCALING,Do not treat as CANON_GEN_SOURCE S_long without bridge
+legacy_PT_and_barrier,results_old/switching/runs/*/PT_matrix.csv,OLD_BARRIER_PT,Template lock for corrected-old builder only under gates
+mixed_canonical_S_long_columns,results/switching/runs/*/switching_canonical_S_long.csv,reports/switching_canonical_S_long_column_namespace.md,S_percent vs PTCDF columns must be declared per consumer
+geocanon_descriptor_branch,tables/switching_geocanon_*.csv; Switching/analysis/run_switching_geocanon_*.m,DIAGNOSTIC_FORENSIC B08,Descriptor-only unless charter promotes
+phi_kappa_experimental_physics,Switching/analysis/run_phi*.m; run_kappa*.m (non-authoritative),Claim boundary tables,Many scripts — use backbone family tree + claim map
+phase_gated_design_inventories,tables/switching_phase*_*.csv,reconstruction program,Hypothesis/design tables not manuscript evidence alone
+quarantined_visuals,figures/switching/canonical/switching_corrected_old_*.png,reports/switching_quarantine_index.md,Filename mimics authoritative package
+backbone_collapse_diagnostic_scripts,Switching/analysis/run_switching_backbone_*.m; Switching/analysis/run_switching_collapse_*.m,reports/switching_final_governance_micro_pass.md,DIAGNOSTIC_FORENSIC headers; not corrected-old builder substitutes
+maintenance_report_naming,reports/maintenance/switching_*.md,reports/switching_corrected_canonical_current_state.md,May say corrected/resolver; authoritative list remains artifact index + builder status

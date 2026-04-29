@@ -1,0 +1,11 @@
+risk_id,severity,title,description,owner_hint
+R01,BLOCKING,Authoritative_builder_and_wrappers_untracked,Switching/analysis/run_switching_corrected_old_authoritative_builder.m and PS1 wrappers are ?? — reproducibility and peer review cannot anchor on git history alone.,Commit with explicit message or document intentional omission
+R02,BLOCKING,Major_authoritative_CSVs_not_in_git,Authoritative backbone/residual/phi/kappa maps and quality_metrics not in git ls-files; exist only locally under ignored paths.,Force-add policy or curated export bundle for archival
+R03,HIGH,Governance_docs_tables_gitignored,reports/** and tables/*audit* etc. hide governance unless git add -f.,Maintain force-add checklist per release
+R04,HIGH,Artifact_index_stale_refined_rows,Refined QA marked pending in index while refined_status complete — misroutes agents,MEDIUM until index fixed
+R05,MEDIUM,Mixed_S_long_load_hazard,Whole-file load of switching_canonical_S_long.csv without column filter — PTCDF accidental use.,Enforce source_view workflow in procedures
+R06,MEDIUM,Quarantine_PNG_filenames,switching_corrected_old_*.png filenames imply authority — listed quarantine but no embedded warnings,MEDIUM — caption discipline
+R07,MEDIUM,Working_tree_canonical_script_drift,35 modified Switching/analysis scripts uncommitted — governance header pass not shared.,Commit or bundle before collaborative continuation
+R08,LOW,TASK_002A_reference_in_current_state,Minor wrong status file citation for which CSV proves TASK_002A,Doc fix
+R09,LOW,Out_of_scope_untracked_contamination,58 untracked includes Relaxation/Aging/scripts — confuses repository hygiene review,Separate branches or clean staging area
+R10,INFO,CHK007_SVD_replay_not_applicable,Explained variance identity not replayed from exports — documented limitation,None

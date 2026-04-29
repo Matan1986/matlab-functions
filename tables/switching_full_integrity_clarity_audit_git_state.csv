@@ -1,0 +1,94 @@
+path,git_status,category,blocks_continuation,notes
+.gitignore,M,MAINTENANCE_OR_DOCS,NO,Modified ignore rules; masks reports/tables unless force-added
+Switching/analysis/run_minimal_canonical.m,M,SWITCHING_CANONICAL_MODULE,NO,Canonical-namespace scripts (local uncommitted governance/header edits)
+Switching/analysis/run_parameter_robustness_switching_canonical.m,M,SWITCHING_CANONICAL_MODULE,NO,
+Switching/analysis/run_phi2_kappa2_canonical_residual_mode.m,M,SWITCHING_EXPERIMENTAL_PTCDF_DIAGNOSTIC,NO,Residual-mode diagnostic; not corrected-old authoritative
+Switching/analysis/run_switching_backbone_confidence_audit.m,M,SWITCHING_CANONICAL_MODULE,NO,
+Switching/analysis/run_switching_backbone_stress_test.m,M,SWITCHING_CANONICAL_MODULE,NO,
+Switching/analysis/run_switching_backbone_validity_audit.m,M,SWITCHING_CANONICAL_MODULE,NO,
+Switching/analysis/run_switching_canonical.m,M,SWITCHING_CANONICAL_MODULE,NO,Mixed producer; header has NAMESPACE/EVIDENCE warning block (verified audit)
+Switching/analysis/run_switching_canonical_collapse_hierarchy.m,M,SWITCHING_CANONICAL_MODULE,NO,
+Switching/analysis/run_switching_canonical_collapse_visualization.m,M,SWITCHING_CANONICAL_MODULE,NO,
+Switching/analysis/run_switching_canonical_first_figure_anchor.m,M,SWITCHING_CANONICAL_MODULE,NO,
+Switching/analysis/run_switching_canonical_map_backbone_residual_visualization.m,M,SWITCHING_CANONICAL_MODULE,NO,
+Switching/analysis/run_switching_canonical_map_visualization.m,M,SWITCHING_CANONICAL_MODULE,NO,
+Switching/analysis/run_switching_canonical_metadata_sidecar_audit.m,M,SWITCHING_CANONICAL_MODULE,NO,
+Switching/analysis/run_switching_canonical_observable_dictionary_audit.m,M,SWITCHING_CANONICAL_MODULE,NO,
+Switching/analysis/run_switching_canonical_ptcdf_collapse_overlay.m,M,SWITCHING_EXPERIMENTAL_PTCDF_DIAGNOSTIC,NO,Diagnostic overlay; quarantine policy applies
+Switching/analysis/run_switching_canonical_reconstruction_visualization.m,M,SWITCHING_CANONICAL_MODULE,NO,
+Switching/analysis/run_switching_canonical_root_pipeline_isolation.m,M,SWITCHING_CANONICAL_MODULE,NO,
+Switching/analysis/run_switching_canonical_transition_highT_diagnostics.m,M,SWITCHING_CANONICAL_MODULE,NO,
+Switching/analysis/run_switching_collapse_breakdown_analysis.m,M,SWITCHING_CANONICAL_MODULE,NO,
+Switching/analysis/run_switching_collapse_subrange_analysis.m,M,SWITCHING_CANONICAL_MODULE,NO,
+Switching/analysis/run_switching_geocanon_descriptor_audit.m,M,SWITCHING_CANONICAL_MODULE,NO,
+Switching/analysis/run_switching_mode_hierarchy_synthesis_audit.m,M,SWITCHING_CANONICAL_MODULE,NO,
+Switching/analysis/run_switching_phi1_kappa1_experimental_replay.m,M,SWITCHING_EXPERIMENTAL_PTCDF_DIAGNOSTIC,NO,
+Switching/analysis/run_switching_phi2_replacement_audit.m,M,SWITCHING_CANONICAL_MODULE,NO,
+Switching/analysis/switching_residual_decomposition_analysis.m,M,SWITCHING_EXPERIMENTAL_PTCDF_DIAGNOSTIC,NO,Legacy residual decomposition path
+docs/switching_governance_persistence_manifest.md,M,MAINTENANCE_OR_DOCS,NO,
+figures/switching/diagnostics/switching_gauge_atlas_G001_G254_G014_preview.png,M,SWITCHING_GAUGE_OR_OTHER,NO,Diagnostic gauge preview asset
+reports/maintenance/governor_summary_latest.md,M,MAINTENANCE_OR_DOCS,NO,Maintenance report area may be tracked under exceptions
+reports/switching_gauge_atlas_preview.md,M,SWITCHING_GAUGE_OR_OTHER,NO,
+scripts/run_switching_canonical_map_spine.ps1,M,SWITCHING_CANONICAL_MODULE,NO,
+scripts/run_switching_gauge_atlas_preview.m,M,SWITCHING_GAUGE_OR_OTHER,NO,
+tables/switching_analysis_classification_status.csv,M,SWITCHING_GAUGE_OR_OTHER,NO,
+tables/switching_gauge_atlas_baseline_vs_stabilized.csv,M,SWITCHING_GAUGE_OR_OTHER,NO,
+tables/switching_gauge_atlas_preview_status.csv,M,SWITCHING_GAUGE_OR_OTHER,NO,
+Relaxation ver3/build_RF3R2_repaired_replay_object.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/diagnostics/run_RF3R_default_replay_repair_audit.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/diagnostics/run_RF3R_manual_trace_review.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/diagnostics/run_relaxation_observable_stability_audit_recovery_runner.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/run_relaxation_A_T_m0_RF3R2_reconciliation_audit.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/run_relaxation_A_T_vs_m0_RF3R2.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/run_relaxation_A_T_vs_m0_diagnostic_RF3R.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/run_relaxation_DeltaM_positive_display_light_smooth_pub_RF3R2.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/run_relaxation_DeltaM_positive_logtime_map_and_slices_RF3R2.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/run_relaxation_DeltaM_positive_time_slices_light_smooth_normalization_RF3R2.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/run_relaxation_RF3R2_units_name_audit.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/run_relaxation_RF3R_allowed_old_analysis_replay.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/run_relaxation_RF4B_RF3R2_visualization.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/run_relaxation_RF5A_RF3R2_primary_rank1_and_m0.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/run_relaxation_canonical_visualization_inventory_and_plan.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/run_relaxation_collapse_RF3R2_narrow_replay.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/run_relaxation_light_norm_RF3R2.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/run_relaxation_light_norm_inliers_RF3R2.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/run_relaxation_light_norm_strict_inliers_RF3R2.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/run_relaxation_light_norm_strict_inliers_Tlt31p5_RF3R2.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/run_relaxation_linear_time_map_RF3R2.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/run_relaxation_linear_trace_visualization_sanity.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/run_relaxation_phase2_A_canon_lock.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/run_relaxation_phase2_A_canon_visual_envelope_bridge.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/run_relaxation_positive_display_leftanchored_compact_RF3R2.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/run_relaxation_positive_display_map_RF3R2.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/run_relaxation_positive_display_publication_fix_RF3R2.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/run_relaxation_positive_display_publication_style_RF3R2.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Relaxation ver3/run_relaxation_tau_RF3R2_narrow_replay.m,??,RELAXATION_OUT_OF_SCOPE,NO,
+Switching/analysis/run_switching_corrected_old_authoritative_builder.m,??,SWITCHING_CORRECTED_OLD_AUTHORITATIVE,YES,Untracked authoritative builder — reproducibility and governance gap vs HEAD
+Switching/analysis/run_switching_corrected_old_builder_readiness_check.m,??,SWITCHING_CORRECTED_OLD_AUTHORITATIVE,YES,Supporting gate script untracked
+Switching/diagnostics/run_switching_cdf_backbone_repair_aggressiveness_audit.m,??,SWITCHING_EXPERIMENTAL_PTCDF_DIAGNOSTIC,NO,
+docs/decisions/switching_main_narrative_namespace_decision.md,??,MAINTENANCE_OR_DOCS,NO,Untracked decision doc
+run_aging_F6b_old_canonical_tau_ratio_bridge_audit.m,??,AGING_OUT_OF_SCOPE,NO,
+run_aging_F6c_old_time_ratio_forensic_discovery.m,??,AGING_OUT_OF_SCOPE,NO,
+run_aging_F6d_clock_ratio_output_recovery.m,??,AGING_OUT_OF_SCOPE,NO,
+run_switching_fixed_T_current_cuts_canonical_replay.m,??,SWITCHING_CANONICAL_MODULE,NO,
+scripts/build_rf3r2_repaired_replay_object.py,??,RELAXATION_OUT_OF_SCOPE,NO,
+scripts/run_relaxation_phase2_A_canon_lock.py,??,RELAXATION_OUT_OF_SCOPE,NO,
+scripts/run_sw_corr_old_nonfinite_debug.m,??,SWITCHING_EXPERIMENTAL_PTCDF_DIAGNOSTIC,NO,
+scripts/run_sw_corr_old_replay_auth.m,??,SWITCHING_EXPERIMENTAL_PTCDF_DIAGNOSTIC,NO,Listed quarantine index
+scripts/run_sw_old_inv_phi1_viz.m,??,SWITCHING_EXPERIMENTAL_PTCDF_DIAGNOSTIC,NO,Listed quarantine index
+scripts/run_switching_baseline_X_panel_style_fix.m,??,SWITCHING_GAUGE_OR_OTHER,NO,
+scripts/run_switching_canonical_X_panel_orientation_repair.m,??,SWITCHING_CANONICAL_MODULE,NO,
+scripts/run_switching_canonical_output_separation.ps1,??,SWITCHING_CANONICAL_MODULE,NO,Post-run splitter — governance-critical
+scripts/run_switching_corrected_old_authoritative_builder.ps1,??,SWITCHING_CORRECTED_OLD_AUTHORITATIVE,YES,Untracked wrapper for authoritative builder
+scripts/run_switching_corrected_old_builder_readiness_check.ps1,??,SWITCHING_CORRECTED_OLD_AUTHORITATIVE,YES,
+scripts/run_switching_corrected_old_replay_inventory_and_phi1_visual_sanity.m,??,SWITCHING_EXPERIMENTAL_PTCDF_DIAGNOSTIC,NO,Quarantine-listed misleading flow
+scripts/run_switching_gauge_component_numeric_summary.m,??,SWITCHING_GAUGE_OR_OTHER,NO,
+scripts/run_switching_gauge_component_stability_preview.m,??,SWITCHING_GAUGE_OR_OTHER,NO,
+scripts/run_switching_normalized_X_robustness.m,??,SWITCHING_CANONICAL_MODULE,NO,
+scripts/run_switching_oldX_functional_replay_audit.ps1,??,SWITCHING_EXPERIMENTAL_PTCDF_DIAGNOSTIC,NO,
+scripts/run_switching_old_fig_forensic_and_canonical_replot.m,??,SWITCHING_VISUAL_QA,NO,
+scripts/run_switching_stabilized_gauge_figure_replay.m,??,SWITCHING_GAUGE_OR_OTHER,NO,
+scripts/run_switching_stabilized_gauge_robustness_summary.m,??,SWITCHING_GAUGE_OR_OTHER,NO,
+scripts/run_switching_stabilized_gauge_xpanel_style_fix.m,??,SWITCHING_GAUGE_OR_OTHER,NO,
+scripts/tmp_nonfinite_debug.py,??,UNKNOWN,NO,Scratch
+scripts/tmp_run_switching_canonical_paper_figures.m,??,SWITCHING_CANONICAL_MODULE,NO,Temporary paper-figure driver — do not treat as gate

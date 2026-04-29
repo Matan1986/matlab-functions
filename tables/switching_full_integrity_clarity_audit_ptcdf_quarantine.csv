@@ -1,0 +1,10 @@
+artifact_or_class,listed_in_quarantine_index,script_header_or_governance_warning,used_by_corrected_old_builder,blocked_as_manuscript_evidence,blocked_as_corrected_old_evidence,notes
+S_model_pt_percent / CDF_pt / PT_pdf,YES — via run_switching_canonical.m rows,Column-level warning NO; script header YES,Mixed — builder uses PT_matrix legacy route not these columns,YES policy,YES builder gate CANON_GEN_DIAGNOSTIC,
+residual_percent diagnostic,YES,Script header YES,NO,YES,YES,
+switching_canonical_phi1.csv (canonical run output),YES,NO in cells,NO for authoritative phi1 — builder produces switching_corrected_old_authoritative_phi1.csv,YES,YES,
+Canonical kappa1 observables path,YES,NO,NO,YES,YES,
+run_switching_canonical_ptcdf_collapse_overlay.m,YES (diagnostic scripts),Header edits in working tree — verify when committing,PARTIAL — not builder input,N/A diagnostic,N/A,
+Quarantined PNGs switching_corrected_old_*.png,YES,NO embedded,NO,YES,YES,
+Experimental replay scripts e.g. run_sw_old_inv_phi1_viz.m,YES,Partial,NO,YES,YES,
+category_uncatalogued_switching_scripts,YES pointer,N/A,N/A,N/A,Broad sweep residual bucket
+_EXPERIMENTAL_PTCDF_QUARANTINE_VERDICT,PARTIAL,policy+index+builder_gates,not_mechanical_file_lock,mixed_S_long_hazard,filename_quarantine_hazard,See report Test C

@@ -1,0 +1,9 @@
+task,item,action,disposition,notes
+1,Authoritative index PARTIAL,Review broad-sweep gap notes; no new manuscript rows for diagnostic-only assets,ADDITIVE_INDEX_AND_MD,Prior pass added mixed S_long INDEX_ONLY and builder cross-refs; no addition of PTCDF/diagnostic as authority
+1,Non-authoritative candidates,Classify as diagnostic / historical / index-only per sweep,DEFERRED_TO_SWEEP_TABLE,See tables/switching_broad_artifact_ambiguity_sweep.csv
+2,Quarantine index PARTIAL,Confirm category + Phase5B + placeholder report rows present,NO_DUPLICATE_ADD,Rows already in tables/switching_quarantine_index.csv; broad sweep category covers residual scripts
+3,Historical/diagnostic inventory,Add backbone/collapse + maintenance rows; sufficiency note in MD,ADDED_ROWS_AND_SUFFICIENCY,tables/switching_historical_diagnostic_artifact_inventory.csv + report section
+4,Header sweep run_switching_canonical_*,All 11 files have SW NAMESPACE block,COMPLETE,Pattern complete in Switching/analysis
+4,Header sweep run_switching_backbone_*,Add comment headers,ADDED,run_switching_backbone_confidence_audit.m; run_switching_backbone_stress_test.m
+4,Header sweep run_switching_collapse_*,Add comment headers,ADDED,run_switching_collapse_breakdown_analysis.m; run_switching_collapse_subrange_analysis.m
+4,Header sweep run_phi*.m / run_switching_phi*.m,Bulk deformation/audit family,NO_ACTION_DEFORMATION_SUITE,"phi_kappa_experimental_physics" inventory row; only run_phi2_kappa2_canonical_residual_mode.m hardened earlier; residual scripts LOW unless cited as evidence
