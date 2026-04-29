@@ -1,0 +1,12 @@
+metric,value,notes
+total_findings,171,
+hard_fail_count,0,
+warn_count,171,
+suggest_count,0,
+required_inputs_count,18,
+required_inputs_missing_count,0,
+contract_tables_checked_count,11,
+schema_warn_count,0,
+lint_rules_loaded_count,19,
+mixed_producer_checks_count,8,
+allowed_use_checks_count,38,
