@@ -1,0 +1,9 @@
+stop_id,condition_summary,category
+STOP_PLAIN_DIP_DEPTH,"Unresolved plain Dip_depth blocks model_ready tau_R paths",identity
+STOP_MISSING_SIDECAR,"Missing sidecar on artifact proposed as model input",lineage
+STOP_RATIO_ID_UNKNOWN,"Unknown numerator or denominator identity for R table",tau_R
+STOP_MISLEADING_CANON_NAME,"tau_dip_canonical or similar without authoritative flag resolution",naming_policy
+STOP_CROSS_MODULE_EARLY,"Cross-module comparison before Aging lineage stable",scope
+STOP_PROCESS_DIRTY_INDEX,"Non-empty git index when planning-only task requires no staging",process
+STOP_OUT_OF_SCOPE_EDIT,"Unexpected modifications outside Aging when scope is Aging-only",process
+STOP_VIS_SHORTCUT,"Visualization shortcut exporting review figures without PNG and FIG where export rules apply treating figures as sufficient proof of canonical status or changing data paths scientific calculations or analysis logic solely for cosmetic figure improvement",visualization
