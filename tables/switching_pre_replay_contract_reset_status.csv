@@ -1,0 +1,20 @@
+status_key,status_value,notes
+SWITCHING_PRE_REPLAY_CONTRACT_RESET_PHASE1_COMPLETE,YES,Design docs and seed CSVs added 2026-04-29 read-only audit
+READ_ONLY_REPO_AUDIT_DONE,YES,No edits to analysis algorithms or existing governed outputs
+MATLAB_NOT_RUN,YES,Phase 1 inspection only
+NO_SCIENCE_OUTPUTS_CREATED,YES,No new canonical figures tables from this task
+NO_EXISTING_ANALYSIS_LOGIC_MODIFIED,YES,Analysis scripts untouched
+NO_STAGING_OR_COMMIT,YES,Opening check showed empty git diff --cached
+REGISTRY_LAYER_FOUND,YES,Multiple tables docs partial unified index missing
+REGISTRY_LAYER_MATURITY,PARTIAL,switching_corrected_old_authoritative_artifact_index strong distributed coverage
+NAMESPACE_LAYER_FOUND,YES,switching_analysis_namespace_clean_map switching_artifact_policy switching_analysis_map
+NAMESPACE_LAYER_MATURITY,PARTIAL,explicit docs machine map path enforcement not universal
+LINEAGE_LAYER_FOUND,PARTIAL,strong for canonical producer and authoritative index varied elsewhere
+LINEAGE_LAYER_MATURITY,PARTIAL,PRESENT for key packages PARTIAL ad hoc scripts
+WRITER_CONTRACT_FOUND,PARTIAL,run_switching_canonical header template scripts vary
+WRITER_CONTRACT_MATURITY,PARTIAL,exemplars strong no single enforced schema
+ASSISTIVE_FIRST_POLICY_USED,YES,WARN SUGGEST default HARD_FAIL narrow
+HARD_FAILS_RESERVED_FOR_CANONICAL_VIOLATIONS,YES,Design reserves hard fail for authority misuse
+SAFE_TO_PROCEED_TO_CONTRACT_MATERIALIZATION,YES,Phase 2 may expand rows optional validators
+SAFE_TO_PROCEED_TO_OLD_ANALYSIS_REPLAY,NO,Do not blind replay wait lineage population governance
+RECOMMENDED_NEXT_PHASE,PHASE2_EXPAND_REGISTRY_AND_OPTIONAL_LINT,"Populate registry CSV from inventories wire WARN-first checks"
