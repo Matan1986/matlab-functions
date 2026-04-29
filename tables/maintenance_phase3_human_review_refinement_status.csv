@@ -1,0 +1,19 @@
+key,value
+MAINTENANCE_PHASE3_HUMAN_REVIEW_REFINEMENT_COMPLETE,YES
+READ_ONLY_REVIEW,YES
+NO_FILES_MODIFIED,YES
+NO_FILES_STAGED,YES
+NO_FILES_DELETED,YES
+P0_REMAINS_CLOSED,YES
+IN_SCOPE_PATH_COUNT,54
+OUT_OF_SCOPE_DIRTY_PATH_COUNT,34
+KEEP_FOR_FUTURE_COMMIT_COUNT,17
+RESTORE_TO_HEAD_LATER_COUNT,0
+DELETE_UNTRACKED_LATER_COUNT,0
+MOVE_TO_QUARANTINE_LATER_COUNT,8
+SPLIT_INTO_SEPARATE_TASK_COUNT,0
+NEEDS_MANUAL_DIFF_REVIEW_COUNT,29
+SAFE_TO_PROCEED_TO_PHASE4_SCOPED_ACTIONS,YES
+BROAD_ACTIONS_RECOMMENDED,NO
+AUDIT_HEAD_COMMIT,b6d6429
+AUDIT_NOTE,Phase 3 refinement only; no edits to pre-existing dirty paths except new maintenance deliverables. Verdict machine-readable rows: this file + companion refinement CSV + report under reports/maintenance/. Note: this filename matches .gitignore tables/*status* so it does not appear in git status; use git add -f when tracking. Path-specific Phase 4 only; canonical bundle gated on manual diff.

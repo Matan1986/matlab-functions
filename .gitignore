@@ -129,6 +129,8 @@ tables/*_trace*
 tables/*_log*
 tables/*_check*
 tables/*cleanup_debug*
+# Broad table/* guards above must not hide tables/maintenance_*.csv (re-assert after later patterns).
+!tables/maintenance_*.csv
 
 # =========================================================
 # Local scratch / archive / experimental directories

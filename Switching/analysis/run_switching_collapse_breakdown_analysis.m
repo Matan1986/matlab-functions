@@ -1,3 +1,7 @@
+% SWITCHING NAMESPACE / EVIDENCE WARNING
+% NAMESPACE_ID: DIAGNOSTIC_FORENSIC — collapse breakdown audit on canonical/legacy inputs per script configuration
+% EVIDENCE_STATUS: AUDIT_ONLY — not OLD_FULL_SCALING parameters export unless labeled
+% CURRENT_STATE_ENTRYPOINT: reports/switching_corrected_canonical_current_state.md
 clear; clc;
 
 repoRoot = fileparts(fileparts(fileparts(mfilename('fullpath'))));

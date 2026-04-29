@@ -1,3 +1,13 @@
+% SWITCHING NAMESPACE / EVIDENCE WARNING
+% NAMESPACE_ID: DIAGNOSTIC_FORENSIC + EXPERIMENTAL_PTCDF_DIAGNOSTIC (validates S_model_pt_percent CDF_pt PT_pdf from S_long)
+% EVIDENCE_STATUS: AUDIT_ONLY — monotonicity / formula checks; not CORRECTED backbone authority
+% BACKBONE_FORMULA: compares S_model_pt to S_peak*CDF proxy; explicitly PTCDF diagnostic column semantics
+% SVD_INPUT: N/A
+% COORDINATE_GRID: native I
+% SAFE_USE: gate documentation for Phase C / PT validity; cite as diagnostic evidence class
+% UNSAFE_USE: using audit pass as proof of manuscript backbone for CORRECTED_CANONICAL_OLD_ANALYSIS
+% NOT_MAIN_MANUSCRIPT_EVIDENCE_IF_APPLICABLE: YES
+% CURRENT_STATE_ENTRYPOINT: reports/switching_corrected_canonical_current_state.md
 clear; clc;
 
 repoRoot = fileparts(fileparts(fileparts(mfilename('fullpath'))));

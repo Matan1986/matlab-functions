@@ -1,3 +1,13 @@
+% SWITCHING NAMESPACE / EVIDENCE WARNING
+% NAMESPACE_ID: CANON_COLLAPSE_FAMILY + EXPERIMENTAL_PTCDF_DIAGNOSTIC (PT/CDF columns from S_long for overlay)
+% EVIDENCE_STATUS: DIAGNOSTIC_OVERLAY — CDF_pt often plot axis; not manuscript primary backbone
+% BACKBONE_FORMULA: reads S_model_pt_percent / CDF_pt / PT_pdf from switching_canonical_S_long per map
+% SVD_INPUT: per overlay stage if any
+% COORDINATE_GRID: native I + CDF_pt axis where used — label EXPERIMENTAL for PTCDF
+% SAFE_USE: overlay figures with dual-namespace caption (see docs/switching_analysis_map.md CANON_COLLAPSE_FAMILY)
+% UNSAFE_USE: equating overlay to CORRECTED_CANONICAL_OLD_ANALYSIS backbone; independent PT construction claim
+% NOT_MAIN_MANUSCRIPT_EVIDENCE_IF_APPLICABLE: YES for PTCDF read path
+% CURRENT_STATE_ENTRYPOINT: reports/switching_corrected_canonical_current_state.md
 clear; clc;
 
 repoRoot = fileparts(fileparts(fileparts(mfilename('fullpath'))));

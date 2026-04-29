@@ -1,4 +1,13 @@
 function run_parameter_robustness_switching_canonical()
+% SWITCHING NAMESPACE / EVIDENCE WARNING
+% NAMESPACE_ID: LEGACY_OLD_TEMPLATE / alignment samples — NOT run_switching_canonical S_long producer chain
+% EVIDENCE_STATUS: DIAGNOSTIC_ROBUSTNESS on alignment-era samples; filename "canonical" refers to parameter tests not CANON_GEN_SOURCE
+% BACKBONE_FORMULA: N/A (observable / sample robustness)
+% SVD_INPUT: N/A
+% COORDINATE_GRID: alignment audit grid
+% SAFE_USE: robustness audit with explicit alignment run id; compare to docs/switching_analysis_map quarantine list for similar names
+% UNSAFE_USE: conflating with CANON_GEN_SOURCE from run_switching_canonical.m outputs; manuscript "canonical" claims without namespace
+% CURRENT_STATE_ENTRYPOINT: reports/switching_corrected_canonical_current_state.md
 % RUN_PARAMETER_ROBUSTNESS_SWITCHING_CANONICAL
 % Analysis-only robustness test for canonical switching features under
 % parameter-definition variants. Keeps the same measurement/data grid.

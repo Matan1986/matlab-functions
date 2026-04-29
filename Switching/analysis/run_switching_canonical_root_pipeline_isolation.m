@@ -1,3 +1,7 @@
+% SWITCHING NAMESPACE / EVIDENCE WARNING
+% NAMESPACE_ID: DIAGNOSTIC_FORENSIC — pipeline isolation / routing audit for canonical run roots
+% EVIDENCE_STATUS: INFRASTRUCTURE_AUDIT — prevents mistaken wiring; not manuscript physics claim
+% CURRENT_STATE_ENTRYPOINT: reports/switching_corrected_canonical_current_state.md
 clear; clc;
 
 repoRoot = fileparts(fileparts(fileparts(mfilename('fullpath'))));

@@ -1,3 +1,8 @@
+% SWITCHING NAMESPACE / EVIDENCE WARNING
+% NAMESPACE_ID: CANON_FIGURE_REPLAY / reconstruction visualization — compares reconstruction paths from resolved canonical inputs
+% EVIDENCE_STATUS: FIGURE_REGENERATION — phi/kappa matching flags are diagnostic checks not manuscript closure alone
+% UNSAFE_USE: presenting as authoritative corrected-old reconstruction without switching_corrected_old_authoritative_* tables
+% CURRENT_STATE_ENTRYPOINT: reports/switching_corrected_canonical_current_state.md
 clear; clc;
 
 repoRoot = fileparts(fileparts(fileparts(mfilename('fullpath'))));

@@ -1,3 +1,6 @@
+% SWITCHING NAMESPACE / EVIDENCE WARNING
+% NAMESPACE_ID: DIAGNOSTIC_FORENSIC — stress tests on backbone/path variants; manuscript-safe only with explicit family ids in report prose
+% CURRENT_STATE_ENTRYPOINT: reports/switching_corrected_canonical_current_state.md
 clear; clc;
 
 repoRoot = fileparts(fileparts(fileparts(mfilename('fullpath'))));

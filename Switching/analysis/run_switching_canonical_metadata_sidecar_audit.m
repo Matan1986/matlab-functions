@@ -1,3 +1,7 @@
+% SWITCHING NAMESPACE / EVIDENCE WARNING
+% NAMESPACE_ID: DIAGNOSTIC_FORENSIC — sidecar .meta.json / identity audit for canonical run tables
+% EVIDENCE_STATUS: AUDIT_ONLY — does not change producer outputs; supports resolver / identity policy
+% CURRENT_STATE_ENTRYPOINT: reports/switching_corrected_canonical_current_state.md
 clear; clc;
 
 repoRoot = fileparts(fileparts(fileparts(mfilename('fullpath'))));

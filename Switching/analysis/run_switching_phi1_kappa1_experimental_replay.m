@@ -1,5 +1,16 @@
 clear; clc;
 
+% SWITCHING NAMESPACE / EVIDENCE WARNING
+% NAMESPACE_ID: CANON_GEN_SOURCE (S_percent) + EXPERIMENTAL_PTCDF_DIAGNOSTIC (S_model_pt_percent / residual on native I) + REPLAY (experimental)
+% EVIDENCE_STATUS: DIAGNOSTIC_ONLY — NOT_CORRECTED_CANONICAL_OLD_ANALYSIS authoritative phi1/kappa1
+% BACKBONE_FORMULA: Scdf from aggregated S_model_pt_percent in S_long (read, not rebuilt from raw)
+% SVD_INPUT: R = Smap - Scdf; svd(Rfill) on native current_mA per experimental replay design
+% COORDINATE_GRID: native current_mA (canonical ladder)
+% SAFE_USE: “On frozen CANON_GEN_SOURCE tables, experimental replay shows …” with run id; B03-style supporting evidence per claim map
+% UNSAFE_USE: substituting outputs for tables/switching_corrected_old_authoritative_phi1.csv / kappa1.csv; main backbone narrative without CORRECTED namespace
+% NOT_MAIN_MANUSCRIPT_EVIDENCE_IF_APPLICABLE: experimental replay is not the manuscript-selected PTCDF backbone per narrative contract
+% CURRENT_STATE_ENTRYPOINT: reports/switching_corrected_canonical_current_state.md
+
 repoRoot = fileparts(fileparts(fileparts(mfilename('fullpath'))));
 addpath(fullfile(repoRoot, 'tools'));
 addpath(fullfile(repoRoot, 'Aging', 'utils'));

@@ -1,7 +1,10 @@
+% SWITCHING NAMESPACE / EVIDENCE WARNING
+% NAMESPACE_ID: DIAGNOSTIC_FORENSIC — dictionary/features from hierarchy/map inputs; CANON_GEN_SOURCE + EXPERIMENTAL columns per read sites in script
+% EVIDENCE_STATUS: AUDIT_AGGREGATION — not authoritative corrected-old phi/kappa substitution
+% CURRENT_STATE_ENTRYPOINT: reports/switching_corrected_canonical_current_state.md
 clear; clc;
 
-% Canonical Switching map-observable dictionary audit.
-% Builds canonical observable definitions and per-T features from locked canonical map/hierarchy.
+% Map-observable dictionary audit — builds definitions from locked canonical map/hierarchy inputs.
 
 repoRoot = fileparts(fileparts(fileparts(mfilename('fullpath'))));
 addpath(fullfile(repoRoot, 'tools'));

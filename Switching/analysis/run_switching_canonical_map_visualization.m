@@ -1,3 +1,13 @@
+% SWITCHING NAMESPACE / EVIDENCE WARNING
+% NAMESPACE_ID: CANON_FIGURE_REPLAY + CANON_GEN_SOURCE (S_long) — column use per validateCanonicalInputTable
+% EVIDENCE_STATUS: FIGURE / MAP_DISPLAY — not new physics reconstruction; cite which S_long columns appear in each figure
+% BACKBONE_FORMULA: read-only display of S / optional residual views — not CORRECTED_CANONICAL_OLD_ANALYSIS unless using authoritative tables
+% SVD_INPUT: N/A unless script recomputes
+% COORDINATE_GRID: per plot (native I vs derived)
+% SAFE_USE: map visualization with run id + namespace in caption
+% UNSAFE_USE: treating plot as proof of corrected-old backbone without switching_corrected_old_authoritative_*.csv
+% NOT_MAIN_MANUSCRIPT_EVIDENCE_IF_APPLICABLE: confirm column classes if S_model_pt_percent shown
+% CURRENT_STATE_ENTRYPOINT: reports/switching_corrected_canonical_current_state.md
 clear; clc;
 
 repoRoot = fileparts(fileparts(fileparts(mfilename('fullpath'))));

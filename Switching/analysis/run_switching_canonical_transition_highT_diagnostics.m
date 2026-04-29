@@ -1,3 +1,8 @@
+% SWITCHING NAMESPACE / EVIDENCE WARNING
+% NAMESPACE_ID: DIAGNOSTIC_FORENSIC / CANON_COLLAPSE_FAMILY reads — high-T transition diagnostics on gated canonical inputs
+% EVIDENCE_STATUS: DIAGNOSTIC — hierarchy / width usage must stay labeled per switching_analysis_map.md
+% UNSAFE_USE: universal backbone or corrected-old authority claims without authoritative tables
+% CURRENT_STATE_ENTRYPOINT: reports/switching_corrected_canonical_current_state.md
 clear; clc;
 
 repoRoot = fileparts(fileparts(fileparts(mfilename('fullpath'))));

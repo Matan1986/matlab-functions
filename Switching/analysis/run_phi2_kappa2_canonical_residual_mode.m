@@ -1,3 +1,13 @@
+% SWITCHING NAMESPACE / EVIDENCE WARNING
+% NAMESPACE_ID: PHI2_KAPPA2_HYBRID / OLD_RESIDUAL_DECOMP (first stage switching_residual_decomposition_analysis with alignmentRunId/fullScalingRunId/ptRunId — NOT CORRECTED_CANONICAL_OLD_ANALYSIS authoritative phi2/kappa2).
+% EVIDENCE_STATUS: HISTORICAL_OR_HYBRID_DIAGNOSTIC — NOT_MANUSCRIPT_PRIMARY
+% BACKBONE_FORMULA: OLD_RESIDUAL_DECOMP Speak*cdfRow (legacy PT_matrix path in cfg); second SVD on residual strip for mode 2
+% SVD_INPUT: second SVD on M from R_all after first-stage decomposition (mode 2 diagnostics)
+% COORDINATE_GRID: legacy decomposition x_grid / x=(I-I_peak)/width via decomposition outputs — not native CANON_GEN ladder alone
+% SAFE_USE: internal diagnostics; cite PHI2_KAPPA2_HYBRID + OLD_RESIDUAL_DECOMP explicitly in any downstream text
+% UNSAFE_USE: manuscript-authoritative phi2/kappa2; substituting outputs for tables/switching_corrected_old_authoritative_*.csv; implying CANON_GEN_SOURCE evidence
+% NOT_MAIN_MANUSCRIPT_EVIDENCE_IF_APPLICABLE: YES — filename contains “canonical” but uses legacy triple-run stack (docs/switching_analysis_map.md PHI2_KAPPA2_HYBRID).
+% CURRENT_STATE_ENTRYPOINT: reports/switching_corrected_canonical_current_state.md
 fprintf('[RUN] run_phi2_kappa2_canonical_residual_mode\n');
 clearvars;
 

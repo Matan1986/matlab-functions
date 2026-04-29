@@ -1,6 +1,11 @@
+% SWITCHING NAMESPACE / EVIDENCE WARNING
+% NAMESPACE_ID: DIAGNOSTIC_FORENSIC — compares proxy observables to hierarchy Phi2 increment; not authoritative corrected-old Phi2
+% EVIDENCE_STATUS: AUDIT_ONLY — "Canonical" in comments refers to CANON_COLLAPSE / Stage E5 semantics; not CORRECTED_CANONICAL_OLD_ANALYSIS CSV package
+% UNSAFE_USE: treating audit as proof of manuscript Phi2 without claim boundary B07/B08 review
+% CURRENT_STATE_ENTRYPOINT: reports/switching_corrected_canonical_current_state.md
 clear; clc;
 
-% Canonical Phi2 replacement audit using physical observables.
+% Phi2 replacement audit using physical observables (naming: canonical increment vs proxies — see docs/switching_analysis_map.md).
 % Tests whether a linear combination of tail_burden_ratio, symmetry_cdf_mirror, and rmse_full_row
 % can approximate the level-2 residual R2 (same construction as Stage E5), compared to the
 % canonical Phi2 increment (pred2 - pred1). Does not change preprocessing or the canonical producer.

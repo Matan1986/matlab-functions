@@ -1,6 +1,16 @@
 clearvars -except modules_used_input switching_batch_inputs
 clc
 
+% SWITCHING NAMESPACE / EVIDENCE WARNING (mixed producer — read column map before any claims)
+% NAMESPACE_ID: CANON_GEN_SOURCE (S_percent) + EXPERIMENTAL_PTCDF_DIAGNOSTIC (S_model_pt_percent,CDF_pt,PT_pdf) + DIAGNOSTIC_MODE_ANALYSIS (residual_percent, phi outputs)
+% EVIDENCE_STATUS: MIXED_OUTPUT_RUN — post-run splitter recommended; see tables/switching_canonical_output_view_contracts.csv
+% BACKBONE_FORMULA: producer emits multiple backbone semantics by column; cite switching_canonical_S_long_column_namespace.md
+% SVD_INPUT: diagnostic-mode phi path uses svd on residual fill — not authoritative corrected-old phi1
+% COORDINATE_GRID: native current_mA in S_long
+% SAFE_USE: canonical S_percent evidence + splitter source views; EXPERIMENTAL columns labeled diagnostic-only for CORRECTED manuscript path
+% UNSAFE_USE: citing PT/CDF or canonical phi1/kappa1 from this run as CORRECTED_CANONICAL_OLD_ANALYSIS authority without authoritative builder tables
+% CURRENT_STATE_ENTRYPOINT: reports/switching_corrected_canonical_current_state.md
+
 % Repo root for catch-path createRunContext (no hardcoded drive paths).
 repoRootBootstrap = fileparts(fileparts(fileparts(mfilename('fullpath'))));
 addpath(fullfile(repoRootBootstrap, 'tools'));

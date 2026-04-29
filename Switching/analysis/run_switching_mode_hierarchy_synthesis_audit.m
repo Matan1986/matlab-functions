@@ -1,7 +1,16 @@
+% SWITCHING NAMESPACE / EVIDENCE WARNING
+% NAMESPACE_ID: DIAGNOSTIC_FORENSIC — mode hierarchy synthesis from certified audit CSVs (no new SVD here)
+% EVIDENCE_STATUS: AUDIT_AGGREGATION — NOT primary manuscript physics reconstruction
+% BACKBONE_FORMULA: N/A — reads prior audit matrices
+% SVD_INPUT: N/A in this script (aggregation only)
+% COORDINATE_GRID: N/A
+% SAFE_USE: gate/boundary tables for mode claims; cite certification CSV dependency
+% UNSAFE_USE: promoting rank2/3 to primary claims without charter; conflating with CORRECTED_CANONICAL_OLD_ANALYSIS authoritative maps
+% NOT_MAIN_MANUSCRIPT_EVIDENCE_IF_APPLICABLE: synthesis report is supporting governance evidence class
+% CURRENT_STATE_ENTRYPOINT: reports/switching_corrected_canonical_current_state.md
 clear; clc;
 
-% Canonical Switching mode-hierarchy synthesis audit.
-% Aggregates certified audit outputs only (no new decomposition/physics analysis).
+% Mode-hierarchy synthesis audit — aggregates certified audit outputs only (no new decomposition/physics analysis).
 
 repoRoot = fileparts(fileparts(fileparts(mfilename('fullpath'))));
 addpath(fullfile(repoRoot, 'tools'));

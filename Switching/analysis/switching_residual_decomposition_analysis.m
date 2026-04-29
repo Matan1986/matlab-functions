@@ -1,4 +1,14 @@
 function out = switching_residual_decomposition_analysis(cfg)
+% SWITCHING NAMESPACE / EVIDENCE WARNING (core legacy decomposition — cite OLD_RESIDUAL_DECOMP)
+% NAMESPACE_ID: OLD_RESIDUAL_DECOMP (alignmentRunId / fullScalingRunId / ptRunId — legacy centered recipe)
+% EVIDENCE_STATUS: HISTORICAL_TEMPLATE unless explicitly replayed under CORRECTED_CANONICAL_OLD_ANALYSIS with governed inputs
+% BACKBONE_FORMULA: S_peak * cdfRow (PT or fallback)
+% SVD_INPUT: deltaS on xGrid -> SVD(R0) for Phi; PT_pdf path not CANON_GEN quasi-CDF identity
+% COORDINATE_GRID: native I for CDF construction; x=(I-I_peak)/width for residual strip
+% SAFE_USE: legacy reproduction; comparisons labeled OLD_RESIDUAL_DECOMP; inputs to PHI2_KAPPA2_HYBRID second stage clearly flagged
+% UNSAFE_USE: bare “canonical Phi/kappa” claims; equating outputs to CANON_GEN phi1/kappa or corrected-old authoritative CSVs without proof
+% NOT_MAIN_MANUSCRIPT_EVIDENCE_IF_APPLICABLE: unless gated replay package says otherwise
+% CURRENT_STATE_ENTRYPOINT: reports/switching_corrected_canonical_current_state.md
 % switching_residual_decomposition_analysis
 % Decompose switching response into active CDF part and residual rigidity part:
 %   S(I,T) = S0(T)*CDF(P_T) + kappa(T)*Phi((I-I_peak)/w)

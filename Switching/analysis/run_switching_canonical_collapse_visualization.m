@@ -1,3 +1,13 @@
+% SWITCHING NAMESPACE / EVIDENCE WARNING
+% NAMESPACE_ID: CANON_COLLAPSE_FAMILY / CANON_FIGURE_REPLAY — reads canonical S_long + phi1 + hierarchy artifacts for visualization
+% EVIDENCE_STATUS: FIGURE_AND_DIAGNOSTIC — confirm columns used per switching_canonical_S_long_column_namespace.md
+% BACKBONE_FORMULA: display-layer reads S_model_pt_percent / hierarchy outputs — EXPERIMENTAL_PTCDF_DIAGNOSTIC where applicable
+% SVD_INPUT: N/A unless script explicitly recomputes (mostly read/plot)
+% COORDINATE_GRID: per figure definition (native I vs collapse coordinate — follow exported axis labels)
+% SAFE_USE: figure regeneration / layout with dual-namespace captions
+% UNSAFE_USE: new physics backbone validation from replay plot alone; corrected-old authority claims without authoritative tables
+% NOT_MAIN_MANUSCRIPT_EVIDENCE_IF_APPLICABLE: PT/CDF visual read paths remain diagnostic unless framed as CORRECTED
+% CURRENT_STATE_ENTRYPOINT: reports/switching_corrected_canonical_current_state.md
 clear; clc;
 
 repoRoot = fileparts(fileparts(fileparts(mfilename('fullpath'))));

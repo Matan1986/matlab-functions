@@ -1,3 +1,9 @@
+% SWITCHING NAMESPACE / EVIDENCE WARNING
+% NAMESPACE_ID: INFRA_TEST — NOT run_switching_canonical / NOT CANON_GEN_SOURCE
+% EVIDENCE_STATUS: SCAFFOLD_MINIMAL — "canonical" in runLabel is createSwitchingRunContext smoke only; no S_long physics
+% BACKBONE_FORMULA: N/A
+% UNSAFE_USE: grep hits on "minimal_canonical" as evidence of Switching pipeline; confusion with real canonical runs
+% CURRENT_STATE_ENTRYPOINT: reports/switching_corrected_canonical_current_state.md
 clear; clc;
 
 repoRoot = fileparts(fileparts(fileparts(mfilename('fullpath'))));

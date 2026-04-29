@@ -1,3 +1,8 @@
+% SWITCHING NAMESPACE / EVIDENCE WARNING
+% NAMESPACE_ID: CANON_FIGURE_REPLAY — visualization reads S_long + backbone/residual columns; declare EXPERIMENTAL vs SOURCE per column
+% EVIDENCE_STATUS: DIAGNOSTIC_VISUALIZATION — vPaperReady flags are script-internal not publication authorization
+% UNSAFE_USE: "canonical" + backbone + residual filename implying CORRECTED_CANONICAL_OLD_ANALYSIS authority without authoritative CSV package
+% CURRENT_STATE_ENTRYPOINT: reports/switching_corrected_canonical_current_state.md
 clear; clc;
 
 repoRoot = fileparts(fileparts(fileparts(mfilename('fullpath'))));

@@ -1,3 +1,8 @@
+% SWITCHING NAMESPACE / EVIDENCE WARNING
+% NAMESPACE_ID: CANON_FIGURE_REPLAY / ANCHOR — layout/anchor for figures from resolved canonical run tables
+% EVIDENCE_STATUS: FIGURE_PRODUCTION — not new physics; uses locked anchorRunId for reproducibility
+% UNSAFE_USE: treating anchor as proof of CORRECTED_CANONICAL_OLD_ANALYSIS without authoritative CSV package
+% CURRENT_STATE_ENTRYPOINT: reports/switching_corrected_canonical_current_state.md
 clear; clc;
 
 repoRoot = fileparts(fileparts(fileparts(mfilename('fullpath'))));

@@ -1,3 +1,9 @@
+% SWITCHING NAMESPACE / EVIDENCE WARNING
+% NAMESPACE_ID: DIAGNOSTIC_FORENSIC / geocanon descriptor branch — NOT backbone physics equivalence
+% EVIDENCE_STATUS: DESCRIPTOR_AUDIT — manuscript interpretation blocked unless promoted by charter (see governance map)
+% SAFE_USE: atlas / descriptor inventories with DIAGNOSTIC labels
+% UNSAFE_USE: importing geocanon descriptors into CORRECTED_CANONICAL_OLD_ANALYSIS claims without bridge
+% CURRENT_STATE_ENTRYPOINT: reports/switching_corrected_canonical_current_state.md
 clear; clc;
 
 repoRoot = fileparts(fileparts(fileparts(mfilename('fullpath'))));

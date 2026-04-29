@@ -1,3 +1,13 @@
+% SWITCHING NAMESPACE / EVIDENCE WARNING
+% NAMESPACE_ID: CANON_COLLAPSE_FAMILY + CANON_GEN_SOURCE (S_percent) + EXPERIMENTAL_PTCDF_DIAGNOSTIC (S_model_pt_percent, CDF_pt, PT_pdf columns read from switching_canonical_S_long.csv)
+% EVIDENCE_STATUS: DIAGNOSTIC_ONLY for PTCDF columns — NOT_CORRECTED_CANONICAL_OLD_ANALYSIS authoritative backbone by itself
+% BACKBONE_FORMULA: pred0 = Bmap from S_model_pt_percent per docs/switching_analysis_map.md CANON_COLLAPSE_FAMILY; not the gated corrected-old PT_matrix builder backbone
+% SVD_INPUT: per script stage (R1, phi2 path on native I in related workflows) — declare which when citing outputs
+% COORDINATE_GRID: native current_mA from S_long; CDF_pt as overlay axis in companion scripts = EXPERIMENTAL_PTCDF_DIAGNOSTIC
+% SAFE_USE: hierarchy / overlay figures with explicit dual-namespace captions; column map: reports/switching_canonical_S_long_column_namespace.md
+% UNSAFE_USE: main-manuscript CORRECTED_CANONICAL_OLD_ANALYSIS backbone or residual evidence from S_model_pt_percent column alone; conflating with switching_corrected_old_authoritative_*.csv
+% NOT_MAIN_MANUSCRIPT_EVIDENCE_IF_APPLICABLE: PT/CDF column claims require EXPERIMENTAL_PTCDF_DIAGNOSTIC labeling for manuscript
+% CURRENT_STATE_ENTRYPOINT: reports/switching_corrected_canonical_current_state.md
 clear; clc;
 
 repoRoot = fileparts(fileparts(fileparts(mfilename('fullpath'))));
