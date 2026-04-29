@@ -1,3 +1,13 @@
+# SWITCHING NAMESPACE / EVIDENCE WARNING
+# NAMESPACE_ID: CANON_GEN_SOURCE (T_K, current_mA, S_percent) + EXPERIMENTAL_PTCDF_DIAGNOSTIC (S_model_pt_percent, CDF_pt, PT_pdf) — full S_long read
+# EVIDENCE_STATUS: DIAGNOSTIC_ONLY for PT/CDF columns; CANON_GEN_SOURCE for S_percent
+# BACKBONE_FORMULA: reads S_model_pt_percent etc. from switching_canonical_S_long — not CORRECTED_CANONICAL_OLD_ANALYSIS backbone
+# SVD_INPUT: N/A in spine (table IO / recompute residual column semantics per script)
+# COORDINATE_GRID: native current_mA ladder
+# SAFE_USE: map spine / correlation diagnostics with column-level namespace declared in any report
+# UNSAFE_USE: treating script output as authoritative corrected-old evidence; manuscript primary backbone from PTCDF columns
+# NOT_MAIN_MANUSCRIPT_EVIDENCE_IF_APPLICABLE: YES for PTCDF column usage
+# CURRENT_STATE_ENTRYPOINT: reports/switching_corrected_canonical_current_state.md
 # Phase 2 — canonical map spine from locked switching_canonical_S_long.csv only (Switching).
 # No scaling tests; no legacy width; geocanon ridge joined by T_K from repo tables only as inventory.
 param([string]$RepoRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path)
