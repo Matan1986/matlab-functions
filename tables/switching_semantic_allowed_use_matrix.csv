@@ -1,0 +1,25 @@
+semantic_family_id,use_canonical_source_claims,use_corrected_old_manuscript_pathway,use_diagnostic_exploration,use_visualization_only,use_replay_only,use_future_comparison_only,use_forbidden_evidence_tagging,use_old_analysis_replay_gating,use_cross_module_comparison_gating,notes
+CANON_GEN_SOURCE,YES,YES_WITH_CANON_GEN_SOURCE_PROVENANCE,YES,CONDITIONAL,CONDITIONAL,YES,NO,YES,WARN_PAIR_BRIDGE_REQUIRED,Cite S_percent and validated observables with run_id and column_class.
+EXPERIMENTAL_PTCDF_DIAGNOSTIC,NO,NO,YES,YES,NO,YES,YES,WARN,NO_QUARANTINE_COLUMNS_NOT_CROSS_MODULE,PT/CDF columns never CORRECTED backbone; tag EXPERIMENTAL.
+CANON_GEN_MIXED_PRODUCER,NO,NO,YES,YES,NO,NO,NO,WARN,WARN,Refer only to split column semantics; never whole-run manuscript bundle.
+OLD_RESIDUAL_DECOMP,NO,CONDITIONAL_LEGACY_VEHICLE,YES,YES,CONDITIONAL,YES,NO,WARN,NO,Vehicle under CORRECTED only when replayed per map; label OLD_RESIDUAL_DECOMP.
+CORRECTED_OLD_AUTH_BUILDER,NO,YES_WHEN_GATES_PASS,YES,NO,NO,NO,NO,YES,NO,Produces authoritative tables when SAFE; not manuscript prose alone.
+CORRECTED_CANONICAL_OLD_ANALYSIS,CONDITIONAL_PROVENANCE_ONLY,YES_WHEN_INDEX_ROWS,YES,NO,NO,NO,NO,YES,NO,Manuscript pathway B09; requires artifact index + CANON_GEN_SOURCE S provenance.
+PHI2_KAPPA2_HYBRID,NO,NO,YES,CONDITIONAL,NO,YES,YES,NO,NO,MISLEADING_NAME; internal diagnostic only.
+REPLAY_PHI1_KAPPA1,NO,NO,YES,YES,YES,NO,NO,WARN,NO,B03 replay on frozen S_long; backbone column is EXPERIMENTAL read.
+GEOCANON_DESCRIPTOR,NO,NO,YES,YES,NO,YES,NO,WARN,NO,B12 descriptor; not residual backbone equivalence.
+CANON_S_LONG_VISUAL_REPLAY,CONDITIONAL_PINNED_FILE_ONLY,NO,YES,YES,YES,YES,NO,WARN,NO,Visualization from pinned S_long; no new physics derivation.
+OLD_FIG_FORENSIC_REPLAY,NO,NO,YES,YES,YES,NO,NO,WARN,NO,Forensic plus styled replot; not authoritative corrected-old alone.
+GAUGE_VISUALIZATION_DIAGNOSTIC,NO,NO,YES,YES,YES,NO,NO,WARN,NO,X_eff gauge-specific; no X_canon.
+OLD_X_REPLAY_OR_ROBUSTNESS,NO,NO,YES,CONDITIONAL,CONDITIONAL,YES,NO,YES,NO,Narrow audits only; broad replay blocked separately.
+CDF_BACKBONE_REPAIR_AGGRESSIVENESS_AUDIT,NO,NO,YES,NO,NO,YES,NO,WARN,NO,Audit OLD residual pathway repairs only.
+INFRA_SMOKE_CANONICAL_CONTEXT,NO,NO,CONDITIONAL,NO,NO,NO,NO,NO,NO,Smoke wrappers not evidence.
+CLASSIFICATION_OR_GOVERNANCE_STATUS,NO,NO,YES,NO,NO,NO,NO,YES,NO,Interpret stale rows via supersession; meta only.
+CANON_FIGURE_COLUMN_REPLAY,NO,NO,YES,YES,YES,NO,NO,WARN,NO,Figure replay reads columns; caption namespaces required.
+CANON_COLLAPSE_PTCDF_OVERLAY_DIAGNOSTIC,NO,NO,YES,YES,CONDITIONAL,NO,NO,WARN,NO,Overlay diagnostic; EXPERIMENTAL labeling.
+PTCDF_DIAGNOSTIC_QUARANTINE_REPLAY,NO,NO,YES,YES,YES,NO,YES,YES,WARN,NO,Quarantine inventory scripts; not authoritative CSV substitute.
+CORRECTED_OLD_REPLAY_FROM_CANON_S_INPUT,NO,CONDITIONAL_FORENSIC_ONLY,YES,YES,YES,NO,YES,YES,WARN,NO,QUARANTINED replay shaped CSVs compare to builder record only.
+GOVERNANCE_DOC_AND_PLANNING,NO,NO,YES,NO,NO,NO,NO,WARN,NO,Planning inventories PS1; not experimental results.
+CORRECTED_OLD_TASK_QA_DIAGNOSTIC,NO,CONDITIONAL_TASK_GATE_ONLY,YES,YES,NO,NO,NO,WARN,NO,QA on authoritative tables; not publication substitute.
+RANK3_STAGE_CHAIN_CLASSIFICATION_AUDIT,NO,NO,YES,NO,NO,NO,NO,WARN,NO,Gated audit on locked run id plus chain.
+PHI_KAPPA_STABILITY_CANONICAL_SUBSET,NO,NO,YES,NO,NO,YES,NO,WARN,NO,Canonical pair subset filter not CANON_GEN umbrella.
