@@ -1,0 +1,23 @@
+status_key,status_value,details
+SWITCHING_ANALYSIS_CLASSIFICATION_AUDIT_COMPLETE,YES,Inspection and classification completed for requested Switching scripts and governance artifacts without rerunning physics.
+RUN_SWITCHING_CANONICAL_MIXED_PRODUCER,YES,run_switching_canonical exports canonical S source plus PT/CDF diagnostic columns and residual-mode outputs.
+GRANULAR_CANONICAL_OUTPUT_CLASSIFICATION,YES,Classification is output-granular and does not reject all outputs from run_switching_canonical.
+CANONICAL_S_SOURCE_IDENTIFIED,YES,S_percent in switching_canonical_S_long from run_switching_canonical is canonical source payload.
+S_PERCENT_PRESERVED_AS_CANON_GEN_SOURCE,YES,S_percent remains explicitly preserved as CANON_GEN_SOURCE.
+CANONICAL_EFFECTIVE_OBSERVABLES_REVIEWED,YES,I_peak S_peak and width/W handling were reviewed with parity/source validation gating.
+CANONICAL_EFFECTIVE_OBSERVABLES_PRESERVED_IF_VALIDATED,YES,I_peak S_peak and width/W are preserved conditionally when parity/identity/source checks are satisfied.
+CANON_GEN_PTCDF_COLUMNS_IDENTIFIED,YES,S_model_pt_percent PT_pdf and CDF_pt are identified as producer-side diagnostic PT/CDF columns.
+CANON_GEN_MODE_OUTPUTS_IDENTIFIED,YES,residual_percent S_model_full_percent switching_canonical_phi1 and kappa1 observables are mode-analysis diagnostic outputs.
+PTCDF_AND_MODE_OUTPUTS_QUARANTINED_ONLY,YES,Only PT/CDF and decomposition-derived mode outputs are quarantined from corrected-old manuscript evidence usage.
+WHOLE_CANONICAL_RUN_REJECTED,NO,run_switching_canonical remains usable for canonical S source and validated effective observables.
+S_MODEL_PT_PERCENT_FORBIDDEN_AS_MANUSCRIPT_BACKBONE,YES,S_model_pt_percent is diagnostic PT/CDF output and forbidden as authoritative corrected-old manuscript backbone.
+RESIDUAL_PERCENT_FORBIDDEN_AS_CORRECTED_OLD_RESIDUAL,YES,residual_percent from canonical mixed producer is diagnostic-mode output and forbidden as corrected-old residual authority.
+SWITCHING_CANONICAL_PHI1_FORBIDDEN_AS_CORRECTED_OLD_PHI1,YES,switching_canonical_phi1.csv is decomposition diagnostic output and forbidden as corrected-old Phi1 authority.
+CANONICAL_KAPPA1_FORBIDDEN_AS_CORRECTED_OLD_KAPPA1,YES,canonical observables kappa1 from decomposition path is forbidden as corrected-old kappa1 authority.
+AUTHORITATIVE_CORRECTED_OLD_ARTIFACTS_EXIST,NO,Resolver report indicates authoritative corrected-old backbone residual Phi1 kappa1 artifacts are not yet present.
+MISLEADING_CORRECTED_OLD_NAMED_ARTIFACTS_FOUND,YES,Multiple corrected-old named scripts/reports are explicitly quarantined PT/CDF diagnostics or failed authority attempts.
+PTCDF_DIAGNOSTIC_OUTPUTS_REQUIRE_QUARANTINE,YES,PT/CDF diagnostic outputs are not selected manuscript backbone per governance map and quarantine notes.
+SAFE_TO_BUILD_CORRECTED_OLD_REPLAY_NOW,NO,Authoritative corrected-old recipe outputs are still missing and naming ambiguity remains unresolved.
+NEXT_STEP_RECIPE_VERIFICATION_REQUIRED,YES,Need one minimal provenance-locked corrected-old recipe verification run before any corrected-old artifact build claims.
+PHYSICS_LOGIC_CHANGED,NO,Audit was inspection and classification only.
+FILES_DELETED,NO,No deletions performed in this audit.

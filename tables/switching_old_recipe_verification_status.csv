@@ -1,0 +1,20 @@
+status_key,status_value,details
+OLD_RECIPE_VERIFIED,YES,Legacy decomposition function and extracted legacy run report/manifests are consistent with old residual-decomposition recipe.
+OLD_BACKBONE_IS_SPEAK_TIMES_CDF,YES,Backbone is Scdf=Speak*CdfRow in implementation.
+OLD_RECIPE_USES_PT_MATRIX_BRANCH,YES,cdfFromPT branch is implemented and used when PT_matrix data are available.
+OLD_RECIPE_USES_FALLBACK_BRANCH,YES,cdfFallbackFromRow branch is implemented and used when PT branch is unavailable.
+CENTERING_USED_IN_BACKBONE,NO,Backbone CDF construction is on native current axis and does not use x=(I-I_peak)/w.
+CENTERING_USED_FOR_RESIDUAL_ALIGNMENT,YES,Centering and width normalization are used for residual alignment and SVD only.
+ATTEMPTED_CORRECTED_OLD_OUTPUTS_REVIEWED,YES,Scripts tables reports and figures for attempted corrected-old outputs were inspected and classified.
+ATTEMPTED_CORRECTED_OLD_OUTPUTS_CLEAN,NO,No fully clean authoritative corrected-old artifact package was found among attempted outputs.
+ATTEMPTED_CORRECTED_OLD_OUTPUTS_CONTAMINATED,YES,Attempted outputs include PT/CDF diagnostic backbone use and ad hoc decomposition in corrected-old named flows.
+ATTEMPTED_CORRECTED_OLD_OUTPUTS_QUARANTINED_IF_NEEDED,YES,Quarantine/misleading classification applied to contaminated corrected-old named outputs.
+CANON_GEN_DIAGNOSTIC_OUTPUTS_USED_IN_ATTEMPTED_CORRECTED_OLD,YES,S_model_pt_percent switching_canonical_phi1 and canonical kappa1 are used in attempted corrected-old visualization/review flows.
+FALLBACK_ONLY_REPLAY_ATTEMPT_FOUND,YES,run_sw_corr_old_replay_auth and run_sw_corr_old_nonfinite_debug implement fallback-only replay behavior.
+SAFE_TO_BUILD_CORRECTED_OLD_REPLAY_AFTER_VERIFICATION,NO,Verification shows contamination and incomplete/failed attempts so authoritative build is not yet safe without controlled recipe-locked runner.
+VISIBLE_FIGURE_ARTIFACTS_REVIEWED,YES,Visible artifacts in figures/switching/canonical were reviewed with per-file provenance and naming-risk classification.
+CORRECTED_OLD_NAMED_FIGURES_REVIEWED,YES,All visible switching_corrected_old_*.png were reviewed and no switching_corrected_old_*.fig were found.
+CORRECTED_OLD_NAMED_FIGURES_QUARANTINED_IF_UNVERIFIED,YES,Corrected-old named figures are treated as manuscript_safe=NO and QUARANTINED_MISLEADING unless authoritative corrected-old provenance is proven.
+SAFE_CANONICAL_SOURCE_FIGURES_NOT_BLANKET_QUARANTINED,YES,Canonical fixed-T cuts, X-panels, and primary-collapse families were reviewed separately and not auto-quarantined.
+PHYSICS_LOGIC_CHANGED,NO,Verification and classification only.
+FILES_DELETED,NO,No files deleted.
