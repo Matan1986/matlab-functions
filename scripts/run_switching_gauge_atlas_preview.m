@@ -45,6 +45,12 @@ verdictKeys = { ...
     'G014_LESS_SMOOTHED_COMPARATOR_INCLUDED'
     'S_AREA_POSITIVE_DOMINATES_TOP15'
     'PREVIEW_FIGURE_WRITTEN'
+    'X_EFF_DECOMPOSITION_INCLUDED'
+    'X_EFF_G001_COMPUTED'
+    'X_EFF_G254_COMPUTED'
+    'X_EFF_G014_COMPUTED'
+    'X_EFF_PRIMARY_DOMAIN_AXIS_SCALING'
+    'X_EFF_LABEL_USED'
     'G254_CANONICAL_COORDINATE_CLAIMED'
     'G014_CANONICAL_COORDINATE_CLAIMED'
     'X_CANON_CLAIMED'
@@ -53,6 +59,12 @@ verdictKeys = { ...
     'SAFE_TO_WRITE_SCALING_CLAIM'
     'CROSS_MODULE_SYNTHESIS_PERFORMED'};
 verdictVals = { ...
+    'NO'
+    'NO'
+    'NO'
+    'NO'
+    'NO'
+    'NO'
     'NO'
     'NO'
     'NO'
@@ -231,7 +243,6 @@ try
     end
     cmpTbl = metricsTbl(rows, :);
     cmpTbl = sortrows(cmpTbl, 'combo_id');
-    writetable(cmpTbl, baselineVsPath);
 
     finiteMask = isfinite(metricsTbl.primary_metric_mean_std) & isfinite(metricsTbl.high_primary_metric_mean_std) & metricsTbl.primary_valid_curves > 0;
     finiteTbl = metricsTbl(finiteMask, :);
@@ -266,7 +277,50 @@ try
         verdictVals{strcmp(verdictKeys,'S_AREA_POSITIVE_DOMINATES_TOP15')} = {'YES'};
     end
 
-    fig = figure('Visible', 'off', 'Position', [100 100 1600 1200]);
+    xeffG001 = NaN(nT,1);
+    xeffG254 = NaN(nT,1);
+    xeffG014 = NaN(nT,1);
+    for it = 1:nT
+        iOld = perT.I_peak_old(it);
+        iSm = perT.I_peak_smoothed_across_T(it);
+        wF = perT.W_FWHM_crossing(it);
+        wS = perT.W_sigma_positive(it);
+        sPk = perT.S_peak_old(it);
+        sAr = perT.S_area_positive(it);
+        if isfinite(iOld) && isfinite(wF) && isfinite(sPk) && wF > 0 && abs(sPk) > 1e-15
+            xeffG001(it) = iOld / (wF * sPk);
+        end
+        if isfinite(iSm) && isfinite(wS) && isfinite(sAr) && wS > 0 && abs(sAr) > 1e-15
+            xeffG254(it) = iSm / (wS * sAr);
+        end
+        if isfinite(iOld) && isfinite(wS) && isfinite(sAr) && wS > 0 && abs(sAr) > 1e-15
+            xeffG014(it) = iOld / (wS * sAr);
+        end
+    end
+
+    baseVs = table();
+    baseVs.T_K = perT.T_K;
+    baseVs.X_eff_G001 = xeffG001;
+    baseVs.X_eff_G254 = xeffG254;
+    baseVs.X_eff_G014 = xeffG014;
+    baseVs.ratio_X_G254_over_G001 = xeffG254 ./ xeffG001;
+    baseVs.ratio_X_G014_over_G001 = xeffG014 ./ xeffG001;
+    baseVs.delta_X_G254_minus_G001 = xeffG254 - xeffG001;
+    baseVs.delta_X_G014_minus_G001 = xeffG014 - xeffG001;
+    writetable(baseVs, baselineVsPath);
+
+    if any(isfinite(xeffG001))
+        verdictVals{strcmp(verdictKeys,'X_EFF_G001_COMPUTED')} = {'YES'};
+    end
+    if any(isfinite(xeffG254))
+        verdictVals{strcmp(verdictKeys,'X_EFF_G254_COMPUTED')} = {'YES'};
+    end
+    if any(isfinite(xeffG014))
+        verdictVals{strcmp(verdictKeys,'X_EFF_G014_COMPUTED')} = {'YES'};
+    end
+    verdictVals{strcmp(verdictKeys,'X_EFF_LABEL_USED')} = {'YES'};
+
+    fig = figure('Visible', 'off', 'Position', [100 100 1700 1400]);
 
     gaugeIds = {'G001','G254','G014'};
     gaugeI0 = {'I_peak_old','I_peak_smoothed_across_T','I_peak_old'};
@@ -274,7 +328,7 @@ try
     gaugeS0 = {'S_peak_old','S_area_positive','S_area_positive'};
 
     for p = 1:3
-        subplot(2,2,p);
+        subplot(3,2,p);
         hold on;
         primaryIdx = find(perT.T_K < 31.5);
         if isempty(primaryIdx)
@@ -318,7 +372,7 @@ try
         hold off;
     end
 
-    subplot(2,2,4);
+    subplot(3,2,4);
     hold on;
     prim = perT.T_K < 31.5;
     diagMask = ~prim;
@@ -333,6 +387,80 @@ try
     title('S_peak_old(T) vs S_area_positive(T)');
     legend('Location', 'best');
     hold off;
+
+    subplot(3,2,5);
+    hold on;
+    plot(perT.T_K, xeffG001, 'o-', 'Color', [0.10 0.35 0.80], 'LineWidth', 1.3, 'DisplayName', 'X_eff G001');
+    plot(perT.T_K, xeffG254, 's-', 'Color', [0.00 0.55 0.20], 'LineWidth', 1.3, 'DisplayName', 'X_eff G254');
+    plot(perT.T_K, xeffG014, 'd-', 'Color', [0.85 0.33 0.10], 'LineWidth', 1.3, 'DisplayName', 'X_eff G014');
+    xline(22, '--k', '22K', 'LabelVerticalAlignment', 'bottom');
+    xline(31.5, ':k', '31.5K', 'LabelVerticalAlignment', 'bottom');
+    d32 = abs(perT.T_K - 32) < 1e-6;
+    d34 = abs(perT.T_K - 34) < 1e-6;
+    if any(d32)
+        plot(perT.T_K(d32), xeffG001(d32), 'ko', 'MarkerFaceColor', [0.8 0.8 0.8], 'HandleVisibility', 'off');
+        plot(perT.T_K(d32), xeffG254(d32), 'ks', 'MarkerFaceColor', [0.8 0.8 0.8], 'HandleVisibility', 'off');
+        plot(perT.T_K(d32), xeffG014(d32), 'kd', 'MarkerFaceColor', [0.8 0.8 0.8], 'HandleVisibility', 'off');
+    end
+    if any(d34)
+        plot(perT.T_K(d34), xeffG001(d34), 'ko', 'MarkerFaceColor', [0.65 0.65 0.65], 'HandleVisibility', 'off');
+        plot(perT.T_K(d34), xeffG254(d34), 'ks', 'MarkerFaceColor', [0.65 0.65 0.65], 'HandleVisibility', 'off');
+        plot(perT.T_K(d34), xeffG014(d34), 'kd', 'MarkerFaceColor', [0.65 0.65 0.65], 'HandleVisibility', 'off');
+    end
+    primX = perT.T_K < 31.5;
+    yPrim = [xeffG001(primX); xeffG254(primX); xeffG014(primX)];
+    yPrim = yPrim(isfinite(yPrim));
+    if ~isempty(yPrim)
+        yLo = min(yPrim);
+        yHi = max(yPrim);
+        if yHi <= yLo
+            yHi = yLo + 1.0;
+        end
+        pad = 0.08 * (yHi - yLo);
+        ylim([yLo - pad, yHi + pad]);
+        verdictVals{strcmp(verdictKeys,'X_EFF_PRIMARY_DOMAIN_AXIS_SCALING')} = {'YES'};
+    end
+    grid on;
+    xlabel('T_K');
+    ylabel('X_eff = I0/(W*S0)');
+    title('F. X_eff(T) comparison (diagnostic gauge-specific)');
+    legend('Location', 'best');
+    hold off;
+
+    subplot(3,2,6);
+    hold on;
+    primMask = perT.T_K < 31.5;
+    medI001 = median(perT.I_peak_old(primMask & isfinite(perT.I_peak_old)));
+    medW001 = median(perT.W_FWHM_crossing(primMask & isfinite(perT.W_FWHM_crossing) & perT.W_FWHM_crossing > 0));
+    medS001 = median(perT.S_peak_old(primMask & isfinite(perT.S_peak_old) & abs(perT.S_peak_old) > 1e-15));
+    medI254 = median(perT.I_peak_smoothed_across_T(primMask & isfinite(perT.I_peak_smoothed_across_T)));
+    medW254 = median(perT.W_sigma_positive(primMask & isfinite(perT.W_sigma_positive) & perT.W_sigma_positive > 0));
+    medS254 = median(perT.S_area_positive(primMask & isfinite(perT.S_area_positive) & abs(perT.S_area_positive) > 1e-15));
+    medI014 = median(perT.I_peak_old(primMask & isfinite(perT.I_peak_old)));
+    medW014 = medW254;
+    medS014 = medS254;
+
+    plot(perT.T_K, perT.I_peak_old ./ medI001, '-', 'Color', [0.10 0.35 0.80], 'LineWidth', 1.2, 'DisplayName', 'G001 I0/med');
+    plot(perT.T_K, (1 ./ perT.W_FWHM_crossing) ./ (1 / medW001), '--', 'Color', [0.10 0.35 0.80], 'LineWidth', 1.2, 'DisplayName', 'G001 (1/W)/med');
+    plot(perT.T_K, (1 ./ perT.S_peak_old) ./ (1 / medS001), ':', 'Color', [0.10 0.35 0.80], 'LineWidth', 1.2, 'DisplayName', 'G001 (1/S0)/med');
+
+    plot(perT.T_K, perT.I_peak_smoothed_across_T ./ medI254, '-', 'Color', [0.00 0.55 0.20], 'LineWidth', 1.2, 'DisplayName', 'G254 I0/med');
+    plot(perT.T_K, (1 ./ perT.W_sigma_positive) ./ (1 / medW254), '--', 'Color', [0.00 0.55 0.20], 'LineWidth', 1.2, 'DisplayName', 'G254 (1/W)/med');
+    plot(perT.T_K, (1 ./ perT.S_area_positive) ./ (1 / medS254), ':', 'Color', [0.00 0.55 0.20], 'LineWidth', 1.2, 'DisplayName', 'G254 (1/S0)/med');
+
+    plot(perT.T_K, perT.I_peak_old ./ medI014, '-', 'Color', [0.85 0.33 0.10], 'LineWidth', 1.2, 'DisplayName', 'G014 I0/med');
+    plot(perT.T_K, (1 ./ perT.W_sigma_positive) ./ (1 / medW014), '--', 'Color', [0.85 0.33 0.10], 'LineWidth', 1.2, 'DisplayName', 'G014 (1/W)/med');
+    plot(perT.T_K, (1 ./ perT.S_area_positive) ./ (1 / medS014), ':', 'Color', [0.85 0.33 0.10], 'LineWidth', 1.2, 'DisplayName', 'G014 (1/S0)/med');
+
+    xline(22, '--k', '22K', 'LabelVerticalAlignment', 'bottom');
+    xline(31.5, ':k', '31.5K', 'LabelVerticalAlignment', 'bottom');
+    grid on;
+    xlabel('T_K');
+    ylabel('Normalized factor contribution');
+    title('G. X_eff factor decomposition (gauge-specific)');
+    legend('Location', 'eastoutside');
+    hold off;
+    verdictVals{strcmp(verdictKeys,'X_EFF_DECOMPOSITION_INCLUDED')} = {'YES'};
 
     exportgraphics(fig, figurePath, 'Resolution', 250);
     close(fig);
@@ -360,6 +488,7 @@ try
     fprintf(fid, '- G001 = I_peak_old + W_FWHM_crossing + S_peak_old\n');
     fprintf(fid, '- G254 = I_peak_smoothed_across_T + W_sigma_positive + S_area_positive\n');
     fprintf(fid, '- G014 = I_peak_old + W_sigma_positive + S_area_positive\n\n');
+    fprintf(fid, 'X_eff interpretation used: X_eff[I0,W,S0] = I0/(W*S0), gauge-specific diagnostic only (not canonical coordinate).\n\n');
     fprintf(fid, '## Best-by-regime reference\n');
     if height(bestTbl) > 0
         for i = 1:height(bestTbl)
@@ -371,6 +500,10 @@ try
     fprintf(fid, '\n## Top15 finite summary\n');
     fprintf(fid, '- rows: %d\n', height(top15));
     fprintf(fid, '- S_area_positive dominates top15: %s\n', string(statusTbl.verdict_value(statusTbl.verdict_key=="S_AREA_POSITIVE_DOMINATES_TOP15")));
+    fprintf(fid, '\n## X_eff summary\n');
+    fprintf(fid, '- finite X_eff G001 points: %d\n', sum(isfinite(xeffG001)));
+    fprintf(fid, '- finite X_eff G254 points: %d\n', sum(isfinite(xeffG254)));
+    fprintf(fid, '- finite X_eff G014 points: %d\n', sum(isfinite(xeffG014)));
     fprintf(fid, '\n## Verdicts\n');
     for i = 1:height(statusTbl)
         fprintf(fid, '- %s=%s\n', statusTbl.verdict_key(i), statusTbl.verdict_value(i));
