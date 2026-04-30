@@ -1,0 +1,2 @@
+source_family_used,old_intended_orientation,candidate_orientation_tested,final_orientation_selected,axes_swapped,old_intended_range_if_known,chosen_display_range_x,chosen_display_range_y,outliers_or_highT_excluded_from_display,exclusion_display_only,notes
+corrected_old_authoritative_backbone_map,"x_aligned on X-axis, corrected_old backbone on Y-axis",tested standard orientation and swapped-axis candidate,standard_x_horizontal,NO,T<=30 for inspection panel,"[-1.377, 2.873]","[0.0000, 0.3364]",YES,YES,QA inspection only; no manuscript claim; display transform/range lock only
