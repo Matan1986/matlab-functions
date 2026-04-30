@@ -1,0 +1,12 @@
+output_basename,writer_script,writer_family_id,metadata_appended,notes
+tau_vs_Tp.csv,Aging/analysis/aging_timescale_extraction.m,WF_TAU_DIP_CURVEFIT,YES,All 12 F7G columns; tau_effective_seconds preserved
+tau_FM_vs_Tp.csv,Aging/analysis/aging_fm_timescale_analysis.m,WF_TAU_FM_CURVEFIT,YES,Same; dip tau table read may now carry extra CSV columns from disk
+tau_rescaling_estimates.csv,Aging/analysis/aging_time_rescaling_collapse.m,WF_TAU_RESCALING_OPTIMIZER,YES,tau_estimate_seconds numeric columns unchanged
+clock_ratio_data.csv,Aging/analysis/aging_clock_ratio_temperature_scaling.m,WF_CLOCK_RATIO_R_AGE,YES,Append-only column R_age_clock_ratio duplicate of R
+aging_clock_ratio_temperature_scaling.csv,same,WF_CLOCK_RATIO_R_AGE,YES,Single-row fit metrics plus metadata
+table_clock_ratio.csv,Aging/analysis/aging_clock_ratio_analysis.m,WF_CLOCK_RATIO_R_AGE,YES,R_tau_FM_over_tau_dip unchanged
+correlation_summary.csv,same,WF_CLOCK_RATIO_R_AGE,YES,AUXILIARY semantic_status string distinguishes role
+source_run_manifest.csv,same,WF_CLOCK_RATIO_R_AGE,YES,tau_or_R_flag NONE on manifest rows
+fm_collapse_using_dip_tau_metrics.csv,Aging/analysis/aging_fm_using_dip_clock.m,WF_TAU_DIP_CURVEFIT,YES,tau_or_R_flag NONE collapse RMSE not tau extraction
+replay tau_proxy outputs,Aging/analysis/run_aging_i1_replay_*.m,PENDING,NOT_IN_THIS_PATCH,WF_REPLAY_DIAGNOSTIC reserved for future replay CSV writers
+pipeline pause CSV exports,PENDING,PENDING,NOT_IN_THIS_PATCH,WF_PIPELINE_CLOCKS surface fields live in pause structs not primary tau CSV writers here

@@ -18,6 +18,7 @@ addpath(fullfile(repoRoot, 'tools'));
 addpath(fullfile(repoRoot, 'tools', 'figures'));
 
 cfg = applyDefaults(cfg, repoRoot);
+thisScriptPath = mfilename('fullpath');
 source = resolveSources(cfg);
 
 runCfg = struct();
@@ -53,6 +54,36 @@ fitStats = fitClockPowerLaw(clockTbl);
 ratioStats = analyzeRatioTemperatureDependence(clockTbl, cfg.crossoverTemperatureK);
 summaryTbl = buildSummaryTable(clockTbl, mergedTbl, fitStats);
 sourceManifestTbl = buildSourceManifestTable(source);
+
+identBundle = ['dip_tau_path=' char(string(source.dipTauPath)) ';fm_tau_path=' char(string(source.fmTauPath))];
+metaClock = struct( ...
+    'writer_family_id', 'WF_CLOCK_RATIO_R_AGE', ...
+    'tau_or_R_flag', 'R', ...
+    'tau_domain', 'AGING_CLOCK_RATIO_ANALYSIS', ...
+    'tau_input_observable_identities', identBundle, ...
+    'tau_input_observable_family', 'tau_FM_over_tau_dip_with_optional_bridge_AX', ...
+    'source_writer_script', thisScriptPath, ...
+    'source_artifact_basename', 'table_clock_ratio.csv', ...
+    'source_artifact_path', fullfile(runDir, 'tables', 'table_clock_ratio.csv'), ...
+    'canonical_status', 'non_canonical_pending_lineage', ...
+    'model_use_allowed', 'NO_UNLESS_PAIR_FILES_LINEAGE_LOCKED', ...
+    'semantic_status', 'R_tau_FM_over_tau_dip_column_present', ...
+    'lineage_status', 'REQUIRES_DIP_FM_SOURCE_RUN_AND_DATASET_IDENTITY');
+clockTbl = appendF7GTauRMetadataColumns(clockTbl, metaClock);
+
+metaSummary = metaClock;
+metaSummary.source_artifact_basename = 'correlation_summary.csv';
+metaSummary.source_artifact_path = fullfile(runDir, 'tables', 'correlation_summary.csv');
+metaSummary.tau_or_R_flag = 'R';
+metaSummary.semantic_status = 'CORRELATION_SUMMARY_AUXILIARY_NOT_PRIMARY_RATIO_TABLE';
+summaryTbl = appendF7GTauRMetadataColumns(summaryTbl, metaSummary);
+
+metaManifest = metaClock;
+metaManifest.source_artifact_basename = 'source_run_manifest.csv';
+metaManifest.source_artifact_path = fullfile(runDir, 'tables', 'source_run_manifest.csv');
+metaManifest.tau_or_R_flag = 'NONE';
+metaManifest.semantic_status = 'SOURCE_MANIFEST_ROWS_FOR_INPUT_ARTIFACT_TRACEABILITY';
+sourceManifestTbl = appendF7GTauRMetadataColumns(sourceManifestTbl, metaManifest);
 
 clockTablePath = save_run_table(clockTbl, 'table_clock_ratio.csv', runDir);
 summaryPath = save_run_table(summaryTbl, 'correlation_summary.csv', runDir);

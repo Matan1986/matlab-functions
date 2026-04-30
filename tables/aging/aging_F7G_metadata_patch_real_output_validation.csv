@@ -1,0 +1,7 @@
+validation_id,method,scope,result,evidence
+RV01,MATLAB_batch run_aging_F7G_metadata_contract_check,schema,mPASS,Exit 0 dummy table has all 12 columns
+RV02,MATLAB_batch double-append appendF7GTauRMetadataColumns,guard,mPASS,Second append errors as designed
+RV03,MATLAB_batch R_age_clock_ratio identity pattern,synthetic_ratio_rows,mPASS,max(abs(R-R_age_clock_ratio)) < 1e-15 for numeric duplicate assignment pattern
+RV04,Repo_scan results/aging/**/tau_vs_Tp.csv,on_disk_writer_outputs,NOT_PRESENT_IN_WORKSPACE,Zero CSV matches under results/aging glob no post-patch artifact to read
+RV05,Git_diff_numstat Aging/,diff_only,mPASS,112 insertions 0 deletions across six writers indicates additive edits only
+RV06,Full_pipeline aging_timescale_extraction end-to-end CSV inspection,real_writer_run,NOT_RUN,Requires dataset paths and wrapper policy outside this review minimal batch scope

@@ -1,0 +1,9 @@
+path,git_change_type,lines_added,lines_removed,append_only_verdict,notes
+Aging/analysis/aging_timescale_extraction.m,modified_unstaged,14,0,YES,Only inserts before save_run_table tau_vs_Tp
+Aging/analysis/aging_fm_timescale_analysis.m,modified_unstaged,14,0,YES,Only inserts before save_run_table tau_FM_vs_Tp
+Aging/analysis/aging_time_rescaling_collapse.m,modified_unstaged,15,0,YES,Only inserts before tau_rescaling_estimates save
+Aging/analysis/aging_clock_ratio_temperature_scaling.m,modified_unstaged,24,0,YES,Adds R_age_clock_ratio duplicate plus metadata before saves
+Aging/analysis/aging_clock_ratio_analysis.m,modified_unstaged,31,0,YES,Metadata before three save_run_table calls
+Aging/analysis/aging_fm_using_dip_clock.m,modified_unstaged,14,0,YES,Metadata before fm_collapse_using_dip_tau_metrics save
+Aging/utils/appendF7GTauRMetadataColumns.m,untracked_new,N/A,N/A,YES,New helper append columns only errors on duplicate metadata names
+Aging/validation/run_aging_F7G_metadata_contract_check.m,untracked_new,N/A,N/A,YES,Contract smoke only no writer edits

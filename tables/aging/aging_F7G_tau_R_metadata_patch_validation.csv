@@ -1,0 +1,5 @@
+check_id,method,result,detail
+V01,MATLAB_batch_run_aging_F7G_metadata_contract_check,PASS,"Exit code 0 print F7G_OK"
+V02,appendF7GTauRMetadataColumns_duplicate_guard,PRESENT,Errors if metadata column already exists in input table
+V03,numeric_formula_review,PRESUMED_UNCHANGED,append-only helper adds trailing columns only
+V04,production_writer_smoke,PENDING_FULL_PIPELINE,"Contract check only does dummy table no full aging_timescale_extraction run"
