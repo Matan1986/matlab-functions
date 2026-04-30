@@ -1,0 +1,4 @@
+reference_graph_file,mapped_variant_id,peak_near_zero_expected,color_by_temperature,y_normalization_style,x_axis_formula,y_axis_formula,regenerated_counterpart
+switching_canonical_primary_collapse_colored_by_T.png,PRIMARY,YES,YES,S/S_peak style,(I-I_peak)/W_I,S_percent/S_peak,Regenerated as phase4B_C02B_primary_collapse_variant_PRIMARY.png
+switching_canonical_primary_collapse_colored_by_T_G014.png,G014,YES,YES,S/S0 style,(I-I0)/W,S_percent/S_area_positive,Regenerated as phase4B_C02B_primary_collapse_variant_G014.png
+switching_canonical_primary_collapse_colored_by_T_G254.png,G254,YES,YES,S/S0 style,(I-I0)/W smoothed I0,S_percent/S_area_positive,Regenerated as phase4B_C02B_primary_collapse_variant_G254.png
