@@ -11,10 +11,25 @@ Technical canonicalization is **not** sufficient if the user still cannot explai
 
 Therefore Aging adds explicit **forensic** and **replay-planning** gates (I0, I1) **before** deep canonical review (I) and **before** physical synthesis (J).
 
+## F-series branch — Tau/R semantic metadata track (logged 2026-04-30)
+
+**Purpose:** Routing note for agents so tau/R CSV verification is not mistaken for patch failure.
+
+- **F7G (complete, committed):** `ced4798` — Add Aging tau R semantic metadata columns. Writers append **`writer_family_id`**, **`tau_domain`**, and related columns before save; **`tau_effective_seconds`** stays as a legacy column but is disambiguated by metadata when patches run successfully.
+- **F7H (attempted; blocked):** Real-output CSV inspection did **not** run to completion — **no** `tau_vs_Tp.csv` etc. generated or found. **Cause:** consolidated **`aging_observable_dataset.csv`** unavailable at writer default **`results/aging/runs/run_2026_03_12_211204_aging_dataset_build/tables/aging_observable_dataset.csv`** in the audited workspace (**empty/missing `results/` tree**, not malformed F7G code).
+
+**Governance stops until resolved:**
+
+1. **Do not** repeat tau/R **real-output** metadata verification cycles until **`F7I — Aging dataset availability + lineage audit`** (or equivalent) restores a known-good dataset pointer and lineage.
+2. **Do not** perform tau/R **physics interpretation** off legacy/unresolved extracts when consolidation path identity is unclear.
+3. **Do not** extend F7G-style metadata to replay/proxy/`WF_PIPELINE_CLOCKS` writers until **dataset lineage** is understood --- scope remains documented as **pending**.
+
+**Pointers:** `reports/aging/aging_F7H_real_output_metadata_verification.md`, `reports/aging/aging_F7H_blocked_verification_roadmap_update.md`, `tables/aging/aging_F7H_blocked_verification_status.csv`.
+
 ## Current State Snapshot
 
 - Measurement contract exists and is frozen.
-- Real consolidated dataset exists at `tables/aging/aging_observable_dataset.csv`.
+- Canonical **materialization path** used by patched tau/R writers expects a consolidated **`aging_observable_dataset.csv`** under a **run snapshot** directory (historical writer default references `results/aging/runs/run_2026_03_12_211204_aging_dataset_build/tables/`). Separate planning rows may cite `tables/aging/aging_observable_dataset.csv` --- **presence depends on cloning/dataset policy** (see **F-series branch** above). **Agents must reconcile path + lineage before tau/R producers run.**
 - Reader-path plumbing is in place.
 - Multi-`Tp x tw` aggregate and consolidation support is in place.
 - Latest status indicates:
