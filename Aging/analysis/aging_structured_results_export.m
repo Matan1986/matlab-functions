@@ -149,15 +149,16 @@ twAxisTbl = table((1:numel(twSec)).', twSec, logTw, string({curves.datasetKey}).
     'VariableNames', {'tw_index','tw_seconds','log10_tw_seconds','dataset','wait_time','Tp_K'});
 mapVarNames = arrayfun(@(x) matlab.lang.makeValidName(sprintf('tw_%0.6gs', x)), twSec, 'UniformOutput', false);
 mapTbl = array2table(M, 'VariableNames', mapVarNames);
-save_run_table(TaxisTbl, 'T_axis.csv', run_output_dir);
-save_run_table(twAxisTbl, 'tw_axis.csv', run_output_dir);
-save_run_table(mapTbl, 'DeltaM_map.csv', run_output_dir);
+TaxisPath = save_run_table(TaxisTbl, 'T_axis.csv', run_output_dir);
+twAxisPath = save_run_table(twAxisTbl, 'tw_axis.csv', run_output_dir);
+deltaMMapPath = save_run_table(mapTbl, 'DeltaM_map.csv', run_output_dir);
 
 obsMatrixTbl = buildObservableMatrix(curves);
 obsExportTbl = removevars(obsMatrixTbl, {'FM_step_mag'});
-writetable(obsExportTbl, fullfile(run_output_dir, 'observables.csv'));
-fprintf('Saved table: %s\n', fullfile(run_output_dir, 'observables.csv'));
-save_run_table(obsMatrixTbl, 'observable_matrix.csv', run_output_dir);
+obsPath = fullfile(run_output_dir, 'observables.csv');
+writetable(obsExportTbl, obsPath);
+fprintf('Saved table: %s\n', obsPath);
+obsMatrixPath = save_run_table(obsMatrixTbl, 'observable_matrix.csv', run_output_dir);
 
 % Full SVD of DeltaM(T,tw).
 [U, S, V] = svd(M, 'econ');
@@ -169,20 +170,20 @@ cumulative = cumsum(explained);
 normalized = svals ./ max(sum(abs(svals), 'omitnan'), eps);
 svdSingTbl = table((1:numel(svals)).', svals, normalized, explained, cumulative, ...
     'VariableNames', {'mode','singular_value','normalized_singular_value','explained_variance_ratio','cumulative_variance_ratio'});
-save_run_table(svdSingTbl, 'svd_singular_values.csv', run_output_dir);
+svdSingPath = save_run_table(svdSingTbl, 'svd_singular_values.csv', run_output_dir);
 
 uTbl = table(Tgrid, 'VariableNames', {'T_K'});
 for k = 1:size(U, 2)
     uTbl.(sprintf('U_mode%d', k)) = U(:, k);
 end
-save_run_table(uTbl, 'svd_U.csv', run_output_dir);
+svdUPath = save_run_table(uTbl, 'svd_U.csv', run_output_dir);
 
 vTbl = table((1:numel(twSec)).', twSec, logTw, string({curves.datasetKey}).', string({curves.waitLabel}).', ...
     'VariableNames', {'tw_index','tw_seconds','log10_tw_seconds','dataset','wait_time'});
 for k = 1:size(V, 2)
     vTbl.(sprintf('V_mode%d', k)) = V(:, k);
 end
-save_run_table(vTbl, 'svd_V.csv', run_output_dir);
+svdVPath = save_run_table(vTbl, 'svd_V.csv', run_output_dir);
 
 coeff = V .* reshape(svals(:).', 1, []);
 coeffTbl = table((1:numel(twSec)).', twSec, logTw, string({curves.datasetKey}).', string({curves.waitLabel}).', ...
@@ -191,10 +192,10 @@ coeffTbl = table((1:numel(twSec)).', twSec, logTw, string({curves.datasetKey}).'
 for k = 1:size(coeff, 2)
     coeffTbl.(sprintf('coeff_mode%d', k)) = coeff(:, k);
 end
-save_run_table(coeffTbl, 'svd_mode_coefficients.csv', run_output_dir);
+coeffPath = save_run_table(coeffTbl, 'svd_mode_coefficients.csv', run_output_dir);
 
 corrTbl = buildObservableModeCorrelationTable(obsMatrixTbl, coeffTbl);
-save_run_table(corrTbl, 'observable_mode_correlations.csv', run_output_dir);
+corrPath = save_run_table(corrTbl, 'observable_mode_correlations.csv', run_output_dir);
 
 % Figures (Name must match save_run_figure base_name; see tools/save_run_figure.m).
 fig1 = figure('Color', 'w', 'Visible', 'off', 'Position', [80 80 920 620], 'Name', 'aging_DeltaM_map');
@@ -308,9 +309,27 @@ zipInputs = {
     reportPath};
 zip(zipPath, zipInputs);
 
+artifactPaths = { ...
+    obsPath, ...
+    obsMatrixPath, ...
+    deltaMMapPath, ...
+    TaxisPath, ...
+    twAxisPath, ...
+    svdSingPath, ...
+    svdUPath, ...
+    svdVPath, ...
+    coeffPath, ...
+    corrPath ...
+    };
+[sidecarPaths, sidecarIssuesPath, sidecarManifestPath] = write_structured_export_sidecars( ...
+    artifactPaths, obsExportTbl, obsMatrixTbl, runCtx, run_output_dir, TpRef, cfgRun.datasetName, curves);
+
 fprintf('Structured Aging export complete.\n');
 fprintf('Run root: %s\n', run_output_dir);
 fprintf('Review ZIP: %s\n', zipPath);
+fprintf('Structured export sidecar manifest: %s\n', sidecarManifestPath);
+fprintf('Structured export sidecar issues: %s\n', sidecarIssuesPath);
+fprintf('Structured export sidecars generated: %d\n', numel(sidecarPaths));
 
 function pauseRuns = extractPauseRunsForTpDiscovery(state)
 if isfield(state, 'pauseRuns_raw') && ~isempty(state.pauseRuns_raw)
@@ -564,6 +583,7 @@ if ~isempty(tokSec)
     twSec = str2double(tokSec{1});
     return;
 end
+
 tokMin = regexp(k, '(\d+(?:\.\d+)?)\s*min', 'tokens', 'once');
 if ~isempty(tokMin)
     twSec = 60 * str2double(tokMin{1});
@@ -573,4 +593,154 @@ tokHour = regexp(k, '(\d+(?:\.\d+)?)\s*(?:hour|hr|h)', 'tokens', 'once');
 if ~isempty(tokHour)
     twSec = 3600 * str2double(tokHour{1});
 end
+end
+
+function [sidecarPaths, issuesPath, manifestPath] = write_structured_export_sidecars(artifactPaths, obsExportTbl, obsMatrixTbl, runCtx, run_output_dir, TpRef, datasetName, curves)
+u = aging_lineage_sidecar_utils();
+opts = u.ensure_opts(struct('validation_mode', 'audit_only', 'strict_mode', false));
+sidecarPaths = {};
+issueAgg = table();
+manifestRows = table();
+
+writerId = 'Aging/analysis/aging_structured_results_export.m#F7C';
+sourceRunId = 'UNKNOWN';
+if isfield(runCtx, 'run_id') && ~isempty(runCtx.run_id)
+    sourceRunId = char(string(runCtx.run_id));
+end
+sourceDatasetId = char(string(datasetName));
+if isempty(strtrim(sourceDatasetId))
+    sourceDatasetId = 'aging_structured_export';
+end
+sampleList = string({curves.datasetKey});
+sampleList = unique(sampleList, 'stable');
+inputSignalId = strjoin(sampleList, '|');
+if strlength(inputSignalId) == 0
+    inputSignalId = "UNKNOWN";
+end
+
+for i = 1:numel(artifactPaths)
+    artPath = artifactPaths{i};
+    [artFolder, artBase, artExt] = fileparts(artPath);
+    if ~strcmpi(artExt, '.csv')
+        continue;
+    end
+    sidecarCsvPath = fullfile(artFolder, [artBase '_lineage.csv']);
+    sidecarJsonPath = fullfile(artFolder, [artBase '_lineage.json']);
+
+    naFields = {'tau_or_R_flag','numerator_observable_id','denominator_observable_id'};
+    obsSemantic = 'NOT_APPLICABLE';
+    obsDefId = 'NOT_APPLICABLE';
+    regId = 'NOT_APPLICABLE';
+    ns = 'current_export';
+    notes = sprintf('structured_export_artifact=%s;Tp_K=%.3f;audit_only_sidecar', [artBase artExt], TpRef);
+    formulaId = ['AGING_STRUCTURED_EXPORT_' upper(artBase)];
+    signConvention = 'NOT_APPLICABLE';
+    unitStatus = 'UNKNOWN';
+    scalarRecipe = 'UNKNOWN';
+    preprocRecipe = 'stage2_stage3_stage4_stage5_pipeline';
+    authoritativeField = 'NOT_APPLICABLE';
+
+    if strcmpi(artBase, 'observables') || strcmpi(artBase, 'observable_matrix')
+        if any(strcmp(obsMatrixTbl.Properties.VariableNames, 'Dip_depth'))
+            obsSemantic = 'Dip_depth';
+            obsDefId = 'UNKNOWN';
+            regId = 'UNKNOWN';
+            notes = [notes ';plain_Dip_depth_unresolved_for_model_use'];
+            authoritativeField = 'UNKNOWN';
+        end
+        if any(strcmp(obsMatrixTbl.Properties.VariableNames, 'FM_step_mag'))
+            signConvention = 'FM_step_mag_signed_from_stage4';
+        end
+        unitStatus = 'mixed_per_observable';
+        scalarRecipe = 'per_pause_run_scalar_fields';
+        naFields = {'tau_or_R_flag','numerator_observable_id','denominator_observable_id'};
+    end
+
+    meta = struct();
+    meta.schema_version = 'F6T-1.0';
+    meta.validation_mode = 'audit_only';
+    meta.artifact_path = artPath;
+    meta.artifact_class = 'structured_export_table';
+    meta.writer_family_id = 'WO_STRUCTURED_EXPORT';
+    meta.writer_id = writerId;
+    meta.formula_id = formulaId;
+    meta.registry_id = regId;
+    meta.namespace = ns;
+    meta.observable_definition_id = obsDefId;
+    meta.observable_semantic_name = obsSemantic;
+    meta.source_run_id = sourceRunId;
+    meta.source_dataset_id = sourceDatasetId;
+    meta.input_signal_id = char(inputSignalId);
+    meta.sign_convention = signConvention;
+    meta.unit_status = unitStatus;
+    meta.preprocessing_recipe_id = preprocRecipe;
+    meta.scalarization_recipe_id = scalarRecipe;
+    meta.provenance_status = 'lineage_replay_ready';
+    meta.model_readiness = 'diagnostic_only';
+    meta.canonical_status = 'not_canonical';
+    meta.legacy_quarantine_allowed = 'yes';
+    meta.diagnostic_use_allowed = 'yes';
+    meta.model_use_allowed = 'no';
+    meta.canonical_use_allowed = 'no';
+    meta.tau_or_R_flag = 'NOT_APPLICABLE';
+    meta.numerator_observable_id = 'NOT_APPLICABLE';
+    meta.denominator_observable_id = 'NOT_APPLICABLE';
+    meta.authoritative_flag_field = authoritativeField;
+    meta.notes = notes;
+
+    optsLocal = opts;
+    optsLocal.na_fields = naFields;
+    [sidecarTbl, issuesTbl] = u.build_default_sidecar(meta, optsLocal);
+    u.write_sidecar_csv(sidecarCsvPath, sidecarTbl);
+    u.write_sidecar_json(sidecarJsonPath, sidecarTbl);
+    sidecarPaths{end + 1} = sidecarCsvPath; %#ok<AGROW>
+    sidecarPaths{end + 1} = sidecarJsonPath; %#ok<AGROW>
+
+    if ~isempty(issuesTbl) && height(issuesTbl) > 0
+        issuesTbl.artifact_path = repmat(string(artPath), height(issuesTbl), 1);
+        if isempty(issueAgg)
+            issueAgg = issuesTbl;
+        else
+            issueAgg = [issueAgg; issuesTbl]; %#ok<AGROW>
+        end
+    end
+
+    rowCount = -1;
+    colCount = -1;
+    try
+        t = readtable(artPath);
+        rowCount = height(t);
+        colCount = width(t);
+    catch
+    end
+    sumStruct = struct( ...
+        'schema_version', sidecarTbl.schema_version{1}, ...
+        'validation_mode', sidecarTbl.validation_mode{1}, ...
+        'writer_id', sidecarTbl.writer_id{1}, ...
+        'table_row_count', string(rowCount), ...
+        'table_column_count', string(colCount));
+    localManifestPath = fullfile(artFolder, [artBase '_manifest.csv']);
+    u.write_compact_table_manifest(localManifestPath, artPath, sumStruct, optsLocal);
+    m = table(string(artPath), string(sidecarCsvPath), string(sidecarJsonPath), string(localManifestPath), ...
+        'VariableNames', {'artifact_path','sidecar_csv_path','sidecar_json_path','manifest_path'});
+    if isempty(manifestRows)
+        manifestRows = m;
+    else
+        manifestRows = [manifestRows; m]; %#ok<AGROW>
+    end
+end
+
+issuesPath = fullfile(run_output_dir, 'tables', 'structured_export_sidecar_issues.csv');
+if isempty(issueAgg)
+    issueAgg = cell2table(cell(0, 8), 'VariableNames', ...
+        {'issue_id','severity','field','what_failed','why_it_matters','suggested_fix','blocks_execution','artifact_path'});
+end
+writetable(issueAgg, issuesPath);
+
+manifestPath = fullfile(run_output_dir, 'tables', 'structured_export_sidecar_manifest.csv');
+if isempty(manifestRows)
+    manifestRows = cell2table(cell(0, 4), 'VariableNames', ...
+        {'artifact_path','sidecar_csv_path','sidecar_json_path','manifest_path'});
+end
+writetable(manifestRows, manifestPath);
 end

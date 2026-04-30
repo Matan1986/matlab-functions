@@ -1,0 +1,2 @@
+artifact_path,sidecar_csv_path,sidecar_json_path,manifest_path
+C:\Dev\matlab-functions\tables\aging\aging_F7C_structured_export_sample_observables.csv,C:\Dev\matlab-functions\tables\aging\aging_F7C_structured_export_sample_observables_lineage.csv,C:\Dev\matlab-functions\tables\aging\aging_F7C_structured_export_sample_observables_lineage.json,C:\Dev\matlab-functions\tables\aging\aging_F7C_structured_export_sample_observables_manifest.csv

@@ -1,0 +1,2 @@
+issue_id,severity,field,what_failed,why_it_matters,suggested_fix,blocks_execution,artifact_path
+F7A_PLAIN_DIP_DEPTH_UNRESOLVED,WARNING,observable_semantic_name,plain Dip_depth without S4A/S4B resolution,tau/R claims require dip lineage,rename column/sidecar to resolved dip definition per writer contract,0,C:\Dev\matlab-functions\tables\aging\aging_F7C_structured_export_sample_observables.csv
