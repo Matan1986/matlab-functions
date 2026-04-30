@@ -164,3 +164,46 @@ Safe execution order:
 - Full reconstruction closure is still partial across asymmetry, crossover, WI/X gauge, atlas, and figure-provenance layers.
 - Anti-contamination protections should remain in force; only stale-state guard records need narrow compatibility updates.
 - Publication figures are not yet fully authorized.
+
+## Visualization and inspection requirements for reconstruction
+
+Every old-analysis reconstruction stage that produces numerical outputs should also produce at least one human-inspection figure when scientifically meaningful. These figures are QA/inspection artifacts first, not manuscript claims.
+
+Default figure policy:
+
+- Prefer PNG outputs for inspection.
+- Do not generate MATLAB `.fig` files by default unless explicitly requested.
+- Follow repository visualization/export guidance:
+  - `docs/visualization_rules.md`
+  - `docs/figure_style_guide.md`
+  - `docs/figure_export_infrastructure.md`
+  - `docs/figure_repair_priority.md`
+  - `tools/save_run_figure.m` where applicable.
+
+Semantic labeling requirements:
+
+- Figures must clearly state source family, semantic family, and variant in the report text or caption.
+- Figures must not silently mix `legacy_old`, corrected-old / `CORRECTED_CANONICAL_OLD_ANALYSIS`, `canonical_residual_decomposition`, `canonical_geometric_decomposition`, `canonical_replay`, or diagnostic / experimental PTCDF outputs.
+- Figures must expose orientation and plotted range choices explicitly, especially for X-like and collapse-like panels.
+- Any display-only transform must be labelled as display-only and must not be written back into source data.
+- If an inspection figure looks wrong, first check source family, orientation, axis choice, range limits, and display transform before interpreting physics.
+
+Readiness rule:
+
+A reconstruction stage is not considered reviewable unless it writes machine-readable outputs and human-inspection material, including figures when applicable.
+
+## Lessons learned from initial reconstruction confusion
+
+The initial attempt to restart the Switching old-analysis reconstruction exposed several semantic and workflow risks. These lessons are now part of the reconstruction contract:
+
+- Do not treat `switching_canonical_S_long` as a single semantic family; it is a mixed producer requiring column-level classification.
+- `S_percent` / measured source S belongs to `CANON_GEN_SOURCE`.
+- PT/CDF/backbone/residual diagnostic columns belong to `EXPERIMENTAL_PTCDF_DIAGNOSTIC`.
+- Do not promote PTCDF diagnostic outputs to corrected-old authority.
+- Do not use forbidden stems such as `X_canon`, `collapse_canon`, `Phi_canon`, or `kappa_canon` for new outputs.
+- Do not assume the word “canonical” means manuscript-safe, publication-safe, or corrected-old authoritative.
+- Do not start broad old-analysis replay until semantic preflight is committed, reviewed, and passing.
+- Do not execute rename from the alias/rename plan until a separate rename-execution phase is explicitly approved.
+- Keep old/corrected-old/canonical residual/geocanon/replay/diagnostic families separated in filenames, reports, captions, and tables.
+- When a lint rule flags a forbidden token inside policy/forbidden-use/notes text, distinguish real unsafe promotion from governance documentation before changing contract content.
+- Every reconstruction stage must document what it did as repository artifacts, not only chat summaries.
