@@ -1,0 +1,11 @@
+check_id,check_name,expected_value,current_value,status,evidence,notes
+P4A_001,current_head_anchor,35ccc92,35ccc92,PASS,git rev-parse --short HEAD,Required Phase 4A anchor present.
+P4A_002,phase3_preflight_committed,YES,YES,PASS,commit 0a9e0a1 and tables/switching_semantic_phase3_preflight_status.csv,Phase 3 preflight is in history and committed.
+P4A_003,reconstruction_inspection_policy_present,YES,YES,PASS,reports/switching_corrected_canonical_reconstruction_program.md markers verified,Inspection and lessons sections are present in HEAD.
+P4A_004,semantic_family_separation_required,YES,YES,PASS,docs/switching_analysis_map.md and semantic contracts,Family separation remains mandatory for all Phase 4 work.
+P4A_005,phase4_replay_executed,NO,NO,PASS,No replay run requested in this phase,Phase 4A is planning/readiness only.
+P4A_006,reviewable_stage_requires_figures_when_applicable,YES,YES,PASS,reconstruction program readiness rule,Machine-readable outputs plus inspection material required.
+P4A_007,inspection_format_default_png,YES,YES,PASS,reconstruction program visualization requirements,PNG is default for inspection output.
+P4A_008,matlab_fig_default_disabled,YES,YES,PASS,reconstruction program visualization requirements,.fig output is opt-in only.
+P4A_009,broad_replay_allowed_in_phase4A,NO,NO,PASS,Phase 3 status and governance constraints,Broad replay remains blocked in Phase 4A.
+P4A_010,first_slice_must_be_narrow,YES,YES,PASS,Phase 4A scope lock,Only minimal bounded slice may be opened next.
