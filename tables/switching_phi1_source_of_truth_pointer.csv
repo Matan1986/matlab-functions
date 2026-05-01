@@ -1,0 +1,17 @@
+topic,value,notes
+manuscript_aligned_phi1_shape_artifact,tables/switching_corrected_old_authoritative_phi1.csv,Durable promoted; column Phi1_corrected_old vs x_aligned; index row corrected_old_authoritative_phi1
+diagnostic_only_phi1_like_artifact,switching_canonical_phi1.csv under results/switching/runs/<run_id>/tables/,Producer run_switching_canonical.m; DIAGNOSTIC_MODE_ANALYSIS class per governance manifest
+blocked_names,"Phi1_canon; canonical Phi1",Blocked until future gate locks source artifact normalization sign usage
+safe_manuscript_wording,Phi1_corrected_old from tables/switching_corrected_old_authoritative_phi1.csv with CORRECTED_CANONICAL_OLD_ANALYSIS,Per switching_corrected_canonical_current_state.md
+safe_diagnostic_wording,diagnostic Phi1-like output switching_canonical_phi1.csv DIAGNOSTIC_MODE_ANALYSIS not interchangeable with corrected-old Phi1,Verbatim pattern in switching_phi1_terminology_contract.md
+unsafe_bare_phrases,"Phi1_canon; canonical Phi1; bare Phi1 without path",Use registry preferred_replacement column
+future_gate_for_Phi1_canon,Publish certification row locking CSV path norm sign allowed_usage scope,No Phi1_canon until then
+rename_switching_canonical_phi1_now,NO,Compatibility and producer wiring unchanged this task
+document_misleading_filename_now,YES,Filename suggests canonical Phi1; governance says diagnostic
+later_compatibility_alias_or_deprecation_review,YES,Optional sidecar label or export alias in follow-on task
+artifact_index_authoritative_home,tables/switching_corrected_old_authoritative_artifact_index.csv,Artifact-centric; not replaced by Phi1 registry
+term_registry_authoritative_home,tables/switching_phi1_terminology_registry.csv,Term-centric supplement
+terminology_contract_home,docs/switching_phi1_terminology_contract.md,Narrow Phi1 vocabulary contract
+normalization_caveat,max_abs producer vs L2 downstream consumers see switching_phi1_terminology_contract.md section 6,
+sign_caveat,producer Speak alignment vs hierarchy pred1 sign story see switching_phi1_terminology_contract.md section 6,
+tables_switching_allowed_comparison_operations_csv,NOT_PRESENT_IN_REPO,Allowed comparisons in reports/switching_legacy_canonical_separation_contract.md prose

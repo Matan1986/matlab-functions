@@ -32,6 +32,10 @@ The **current manuscript narrative** is the **corrected canonical replay of the 
 
 **Rule:** Any prose using **“canonical backbone”** must specify **`namespace_id`** (`CORRECTED_CANONICAL_OLD_ANALYSIS` vs `EXPERIMENTAL_PTCDF_DIAGNOSTIC` vs none).
 
+### Phi1 terminology (narrow contract)
+
+Manuscript-aligned **`Phi1_corrected_old`** vs diagnostic **`switching_canonical_phi1.csv`**, blocked names **`Phi1_canon`** / **`canonical Phi1`** (until a future certification gate), and normalization/sign caveats: **`docs/switching_phi1_terminology_contract.md`**, **`tables/switching_phi1_terminology_registry.csv`**, **`tables/switching_phi1_source_of_truth_pointer.csv`**. **`switching_canonical_phi1.csv`** is a diagnostic Phi1-like output from the canonical run; despite its filename it is **not** the locked manuscript-aligned Phi1 shape (**`tables/switching_corrected_old_authoritative_phi1.csv`**). These files **supplement** **`tables/switching_corrected_old_authoritative_artifact_index.csv`** (artifact inventory); they do **not** replace it.
+
 ---
 
 ## One-page plain-language summary

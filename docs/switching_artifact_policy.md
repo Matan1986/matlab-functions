@@ -14,6 +14,10 @@ Switching artifacts are organized into explicit families that must remain separa
 
 These four families are mandatory and must not be merged, collapsed, or renamed.
 
+### Phi1 / decomposition vocabulary pointer
+
+Phi1 naming (manuscript vs diagnostic), the misleading filename **`switching_canonical_phi1.csv`**, and blocked phrases **`Phi1_canon`** / **`canonical Phi1`**: **`docs/switching_phi1_terminology_contract.md`** and **`tables/switching_phi1_terminology_registry.csv`**. Artifact inventory rows remain authoritative in **`tables/switching_corrected_old_authoritative_artifact_index.csv`**.
+
 ## Source-of-Truth Hierarchy (Switching)
 Priority order for Switching artifact truth:
 1. `results/switching/runs/<run_id>/` lineage containers (run manifest, status, logs, run-scoped outputs).

@@ -3,6 +3,8 @@
 This file is outdated and does not represent the current canonical definition.
 Refer to canonical/xy_switching/ instead.
 
+**Phi1 terminology:** Manuscript-aligned Phi1 vs diagnostic Phi1-like output from the canonical run, blocked phrases (**`Phi1_canon`**, **`canonical Phi1`**), and filename caveat for **`switching_canonical_phi1.csv`**, are governed by **`docs/switching_phi1_terminology_contract.md`** (do not infer Phi1 authority from this deprecated file alone).
+
 # Switching Canonical Definition (v1.2)
 
 ## 0. Canonical execution system (locked)
