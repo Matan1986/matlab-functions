@@ -1,0 +1,9 @@
+rule_id,rule_text,enforcement_type
+CM1,"Any artifact that uses a Switching coordinate or Switching-derived table (including X_eff_nonunique, X_eff, Switching observables, or Switching-matched rows) is CROSS_MODULE_SWITCHING_RELAXATION even if path is under reports/relaxation or tables/relaxation.",classification
+CM2,"Do not label such analyses Relaxation-only based on folder alone.",wording
+CM3,"Do not use X_canon for AX claims unless an explicit Switching contract allows it; prefer X_eff_nonunique or documented effective coordinate name.",wording
+CM4,"Treat get_canonical_X / canonical_X as legacy/misleading until a dedicated audit; do not equate with current X_eff_nonunique without proof.",wording
+CM5,"Keep A_obs, A_proj_nonSVD, m0_svd / SVD_score_mode1, and legacy A_T symbols distinct; never collapse to bare A without qualifier.",wording
+CM6,"Power-law exponent near 0.66 is diagnostic unless cross-validated model comparison supports stronger wording.",claims
+CM7,"Main narrative must distinguish bridge-style linkage vs universal power-law exponent claims.",claims
+CM8,"Future outputs may use a dedicated cross_module namespace after compatibility review; default is index-first, no moves.",process

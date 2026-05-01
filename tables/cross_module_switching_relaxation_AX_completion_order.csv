@@ -1,0 +1,6 @@
+stage_order,stage_id,goal,allowed_actions,forbidden_actions,outputs,stop_condition
+1,ORG_INDEX,"Establish cross-module index and classification without moving files","Write index CSV/MD; reference existing paths; tag families","Moves; renames; new scientific fits; producer edits","docs/tables cross_module index artifacts; status verdict ORGANIZATION_COMPLETE","Index lists all P0 families and pointers resolve or are marked MISSING"
+2,ARCH_CANON_X,"Audit get_canonical_X / legacy canonical_X usage vs X_eff_nonunique","Read-only archaeology; side-by-side table of definitions","Universal exponent claims; silent alias of X_canon","Audit report/CSV rows","Explicit verdict per symbol path"
+3,CANON_AX_SUMMARY,"Single-page canonical AX crosswalk (current evidence)","Synthesize documented verdicts only","New fits; new figures required for summary","AX summary MD + optional status CSV","Summary cites artifact paths + claim boundaries"
+4,SCIENCE_GAPS,"Fill targeted gaps only after 1-3","Scoped reruns per repo_execution_rules","Broad replay; scope creep","Run-scoped results","Per-task acceptance criteria met"
+5,CLAIM_SAFETY_PASS,"Final claim-safety review for publication-facing text","Text/table review against claim_boundary_plan","Promoting diagnostic alpha to main-text universal","Review markdown + status CSV","All HIGH-risk phrases gated"
