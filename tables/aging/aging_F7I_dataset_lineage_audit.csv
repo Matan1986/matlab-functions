@@ -1,0 +1,9 @@
+lineage_field,present_in_five_column_main_csv,present_in_consolidation_sidecar_schema,present_in_stage4_pipeline_struct,required_for_F7H_metadata_real_output_gate,adequacy_summary,expanded_notes_no_commas
+Dip_depth,YES,NO_scalar_in_main_only,YES,YES_for_curvefit_input,ADECQUATE_NUMERIC_ONLY,"Five column supplies numeric Dip_depth; no Dip_depth_source column in standard five column file"
+FM_abs,YES,NO_in_main_only,YES_as_abs_FM_signed,NO_for_dip_writer_core,ADECQUATE_WHERE_FINITE,"Some legacy rows may carry NaN FM_abs without blocking dip tau reader if dip column finite"
+source_run_concat_string,YES,NO_distinct_manifest_column,NO_direct_in_stage4_row,YES_row_identity,ADECQUATE_UNDER_STAGE_D,"Consolidation emits run_id pipe sample pipe dataset composite"
+manifest_run_id,NO,YES_in_sidecar_column,YES_via_run_manifest_in_export_run,nice_to_have,ADECUATE_FOR_JOIN,"Sidecar carries manifest_run_id separate from source_run string"
+input_table_path,NO,YES_in_sidecar_input_table_column,yes_implicit_from_structured_export,metadata_trace,ADECQUATE_FOR_JOIN,"Observable matrix path echoed per orig_row_index"
+Dip_depth_source,NO,NO_in_current_sidecar_emit,YES_run_field_Dip_depth_source,NOT_METADATA_VERIFIED_WITHOUT_EXTRA_COLUMN,PARTIAL,"Writer metadata flags pending dip branch resolution; optional future sidecar column not present in current emit"
+source_run_TrackB,NO,NO,NO,N_A_not_part_of_five_column_contract,NOT_APPLICABLE_STANDARD_CONSOLIDATION,"Exists only in separate TrackB extract tables in other scripts"
+run_manifest_json,NO,NO_as_main_csv_but_exists_on_disk_for_structured_feed,YES,NO_for_csv_only,ADECQUATE_PARALLEL_ARTIFACT,"Consolidation consumer should cite manifest beside structured export feeding pointer file"
