@@ -1,0 +1,7 @@
+stable_label_id,semantic_meaning,example_absolute_path_shape_windows_repo,suggested_run_report_tag,f7h_use_notes
+dataset_source_branch_current_tables_22row,Five-column consolidation from current workspace tables tree,{REPO}\tables\aging\aging_observable_dataset.csv,F7H_DS_BRANCH_tables22_metadata_only,"Dip_depth FM_abs magnitude rows Tp 14-34 K no 6 10 unless regenerated upstream"
+dataset_source_branch_archival_results_old_30row,Historical dataset_build snapshot mirrored under results_old,{REPO}\results_old\aging\runs\run_2026_03_12_211204_aging_dataset_build\tables\aging_observable_dataset.csv,F7H_DS_BRANCH_arch30_metadata_only,"Adds Tp 6 10 K rows same tw grid FM_abs may NaN some rows"
+fm_signal_mode_magnitude_abs_for_fm_tau,TAU_FM reader ingest uses FM_abs column only,N_A,F7H_FM_MODE_mag_abs,"Matches aging_fm_timescale_analysis numeric ingest contract"
+fm_signal_mode_signed_matrix_for_short_tw_audit,Not used by default tau writers; matrix FM_step_mag audit paths,N_A,F7H_FM_MODE_signed_audit_parallel,"Separate from F7H dip tau CSV verification unless explicitly scoped"
+tau_method_dip_multi_curvefit,aging_timescale_extraction logistic stretched half-range family,N_A,F7H_TAU_DIP_WF_TAU_DIP_CURVEFIT,"Metadata columns appended via appendF7GTauRMetadataColumns per ced4798"
+tau_method_fm_abs_multi_curvefit,aging_fm_timescale_analysis on FM_abs curves,N_A,F7H_TAU_FM_WF_TAU_FM_CURVEFIT,"Requires cfg dipTauPath and other defaults reviewed separately for chain runs"

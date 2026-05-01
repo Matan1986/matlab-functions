@@ -1,0 +1,10 @@
+criterion_id,criterion_description,assessment,evidence_or_notes
+R1,Maps question to branch,PASS,docs/aging_observable_branch_router.md quick decision table rows cover tau input sign Track A stage4 consolidation clock ratio
+R2,Maps branch to fields,PASS,Branch summaries section lists primary fields per branch
+R3,Maps fields to artifact or script,PASS,Table and summaries cite concrete paths e.g. aging_observable_dataset.csv stage6_extractMetrics observable_matrix
+R4,FM sign visibility documented,PASS,Dedicated FM sign visibility matrix plus five-column limits
+R5,Fit versus direct status documented,PASS,Quick table column Fit/direct plus F7J-derived fit versus direct map in router
+R6,Allowed claims classes documented,PASS,Section allowed claims references F7J map and lists metadata replay exploration blocked classes
+R7,Known confusions documented,PASS,Known risks section Track A vs B FM_step_mag naming tau gates absence inference
+R8,F7H-specific operator checklist row present,PARTIAL_OPTIONAL,Router targets branch selection; explicit F7H session env checklist could be added later not blocking readiness
+OVERALL_ROUTER_SUFFICIENCY_FOR_READERS,Sufficient for branch selection and pointer literacy,YES_WITH_MINOR_OPTIONAL_ENHANCEMENT,"Sufficient; optional one-row F7H rerun checklist could reduce operator error but not required for conceptual readiness"

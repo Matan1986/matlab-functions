@@ -1,0 +1,12 @@
+gate_id,gate_statement,verdict,value_notes
+G1,Default writer path results_aging_runs_run_2026_03_12_211204 exists this checkout,BLOCKER_UNLESS_OVERRIDE,Path missing False per existence probe; env AGING_OBSERVABLE_DATASET_PATH or cfg override required
+G2,Current workspace consolidation CSV readable,BYPASS_OK,tables/aging/aging_observable_dataset.csv exists True
+G3,Archival results_old snapshot CSV readable,BYPASS_OK,results_old/.../aging_observable_dataset.csv exists True
+G4,Branch router explains five-column FM_abs magnitude tau ingest,PASS,Router documents FM_abs only for tau_FM reader chain
+G5,F7I lineage prerequisites documented,PASS,F7I audit defines pointer and lineage expectations
+SAFE_TO_RESUME_F7H_CURRENT_22ROW_WITH_POINTER,Session pointer to tables consolidation file,YES,"Set AGING_OBSERVABLE_DATASET_PATH to absolute repo path of tables/aging/aging_observable_dataset.csv before MATLAB"
+SAFE_TO_RESUME_F7H_ARCHIVAL_30ROW_WITH_POINTER,Session pointer to results_old snapshot file,YES,"Set same env var to absolute path under results_old/.../tables/aging_observable_dataset.csv"
+SAFE_TO_COMPARE_BOTH_BRANCHES_IN_F7H,Two writer runs with same code different inputs metadata only,YES,"Run aging_timescale_extraction twice with distinct env paths; createRunContext assigns new run_dir each time no overwrite"
+BLOCKED_PENDING_DATASET_LINEAGE,Cannot name upstream structured export for chosen rows,BOUNDED_RISK,"Operator must record which consolidation epoch each file represents in run_notes not automatic blocker if files exist"
+BLOCKED_PENDING_CONFIG_ROUTING,Requires implemented unified config object,NO,"Session env pointer suffices for dip tau writer metadata verification gate"
+CONFIG_ROUTING_IMPLEMENTATION_REQUIRED_BEFORE_F7H,Hard blocker,NO,"Labels plus env override sufficient for metadata-only verification"

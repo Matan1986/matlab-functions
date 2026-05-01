@@ -1,0 +1,11 @@
+f7j_proposed_key,implementation_status_in_repo,risk_if_unimplemented,f7h_minimum_bridge_without_full_impl
+observable_branch,Distributed across cfg.agingMetricMode only inside pipeline,"Wrong mode assumed when reading exports","Document chosen branch in run_notes; router suffices"
+dip_extraction_method,Implicit in AFM_metric_main and windows,"Dip_depth_source ambiguity for tau claims","F7H verifies metadata columns existence not dip physics reinterpretation"
+background_method,Implicit smoothWindow_K etc.,Limited comparability across exports,N_A_for_metadata_only_F7H
+fm_signal_mode,Not single cfg flag,"Confusion magnitude versus signed","Router plus explicit dataset_source_branch label per run"
+fm_short_tw_policy,Scattered excludeLowT FM_plateau_K,"Low-T NaN FM_abs misunderstood","Label dataset branch includes whether low-T rows present"
+tau_method,Separate scripts not registry,"Operator picks script explicitly","F7H starts with aging_timescale_extraction only unless chain scoped"
+fit_family,Multiple layers stage5 vs tau logistic,"Semantic mismatch narrative","Metadata verification checks writer_family_id tau_domain strings not fit quality"
+direct_tau_method,Internal consensus strings,"Low priority for F7H","Inspect tau_consensus_methods column bytes if present"
+dataset_source_branch,Partially consolidation_structured_run_dir.txt plus env AGING_OBSERVABLE_DATASET_PATH,"Stale pointer","Use stable_label_id rows in this audit for report prose only"
+lineage_policy,F7G appendF7GTauRMetadataColumns plus freeze CSV,"Pending canonical_status flags","Expected on successful CSV emit row-level read"
