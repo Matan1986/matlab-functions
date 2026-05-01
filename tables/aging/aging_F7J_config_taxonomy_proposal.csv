@@ -1,0 +1,11 @@
+proposed_config_key,intended_semantics,map_to_existing_code_symbols_if_any,missing_or_stub_notes
+observable_branch,"Select among Track A summaries vs Track B stage4 vs derivative vs extrema vs consolidation thin sink","cfg.agingMetricMode in Main_Aging stage4 switch surface","Needs unified registry string covering consolidation-only workflows"
+dip_extraction_method,"Residual AFM_amp dip_metric derivative extrema fallback naming","cfg.AFM_metric_main cfg dip_window_K smoothWindow_K combined behavior","Needs explicit enum mirroring analyzeAFM_FM_components branches"
+background_method,"Smoothing baseline slope baseline_status conventions","cfg.smoothWindow_K baseline estimation inside components","Partially implicit per mode"
+fm_signal_mode,"signed_step_raw vs magnitude_abs vs misnamed_mag_column semantics","FM_signed FM_abs FM_step_mag triad in stage4","Needs policy flag for export narrow vs wide consumers"
+fm_short_tw_policy,"Minimum tw validity plateau counts excludeLowT FM_plateau_valid interplay","cfg.excludeLowT_* cfg.FM_plateau_K cfg.FM_buffer_K","Needs named presets linking to lowT diagnostic findings"
+tau_method,"dip logistic vs fm logistic vs rescaling vs clock ratio downstream","Multiple scripts each partially configurable","Needs orchestrator-level registry not yet present"
+fit_family,"Gaussian dip tanh step vs logistic tau fits vs power laws","stage5 vs aging_timescale_extraction fitLogisticInLogTime cluster","Cross-layer naming inconsistent"
+direct_tau_method,"half_range logistic stretched summaries selection policy","tau_consensus_methods strings computed internal","Implicit tie-break rules in extraction script"
+dataset_source_branch,"Which structured export run id or aggregate folder feeds consolidation","consolidation_structured_run_dir.txt pointer","Needs UI friendly alias beyond single text file"
+lineage_policy,"F7G canonical_status model_use_allowed semantic_status gates","appendF7GTauRMetadataColumns meta structs per writer","Needs dataset_branch plus dip_branch encoded columns not only strings"
