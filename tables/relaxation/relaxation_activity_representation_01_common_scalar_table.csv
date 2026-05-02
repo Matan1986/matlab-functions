@@ -1,0 +1,9 @@
+T_K,A_obs,A_proj_nonSVD,m0_svd,projection_mean_curve,source_RCON,source_projection_mean,inclusion_set_label
+3,8.29795109014123e-06,8.32009897824254e-06,-0.000142328120905496,0.499747996625578,tables/relaxation/relaxation_RCON_02B_Aproj_vs_SVD_score.csv,computed_from_M,strict_default_no_quality_flag
+19,1.79857103881539e-05,1.78875331389325e-05,-0.000305991221266062,1.074341539215,tables/relaxation/relaxation_RCON_02B_Aproj_vs_SVD_score.csv,computed_from_M,strict_default_no_quality_flag
+23,2.40753761698e-05,2.40789747607092e-05,-0.000411949977089507,1.44626756669098,tables/relaxation/relaxation_RCON_02B_Aproj_vs_SVD_score.csv,computed_from_M,strict_default_no_quality_flag
+25,2.55584696472518e-05,2.56218719809483e-05,-0.000438349242668188,1.53890327496023,tables/relaxation/relaxation_RCON_02B_Aproj_vs_SVD_score.csv,computed_from_M,strict_default_no_quality_flag
+27,2.7092458026738e-05,2.72644720566327e-05,-0.000466473471344076,1.63758719116569,tables/relaxation/relaxation_RCON_02B_Aproj_vs_SVD_score.csv,computed_from_M,strict_default_no_quality_flag
+31,2.68829445900315e-05,2.67723109072531e-05,-0.000458066543840035,1.60811149816711,tables/relaxation/relaxation_RCON_02B_Aproj_vs_SVD_score.csv,computed_from_M,strict_default_no_quality_flag
+33,3.58270578645533e-06,3.67072141218472e-06,-6.27757553194601e-05,0.220507583989807,tables/relaxation/relaxation_RCON_02B_Aproj_vs_SVD_score.csv,computed_from_M,strict_default_no_quality_flag
+37,4.96184052238109e-07,-4.26129402320712e-07,7.30674691715132e-06,-0.0254666508143949,tables/relaxation/relaxation_RCON_02B_Aproj_vs_SVD_score.csv,computed_from_M,strict_default_no_quality_flag

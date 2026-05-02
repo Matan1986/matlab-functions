@@ -1,0 +1,2 @@
+variant_id,temperature_set_used,winner_in_sample,winner_heldout_or_LOO_if_available,best_nonSVD,best_direct,ranking_order,ranking_matches_primary,m0_rank_stable,Aproj_rank_stable,Aobs_rank_stable,notes
+primary_RF3R2_repaired,[3 19 23 25 27 31 33 37],m0_svd,m0_LOO_SVD_projection,m0_LOO_SVD_projection,A_obs,m0_svd>A_proj~proj_mean>A_obs_typically,YES,YES,YES,YES,only_primary_variant_present

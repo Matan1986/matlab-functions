@@ -1,0 +1,7 @@
+key,value,notes
+sigma1,0.0009524741509687567,"largest singular value of D"
+rank1_energy_fraction,0.9991759524142521,"sigma1^2/sum(sigma_k^2)"
+n_temperatures,8,""
+n_time_points,320,""
+sign_reference,m0_svd_from_RCON_SVD_score_mode1_aligned_by_Pearson_sign,""
+sign_flip_applied,YES,"flip if corr(raw,m0_svd)<0"

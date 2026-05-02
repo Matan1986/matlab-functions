@@ -1,0 +1,6 @@
+variant_id,scalar_method,mean_fold_rmse,median_fold_rmse,rank_mean_rmse
+primary_RF3R2_repaired,m0_LOO_SVD_projection,6.21057880483923e-07,6.41159368214649e-07,1
+primary_RF3R2_repaired,A_obs,6.90132027586325e-07,6.62118974772859e-07,4
+primary_RF3R2_repaired,A_proj_nonSVD,6.21065284792398e-07,6.41166657552753e-07,2
+primary_RF3R2_repaired,projection_mean_curve,6.21065436775646e-07,6.41164942720115e-07,3
+primary_RF3R2_repaired,full_data_m0_diagnostic_leaky,3.20763470610612e-05,4.01392239467079e-05,5

@@ -1,0 +1,3 @@
+comparison_type,n_common,pearson,spearman,scale_c,affine_intercept_b,affine_slope_c,normalized_rmse,max_abs_residual,largest_residual_T,notes
+AT_old_vs_m0_RF5A_saved,0,NaN,NaN,NaN,NaN,NaN,NaN,NaN,NaN,insufficient_overlap_or_missing_series
+RF5A_m0_vs_RCON_SVD_score_internal_consistency,8,0.999999629616703,1,0.991883119606989,2.70124987575726e-08,0.991950970483181,0.000459151849942753,3.66470693326563e-07,NaN,affine_normalized_rmse_column_uses_affine_fit

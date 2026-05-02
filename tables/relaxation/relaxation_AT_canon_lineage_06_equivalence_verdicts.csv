@@ -1,0 +1,10 @@
+verdict_key,value,evidence,notes
+LEGACY_AT_DEFINITION_RECONSTRUCTED,YES,"sigma1*U(:,1) from svd(D,econ) on D=M transpose",definition applied to RF3R2
+AT_CANON_EQUIVALENT_TO_M0_SVD,YES,"affine-equivalent",|Pearson|>=0.995 and low NRMSE per class
+AT_CANON_EQUIVALENT_TO_M0_LOO,YES,"affine-equivalent",requires AR02 fold table
+AT_CANON_EQUIVALENT_TO_RCON_SVD_SCORE,YES,"affine-equivalent",SVD_score_mode1 column
+AT_CANON_DISTINCT_FROM_AOBS,YES,"monotonic-only",YES if not sign/scale/affine equiv
+AT_CANON_DISTINCT_FROM_APROJ,NO,"affine-equivalent",YES if not sign/scale/affine equiv
+READY_FOR_AX_REINTERPRETATION,YES,"A_T computed and m0 class clear",no AX run here
+READY_FOR_POWERLAW_RETEST,YES,"canon exists; m0 relation classified",no power-law run here
+EXACT_OLD_AT_RECOVERED,NO,"no historical temperature_observables.csv",LINEAGE-05

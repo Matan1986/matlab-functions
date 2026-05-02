@@ -1,0 +1,10 @@
+handoff_key,value,allowed,caveat,notes
+RELAXATION_SCALAR_LINEAGE_CLOSED_FOR_AX_HANDOFF,YES,YES,Cross-module AX itself not executed here.,Closure-only authorization package.
+recommended_primary_SVD_family_coordinate,m0_LOO_SVD_projection,YES,Must carry RF3R2 map and inclusion-mask lineage.,AR02 AR03 evidence chain.
+equivalent_SVD_family_references,m0_svd;SVD_score_mode1;A_T_canon,YES,Equivalence statements affine-class on Lineage-06 strict subset.,Scope check before comparing to Switching X_eff.
+direct_observable_comparison_scalar,A_obs,YES,Not substitute for SVD coordinate role.,Transparency comparison anchor.
+diagnostic_only_scalars,projection_mean_curve;historical_A_T_old_placeholder,NO numerical A_T_old,A_T_old missing export.,Do not feed legacy unknown numerics into AX.
+fits_executed_in_closure,none,NO AX NO power-law,NO Relaxation AX fit in CLOSURE-07.,Explicit gap for downstream task.
+allowed_future_cross_module_tests,cross-module AX reinterpretation using Relaxation canonical coordinate candidates,YES,Must isolate Relaxation inputs from Switching in provenance.,Follow repo Switching-Relaxation AX guardrails.
+claims_not_permitted_pre_AX,"exact legacy identity universal exponent AX bridge proven",NO,Treat as Relaxation-only closure.,See claim boundaries UNSAFE rows.
+recommended_handoff_sentence,"Relaxation-internal scalar lineage is closed enough for separate cross-module AX reinterpretation; recommended SVD-family candidate m0_LOO_SVD_projection with m0_svd SVD_score_mode1 A_T_canon equivalent references on RF3R2; keep A_obs as direct observable; historical A_T_old not usable numerically.",YES,Replace bracket wording with final prose in AX brief.,Paraphrase permitted.

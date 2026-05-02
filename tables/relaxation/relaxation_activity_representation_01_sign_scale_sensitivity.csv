@@ -1,0 +1,2 @@
+set_label,max_abs_delta_fro_raw_vs_signflip,ranking_winner_differs_raw_vs_signflip
+strict_default_no_quality_flag,0,0

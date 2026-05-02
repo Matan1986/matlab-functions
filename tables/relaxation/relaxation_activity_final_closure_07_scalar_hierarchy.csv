@@ -1,0 +1,9 @@
+hierarchy_level,scalar,role,evidence_basis,notes
+main_text,A_obs,Direct experimentally transparent relaxation amplitude,AR01 recommended main text; AR02 recommendation after LOO,Transparent readout; not rank-1 reconstruction winner
+supplement_map_coordinate,m0_LOO_SVD_projection,Robust intrinsic rank-1 RF3R2 map coordinate,AR02 non-leaky held-out best; AR03 winner in all 12 variants,Primary supplement for map/reconstruction story
+SVD_family_equivalent,m0_svd,Full-map SVD mode-1 score (RCON),AR01 in-sample rank-1 optimal; Lineage-06 affine match to A_T_canon,Same bundle column family as SVD_score_mode1
+SVD_family_equivalent,SVD_score_mode1,RCON naming for full-map SVD mode-1 score,tables/relaxation/relaxation_RCON_02B_Aproj_vs_SVD_score.csv,Alias of m0_svd when sourced from RCON
+SVD_family_equivalent,A_T_canon,Legacy definition sigma1*U1 on D rows T cols t,Lineage-06 reconstruction and equivalence verdicts,Affine-equivalent to m0 family on current RF3R2 strict subset
+non_SVD_projection_reference,A_proj_nonSVD,Non-SVD projection reference,AR01 compromise; Lineage-06 near SVD family,Not independent axis from SVD family without retesting scope
+non_SVD_projection_reference,projection_mean_curve,Projection onto mean temporal template,AR01 construction,Supplement or diagnostic
+historical_diagnostic,A_T_old,Missing historical table,LINEAGE-05 not found,No numeric use

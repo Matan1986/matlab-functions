@@ -1,0 +1,23 @@
+group,path,recommended_action,force_add,priority,reason
+AR01,tables/relaxation/relaxation_activity_representation_01_*.csv,stage tables later when committing artifact bundle,YES,MEDIUM,Ignored by tables/** gitignore
+AR01,reports/relaxation/relaxation_activity_representation_01_scalar_ranking.md,stage report later,YES,MEDIUM,Ignored by reports/**
+AR02,tables/relaxation/relaxation_activity_representation_02_*.csv,stage tables later,YES,MEDIUM,Generated relaxation outputs
+AR02,reports/relaxation/relaxation_activity_representation_02_loo_svd_and_robustness.md,stage report later,YES,MEDIUM,Documentation artifact
+AR03,tables/relaxation/relaxation_activity_representation_03_*.csv,stage tables later,YES,MEDIUM,Ranking audit outputs
+AR03,reports/relaxation/relaxation_activity_representation_03_robustness_audit.md,stage report later,YES,MEDIUM,Robustness narrative
+CONSOLIDATION_04,tables/relaxation/relaxation_activity_consolidation_04_*.csv,stage tables later,YES,MEDIUM,Safety matrix hierarchy
+CONSOLIDATION_04,reports/relaxation/relaxation_activity_consolidation_04_scalar_evidence_and_lineage_roadmap.md,stage report later,YES,MEDIUM,Roadmap doc
+LINEAGE_05,tables/relaxation/relaxation_AT_old_vs_m0_svd_lineage_05_*.csv,stage tables later,YES,MEDIUM,Legacy reconciliation tables
+LINEAGE_05,reports/relaxation/relaxation_AT_old_vs_m0_svd_lineage_05_exact_reconciliation.md,stage report later,YES,MEDIUM,Lineage report
+LINEAGE_06,tables/relaxation/relaxation_AT_canon_lineage_06_*.csv,stage tables later,YES,HIGH,Canon reconstruction evidence
+LINEAGE_06,reports/relaxation/relaxation_AT_canon_lineage_06_legacy_definition_reconstruction.md,stage report later,YES,HIGH,Definition bridge doc
+LINEAGE_06,figures/relaxation/canonical/relaxation_AT_canon_lineage_06_*.png,optional stage figures if preserving visuals,YES,LOW,figures/** ignored
+CLOSURE_07,tables/relaxation/relaxation_activity_final_closure_07_*.csv,stage closure tables with bundle,YES,HIGH,Final package inventory dictionary status
+CLOSURE_07,reports/relaxation/relaxation_activity_final_closure_07.md,stage closure report,YES,HIGH,Freeze narrative boundary
+SCRIPTS_ROOT,run_relaxation_activity_representation_01.m,track normally,NO,HIGH,Usually tracked source script
+SCRIPTS_ROOT,run_relaxation_activity_representation_02.m,track normally,NO,HIGH,Usually tracked source script
+SCRIPTS_ROOT,run_relaxation_activity_representation_03.m,track normally,NO,HIGH,Usually tracked source script
+SCRIPTS_DIAG,Relaxation ver3/diagnostics/run_relaxation_AT_old_vs_m0_svd_exact_lineage_reconciliation.m,track when committing diagnostics,NO,HIGH,Untracked until git add
+SCRIPTS_DIAG,Relaxation ver3/diagnostics/run_relaxation_AT_canon_lineage_06.m,track when committing diagnostics,NO,HIGH,Untracked until git add
+RUN_ARTIFACTS,results/relaxation/runs/*/execution_status.csv,optional archive exclude large trees,SITUATIONAL,LOW,Run dirs optional vs reproducibility policy
+DO_NOT_STAGE,large raw switching datasets outside Relaxation scope,exclude,N/A,N/A,Out of Relaxation closure scope

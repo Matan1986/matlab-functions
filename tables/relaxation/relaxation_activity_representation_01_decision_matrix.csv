@@ -1,0 +1,5 @@
+scalar,directness_note,reconstruction_summary,notes
+A_obs,see_scalar_definitions.csv,fro_rel=0.033452013_var_expl=0.998881,rank1_psi_equals_M_times_a_over_aTa
+A_proj_nonSVD,see_scalar_definitions.csv,fro_rel=0.028706338_var_expl=0.999176,rank1_psi_equals_M_times_a_over_aTa
+m0_svd,see_scalar_definitions.csv,fro_rel=0.028706235_var_expl=0.999176,rank1_psi_equals_M_times_a_over_aTa
+projection_mean_curve,see_scalar_definitions.csv,fro_rel=0.02870635_var_expl=0.999176,rank1_psi_equals_M_times_a_over_aTa

@@ -1,0 +1,7 @@
+scalar_a,scalar_b,pearson_r,spearman_r
+A_obs,A_proj_nonSVD,0.999669954117854,1
+A_obs,m0_svd,-0.999670610352548,-1
+A_obs,projection_mean_curve,0.999671188631129,1
+A_proj_nonSVD,m0_svd,-0.999999995804487,-1
+A_proj_nonSVD,projection_mean_curve,0.999999997384685,1
+m0_svd,projection_mean_curve,-0.999999998822393,-1

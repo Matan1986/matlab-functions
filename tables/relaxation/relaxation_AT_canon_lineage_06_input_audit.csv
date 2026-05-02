@@ -1,0 +1,19 @@
+key,value,notes
+sample_table_path,C:\Dev\matlab-functions\tables\relaxation\relaxation_RF3R2_repaired_curve_samples.csv,RF3R2 repaired curve samples
+index_table_path,C:\Dev\matlab-functions\tables\relaxation\relaxation_RF3R2_repaired_curve_index.csv,RF3R2 index with replay flags
+rcon_table_path,C:\Dev\matlab-functions\tables\relaxation\relaxation_RCON_02B_Aproj_vs_SVD_score.csv,RCON scalar bundle
+rf5a_m0_table_path,C:\Dev\matlab-functions\tables\relaxation_RF5A_m0_svd_scores_RF3R.csv,optional RF5A m0 scores
+loo_fold_table_path,C:\Dev\matlab-functions\tables\relaxation\relaxation_activity_representation_02_loo_svd_fold_metrics.csv,optional AR02 fold metrics for m0_LOO
+expected_rf3r2_run_context,rf3r2_repaired_20260427_193555_src_run_2026_04_26_234453,audit note only
+n_temperatures_available_index_rows,18,index table rows
+n_temperatures_included,8,strict_default_no_quality_flag
+included_temperatures_csv,3;19;23;25;27;31;33;37,sorted_K
+excluded_temperatures_note,none_relative_to_strict_set,strict vs final inclusion
+inclusion_rule,trace_valid_for_relaxation==YES AND valid_for_default_replay==YES AND is_quality_flagged==NO; fallback default_replay if nT<3,matches AR01 strict default
+time_grid_length,320,linear_interp_points_per_trace
+matrix_orientation_D,rows_temperature_columns_time,D = M_transpose_AR01
+interpolation_method,linear_on_common_t_intersection_linspace,same as AR01 rlx_ar01_build_map
+nGrid_match_AR01,320,320
+used_strict_fallback_to_default_replay,NO,
+rf3r2_run_id_filter_applied,NO,full repaired index as published
+matlab_script_file,Relaxation ver3/diagnostics/run_relaxation_AT_canon_lineage_06.m,MATLAB_identifiers_limited_to_63_chars_long_name_not_runnable_via_run

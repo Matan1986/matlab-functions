@@ -1,0 +1,13 @@
+inclusion_set,variant,winner_scalar_by_fro_rel,best_fro_rel
+default_replay,raw,m0_svd,0.0287062354694906
+default_replay,sign_flip_if_negative_mean,m0_svd,0.0287062354694906
+default_replay,abs_diagnostic,projection_mean_curve,0.0325193280487959
+default_replay,zscore_diagnostic,m0_svd,0.845925681765401
+strict_default_no_quality_flag,raw,m0_svd,0.0287062354694906
+strict_default_no_quality_flag,sign_flip_if_negative_mean,m0_svd,0.0287062354694906
+strict_default_no_quality_flag,abs_diagnostic,projection_mean_curve,0.0325193280487959
+strict_default_no_quality_flag,zscore_diagnostic,m0_svd,0.845925681765401
+all_trace_valid,raw,m0_svd,0.0373699560301347
+all_trace_valid,sign_flip_if_negative_mean,m0_svd,0.0373699560301347
+all_trace_valid,abs_diagnostic,projection_mean_curve,0.040317436600079
+all_trace_valid,zscore_diagnostic,m0_svd,0.841450307285135

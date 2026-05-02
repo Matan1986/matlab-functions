@@ -1,0 +1,2 @@
+RUN_LABEL,EXECUTION_STATUS,INPUT_FOUND,N_T,MAIN_RESULT_SUMMARY
+relaxation_activity_representation_01,SUCCESS,YES,8,nT=8_nGrid=320_map_source_RF3R2_repaired_curve_samples

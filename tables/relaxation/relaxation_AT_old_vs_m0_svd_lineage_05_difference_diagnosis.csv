@@ -1,0 +1,14 @@
+diagnosis_key,verdict,evidence,notes
+TRANSPOSE_ONLY,PARTIAL,"Old svd(dMMap) with A=sigma(1)*U(:,1) on temp-by-time; RF5A svd(X) with m0=S(1)*V(:,1) on time-by-temp — transpose pairs U and V",Equivalence only if dMMap equals X. numerically
+SIGN_ONLY,UNKNOWN,"peakSignedValue vs RF5A psi flip",Needs overlapping series
+SOURCE_OBJECT_DIFFERENCE,YES,"Legacy stability maps vs RF3R canonical RF5A matrix",Independent CSV stacks
+OLD_AT_OUTPUT_MISSING,YES,"temperature_observables path check",Workspace lacks canonical run export
+CURRENT_M0_OUTPUT_MISSING,NO,"RF5A and RCON tables",
+TEMPERATURE_MASK_DIFFERENCE,PARTIAL,"RF5A n=8 vs RCON full index",
+TIME_GRID_DIFFERENCE,PARTIAL,"RF5A 320 linspace vs variant xGrid",
+TRACE_SELECTION_DIFFERENCE,PARTIAL,"RF3R2 replay filters vs legacy map resolution",
+SMOOTHING_OR_BASELINE_DIFFERENCE,PARTIAL,"variantBank smoothing variants vs raw interp",
+NORMALIZATION_DIFFERENCE,PARTIAL,"RCON join rules vs raw SVD on unnormalized X",
+GLOBAL_SCALE_ONLY,NO,"No row-level A_T vs m0 overlap",Blocked until legacy temperature_observables.csv is present
+AFFINE_OFFSET,NO,"No row-level A_T vs m0 overlap",Blocked until legacy temperature_observables.csv is present
+MONOTONIC_ONLY,UNKNOWN,"No row-level A_T vs m0 overlap",Internal RF5A-vs-RCON Spearman is 1 on n=8 but does not involve A_T_old

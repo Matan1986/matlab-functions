@@ -1,0 +1,14 @@
+claim_id,claim_text,safety,evidence_basis,recommended_wording,forbidden_overstatement,notes
+C01,A_obs is the direct experimentally transparent relaxation amplitude,SAFE,AR01 verdicts RECOMMENDED_MAIN_TEXT_SCALAR; AR02,Use direct observable language for A_obs,Claim A_obs is the best rank-1 reconstruction coordinate,AR03 shows A_obs never best for reconstruction
+C02,m0_LOO_SVD_projection is a robust intrinsic rank-1 coordinate of the RF3R2 map under tested variants,SAFE,AR02 LOO results; AR03 12 variant ranking stability,LOO best across tested map-preprocessing variants,Claim universality beyond tested variant grid
+C03,A_T_canon reconstructs the legacy A_T definition on the current RF3R2 object,SAFE,Lineage-06 LEGACY_AT_DEFINITION_RECONSTRUCTED,Define D orientation and svd formula explicitly,Claim this equals the missing historical export file
+C04,A_T_canon is affine-equivalent to the current m0 and SVD-family coordinates on the current RF3R2 object,SAFE,Lineage-06 equivalence verdicts; strict inclusion subset,Scope to RF3R2 build and tested temperature mask,Global identity across all T without mask caveats
+C05,The legacy A_T definition survives canonically on the current RF3R2 object,SAFE,Lineage-06 computation success,Phrased as definitional reconstruction not recovery,The old 0.66 law is restored
+C06,A_proj_nonSVD is a useful non-SVD/projection reference,PARTIAL,AR01 compromise scalar; conslidation hierarchy,A useful compromise pathway alongside direct observable,Claim fundamental distinction from SVD family absent affine check,Lineage-06 affine-equivalent to SVD family on tested temps
+C07,A_obs can be compared to SVD-family coordinates as a direct observable,PARTIAL,Cross-role comparison in AR tables,Compare roles explicitly as transparency vs coordinate,m0_LOO is merely noise compared to A_obs
+C08,Historical old A_T mismatch versus current tables likely reflects source-object lineage,PARTIAL,LINEAGE-05 AT_AND_M0_DIFFER_BY_SOURCE_OBJECT,Phrase as hypothesis grounded in lineage audits,Exact attribution without recovered artifact
+C09,A_T_old equals m0_svd numerically,UNSAFE,LINEAGE-05 EXACT_IDENTITY_CLAIM_SAFE NO,,Exact equality statement,Numeric export missing
+C10,A_T_old was recovered,UNSAFE,LINEAGE-05 OLD_AT_TABLE_FOUND NO,,Recovery narrative without artifact,Numeric reconciliation impossible
+C11,m0_LOO is the unique physical material amplitude,UNSAFE,AR03 uniqueness scoped to variants; physics claim absent,,Physical uniqueness,materials physics beyond Relaxation tables
+C12,The old 0.66 power law is restored or universal,UNSAFE,No power-law fit in closure,,Exponent restoration,Relaxation-only closure does not fit Switching laws
+C13,Switching Relaxation AX relation is proven by this Relaxation closure,UNSAFE,Forbidden cross-module,,Proof language for AX,Explicitly out of scope
