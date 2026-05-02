@@ -1,0 +1,14 @@
+comparison_item,F7O_A_22row,F7O_B_30row,same_or_different,interpretation_allowed
+matlab_exit_code,0,0,same,Both full success metadata verification context only
+tau_FM_table_row_count,6,8,different,30-row input includes more Tp groups with FM rows than 22-row run not a physics rank
+tp_coverage_unique_K,14;18;22;26;30;34,6;10;14;18;22;26;30;34,different,Archival branch adds low-T 6K and 10K stops per F7H-resume B no tau value comparison
+all_12_F7G_metadata_columns_present,YES,YES,same,Header contract satisfied both runs
+writer_family_id_semantics,WF_TAU_FM_CURVEFIT,WF_TAU_FM_CURVEFIT,same,Writer family unchanged
+tau_or_R_flag_semantics,TAU,TAU,same,
+tau_domain_semantics,FM_ABS_CURVEFIT,FM_ABS_CURVEFIT,same,
+model_use_allowed,NO_UNLESS_LINEAGE_RESOLVED,NO_UNLESS_LINEAGE_RESOLVED,same,Conservative both
+canonical_status,non_canonical_pending_lineage,non_canonical_pending_lineage,same,
+lineage_status,REQUIRES_DATASET_PATH_AND_FM_CONVENTION_RESOLUTION,REQUIRES_DATASET_PATH_AND_FM_CONVENTION_RESOLUTION,same,
+source_artifact_path,run_2026_05_02_225424_F7O_FM_METADATA_VERIFY_22ROW,run_2026_05_02_230740_F7O_FM_METADATA_VERIFY_30ROW,different,Expected distinct timestamped run dirs only
+partial_vs_full_run,SUCCESS_FULL_RUN,SUCCESS_FULL_RUN,same,Neither hit validCurves assert failure in this workspace
+failed_dip_clock_metrics_path,results_old archival copy,results_old archival copy,same,Same auxiliary file path policy as F7N

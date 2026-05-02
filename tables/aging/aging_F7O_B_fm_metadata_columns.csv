@@ -1,0 +1,13 @@
+metadata_column,expected_pattern_or_value_notes,present,row0_value_excerpt,validation_note
+writer_family_id,WF_TAU_FM_CURVEFIT,YES,WF_TAU_FM_CURVEFIT,Exact match row 0 Tp=6K branch first sorted row
+tau_or_R_flag,TAU uppercase,YES,TAU,Match
+tau_domain,FM_ABS_CURVEFIT,YES,FM_ABS_CURVEFIT,Match f7gMeta
+tau_input_observable_identities,JSON FM_abs column ref,YES,"{""FM_abs"":""consolidated_aging_observable_dataset_column""}",Expected
+tau_input_observable_family,FM_abs_memory_curve,YES,FM_abs_memory_curve,Match
+source_writer_script,Aging/analysis/aging_fm_timescale_analysis.m,YES,Aging/analysis/aging_fm_timescale_analysis.m,Match
+source_artifact_basename,tau_FM_vs_Tp.csv,YES,tau_FM_vs_Tp.csv,Match
+source_artifact_path,Absolute under run_dir tables,YES,C:\Dev\matlab-functions\results\aging\runs\run_2026_05_02_230740_F7O_FM_METADATA_VERIFY_30ROW\tables\tau_FM_vs_Tp.csv,F7O-B run root distinct from F7O-A
+canonical_status,non_canonical_pending_lineage,YES,non_canonical_pending_lineage,Conservative
+model_use_allowed,NO_UNLESS_LINEAGE_RESOLVED,YES,NO_UNLESS_LINEAGE_RESOLVED,Conservative
+semantic_status,legacy alias FM,YES,tau_effective_seconds_is_legacy_alias_FM_ABS_CURVEFIT,Match
+lineage_status,FM convention resolution,YES,REQUIRES_DATASET_PATH_AND_FM_CONVENTION_RESOLUTION,Match
