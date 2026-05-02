@@ -1,0 +1,3 @@
+decision_scope,model_use_allowed_after_F7Q,required_conditions,forbidden_uses,required_metadata_update,next_action
+GLOBAL_DEFAULT,NO,"Evidence-backed trace complete; governance flags unchanged","Treat tau_FM as lineage-closed or physics-valid without F7R policy","Optional row-level eligibility column separate from global F7G repeats","F7R lineage policy lock or scoped charter"
+PER_BRANCH_SCOPED_ONLY,YES_SCOPED_ONLY,"Single declared datasetPath+dipTauPath+failed path triple per analysis; consumers filter has_fm and finite tau_effective","Cross-branch mixing numerators denominators without disclosure","Embed cfg triple in manifest or extend F7G with input hashes paths","F7R metadata schema decision"

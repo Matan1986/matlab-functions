@@ -1,0 +1,11 @@
+branch_id,Tp,has_fm,tau_value_present,row_model_use_allowed,row_ratio_use_allowed,exclusion_reason,notes
+FM_O_22row_A,14,1,YES finite tau_effective,NO per metadata NO_UNLESS_LINEAGE_RESOLVED,NO_PENDING_LINEAGE_AND_GLOBAL_METADATA,NONE stable row,"fragile_low_point_count 0"
+FM_O_22row_A,18,1,YES,NO,NO_PENDING_LINEAGE_AND_GLOBAL_METADATA,NONE,
+FM_O_22row_A,22,1,YES,NO,NO_PENDING_LINEAGE_AND_GLOBAL_METADATA,NONE,
+FM_O_22row_A,26,1,YES,NO,NO_PENDING_LINEAGE_AND_GLOBAL_METADATA,NONE,
+FM_O_22row_A,30,1,YES,NO,NO_PENDING_LINEAGE_AND_GLOBAL_METADATA,fragile n_points=3 per CSV,"Consumer should treat fragile_low_point_count per policy"
+FM_O_22row_A,34,1,YES,NO,NO_PENDING_LINEAGE_AND_GLOBAL_METADATA,fragile n_points=3,
+FM_O_30row_B,6,0,NO finite tau,NO,NO,has_fm 0 n_points 0,"No FM points at this Tp in dataset branch"
+FM_O_30row_B,10,0,NO,NO,NO,has_fm 0 n_points 0,same
+FM_O_30row_B,14,1,YES,NO,NO,NONE,
+FM_O_30row_B,34,1,YES,NO,NO,NONE,"Representative high-T row"

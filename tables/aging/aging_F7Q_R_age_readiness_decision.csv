@@ -1,0 +1,3 @@
+ratio_scope,R_age_or_clock_ratio_ready_after_F7Q,required_conditions,forbidden_uses,next_action
+UNCONSTRAINED,NO_PENDING_FM_TAU_LINEAGE_RESOLUTION,"Lineage flags still NO_UNLESS_LINEAGE_RESOLVED on tau rows; dual branch streams","Publish single ratio implying canonical tau_FM without branch manifest","F7R ratio input binding plus lineage closure or explicit parallel-branch policy"
+PER_BRANCH_SCOPED_ONLY,YES_SCOPED_ONLY,"Separate ratio runs each locked to one F7O branch triple and has_fm gate","Merge ratios across branches in one scalar headline","Charter ratio runner with cfg manifest only"

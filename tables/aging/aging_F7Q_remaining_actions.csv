@@ -1,0 +1,6 @@
+action_id,action_type,priority,blocker_addressed,exact_next_step,expected_output,required_before_model_use,required_before_R_age
+F7R_METADATA_INPUT_MANIFEST,POLICY_OR_CODE,HIGH,machine_readable cfg triple not in tau CSV columns,"Decide schema run_manifest sidecar vs new F7G columns","Locked manifest pattern",YES,YES
+F7R_FM_ABS_DATASET_CONTRACT,DOCUMENTATION,HIGH,FM_abs absolute vs signed ambiguity,"Dataset producer documents FM_abs definition",signed aging_observable contract,YES,YES
+F7R_FAILED_DIP_CLOCK_POLICY,GOVERNANCE,MEDIUM,NEEDS_POLICY strict auxiliary,"Approve shared archival vs regen per branch",written policy row,CONDITIONAL,CONDITIONAL
+F7R_REMOVE_HARDCODED_RUN_ID,CODE_HYGIENE,MEDIUM,loadFailedDipClockMetrics run_id literal,"Parameterize or derive from metricsPath",PR with behavior unchanged,OPTIONAL,OPTIONAL
+F7R_ROW_LEVEL_MODEL_ELIGIBILITY,METADATA,LOW,global model_use_allowed duplicated on ineligible rows,"Add explicit row gate column or consumer contract doc",downstream clarity,RECOMMENDED,RECOMMENDED

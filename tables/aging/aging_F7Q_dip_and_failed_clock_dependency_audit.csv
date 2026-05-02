@@ -1,0 +1,6 @@
+branch_id,dependency_name,dependency_path,exists_on_disk,used_for_fm_tau_numeric_fit,used_for_report_or_comparison,branch_specific,dependency_status,required_action
+FM_O_22row_A,dipTauPath dip table,C:/Dev/matlab-functions/results/aging/runs/run_2026_05_01_231047_aging_timescale_extraction/tables/tau_vs_Tp.csv,YES,NO YES post tau save,YES compareTauStructures figures report,NO,CLOSED_ROLE_VERIFIED,"Ensure pairing discipline only."
+FM_O_30row_B,dipTauPath dip table,C:/Dev/matlab-functions/results/aging/runs/run_2026_05_01_231444_aging_timescale_extraction/tables/tau_vs_Tp.csv,YES,NO,YES,same,NO,CLOSED_ROLE_VERIFIED,same
+FM_O_22row_A,failedDipClockMetricsPath,C:/Dev/matlab-functions/results_old/aging/runs/run_2026_03_13_005134_aging_fm_using_dip_clock/tables/fm_collapse_using_dip_tau_metrics.csv,YES,NO,YES baseline_all_fm narrative,NO,NEEDS_POLICY_STRICT_AUX,"Optional per-branch regen if governance demands aligned auxiliary."
+FM_O_30row_B,failedDipClockMetricsPath,same as A,YES,NO,YES,NO,NEEDS_POLICY_STRICT_AUX,same
+GLOBAL,hardcoded failed.run_id in loadFailedDipClockMetrics,N/A code literal,N/A,NO,N/A,N/A,OPEN_CODE_LINEAGE_STRING,"Replace or parameterize in future code task outside F7Q."
