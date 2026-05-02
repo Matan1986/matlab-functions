@@ -1,0 +1,10 @@
+use_case,primary_scalar,secondary_scalar,decision,required_caveat,notes
+main_paper_figure,A_obs_canon,A_svd_canon optional,DUAL_CANONICAL_ROLES,"Figure caption defines transparent observable vs rank-1 coordinate family.",Never imply competition between roles without labeling axes.
+supplement_reconstruction_figure,A_svd_LOO_canon,A_svd_full_canon diagnostic,LOO_PRIMARY_FULL_REFERENCE,"State leakage protocol difference.",AR03 ranking covers variants not infinite universe.
+internal_relaxation_robustness,scenario_specific_scalar,m0_LOO vs A_obs comparison,CONTEXT_RULE_FROM_AR03,"Variant IDs must appear in supplement.",Robustness does not extend Switching claims.
+legacy_comparison,A_T_canon,A_T_old narrative_only,DEFINITION_BRIDGE_ONLY,"No numeric A_T_old join.",Lineage-05 blocks numeric reconciliation.
+AX_cross_module,A_obs_canon,A_svd_canon representative,MUST_TEST_BOTH_TRACKS,"Relaxation-only survey does not execute AX.",Closure-07 authorized separate governed task.
+power_law_retest_future,A_obs_canon,A_svd_canon,AUTHORIZATION_ONLY_NO_FIT,"Exponent universality forbidden without fit.",Lineage-06 READY_FOR_POWERLAW_RETEST is flag only.
+physical_interpretation,A_obs_canon transparency,A_svd_canon coordinate,DUAL_FRAME_OK,"Explain roles once per section.",Avoid collapsing into single amplitude story.
+code_variables,A_obs_canon and suffixed m0_loo m0_full,NAMESPACE_REQUIRED,NO_BARE_SYMBOLS,"Alias table maps columns.",Match repo MATLAB naming discipline where adopted.
+table_columns,RCON_headers mapped_to_contract,naming_contract_README,PROVENANCE_ROW,"Every relaxation amplitude column cites generator script.",Cross-module joins require governance doc.

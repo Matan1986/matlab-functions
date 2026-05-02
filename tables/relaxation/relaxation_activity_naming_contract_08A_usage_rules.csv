@@ -1,0 +1,10 @@
+context,primary_name,secondary_name,required_caveat,forbidden_wording,paper_label,code_label
+main_paper_figure,A_obs_canon,A_svd_canon optional overlay,"Two roles: transparency vs rank-1 coordinate; not competing definitions of same quantity.",A_obs is less canonical than SVD amplitude,A_obs (direct obs.),A_obs_canon or RCON_A_obs
+supplement_reconstruction_figure,A_svd_LOO_canon,A_svd_full_canon optional,"State LOO vs full-map leakage distinction.",m0_LOO is the unique physical amplitude,A_LOO rank-1 coeff.,m0_LOO_vec
+internal_robustness_RLX_only,context_specific,A_proj_nonSVD or projection_mean_curve,"Reference AR03 variant scope when ranking.",Unique best scalar globally,baseline sweep variants,variant_tag_scalar
+legacy_comparison,A_T_canon,A_T_old prose_only,"A_T_old has no numeric artifact in repo.",A_T_old equals m0,Legacy A_T (def. only),N_A_T_old
+AX_or_cross_module,A_obs_canon plus A_svd_canon member,"Pick one LOO or full per protocol","Cross-module task must exercise both direct obs. and SVD family coordinate policy.",Relaxation alone proves AX bridge,A_obs vs A_svd (caption contract),a_obs_canon a_svd_member
+power_law_retest_future,A_obs_canon and A_svd_canon track,"Authorization only; no fit in survey",Do not claim exponent restored,The 0.66 law restored,n/a fit in survey,n_a_fit
+physical_interpretation_text,A_obs_canon for transparency,A_svd_canon family for coordinate story,"Do not merge roles in one sentence without labels.",Single amplitude rules all panels,Direct amplitude; rank-1 coordinate,narrative_terms_fixed
+code_variables,namespace_required,m0_svd_column vs m0_LOO_vector,"Never bare m0 or bare A.",Underspecified A or m0,a_obs_canon m0_loo m0_full,a_obs_canon m0_loo m0_full
+table_columns,RCON headers plus contract aliases,"Map CSV column to contract name in README","Reject bare activity column.",Generic amplitude column without source,A_obs (RCON),A_obs_from_RCON

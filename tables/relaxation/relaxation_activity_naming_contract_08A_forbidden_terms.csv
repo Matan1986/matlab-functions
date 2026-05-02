@@ -1,0 +1,8 @@
+term,why_forbidden_or_restricted,allowed_replacement,exception_if_any
+A,ambiguous amplitude symbol,A_obs_canon or A_svd_canon per role,none in new prose
+m0,ambiguous which m0 track,m0_svd vs m0_LOO_SVD_projection explicit,legacy quoted code blocks labeled legacy
+A_T,ambiguous legacy vs canon,A_T_canon vs A_T_old diagnostic,quotes of historical papers with definition
+activity,bare category,relaxation amplitude or observable name,section headings if scoped Relaxation module
+amplitude,bare noun,direct observable amplitude or rank-1 coordinate,caption once define symbols table
+canonical A,undefined namespace,A_obs_canon or A_svd_canon,none
+the canonical amplitude,singular without role split,A_obs_canon and A_svd_canon dual-canonical framing,none

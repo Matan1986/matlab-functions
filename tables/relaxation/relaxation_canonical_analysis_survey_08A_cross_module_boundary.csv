@@ -1,0 +1,11 @@
+topic,classification,allowed_in_relaxation_only,requires_cross_module_task,required_scalar_policy,forbidden_shortcut,notes
+RF3R2_curve_build,R_ONLY_DATA,YES,NO,n/a instrument paths,n/a,maintain manifest discipline
+relaxation_map_rank1,SVD_family_RLX,YES,NO,A_svd_canon members labeled,n/a,
+direct_observable_amplitude,A_obs_RLX,YES,NO,A_obs_canon naming,n/a,
+tau_beta_KWW_internal_fit,RELAXATION_TIME_LAW_IF_TRACE_ONLY,YES,NO,declare window model scope,n/a,tau-beta canon separate survey recommended
+relaxation_collapse_like_panel,R_ONLY_DIAGNOSTIC,YES,NO,label narrow replay provenance,n/a,
+AX_style_relaxation_vs_X,CROSS_MODULE,NO_IN_RLX_ONLY_PROOF,YES,A_obs_canon plus A_svd_canon per governed brief,prove_AX_from_Relaxation_tables_alone,Needs Switching X_eff inputs
+power_law_exponent_bridge,SPLIT_SCOPE,PARTIAL_RLX_SCOPE_ONLY,YES_IF_BRIDGE,NO_SINGLE_EXPONENT_STORY,claim_old_exponent_restored_without_fit,Closure forbids restoration narrative without refit
+relaxation_vs_switching_collapse,CROSS_MODULE,NO_SOLO_RLX_PROOF,YES,dual_module_observables,ad_hoc_join,n/a
+relaxation_vs_aging_clock,CROSS_MODULE,NO_SOLO_RLX_PROOF,YES,separate aging observable contract,n/a,n/a
+Switching_table_join,CROSS_MODULE,NO_AD_HOC_JOIN,YES,governed_join_manifest,n/a,n/a

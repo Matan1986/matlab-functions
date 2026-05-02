@@ -1,0 +1,9 @@
+phase,stage,task_id,task_title,agent_type,dependency,parallelization,expected_outputs,stop_conditions,priority
+R_ONLY,naming_and_docs,RLX-NAMING-AUDIT-09,"Freeze naming contract into CI doc checklist",narrow,CLOSURE_07 plus SURVEY_08A tables,no_single_writer_conflict,"updated README pointers",contract referenced by two reviewers,HIGH
+R_ONLY,inventory,RLX-RF3R2-MANIFEST-09,"Canonical RF3R2 manifest row completeness",narrow,RF3R2 inputs exist,yes_with_review,"manifest CSV","checksum or date mismatch resolved",HIGH
+R_ONLY,tau_beta,KWW-TAU-BETA-SURVEY-09,"Separate Relaxation-only tau beta KWW canon survey",broad,none_parallel_first_then_split,no_parallel_until_contract_locked,"survey MD plus gap map","explicit scope vs amplitude closure",MEDIUM
+R_ONLY,legacy_RF5A,RLX-RF5A-HARMON-09,"Map RF5A scripts outputs to A_svd_canon naming",narrow,NAMING_AUDIT_09,partial_allowed,"mapping table","every RF5A amplitude cited maps alias",MEDIUM
+R_ONLY,figures,RLX-FIG-READINESS-09,"Publication figure readiness audit Relaxation-only",narrow,CLOSURE naming,broadcast_safe_parallel,"figure checklist MD","axes use contract labels",MEDIUM
+CROSS_MODULE,AX_replay,CM-SW-RLX-AX-10,"Governed AX reinterpretation Relaxation scalars vs Switching X_eff",narrow,SURVEY boundary plus CLOSURE auth,no_parallel_with_RLX_fit,"AX brief CSV MD","invalid joins rejected by manifest",HIGH
+CROSS_MODULE,power_law,RLX-POWERLAW-RET-10,"Authorized exponent refit dual coordinate tracks",narrow,LINEAGE_06 authorization flags,no_parallel_uncertainty_budget,"fit tables","convergence or rejection documented",MEDIUM
+CROSS_MODULE,governance,CM-GOVERNANCE-LOCK-09,"Cross-module scalar join governance doc sync",narrow,cross_module_switching_relaxation_docs,yes_review_parallel,"governance diff merged","two-module signoff recorded",HIGH
