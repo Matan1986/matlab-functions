@@ -1,0 +1,16 @@
+scope_item,status,evidence_artifact,notes
+Dip writer real run with explicit dataset pointer (22-row branch),CLOSED,reports/aging/aging_F7H_resume_dip_real_output_metadata_verification.md; tables/aging/aging_F7H_resume_dip_real_output_verification.csv,Run A succeeded; tau_vs_Tp.csv emitted; session AGING_OBSERVABLE_DATASET_PATH
+Dip writer real run with explicit dataset pointer (30-row archival branch),CLOSED,reports/aging/aging_F7H_resume_dip_real_output_metadata_verification.md; tables/aging/aging_F7H_resume_dip_real_output_verification.csv,Run B succeeded; tau_vs_Tp.csv emitted; results_old snapshot path
+F7G metadata columns on emitted tau_vs_Tp.csv,CLOSED,tables/aging/aging_F7H_resume_dip_metadata_columns.csv; reports/aging/aging_F7G_metadata_patch_review.md,Twelve required columns present in both F7H-resume runs; F7G patch at ced4798
+Metadata value semantics (writer_family_id tau_domain flags),CLOSED,tables/aging/aging_F7H_resume_dip_metadata_columns.csv,WF_TAU_DIP_CURVEFIT; conservative model_use_allowed; lineage flags explicit
+Branch comparison (coverage/metadata only),CLOSED,tables/aging/aging_F7H_resume_dip_branch_comparison.csv,Row counts and Tp coverage differ by branch; no physics winner
+F7H dip-only blocker (could not verify real CSV without dataset),CLOSED,reports/aging/aging_F7H_blocked_verification_roadmap_update.md; commit 1eb47ff,Explicit pointers + F7H-resume completed; superseded for dip scope by closure doc
+Physical tau interpretation / canonical tau physics,OPEN,reports/aging/aging_F7J_observable_definition_scope_map.md,Closure does not validate numeric tau physics; lineage pending
+model_use_allowed beyond NO_UNLESS_LINEAGE_RESOLVED,OPEN,tables/aging/aging_F7H_resume_dip_metadata_columns.csv,Remains conservative until lineage gates cleared
+canonical_status finalization,OPEN,tables/aging/aging_F7H_resume_dip_metadata_columns.csv,non_canonical_pending_lineage in verified outputs
+lineage_status resolution for Dip branch,OPEN,tables/aging/aging_F7H_resume_dip_metadata_columns.csv,REQUIRES_DATASET_PATH_AND_DIP_BRANCH_RESOLUTION
+FM tau metadata real-output verification,PARTIAL,docs/aging_observable_branch_router.md; reports/aging/aging_F7L_branch_router_readiness_and_resume_gate.md,F7G encodes FM family; real-output verification not part of F7H-resume dip; needs explicit cfg chain
+Clock-ratio / R_age metadata real-output verification,OPEN,reports/aging/aging_F7J_observable_definition_scope_map.md; aging_F7L report,Paired prior tau CSVs and lineage not exercised here
+Selecting one dataset branch as physically superior,FORBIDDEN,reports/aging/aging_F7J_observable_definition_scope_map.md; tables/aging/aging_F7H_resume_dip_branch_comparison.csv,F7J/F7H-resume policy: no single canonical physics truth
+Unified config registry implementation,PARTIAL,tables/aging/aging_F7L_next_step_status.csv,F7L: not required for dip metadata verification; optional for FM/clock chains
+Code default path to historical results run folder,OPEN,reports/aging/aging_F7I_dataset_availability_lineage_audit.md; aging_F7L report,Missing snapshot under results/... unless bridged; session pointer mitigates; no default change in F7M
