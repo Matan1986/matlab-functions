@@ -1,0 +1,5 @@
+action_id,action_type,agent_type,blocking_order,can_parallelize,inputs,outputs_expected,success_gate,forbidden_actions
+F7Q_LINEAGE_RESOLUTION,LINEAGE_EXECUTION_OR_AUDIT,AGING_LINEAGE_AGENT,1,NO,aging_F7P_lineage_blocker_inventory.csv; F7N/F7O reports,governance closure artifacts updating lineage flags or scoped charters,lineage_status and model_use policy documented,NO_PHYSICS_WINNER_NO_BRANCH_RANKING
+AUX_POLICY_FAILED_DIP_CLOCK,POLICY_DECISION,AGING_GOVERNANCE,2,YES_WITH_F7Q,aging_F7O_series_open_items.csv; F7N_auxiliary_notes,policy row on regenerate vs document,explicit YES_NO_REGEN decision,NO_RATIO_WRITER_BEFORE_POLICY_IF_DOWNSTREAM
+RATIO_CHARTER_AFTER_LINEAGE,R_AGE_CLOCK_RATIO_READINESS,AGING_ANALYSIS_AGENT,3,NO,F7Q outputs; aging_F7P_R_age_prerequisite_gate.csv,ratio metadata verification plan CSV similar F7N pattern,chartered runner cfg and forbidden merge rules,NO_FM_TAU_DEFAULT_PATH_RUN
+DOC_EXPLICIT_CFG_FOR_FM,RERUN_HYGIENE,DOCUMENTATION,4,YES,F7N_cfg_inventory; F7O harness notes,developer note in aging docs or runner template,defaults never used blindly for FM,NO_SILENT_ENV_ONLY_FM_RUN
