@@ -1,0 +1,2 @@
+run_label,matlab_task_id,matlab_exit_code,run_directory,tau_fm_csv_emitted,failure_stage_if_any,partial_output_classification,valid_fm_curves_count_if_available,notes
+F7O_FM_METADATA_VERIFY_22ROW,LOCAL_SHELL_WRAPPER_run_matlab_safe_F7O_A_harness,0,C:\Dev\matlab-functions\results\aging\runs\run_2026_05_02_225424_F7O_FM_METADATA_VERIFY_22ROW,YES,none,SUCCESS_FULL_RUN,>=3_passed_assert,Aging FM timescale analysis complete wrapper AFTER_MATLAB_CALL exit 0 full figures report zip
