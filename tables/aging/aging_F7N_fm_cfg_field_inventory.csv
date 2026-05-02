@@ -1,0 +1,15 @@
+cfg_field,required_for_metadata_run,default_value_or_source,risk_if_default_used,recommended_explicit_value_or_rule,notes
+runLabel,RECOMMENDED_FOR_LINEAGE,setDefault aging_fm_timescale_analysis,Low,must_include_branch_tag_e_g_FM_METAVERIFY_22ROW_OR_30ROW,Logged to createRunContext; aids run_notes discrimination between branches.
+datasetPath,YES_HARD_FAIL_IF_MISSING,fullfile(repoRoot results aging runs run_2026_03_12_211204_aging_dataset_build tables aging_observable_dataset.csv),Assert fails file not found in this workspace; same stale snapshot issue as F7I,C:\Dev\matlab-functions\tables\aging\aging_observable_dataset.csv for 22-row OR results_old ...211204... for 30-row FM tau extraction reads FM_abs from this CSV only (buildFmTauTable).
+dipTauPath,YES_HARD_FAIL_IF_MISSING,fullfile(repoRoot results aging runs run_2026_03_12_223709_aging_timescale_extraction tables tau_vs_Tp.csv),Assert fails; historical run absent here,Branch-align with dataset: F7H-resume Run A tau_vs_Tp OR Run B tau_vs_Tp. Not used to compute tau_FM numerics but required for compareTauStructures figures report and loadDipTauTable.
+failedDipClockMetricsPath,YES_HARD_FAIL_IF_MISSING,fullfile(repoRoot results aging runs run_2026_03_13_005134_aging_fm_using_dip_clock tables fm_collapse_using_dip_tau_metrics.csv),Assert fails; results copy absent here,C:\Dev\matlab-functions\results_old\aging\runs\run_2026_03_13_005134_aging_fm_using_dip_clock\tables\fm_collapse_using_dip_tau_metrics.csv loadFailedDipClockMetrics requires scenario baseline_all_fm row present verified in archival file.
+pairGridCount,OPTIONAL_METADATA_RUN,setDefault 120,Low,leave default unless profiling,Pairwise collapse RMSE grid density.
+displayGridCount,OPTIONAL_METADATA_RUN,setDefault 240,Low,leave default unless profiling,Profile grid for collapse figures.
+minPairOverlapLog10,OPTIONAL_METADATA_RUN,setDefault 0.15,Medium if tuned,affects pairwise validity gates,Collapse pairwise gate in pairwiseRmse.
+minPairSamples,OPTIONAL_METADATA_RUN,setDefault 16,Medium if tuned,affects pairwise validity gates,Minimum overlapping samples for RMSE.
+minCurvesForStats,OPTIONAL_METADATA_RUN,setDefault 3,Medium,must align with assert numel validCurves >= 3,Keep aligned with line 67 assert.
+rawFigurePosition,OPTIONAL,setDefault [2 2 18.6 11.8],Low,default OK for metadata smoke,Figure export only.
+rescaledFigurePosition,OPTIONAL,setDefault [2 2 21.2 12.4],Low,default OK,Figure export only.
+tauFigurePosition,OPTIONAL,setDefault [2 2 12.5 8.8],Low,default OK,Figure export only.
+compareFigurePosition,OPTIONAL,setDefault [2 2 19.0 9.5],Low,default OK,Figure export only.
+AGING_OBSERVABLE_DATASET_PATH,N_A_ENV_NOT_READ,MATLAB env not referenced in aging_fm_timescale_analysis.m,N_A — writer ignores this env,Dip writer used env override FM does not; must pass datasetPath in cfg struct,F7L distinction.
