@@ -1,0 +1,10 @@
+closure_item,F7O_A_22row,F7O_B_30row,series_verdict,allowed_interpretation
+matlab_exit_code,0,0,BOTH_SUCCESS,Metadata verification context only not a physics proof
+tau_FM_vs_Tp_csv_emitted,YES,YES,BOTH_EMITTED,Real writer output on disk per run
+twelve_F7G_metadata_columns_present,YES,YES,BOTH_PASS,Row-level writer_family_id through lineage_status
+metadata_values_conservative_valid,YES,YES,BOTH_PASS,WF_TAU_FM_CURVEFIT FM_ABS_CURVEFIT TAU flags match code
+model_use_allowed,NO_UNLESS_LINEAGE_RESOLVED,NO_UNLESS_LINEAGE_RESOLVED,BOTH_CONSERVATIVE,No model_use escalation from F7O series
+canonical_status,non_canonical_pending_lineage,non_canonical_pending_lineage,BOTH_PENDING,No canonical dataset lock from F7O
+lineage_status,REQUIRES_DATASET_PATH_AND_FM_CONVENTION_RESOLUTION,REQUIRES_DATASET_PATH_AND_FM_CONVENTION_RESOLUTION,BOTH_OPEN,FM path and convention resolution still required for stronger claims
+F7O_B_metadata_only_compare_to_F7O_A,NA,YES per aging_F7O_B_vs_A_metadata_comparison.csv,COMPLETE_NO_RANKING,Coverage and row count differ by branch input not superiority
+rerun_F7O_A_or_B_in_this_closure,NO,NO,NO_RERUN,Closure reads committed artifacts only

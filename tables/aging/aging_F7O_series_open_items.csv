@@ -1,0 +1,8 @@
+open_item_id,status,notes
+FM_tau_lineage_resolution_for_model_use,OPEN,Outputs remain NO_UNLESS_LINEAGE_RESOLVED until explicit lineage policy task
+FM_convention_resolution,OPEN,lineage_status REQUIRES_DATASET_PATH_AND_FM_CONVENTION_RESOLUTION on verified rows
+regenerate_failed_dip_clock_metrics_per_branch_if_strict_lineage_required,OPEN,F7O series used shared archival fm_collapse_using_dip_tau_metrics.csv strict per-branch regeneration optional
+R_age_clock_ratio_real_output_metadata_verification,OPEN,Clock-ratio writers not run in F7O series
+final_canonical_branch_selection_if_needed,OPEN,No 22-row vs 30-row physics winner per F7J F7M F7O policy
+physics_interpretation_of_tau_FM,OPEN,F7O verified metadata columns and flags only not tau numeric interpretation
+cross_module_synthesis_with_switching_relaxation,OUT_OF_SCOPE_FOR_F7O,Explicit boundary no Switching Relaxation MT synthesis in this closure
