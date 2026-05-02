@@ -1,0 +1,10 @@
+readiness_key,value,evidence,caveat,notes
+RELAXATION_READY_FOR_R_ONLY_CONTINUATION,YES,08A survey contract MD tables present open gaps are harmonization not lineage blockage,Legacy RF5A tau visualization tracks still need scoped tasks,
+RELAXATION_READY_FOR_TARGETED_R_ONLY_ANALYSIS,YES,relaxation_only_gap_route.csv lists tasks priorities inputs outputs stops,R_ONLY tasks should stay clear of AX exponent bridges,
+RELAXATION_READY_FOR_CROSS_MODULE_ANALYSIS,YES,cross_module_gap_route.csv dual-A boundary CSV CLOSURE handoff,Must complete governance lock before claiming joins,
+CROSS_MODULE_REQUIRES_DUAL_A_POLICY,YES,A_policy AX_cross_module MUST_TEST_BOTH_TRACKS boundary required_scalar_policy,, 
+PAPER_READY_MAIN_TEXT_AOBS,YES,usage_rules main_paper_figure A_obs_canon A_policy main_paper_figure,Every figure caption must state role vs SVD family,
+PAPER_READY_ASVD_SUPPLEMENT,YES,supplement_reconstruction_figure A_svd_LOO_canon LOO vs full caveat,Do not substitute full-map for LOO in held-out claims,
+SAFE_TO_RUN_AX_NEXT,YES,contract cross-module MUST_TEST_BOTH; audit requires both tracks for CM briefs,Only under CM-SW-RLX-10 governance not Relaxation-only runner,
+SAFE_TO_RUN_POWERLAW_RETEST_NEXT,YES,A_policy power_law_retest_future dual tracks AUTHORIZATION framing,Still requires RLX-POWERLAW-RET-10 execution not survey-only,
+SAFE_TO_RUN_KWW_TAU_BETA_SURVEY_NEXT,YES,roadmap KWW-TAU-BETA-SURVEY-09 R_ONLY medium priority explicit scope,Survey must not modify amplitude closure tables,

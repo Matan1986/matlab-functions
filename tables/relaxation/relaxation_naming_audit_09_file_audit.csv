@@ -1,0 +1,16 @@
+path,exists,role,required,notes
+reports/relaxation/relaxation_canonical_analysis_survey_08A.md,YES,survey_report,YES,RLX-CANONICAL-SURVEY-08A executive narrative and pointers to tables.
+docs/relaxation_activity_naming_contract_08A.md,YES,naming_contract,YES,Canonical names forbidden terms principles paper wording.
+tables/relaxation/relaxation_canonical_analysis_survey_08A_current_inventory.csv,YES,inventory,YES,Canonical vs legacy artifact paths and next_action.
+tables/relaxation/relaxation_canonical_analysis_survey_08A_legacy_gap_map.csv,YES,legacy_gap_map,YES,Legacy claims vs current answer and R_ONLY vs cross-module routing.
+tables/relaxation/relaxation_canonical_analysis_survey_08A_cross_module_boundary.csv,YES,boundary,YES,Topic classification allowed_in_RLX vs requires CM task.
+tables/relaxation/relaxation_canonical_analysis_survey_08A_completion_roadmap.csv,YES,roadmap,YES,Phased task_ids R_ONLY vs CROSS_MODULE with stop_conditions.
+tables/relaxation/relaxation_canonical_analysis_survey_08A_status.csv,YES,survey_status,YES,08A survey completion flags not NAMING-AUDIT-09 keys.
+tables/relaxation/relaxation_activity_naming_contract_08A_aliases.csv,YES,alias_map,YES,Canonical names columns sources equivalence caveats.
+tables/relaxation/relaxation_activity_naming_contract_08A_usage_rules.csv,YES,usage_rules,YES,Context primary secondary caveat forbidden wording.
+tables/relaxation/relaxation_activity_naming_contract_08A_forbidden_terms.csv,YES,forbidden_terms,YES,Bare symbols and replacements exceptions.
+tables/relaxation/relaxation_activity_naming_contract_08A_A_policy.csv,YES,a_policy,YES,Use_case primary secondary decision dual-track CM rules.
+reports/relaxation/relaxation_activity_final_closure_07.md,YES,reference_closure,NO,Prior closure package reference for handoff flags.
+tables/relaxation/relaxation_activity_final_closure_07_scalar_dictionary.csv,YES,reference_closure,NO,Scalar definitions extension for contract alignment.
+tables/relaxation/relaxation_activity_final_closure_07_scalar_hierarchy.csv,YES,reference_closure,NO,Hierarchy reference.
+tables/relaxation/relaxation_activity_final_closure_07_cross_module_handoff.csv,YES,reference_closure,NO,Dual-A authorization reference.
