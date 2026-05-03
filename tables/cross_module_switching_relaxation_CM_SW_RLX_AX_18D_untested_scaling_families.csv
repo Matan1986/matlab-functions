@@ -1,0 +1,8 @@
+family,reason_not_tested,would_require_new_fit,overfit_risk,recommended_next_action,notes
+Multiplicative joint form A ~ (T^a)(Xeff^b) or (T^a)(invD^b) with fixed exponents or additive log terms beyond separate single-term log-log columns,Not enumerated as separate rows in AX-18C scaling_law_comparison.,YES,HIGH on n=15,"If hypothesis-driven: add one low-DF joint template and mirror AX-18C LOOCV scoring in A space.",Do not free-search exponents.
+Higher-degree polynomials in log(predictor) or additive logs beyond single-term power laws,Blocked by AX-18C scope / complexity guardrails.,YES,HIGH,"Keep DF explicit; prefer pre-registered degree cap.",AX-18C explicitly avoided high-degree polynomials.
+Flexible splines / many breakpoints in T or coordinates,Explicitly out of scope for AX-18C.,YES,VERY_HIGH,"Avoid unless n grows or held-out validation exists.",Repository guardrail alignment.
+Free critical temperature search for |T - Tc| scaling,AX-18C used only fixed Tc values (23; 25; 31.5 K).,YES,HIGH,"Do not add without independent justification; if needed use fixed grid only.",FREE_TC_SEARCH_BLOCKED in AX-18C status.
+Bootstrap / jackknife distributions for alpha or LOOCV endpoint stability,Not computed in AX-18C artifacts.,YES,MEDIUM,"Optional if upgrading from empirical summary to stability claims.",endpoint_stable not recorded in AX-18C.
+Cross-module physics-based reductions (e.g. tau/beta/KWW composite scaling),Out of scope for AX-18C; tau/KWW not run.,YES,N/A,"Separate audit track; do not mix into AX-18D closure without artifacts.",User forbade tau/KWW here.
+Generalized homogeneity scaling combining gauge fields beyond chosen Xeff/invD,Not in AX-18C candidate list.,YES,HIGH,"Hypothesis-first; avoid trawling.",Untested != ruled out.

@@ -1,0 +1,5 @@
+target,best_T_baseline,coordinate,residual_corr_Pearson,residual_corr_Spearman,interpretation,notes
+A_obs_canon,T_linear,Xeff_chosen,0.6416350327594863,0.6607142857142857,nonzero_partial_association_after_best_T_linear_structure,Residuals from OLS projection onto same X_best_T for A and coordinate
+A_obs_canon,T_linear,invD_chosen,0.6785745455890244,0.5928571428571429,nonzero_partial_association_after_best_T_linear_structure,Residuals from OLS projection onto same X_best_T for A and coordinate
+A_svd_full_oriented_candidate,T_linear,Xeff_chosen,0.6398287215663754,0.6428571428571429,nonzero_partial_association_after_best_T_linear_structure,Residuals from OLS projection onto same X_best_T for A and coordinate
+A_svd_full_oriented_candidate,T_linear,invD_chosen,0.6832054510876844,0.5964285714285714,nonzero_partial_association_after_best_T_linear_structure,Residuals from OLS projection onto same X_best_T for A and coordinate

@@ -1,0 +1,28 @@
+path,expected_family,exists,git_status,include_in_commit,reason,notes
+reports/cross_module_switching_relaxation_CM_SW_RLX_AX_18C_T_function_scaling_baseline_control.md,AX-18C,YES,gitignored untracked,YES,Core AX-18C report,Requires git add -f (reports/**)
+tables/cross_module_switching_relaxation_CM_SW_RLX_AX_18C_T_function_model_comparison.csv,AX-18C,YES,gitignored untracked,YES,Core AX-18C table,Requires git add -f (tables/**)
+tables/cross_module_switching_relaxation_CM_SW_RLX_AX_18C_scaling_law_comparison.csv,AX-18C,YES,gitignored untracked,YES,Core AX-18C table,Requires git add -f
+tables/cross_module_switching_relaxation_CM_SW_RLX_AX_18C_combined_models.csv,AX-18C,YES,gitignored untracked,YES,Core AX-18C table,Requires git add -f
+tables/cross_module_switching_relaxation_CM_SW_RLX_AX_18C_residual_after_T.csv,AX-18C,YES,gitignored untracked,YES,Core AX-18C table,Requires git add -f
+tables/cross_module_switching_relaxation_CM_SW_RLX_AX_18C_reparameterization_scaling_judgement.csv,AX-18C,YES,gitignored untracked,YES,Core AX-18C table,Requires git add -f
+tables/cross_module_switching_relaxation_CM_SW_RLX_AX_18C_status.csv,AX-18C,YES,gitignored untracked,YES,TASK_COMPLETED=YES; PHYSICAL_SCALING_LAW_SUPPORTED=NO,tables/*status* also matched by gitignore
+reports/cross_module_switching_relaxation_CM_SW_RLX_AX_18D_scaling_law_closure.md,AX-18D,YES,gitignored untracked,YES,Core AX-18D report,Requires git add -f
+tables/cross_module_switching_relaxation_CM_SW_RLX_AX_18D_scaling_inventory.csv,AX-18D,YES,gitignored untracked,YES,Core AX-18D table,Requires git add -f
+tables/cross_module_switching_relaxation_CM_SW_RLX_AX_18D_scaling_claims.csv,AX-18D,YES,gitignored untracked,YES,Core AX-18D table,Requires git add -f
+tables/cross_module_switching_relaxation_CM_SW_RLX_AX_18D_untested_scaling_families.csv,AX-18D,YES,gitignored untracked,YES,Core AX-18D table,Requires git add -f
+tables/cross_module_switching_relaxation_CM_SW_RLX_AX_18D_status.csv,AX-18D,YES,gitignored untracked,YES,TASK_COMPLETED=YES; PHYSICAL_SCALING_LAW_ESTABLISHED=NO,Requires git add -f
+reports/cross_module_switching_relaxation_CM_SW_RLX_AX_20A_synthesis_claim_boundary.md,AX-20A,YES,gitignored untracked,YES,Core AX-20A report,Requires git add -f
+tables/cross_module_switching_relaxation_CM_SW_RLX_AX_20A_evidence_matrix.csv,AX-20A,YES,gitignored untracked,YES,Core AX-20A table,Requires git add -f
+tables/cross_module_switching_relaxation_CM_SW_RLX_AX_20A_final_claims.csv,AX-20A,YES,gitignored untracked,YES,Core AX-20A table,Requires git add -f
+tables/cross_module_switching_relaxation_CM_SW_RLX_AX_20A_variable_roles.csv,AX-20A,YES,gitignored untracked,YES,Core AX-20A table,Requires git add -f
+tables/cross_module_switching_relaxation_CM_SW_RLX_AX_20A_powerlike_scaling_summary.csv,AX-20A,YES,gitignored untracked,YES,Core AX-20A table,Requires git add -f
+tables/cross_module_switching_relaxation_CM_SW_RLX_AX_20A_manuscript_wording.csv,AX-20A,YES,gitignored untracked,YES,Core AX-20A table,Requires git add -f
+tables/cross_module_switching_relaxation_CM_SW_RLX_AX_20A_status.csv,AX-20A,YES,gitignored untracked,YES,EMPIRICAL_INVD_POWERLIKE_SCALING; alphas; PHYSICAL=NO,Requires git add -f
+docs/cross_module_switching_relaxation_AX_index.md,AX-20B,YES,untracked not ignored,YES,Canonical AX index; AX-20A section + upstream links,git add without -f
+reports/cross_module_switching_relaxation_CM_SW_RLX_AX_20B_index_registration.md,AX-20B,YES,gitignored untracked,YES,AX-20B registration report,Requires git add -f
+tables/cross_module_switching_relaxation_CM_SW_RLX_AX_20B_index_registration_status.csv,AX-20B,YES,gitignored untracked,YES,TASK_COMPLETED=YES,Requires git add -f
+reports/cross_module_switching_relaxation_CM_SW_RLX_AX_20C_commit_readiness.md,AX-20C,YES,gitignored untracked,YES,This commit-readiness audit report,Requires git add -f
+tables/cross_module_switching_relaxation_CM_SW_RLX_AX_20C_package_inventory.csv,AX-20C,YES,gitignored untracked,YES,CM-SW-RLX-AX-20C inventory artifact,Requires git add -f
+tables/cross_module_switching_relaxation_CM_SW_RLX_AX_20C_explicit_staging_plan.csv,AX-20C,YES,gitignored untracked,YES,CM-SW-RLX-AX-20C staging plan,Requires git add -f
+tables/cross_module_switching_relaxation_CM_SW_RLX_AX_20C_status.csv,AX-20C,YES,gitignored untracked,YES,CM-SW-RLX-AX-20C status artifact,Requires git add -f
+scripts/run_cm_sw_rlx_ax_18c_t_scaling_baseline.mjs,AX-18C_runner,YES,untracked not ignored,OPTIONAL,Reproducible regeneration of AX-18C outputs; not in 22-file enum,Explicit git add (no -f) if included

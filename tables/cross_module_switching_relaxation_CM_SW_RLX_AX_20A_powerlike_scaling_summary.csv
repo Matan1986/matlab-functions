@@ -1,0 +1,3 @@
+target,scaling_variable,alpha,LOOCV_RMSE,beats_T_baseline,empirical_scaling_supported,physical_scaling_supported,caveat,notes
+A_obs_canon,invD_power (log invD_chosen; pred back to A for LOOCV),0.562460847,0.0000013780575055242083,YES,YES,NO,"n=15; log-log OLS; endpoint/exponent stability not in AX-18C artifacts.","From AX-18C scaling_law_comparison via AX-18D inventory; alpha = 5.62460847e-1."
+A_svd_full_oriented_candidate,invD_power (log invD_chosen; pred back to A for LOOCV),0.558279495,0.000023610554970423528,YES,YES,NO,Same as A_obs.,"Alpha = 5.58279495e-1."
