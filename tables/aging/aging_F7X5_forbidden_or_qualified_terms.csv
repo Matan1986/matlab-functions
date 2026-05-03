@@ -1,0 +1,15 @@
+term,term_status,required_qualifier_or_metadata,allowed_example_usage,forbidden_example_usage,reason,basis,notes
+background,FORBIDDEN_STANDALONE,SMOOTH_COMPONENT_STAGE4_DIRECT or STAGE5_FIT_PARAMETRIC token,SMOOTH_COMPONENT_STAGE4_DIRECT:DeltaM_smooth,background equals dip,F7X4 G2 colloquial multi-map,tables/aging/aging_F7X4_background_baseline_resolution.csv,Use category token from contract vocabulary
+baseline,FORBIDDEN_STANDALONE,DERIVATIVE_MEDIAN_BASELINE_ON_SMOOTH or PLATEAU_REFERENCE_FM or STAGE5_FIT_PARAMETRIC,PLATEAU_REFERENCE_FM:stage4_direct FM plateaus,baseline without stage,F7X4 mapping,aging_F7X4_background_baseline_resolution.csv,""
+residual,FORBIDDEN_STANDALONE,SHARP_RESIDUAL_DELTA_M_OBSERVABLE or SIGNED_DIP_RESIDUAL,SHARP_RESIDUAL:DeltaM_sharp,residual generic,F7X4 two residual definitions differ,aging_F7X4_dM_deltaM_signed_resolution.csv,""
+fit,QUALIFIER_REQUIRED,stage4_agingMetricMode_fit_flag vs stage5_fit_object,agingMetricMode_fit means stage4_direct_family,fit means FM_E,F7X4 G4,stage4_analyzeAFM_FM.m Main_Aging.m,""
+Track A,QUALIFIER_REQUIRED,stage6_summary_fit_lineage plus object list,Track_A:AFM_like_from_Dip_area_selected,Track A equals Track B,F7J freeze router,docs/aging_measurement_definition_freeze.md,""
+Track B,QUALIFIER_REQUIRED,consolidation_five_column_contract,Track_B:Dip_depth_FM_abs_reader_contract,Track B equals dip_signed export,F7J freeze,docs/aging_measurement_definition_freeze.md,""
+C_DIP_DEPTH_B,BRIDGE_ONLY,F7X bridge_row_id branch_family component_id,bridge:C_DIP_DEPTH_B:TRACK_B_CONSOLIDATION,C_DIP_DEPTH_B canonical observable,F7W charter F7X impl,reports/aging/aging_F7X_bridge_export_implementation.md,""
+C_FM_ABS_B,BRIDGE_ONLY,same plus sign_policy FM_abs_abs_only,bridge:C_FM_ABS_B:ABS_ONLY,FM physics from bridge id alone,F7W F7X tables,tables/aging/aging_F7X_bridge_component_index.csv,""
+FM_abs,QUALIFIER_REQUIRED,ABS_ONLY plus stage_route Track_B_consolidation_or_pauseRuns,FM_abs magnitude Track_B_column,FM_abs signed reversal,F7J FM policy,docs/aging_measurement_definition_freeze.md,""
+FM_step_mag,QUALIFIER_REQUIRED,route_sign_policy stage4_direct_signed_plateau_raw_name,FM_step_mag wide_matrix signed_semantics per freeze,FM_step_mag magnitude_only,F7J freeze,docs/aging_measurement_definition_freeze.md,""
+tau_effective_seconds,LEGACY_ONLY,tau_domain tau_method producer_script grain units tau_consensus_methods,tau_effective_seconds with WF_TAU_DIP_CURVEFIT row,tau_effective_seconds without domain,F7X4 G5 dual builder,aging_timescale_extraction.m aging_fm_timescale_analysis.m,""
+tau_vs_Tp,DOWNSTREAM_ONLY,artifact not pauseRun field,tau_output_file tau_vs_Tp.csv,Dip_depth alias tau_vs_Tp,F7U inventory,docs/aging_observable_branch_router.md,""
+tau_FM_vs_Tp,DOWNSTREAM_ONLY,same FM domain,tau_output_file tau_FM_vs_Tp.csv,FM_abs equals tau table,F7U inventory,same,""
+R_age,DOWNSTREAM_ONLY,ratio_inputs tau_FM_seconds tau_dip_seconds lineage,R_age from paired tau CSVs,R_age from raw DeltaM,F7T clock scripts,aging_clock_ratio_analysis.m,""

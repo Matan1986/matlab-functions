@@ -1,0 +1,12 @@
+object_group,representative_objects,definition_resolved,background_baseline_resolved,sign_policy_resolved,grain_and_keys_resolved,tau_role_resolved,ready_for_naming_contract,blocking_reason,recommended_next_action
+Stage4_direct_core,"DeltaM_smooth;DeltaM_sharp;dip_signed;AFM_RMS;AFM_amp;FM_step_raw;FM_step_mag",YES,YES,YES,YES,NA,PARTIAL,FM baseline variant multiplicity,Log cfg snapshot per run
+Stage4_router_scalars,"Dip_depth;Dip_depth_source;FM_signed;FM_abs",YES,PARTIAL,YES,YES,NA,PARTIAL,Dip_depth_source missing from five-column alone,Sidecar policy
+Stage4_derivative_branch,derivative pauseRun fields,PARTIAL,PARTIAL,PARTIAL,PARTIAL,NA,NO,Field inventory incomplete,Extend survey with derivative result fields
+Stage4_extrema_branch,"AFM_extrema_smoothed;FM_extrema_smoothed",PARTIAL,PARTIAL,PARTIAL,PARTIAL,NA,PARTIAL,Differs from direct sgolay smooth,Document movmean window in contract appendix
+Stage5_fit_objects,"Dip_area_fit;Dip_area_selected;FM_E;Dip_A;Dip_sigma",PARTIAL,PARTIAL,N/A,PARTIAL,NA,PARTIAL,fit helper partially unread,Anchor contract to fit helper or read fitFMstep_plus_GaussianDip
+Stage6_summary_objects,"AFM_like;FM_like",YES,YES,N/A,YES,NO_TRACK_A_READER,PARTIAL,No standard tau on summaries,Charter adapter or forbid tau_input
+Consolidation_dataset,"Tp;tw;Dip_depth;FM_abs;source_run",YES,NA,YES,YES,tau_input_candidate,PARTIAL,lineage and NaN rows,F7I lineage closure
+Tau_outputs,"tau_vs_Tp;tau_FM_vs_Tp;tau_effective_seconds",PARTIAL,NA,NA,YES,YES,PARTIAL,legacy alias ambiguity,Require F7G metadata in contract
+Ratio_outputs,"R_age;table_clock_ratio",YES,NA,NA,YES,YES,PARTIAL,tau file pairing,Pairing policy in contract
+F7X_bridge_components,"C_DIP_DEPTH_B;C_FM_ABS_B;STREAM_*",YES,NA,PARTIAL,YES,bridge_only,PARTIAL,Dip sign UNKNOWN rows,Populate sign_convention or document UNKNOWN
+Conceptual_meta_terms,"background;baseline;residual;dip;FM_step",PARTIAL,PARTIAL,PARTIAL,PARTIAL,NA,NO,Colloquial overlap,Glossary bind to producer ids

@@ -1,0 +1,7 @@
+blocker_id,blocker_area,description,severity,blocks_final_naming_contract,blocks_partial_definition_contract,required_resolution,recommended_next_action,notes
+B-001,background_baseline_language,Colloquial background baseline residual remain in headers outside normalized tokens,HIGH,PARTIAL,PARTIAL,Style guide plus lint for new docs only or accept human prose outside machine rows,Keep F7X5 machine rules as normative,"F7X4 G2 PARTIAL"
+B-002,fit_callee_internals,fitFMstep_plus_GaussianDip not line-audited so FM_E closed-form not LOCKED,MEDIUM,PARTIAL,PARTIAL,Read callee or declare PARTIAL permanently in contract,Schedule F7Y fit audit or keep interface-only LOCKED,Matches F7X4 FIT-002
+B-003,tau_effective_shared_name,Same column name two builder algorithms without always-present disambiguation,HIGH,PARTIAL,NO,Always emit tau_domain writer_family tau_consensus_methods on rows,Enforce writer patch policy F7G,"F7X4 G5"
+B-004,bridge_lineage,F7X long rows PARTIAL lineage sign UNKNOWN on some Dip rows,MEDIUM,PARTIAL,NO,Complete lineage fields or exclude those rows from ratio-eligible,Refresh bridge when sources complete,F7X status
+B-005,track_label_semantics,Track A B insufficient for unique naming without object tokens,MEDIUM,PARTIAL,NO,Naming contract must require stage object producer tokens,F7X5 rule R-TRK-001,Governance
+B-006,derivative_extrema_cross_compare,Cross-branch numeric compare needs explicit bridge not yet all LOCKED,LOW,PARTIAL,NO,F7W bridge pairing when both streams materialized,F7V pairing policy,Operational not definition-only

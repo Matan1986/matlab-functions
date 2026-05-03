@@ -1,0 +1,14 @@
+route_or_object_group,included_in_definition_contract,contract_status,required_qualifiers,allowed_use,excluded_use,blocking_gaps,basis,recommended_next_action
+stage4 direct objects,YES,LOCKED_WITH_QUALIFIER,stage4_direct_family agingMetricMode direct|model|fit,decomposition export consolidation upstream when cfg logged,Track A substitution tau without export grain,F7X4 G1 sharp vs signed,F7X4 dM table,Carry DeltaM_signed_source in exports
+stage4 derivative objects,YES,LOCKED_WITH_QUALIFIER,stage4_derivative_route,decomposition diagnostics listed fields,default interchange with direct FM without label,F7X4 G3 field awareness,derivative.m,Publish derivative appendix in final contract
+stage4 extrema-smoothed objects,YES,LOCKED_WITH_QUALIFIER,stage4_extrema_movmean11,stage6 extrema summaries diagnostics,cross-alias to Dip_depth smooth,extrema vs sgolay smooth,extrema_smoothed.m,Label EXTREMA token in any compare
+stage5 fit objects,YES,PARTIAL,stage5_fit_interface,cite Dip_area_selected FM_E Dip_A Dip_sigma from pauseRuns post fit,LOCKED internal tanh Gaussian formulas,callee internals open,F7X4 fit resolution,Audit fitFMstep_plus_GaussianDip or keep PARTIAL
+stage6 summary objects,YES,LOCKED_WITH_QUALIFIER,stage6_Track_A AFM_like FM_like,summary diagnostics figures,tau_input without adapter,Track A tau reader missing,F7J F7U,Charter adapter or exclude tau_input
+five-column dataset objects,YES,LOCKED,Track_B_consolidation_contract Tp tw Dip_depth FM_abs source_run,tau dip FM readers when lineage satisfied,FM_signed column contract extension,sidecar optional lineage,F7D freeze consolidation script,Optional sidecar policy decision
+F7X bridge components,YES,LOCKED_WITH_QUALIFIER,bridge_only branch_family component_stream_id,bridge audits pairing,canonical physics substitution,F7X sign UNKNOWN rows partial,F7W F7X tables,Improve lineage or keep qualifier
+tau dip outputs,YES,LOCKED_WITH_QUALIFIER,tau_metadata_bundle WF_TAU_DIP_CURVEFIT,exploration ratio input gated,decomposition column claim,F7I lineage optional,F7G dip writer,Keep metadata mandatory
+tau FM outputs,YES,LOCKED_WITH_QUALIFIER,same WF_TAU_FM_CURVEFIT F7R2 columns,exploration ratio gated,same,F7R2 row policy,F7G FM writer,same
+tau_effective_seconds,YES,LOCKED_WITH_QUALIFIER,tau_domain tau_method producer grain units methods_string,legacy display with full bundle,primary key without bundle,F7X4 dual algorithm,F7X4 tau csv,Enforce bundle in contract engine
+ratio outputs,YES,LOCKED_WITH_QUALIFIER,tau_pair_files lineage,R_age gated comparative,raw observable ratio,F7T pairing,clock_ratio script,Pair file manifest
+Track A,PARTIAL,LOCKED_WITH_QUALIFIER,object-level tokens AFM_like FM_like,router governance summary lane,solo machine semantic id,F7J,router md,Always pair with stage6 objects
+Track B,PARTIAL,LOCKED_WITH_QUALIFIER,five_column consolidation semantics,reader tau input lane,solo id for decomposition,F7J,same,same

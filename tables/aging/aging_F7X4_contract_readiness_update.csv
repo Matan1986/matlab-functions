@@ -1,0 +1,11 @@
+contract_area,readiness_before_F7X4,readiness_after_F7X4,blocking_gaps_remaining,contract_strategy,recommended_next_action
+object_definitions,PARTIAL,PARTIAL,dM vs sharp vs dip_signed must stay explicit in contract,DEFINITION_CONTRACT_BEFORE_NAMING,Promote F7X4_dM table into contract appendix
+background_baseline,PARTIAL,PARTIAL,colloquial background in prose headers,BAN_UNQUALIFIED_BACKGROUND_TERM,Use resolved_category tokens only in normative rows
+direct_route,YES,YES,none,FULL_CONTRACT_ALLOWED,Keep stage4_direct_family row
+derivative_route,PARTIAL,YES,none,FULL_CONTRACT_ALLOWED,Append derivative field list from F7X4_derivative_branch_resolution
+extrema_route,PARTIAL,PARTIAL,movmean vs direct smooth mismatch documented,SAFE_ONLY_WITH_QUALIFIER,Label EXTREMA_MOVMEAN_SMOOTH in any cross-branch compare
+fit_stage5_route,PARTIAL,PARTIAL,callee internals not audited,PARTIAL_CONTRACT_ONLY,Point contract to fit helper file or future F7 audit
+stage6_summary,YES,YES,tau adapter missing for summaries,EXCLUDE_UNRESOLVED_ROUTE,Charter adapter or forbid tau_input for AFM_like FM_like
+bridge_components,PARTIAL,PARTIAL,F7X sign UNKNOWN rows unchanged,SAFE_ONLY_WITH_QUALIFIER,Out of F7X4 scope do not edit F7X
+tau_outputs,PARTIAL,PARTIAL,tau_effective dual algorithm,SAFE_ONLY_WITH_QUALIFIER,Require script domain plus tau_consensus_methods in contract
+ratio_outputs,PARTIAL,PARTIAL,pair file lineage,PARTIAL_CONTRACT_ONLY,Keep F7T pairing gates in definition contract

@@ -1,0 +1,12 @@
+risk_id,object_or_term,risk_type,risk_description,where_seen,severity,blocks_naming_contract,recommended_resolution,notes
+R001,FM_abs,sign_loss,Magnitude column cannot encode FM sign reversal or signed plateau physics,docs/aging_measurement_definition_freeze.md aging_fm_timescale_analysis input,HIGH,PARTIAL,Keep ABS_ONLY in contract carry FM_signed or FM_step_mag where needed,"F7X2 risk echo"
+R002,FM_step_mag,name_conflict,_mag suffix suggests magnitude-only but direct path stores signed raw equal FM_step_raw,docs/aging_measurement_definition_freeze.md analyzeAFM_FM_components.m,HIGH,PARTIAL,Rename only with coordinated freeze or always pair semantic footnote,""
+R003,cfg agingMetricMode fit,fit_vs_direct_confusion,String fit routes to analyzeAFM_FM_components not stage5 Gaussian summary,stage4_analyzeAFM_FM.m switch,MEDIUM,PARTIAL,Split vocabulary stage4_direct_family vs stage5_fit in future contract,""
+R004,Dip_depth,background_unclear,Scalar may be bound from AFM_amp without Dip_depth_source in narrow exports,stage4_analyzeAFM_FM.m consolidation five column,MEDIUM,PARTIAL,Require sidecar Dip_depth_source policy,""
+R005,tau_vs_Tp tau_FM_vs_Tp,tau_downstream_confusion,Files are tau outputs not pauseRun decomposition fields,aging_timescale_extraction.m router,HIGH,PARTIAL,Never alias tau columns to Dip_depth FM_abs without tau_method tag,""
+R006,R_age,ratio_downstream_confusion,Ratio combines prior tau tables not raw DeltaM,aging_clock_ratio_analysis.m,HIGH,PARTIAL,Explicit ratio_input=tau_tables in naming,""
+R007,background baseline residual,ambiguous_definition,Words used in docs comments but not one unified struct name across derivative extrema fit,direct headers vs extrema_smoothed,MEDIUM,PARTIAL,Object_kind table maps concepts to producers,""
+R008,per Tp tw vs per Tp tau,grain_mismatch,Observable grid Tp by tw differs from one tau row per Tp after collapse,F7U compatibility matrix,MEDIUM,PARTIAL,Grain dimension mandatory on labels,""
+R009,F7X bridge component C_*,legacy_vs_canonical_confusion,Bridge row is lineage export not new physics observable,F7X bridge long CSV,LOW,NO,Keep bridge_only use classification,""
+R010,Track A vs Track B names,name_conflict,Same English words AFM FM used for different mathematical objects,docs/aging_measurement_definition_freeze.md,CRITICAL,PARTIAL,Never equate AFM_like to Dip_depth FM_like to FM_abs,""
+R011,FM_signed,tau_downstream_confusion,No default tau extractor reads FM_signed vs tw,F7V tau_readiness,MEDIUM,PARTIAL,Charter signed tau path if ever needed,""

@@ -1,0 +1,30 @@
+metadata_field,required_for,definition,allowed_values_or_examples,mandatory,reason,notes
+entity_kind,future_naming_contract,Classifier for row kind,object|tau_output|ratio_output|bridge_row|dataset_row,YES,Disambiguate layers,F7X4 stage map
+object_name,future_naming_contract,Human or machine object token,Dip_depth FM_abs AFM_like,YES,Join to rules table,F7X2 inventory
+source_field,future_naming_contract,Column or pauseRuns field name,Dip_depth FM_signed,CONDITIONAL,Needed when not obvious from object_name,Export vs pauseRuns
+source_artifact,future_naming_contract,File or table basename,observable_matrix.csv tau_vs_Tp.csv,YES,Lineage anchor,F7I
+producer_script,future_naming_contract,MATLAB script path string,Aging/analysis/aging_timescale_extraction.m,YES,Reproducibility,F7G
+producer_function,future_naming_contract,Function name when narrower than script,buildConsensusTau analyzeAFM_FM_components,CONDITIONAL,Multi-function scripts,Code
+stage_or_route,future_naming_contract,Pipeline stage or cfg route,stage4_direct stage4_derivative stage5 stage6 tau_script,YES,Qualifier discipline,F7X4
+branch,object_definition,Governance branch family,TRACK_A_SUMMARY TRACK_B_STAGE4 TRACK_B_CONSOLIDATION,CONDITIONAL,Router alignment,F7W schema
+decomposition_class,object_definition,High level decomp family,DIRECT DERIVATIVE EXTREMA FIT CONSOL_EXPORT DOWNSTREAM,CONDITIONAL,Non-tau rows,F7U
+decomposition_method,object_definition,Finer producer token,analyzeAFM_FM_components analyzeAFM_FM_derivative,CONDITIONAL,Risk reduction,F7X2
+input_signal,object_definition,Primary input trace or table column,DeltaM Dip_depth FM_abs,CONDITIONAL,Semantics,F7X3
+background_or_baseline_definition,object_definition,Category token for smooth or plateau or fit,SMOOTH_COMPONENT STAGE5_FIT_PARAMETRIC,CONDITIONAL,F7X5 forbids bare background,F7X4 BG table
+reference_or_subtraction_rule,object_definition,Explicit subtraction identity,dM_sharp_eq_dM_minus_smooth dip_signed_eq_signed_minus_smooth,CONDITIONAL,dM vs signed,F7X4
+sign_policy,object_definition,SIGNED_ONLY ABS_ONLY SIGNED_SEMANTICS_LEGACY_MAG_NAME etc,ABS_ONLY for FM_abs,CONDITIONAL,FM risk,F7J
+smoothing_policy,object_definition,sgolay movmean none,sgolayfilt winPts from smoothWindow_K,CONDITIONAL,Direct vs extrema,F7X4
+fit_dependency,object_definition,Whether row depends on nonlinear fit,YES NO PARTIAL,CONDITIONAL,Stage5 rows,F7X4
+normalization_policy,object_definition,zscore diagnostic none etc,none default stage6_diag_zscore,CONDITIONAL,Stage6 diagnostics only,stage6
+grain,object_definition,Tw curve vs per Tp summary,per_curve per_Tp_tw PER_TP_SUMMARY_ONLY,YES,Tau reader mismatch guard,F7U
+join_keys,object_definition,Stable merge keys,Tp tw source_run bridge_row_id,CONDITIONAL,Dataset vs bridge,F7D
+allowed_use,object_definition,Machine use class from contract,tau_input_candidate decomposition_component,YES,Gates,F7V
+contract_status,object_definition,LOCKED family for this row,LOCKED LOCKED_WITH_QUALIFIER PARTIAL,YES,Honesty,F7X5
+lineage_status,future_naming_contract,COMPLETE PARTIAL MISSING,COMPLETE PARTIAL MISSING,YES,F7G gates,F7I
+tau_domain,tau_output,DIP_CURVEFIT FM_ABS_CURVEFIT etc from metadata,DIP_CURVEFIT FM_ABS_CURVEFIT,CONDITIONAL,tau rows only,F7G semantic_status
+tau_method,tau_output,High level tau recipe,CURVEFIT_ZOO half_range_primary consensus_median_log,CONDITIONAL,tau rows,F7X4 G5
+tau_input_object,tau_output,Consolidated column feeding curve,Dip_depth FM_abs,CONDITIONAL,tau rows,Scripts
+tau_event_or_feature,object_definition,What feature extracted from curve,half_range logistic stretched,CONDITIONAL,tau internals,buildTauTable
+tau_units,tau_output,Seconds or arbitrary,seconds arbitrary,CONDITIONAL,tau rows,Writers
+ratio_inputs,ratio_output,Prior tau artifacts and columns,tau_FM_seconds tau_dip_seconds,CONDITIONAL,ratio rows,clock_ratio
+downstream_status,ratio_output,COMBINATOR_NOT_DECOMP,COMBINATOR,YES,ratio not raw,aging_clock_ratio_analysis.m
