@@ -1,0 +1,2 @@
+ratio_name,formula,numerator,denominator,units_policy,transform_policy,normalization_policy,interpretation_policy,notes
+R_age,tau_FM divided by tau_dip,tau_effective_seconds from hardened FM tau table,tau_effective_seconds from dip tau_vs_Tp table,"Copy numeric values as stored; document column semantic_status legacy alias from FM side in output manifest","NO log transform in default charter","NO rescaling in default charter","NO physics claims; ratio is algebraic bookkeeping only per F7T",

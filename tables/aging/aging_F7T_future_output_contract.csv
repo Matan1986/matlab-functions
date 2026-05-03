@@ -1,0 +1,8 @@
+future_artifact_path,artifact_role,required_columns,required_status_keys,should_be_created_now,notes
+results/aging/runs/<run_id>/tables/R_age_scoped_vs_Tp.csv,Primary ratio table,"Tp tau_FM_seconds tau_dip_seconds R_age branch_id datasetPath dipTauPath failedDipClockMetricsPath source_fm_tau_path source_dip_tau_path charter_mode_id cel_pass global_ratio_flag_note",N/A,NO placeholder path,
+results/aging/runs/<run_id>/tables/R_age_join_audit.csv,Join audit per Tp,"Tp join_status fm_row_present dip_row_present tau_fm_finite tau_dip_finite",N/A,NO,
+results/aging/runs/<run_id>/tables/R_age_row_exclusions.csv,Excluded rows log,"Tp exclusion_reason blocking_gate_id",N/A,NO,
+results/aging/runs/<run_id>/tables/R_age_input_manifest.csv,Input manifest,"cfg_field cfg_value branch_mode_id",N/A,NO,
+results/aging/runs/<run_id>/tables/R_age_metadata_compatibility.csv,Compatibility check,"check_id pass fail_reason",N/A,NO,
+results/aging/runs/<run_id>/tables/R_age_execution_status.csv,Run status,"EXECUTION_STATUS CHARTER_ID GATE_SUMMARY ERROR_MESSAGE",N/A,NO,
+results/aging/runs/<run_id>/reports/aging_R_age_scoped_execution_report.md,Narrative report,Markdown sections Scope Inputs Outputs Exclusions,N/A,NO,

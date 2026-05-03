@@ -1,0 +1,9 @@
+gate_id,condition,required_value,fail_action,exclusion_reason,blocks_ratio,notes
+CEL01,Tp present in FM and dip inner join,Both tables have same numeric Tp,EXCLUDE_ROW,Tp_MISMATCH,YES,
+CEL02,Finite tau_FM,tau_effective_seconds finite and positive,EXCLUDE_ROW,NONFINITE_OR_NONPOSITIVE_TAU_FM,YES,
+CEL03,Finite tau_dip,tau_effective_seconds or charter dip column finite positive,EXCLUDE_ROW,NONFINITE_OR_NONPOSITIVE_TAU_DIP,YES,
+CEL04,FM has_fm,has_fm true or 1,EXCLUDE_ROW,NO_FM_POINTS_AT_TP,YES,
+CEL05,Branch path match,Row datasetPath dipTauPath failedDipClockMetricsPath match cfg,EXCLUDE_ROW,BRANCH_OR_PATH_MISMATCH,YES,
+CEL06,Metadata presence,Required hardened columns present on FM row,EXCLUDE_ROW,MISSING_HARDENED_METADATA,YES,
+CEL07,Charter eligibility note,row_ratio_use_allowed may remain NO globally; CEL still documents technical join,LOG_WARNING_NOT_BLOCK_IF_CEL_OK,GLOBAL_RATIO_FLAG_NO_WITH_CHARTER_OVERRIDE_DISCLOSED,NO,Execution records conservative CSV flags unchanged
+CEL08,Blocked fragile optional,"If charter mode forbids fragile rows optional",EXCLUDE_ROW,FRAGILE_SPARSE_FM_POINTS_CHARTER_BLOCK,OPTIONAL,Default allow if CEL02-06 pass unless charter tightens

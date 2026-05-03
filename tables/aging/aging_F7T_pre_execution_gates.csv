@@ -1,0 +1,7 @@
+gate_id,gate_description,required_for_execution,evidence_required,pass_condition,fail_action,notes
+G01,Hardened FM tau schema present,YES,Header contains F7R2 required columns,All required columns exist in input CSV,ABORT_RUN,F7S HARDENED_TAU_SCHEMA_CONFIRMED lineage
+G02,Explicit dip tau path,YES,cfg dipTauPath matches FM row dipTauPath strings,Char equality for declared run,ABORT_RUN,F7T_DIP_TAU_EXPLICIT_PATH_REQUIRED
+G03,Branch mode declared,YES,cfg branch_mode_id from aging_F7T_branch_mode_contract,Non-empty mode token,ABORT_RUN,F7T_BRANCH_MODE_REQUIRED
+G04,No cross-branch inputs in one run,YES,Single branch_id value across FM rows used,unique branch_id subset size 1,ABORT_RUN,F7O dual streams
+G05,Pre-scan row exclusions,YES,CEL rules evaluated before ratio write,EXCLUSIONS table populated for failures,ABORT_IF_ZERO_INCLUDED_ROWS_AND_POLICY_REQUIRES_ONE,Configurable minimum rows optional
+G06,Failed-clock governance disclosure,CONDITIONAL,If using metrics path manifest notes NEEDS_POLICY disclosure row,F7R FAILED_CLOCK_GOVERNANCE acknowledged in manifest,WARN_CONTINUE,F7S remaining blocker

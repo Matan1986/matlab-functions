@@ -1,0 +1,10 @@
+scope_item,allowed,forbidden,condition,rationale,source_evidence
+Read hardened tau_FM_vs_Tp.csv,YES,Using FM tau CSV missing F7R2 lineage columns,Input file passes schema gate in aging_F7T_allowed_input_contract.csv,Prevents silent reuse,F7S HARDENED_TAU_SCHEMA_CONFIRMED; F7R2 smoke schema
+Join FM and dip on Tp with explicit paths,YES,Join without recording dip path in manifest,Tp key plus path equality to declared cfg,F7R dip pairing manifest gate; F7Q PER_BRANCH_SCOPED_ONLY
+Compute R_age tau_FM over tau_dip,YES,Compute without row audit tables,CEL passes for each row,Charter ratio definition; F7S YES_SCOPED_CHARTER_ONLY
+Emit ratio diagnostic artifacts,YES,Omit exclusion audit or manifest,All outputs per aging_F7T_future_output_contract.csv,Traceability,F7S model_use_readiness EXPLICIT_CFG_SCOPED_RUN
+Branch ranking,NO,N/A,Always,N/A,F7T forbidden; F7O NO_BRANCH_RANKING
+Canonical branch selection,NO,N/A,Always,N/A,F7T forbidden; F7S canonical_status non_canonical
+Physics interpretation of ratio,NO,N/A,Always,Execution is bookkeeping only,F7S SAFE_FOR_PHYSICS_CLAIMS NO
+Cross-module synthesis,NO,Compare to Switching Relaxation MT,N/A,Charter is Aging-only,F7S cross-module
+Conservative row_ratio_use_allowed CSV flags,CEL numeric join allowed with manifest disclosure that flags stay NO in source,Treating CSV NO as physics veto without charter record,CEL passes and manifest logs disclosure,Numeric join is charter-scoped not policy upgrade,F7R2 row_ratio_use_allowed all NO smoke

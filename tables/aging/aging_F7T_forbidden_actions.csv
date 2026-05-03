@@ -1,0 +1,9 @@
+forbidden_action,reason,applies_to_future_execution,applies_to_current_F7T,notes
+Rank FM_O_22row vs FM_O_30row outputs,No branch ranking charter requirement,YES,YES,F7O NO_BRANCH_RANKING
+Select canonical tau_FM branch,Non-canonical lineage policy,YES,YES,F7S canonical_status
+Compute ratio without input manifest,Traceability,YES,N/A execution only,
+Merge 22-row and 30-row Tp rows in one ratio table,Silent mixing,YES,YES,
+Ignore row_exclusion_reason when has_fm 0,has_fm gate,YES,YES,
+Treat ratio magnitude as validated physics,Interpretation policy,YES,YES,F7T_SAFE_FOR_PHYSICS_CLAIMS NO
+Invoke Switching Relaxation MT comparators,Scope,YES,YES,
+Override cfg paths with defaults without assert,Path discipline,YES,N/A future writer code,

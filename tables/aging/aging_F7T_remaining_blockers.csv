@@ -1,0 +1,6 @@
+blocker_id,blocker_type,current_status,blocks_charter_definition,blocks_scoped_execution,required_resolution,notes
+SIGNED_FM_SOURCE,convention,partial,NO,NO,Optional dataset schema before interpreting FM side,F7S remaining
+FAILED_CLOCK_GOVERNANCE,governance,NEEDS_POLICY,NO,CONDITIONAL,Optional memo before using auxiliary for claims; ratio numerics use tau columns only,F7R gate
+FM_ABS_PARTIAL,F7Q F7R,persistently PARTIAL,NO,NO,Charter forbids physics interpretation mitigates,F7S FM convention
+ROW_RATIO_ALL_NO,F7R2 policy,all rows row_ratio_use_allowed NO,NO,NO,CEL and manifest disclosure; future writer may upgrade column in separate governance charter if needed,
+CHR_TABLE_DRIFT,documentation,F7R tasks CSV OPEN,NO,NO,Optional editorial refresh not blocking execution,F7S noted
