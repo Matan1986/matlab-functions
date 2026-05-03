@@ -1,0 +1,12 @@
+observable_family,allowed_for_user_display,allowed_for_physical_interpretation,allowed_for_tau_input,allowed_for_ratio_input,allowed_for_bridge_use,required_qualifier,basis,notes
+stage4 direct decomposition,WITH_QUALIFIER,NOT_CLAIMED,WITH_METADATA,WITH_METADATA,NO,"stage4_direct_family DeltaM_signed_source when needed","F7X5 scope matrix stage4 direct","Contracts do not certify physics; study-specific interpretation outside this matrix"
+stage4 derivative decomposition,WITH_QUALIFIER,NOT_CLAIMED,NO,NO,NO,"stage4_derivative_route label on FM swaps","F7X5 stage4 derivative row","Diagnostics-first route swap hazards"
+stage4 extrema smoothed,WITH_QUALIFIER,NOT_CLAIMED,NO,NO,NO,"stage4_extrema_movmean11 token","F7X5 extrema row","Keep distinct from consolidation Dip_depth"
+stage5 fit interface,WITH_QUALIFIER,NOT_CLAIMED,NO,NO,NO,"stage5_fit_interface PARTIAL on internals","F7X5 stage5 PARTIAL","tau_input NA until adapter chartered per scope notes"
+stage6 Track A summaries AFM_like FM_like,WITH_QUALIFIER,NOT_CLAIMED,NO,NO,NO,"stage6_Track_A upstream Dip_area_selected FM_E","F7X5 R-ST6-001","Summary lane not consolidation contract"
+five-column consolidation Dip_depth FM_abs,WITH_QUALIFIER,NOT_CLAIMED,YES,WITH_METADATA,NO,"Track_B reader contract grain lineage","F7X5 five-column LOCKED","tau_input YES per reader contract physics interpretation still NOT_CLAIMED here"
+F7X bridge components,WITH_QUALIFIER,NOT_CLAIMED,NA,NA,YES,"bridge_only branch_family component ids","F7X5 bridge row","Bridge use YES means pairing automation not physics headline"
+tau dip tau_FM outputs,WITH_QUALIFIER,NOT_CLAIMED,NA,WITH_METADATA,NO,"full tau_metadata_bundle","F7X5 tau rows","ratio_input WITH_METADATA after lineage gates"
+tau_effective_seconds legacy column,WITH_QUALIFIER,NOT_CLAIMED,NA,WITH_METADATA,NO,"tau_domain tau_method producer grain units methods disclosure","F7X5 R-TAU-002","Prefer primary tau columns when possible"
+ratio R_age downstream,WITH_QUALIFIER,NOT_CLAIMED,NA,NA,NO,"ratio_inputs downstream_status manifests","F7X5 ratio row","Display YES with qualifiers ratio_input NA at ratio layer"
+Track A Track B labels alone,NO,NOT_CLAIMED,NA,NA,NO,"pair object tokens and stages","F7X5 Track rows PARTIAL","Lane label insufficient for any column"
