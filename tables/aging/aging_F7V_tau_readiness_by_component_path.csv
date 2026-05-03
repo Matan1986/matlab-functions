@@ -1,0 +1,6 @@
+tau_path_id,component_id,existing_tau_method,tau_extraction_exists_now,tau_style,required_input_shape,available_input_shape,metadata_ready,direct_tau_possible,fit_tau_possible,blockers,notes
+TAU_PATH_DIP_B,C_DIP_DEPTH_B,aging_timescale_extraction on consolidated Dip_depth vs tw,YES,CURVEFIT_DIP,Dip_depth curve per Tp in aging_observable_dataset,same when consolidation matches tau extraction dataset,HIGH when F7H lineage,PARTIAL,PARTIAL,F7R dip branch alignment,
+TAU_PATH_FM_B,C_FM_ABS_B,aging_fm_timescale_analysis FM_abs vs tw,YES,CURVEFIT_FM,FM_abs consolidated,HIGH F7R2,PARTIAL,PARTIAL,F7R2 convention partial signed closure,
+TAU_PATH_FM_A,C_FM_LIKE_A,none standard reader,NO,UNKNOWN,per-pause tw curve of FM_like if exposed,stage6 summary vectors not plug-in to aging_fm_timescale_analysis,LOW until bridge,NO,NO,NO_TRACK_A_READER,needs BRIDGE_TAU_TRACK_A
+TAU_PATH_AFM_A,C_AFM_LIKE_A,none standard dip tau reader on AFM_like,NO,UNKNOWN,AFM_like vs tw if exposed,summary differs from Dip_depth curve,LOW until bridge,NO,NO,NO_TRACK_A_READER,paired tau must be chartered
+TAU_PATH_FM_SIGNED_B,C_FM_SIGNED_B,none default tau extraction,NO,UNKNOWN,FM_signed vs tw,signed plateau curve in pauseRuns,LOW until chartered,NO,OPTIONAL_CHARTER,chartered only,signed tau path not default aging_fm

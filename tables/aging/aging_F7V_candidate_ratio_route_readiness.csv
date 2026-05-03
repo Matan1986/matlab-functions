@@ -1,0 +1,4 @@
+ratio_route_id,FM_component_id,Dip_component_id,tau_FM_path_id,tau_dip_path_id,route_class,ready_now,ready_after_bridge,forbidden,diagnostic_only,required_next_action,allowed_claims,blockers,notes
+RR_F7T_BASELINE_CONSOL,C_FM_ABS_B,C_DIP_DEPTH_B,TAU_PATH_FM_B,TAU_PATH_DIP_B,F7T_BASELINE_LINE,YES_BASELINE_ONLY,NO,NO,NO,baseline ratio executor per F7T,chartered bookkeeping ratio,F7R2 row_ratio NO disclosure,
+RR_MULTIPATH_ALIGNED,C_FM_LIKE_A,C_AFM_LIKE_A,"TAU_PATH_FM_A;TAU_PATH_AFM_A",,MULTIPATH_TRACK_A,NO,CONDITIONAL,NO,NO,bridge BRIDGE_TAU_TRACK_A plus paired tau CSVs,multipath robustness narrative,tau readers missing
+RR_DIAGNOSTIC_SIDE_BY_SIDE,C_FM_LIKE_A,C_FM_ABS_B,,,DIAGNOSTIC_COMPARE,NO,NO,NO,YES,alignment tables only none ratio,no headline ratio,semantic mismatch freeze,

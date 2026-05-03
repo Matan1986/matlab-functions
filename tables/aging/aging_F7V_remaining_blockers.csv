@@ -1,0 +1,5 @@
+blocker_id,blocker_type,current_status,blocks_fit_direct_alignment,blocks_multipath_ratio,blocks_physics_claims,required_resolution,notes
+TRACK_AB_FREEZE_SEMANTICS,governance,frozen,YES until bridged,YES,YES,documented dual-export bridge,F7V charter
+TAU_READER_GAP_TRACK_A,tooling,missing reader for FM_like AFM_like curves,NO for baseline,NO for multipath,N/A,BRIDGE_TAU_TRACK_A implementation charter,
+FM_ABS_SIGN_COLLAPSE,observable,FM_abs magnitude only in reader,PARTIAL,PARTIAL,YES,parallel signed exports,F7U echo
+MULTIPATH_REGISTRY,process,absent,PARTIAL,PARTIAL,NO,named ratio_route_id governance,F7U echo

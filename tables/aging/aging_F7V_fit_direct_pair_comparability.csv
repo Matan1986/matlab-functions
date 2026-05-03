@@ -1,0 +1,7 @@
+pair_id,fit_component_id,direct_component_id,component_role,same_physical_quantity_claimed,comparable_status,reason,required_bridge_id,measurement_freeze_risk,sign_policy_risk,scalar_type_risk,grid_risk,lineage_risk,allowed_future_use,notes
+P_DIP_SUMMARY,C_AFM_LIKE_A,C_DIP_DEPTH_B,Dip-sector scalar,NO,NOT_COMPARABLE,AFM_like from Dip_area_selected vs Dip_depth stage4 semantics differ per freeze none without bridge,,HIGH,HIGH,HIGH,MEDIUM,MEDIUM,none until bridge BRIDGE_DIP_TRACK_AB,
+P_FM_SUMMARY,C_FM_LIKE_A,C_FM_ABS_B,FM-sector scalar,NO,NOT_COMPARABLE,FM_like vs FM_abs identity forbidden,,HIGH,HIGH,HIGH,MEDIUM,MEDIUM,none until bridge BRIDGE_FM_TRACK_AB,
+P_DIP_AREA_VS_DEPTH,C_DIP_AREA_FIT,C_DIP_DEPTH_B,Dip-related,NO,COMPARABLE_AFTER_BRIDGE,Different constructs area vs depth require documented mapping and dual export,,MEDIUM,MEDIUM,HIGH,MEDIUM,MEDIUM,alignment diagnostic only,
+P_TRACKA_EXPORT_VS_CONSOL,C_AFM_LIKE_A,C_DIP_DEPTH_B,cross-track,NO,DIAGNOSTIC_ONLY,Side-by-side audit tables allowed no substitution into ratio numerator,,HIGH,HIGH,HIGH,HIGH,HIGH,audit scripts only,
+P_STAGE4_MODES,C_FM_SIGNED_B,C_FM_SIGNED_B,same path different mode,NO,DIAGNOSTIC_ONLY,direct vs derivative stage4 produce different fields,,LOW,MEDIUM,MEDIUM,LOW,MEDIUM,parameter sensitivity studies,
+P_EXTREMA_VS_DIRECT,C_AFM_LIKE_A,C_AFM_AMP_B,mixed,NO,UNKNOWN_PENDING_SOURCE_AUDIT,extrema summary vs AFM_amp identity unclear,,MEDIUM,MEDIUM,HIGH,MEDIUM,MEDIUM,further source audit,

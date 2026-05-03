@@ -1,0 +1,6 @@
+option_id,option_name,allowed_now,recommended,rationale,prerequisites,expected_outputs,risks,notes
+A,IMPLEMENT_DECOMPOSITION_BRIDGE_EXPORT,NO,YES first gate before multipath ratio,F7V bridges defined not implemented,chartered PR scope,long component table plus lineage CSV,scope creep if physics sneaks in,preferred sequencing
+B,CREATE_DIRECT_TAU_EXTRACTION_CHARTER_TRACK_A,YES doc only,PARTIAL parallel,Close tau gap for FM_like AFM_like,F7V tau readiness,B charter artifacts only,no execution inside charter,
+C,EXECUTE_BASELINE_F7T_RATIO_ONLY,CONDITIONAL,NO default until alignment clarity,multipath goal needs bridges,F7T gates hardened outputs,single ratio CSV,misleading if sold as robustness,baseline bookkeeping lane only
+D,CREATE_MULTIPATH_ROBUSTNESS_EXECUTION_CHARTER,NO until A partial,NO premature,would assume bridges exist,bridges implemented,chartered executor spec,huge scope without A,
+E,RESOLVE_DOCUMENTATION_SEMANTIC_BLOCKERS_FIRST,YES,YES alongside A,freeze already authoritative,reread freeze CSV rows,router updates low risk,none,narrative alignment

@@ -1,0 +1,5 @@
+forbidden_substitution,reason,source_policy,consequence,allowed_alternative,notes
+Equate AFM_like with Dip_depth for consolidation or ratio,Different producer semantics and freeze roles,docs/aging_measurement_definition_freeze.md,invalid reader contract and invalid ratio pairing,dual export with family_id tags per BRIDGE_LONG_COMPONENT_TABLE,
+Equate FM_like with FM_abs for consolidation or ratio,Fit summary vs magnitude column identity forbidden,same freeze,silent physics mismatch plus tau ingest error,separate tau charter on FM_like vs FM_abs paths,
+Map Dip_area_selected into five-column Dip_depth without bridge,Track A fit area not stage4 Dip_depth,same freeze,broken aging_observable_dataset contract,explicit bridge mapping row with lineage,
+Use FM_abs alone to infer FM sign reversal,FM_abs drops sign,same freeze plus F7J FM policy,misclaimed reversal direction,use FM_signed FM_step_mag audits,
