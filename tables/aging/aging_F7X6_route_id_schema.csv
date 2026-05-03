@@ -1,0 +1,14 @@
+field_name,definition,required,allowed_values_or_examples,reason,notes
+route_id,Stable machine identifier for a display or export row joining metadata tables,YES,"AGING_STAGE4_DIRECT_Dip_smooth_v1 example pattern not final","Single join key for UI automation",Pattern examples only not normative strings
+entity_kind,Classifier for what the row represents,YES,"object|tau_output|ratio_output|bridge_row|dataset_row|diagnostic","Separates decomposition from downstream layers",F7X5 schema
+branch,Governance branch family when router-aligned,CONDITIONAL,"TRACK_A_SUMMARY|TRACK_B_CONSOLIDATION|TRACK_B_STAGE4|NONE","Needed for Track-labeled narratives",docs/aging_observable_branch_router.md
+stage,Pipeline stage or script stage producing the scalar or curve,YES,"stage4_direct|stage4_derivative|stage4_extrema|stage5|stage6|tau_script|ratio_script|export","User must know production stage",F7X4 stage_boundary_map
+object_name,Column or pauseRuns field token,YES,"DeltaM_smooth|Dip_depth|FM_abs|AFM_like|tau_effective_seconds","Join to F7X3 inventory",Exact repo names unchanged
+source_field,Underlying pauseRuns or table column when distinct from object_name,CONDITIONAL,"DeltaM|Dip_depth|FM_signed","Needed for exports vs pauseRuns",F7X5 source_field
+decomposition_method,Producer function token for decomposition rows,CONDITIONAL,"analyzeAFM_FM_components|analyzeAFM_FM_derivative|analyzeAFM_FM_extrema_smoothed","Disambiguates method families",F7X2
+sign_policy,Sign or magnitude convention for FM and dip layers,CONDITIONAL,"SIGNED_ONLY|ABS_ONLY|SIGNED_SEMANTICS_LEGACY_MAG_NAME","Prevents FM_abs reversal claims",R-FM-001 R-FM-002 R-FM-003
+tau_domain,Tau extraction domain token for tau rows,CONDITIONAL,"DIP_CURVEFIT|FM_ABS_CURVEFIT|other writer tokens","Required whenever tau displayed",R-TAU-001
+tau_method,Tau recipe or consensus policy,CONDITIONAL,"CURVEFIT_ZOO|half_range_primary|consensus_median_log","Pairs with tau_domain",F7X4 G5
+allowed_use,Machine gate for how row may be consumed,YES,"decomposition_component|tau_input_candidate|bridge_only|downstream_ratio|diagnostic_only|display_only","Aligns naming lane to automation",F7X5 contract_scope_matrix
+contract_status,Definition contract lock level for the object,YES,"LOCKED|LOCKED_WITH_QUALIFIER|PARTIAL|EXCLUDED|FORBIDDEN","Honesty for partial naming",F7X5 rules
+lineage_status,Completeness of producer to artifact chain,YES,"COMPLETE|PARTIAL|MISSING","Tau and ratio gates",F7G F7I narratives

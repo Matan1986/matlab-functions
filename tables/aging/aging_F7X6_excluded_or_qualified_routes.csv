@@ -1,0 +1,12 @@
+object_or_route_group,status,reason,required_resolution_before_final_naming,allowed_temporary_display,forbidden_display,basis,notes
+unresolved fit callee internals,EXCLUDED,Undocumented Gaussian kernel algebra not line-audited,callee read or permanent PARTIAL annex,technical field keys inside debug tables only,consumer-friendly marketing names for kernel,R-EXC-001 B-002,Interface list remains PARTIAL not EXCLUDED
+standalone background,QUALIFIER_REQUIRED,Token maps to multiple branch-specific constructs,category token plus stage in metadata,SMOOTH_COMPONENT_STAGE4_DIRECT in annex row,headline Background,F7X4 G2 R-BG-001,
+standalone baseline,QUALIFIER_REQUIRED,same,category plus route token,DERIVATIVE_MEDIAN_BASELINE_ON_SMOOTH labeled,Baseline alone,F7X4 R-BG-002,
+standalone residual,QUALIFIER_REQUIRED,sharp vs signed dip residuals differ,subtraction identity in metadata,SHARP_RESIDUAL or SIGNED_DIP_RESIDUAL tokens,Residual alone,F7X4 dM table R-BG-003,
+tau_effective_seconds without metadata,EXCLUDED,dual builder same column name,B-003 writer policy or always-bundle UI,forbidden in primary axis unless bundle present,tau_effective_seconds as sole axis title,R-TAU-002 B-003,
+Track A alone,QUALIFIER_REQUIRED,governance label not object id,pair AFM_like FM_like stage6 tokens,router table reference,plot title Track A only,R-TRK-001 B-005,
+Track B alone,QUALIFIER_REQUIRED,governance label not object id,pair five-column contract reference,plot title Track B only,R-TRK-001 B-005,
+F7X bridge components without bridge export qualifier,QUALIFIER_REQUIRED,bridge rows not canonical observables,metadata banner BRIDGE_EXPORT,bridge id with branch_family and sign_policy,bare bridge id as physics headline,R-BRI-001 B-004,BRIDGE_ONLY is allowed_use lane once qualifier present
+ratio outputs without downstream qualifier,QUALIFIER_REQUIRED,R_age is combinator not pauseRun DeltaM,ratio_inputs manifest,R_age with DOWNSTREAM_RATIO banner,R_age from raw dip,F7T R-RAT-001,DOWNSTREAM_ONLY is allowed_use once ratio_inputs explicit
+stage5 FM_E closed form narrative,PARTIAL,internal kernel PARTIAL,callee audit or accept PARTIAL forever,interface field name with PARTIAL tag,FM_E equals physics truth,R-FIT-002,
+cross-branch numeric compare without bridge,DISPLAY_ONLY,bridge pairing incomplete per B-006,explicit bridge row or diagnostic banner,side-by-side without bridge id,default primary naming,F7X5 B-006,

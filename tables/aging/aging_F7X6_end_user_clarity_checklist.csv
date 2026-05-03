@@ -1,0 +1,11 @@
+check_id,clarity_question,required_answer_source,applies_to,pass_condition,failure_action,notes
+CL-001,What object is this?,entity_kind object_name contract_status in metadata panel,all displays,entity_kind populated and matches column,withhold primary headline,F7X6 rule PN-004
+CL-002,What signal or source did it come from?,source_field source_artifact producer_script,decomposition export consolidation,source_artifact and producer_script non-empty where mandatory,do not export to naive dashboards,F7X5 schema
+CL-003,Which branch or stage produced it?,stage_or_route stage branch,all non-diagnostic rows,stage token matches F7X4 resolution for object,add qualifier or EXCLUDE from UI,F7X4
+CL-004,Is it decomposition tau input tau output ratio bridge or diagnostic?,entity_kind allowed_use decomposition_or_tau_role,ambiguous names,tuple consistent with F7X3 classification,refuse auto-join across layers,F7X3
+CL-005,What sign or magnitude convention applies?,sign_policy route_sign_policy,FM dip family,sign_policy present for FM rows,show ABS_ONLY banner for FM_abs,F7J
+CL-006,What metadata is required for this entity kind?,aging_F7X5_required_metadata_schema mandatory column,machine rows,all mandatory YES fields present for kind,block render,F7X5
+CL-007,Is it safe for physical interpretation bridge diagnostic or downstream-only?,allowed_use contract_status lineage_status,gated consumers,allowed_use matches intended use case,downgrade to diagnostic or downstream banner,F7X5 scope matrix
+CL-008,Is tau metadata present if any tau field is displayed?,tau_domain tau_method tau_input_object grain units lineage_status,tau CSV and tau columns in joins,all CONDITIONAL tau fields present when entity_kind=tau_output,hide tau field,R-TAU-001
+CL-009,Is ratio or downstream status explicit if a ratio field is displayed?,downstream_status ratio_inputs,ratio tables and figures,downstream_status COMBINATOR or equivalent explicit,forbid ratio without inputs list,R-RAT-001
+CL-010,Is bridge export explicit if a bridge component is shown?,allowed_use bridge_row_id branch_family,bridge long tables,BRIDGE_ONLY metadata visible,forbid physics headline from bridge id alone,R-BRI-001
