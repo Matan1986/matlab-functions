@@ -1,0 +1,3 @@
+changed_path,change_type,reason,linked_F7R_task,risk_level,verification_method,notes
+Aging/analysis/aging_fm_timescale_analysis.m,modify,Append row-level lineage hardening columns and conservative FM convention metadata before saving tau_FM_vs_Tp.csv,F7R_code_hardening_tasks,medium,MATLAB smoke run_F7R2_fm_metadata_smoke.m + CSV header inspection,Also parameterizes failed-clock run_id via cfg.failedDipClockRunId or path-derived token; loadFailedDipClockMetrics called once before save
+Aging/diagnostics/run_F7R2_fm_metadata_smoke.m,add,Minimal schema-only smoke for explicit cfg.branch_id and F7O-style paths,F7R_code_hardening_tasks,low,MATLAB execution SUCCESS + execution_status.csv,Writes execution_status to analysis run dir; N_T = height(fm_tau_table)

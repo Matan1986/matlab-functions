@@ -1,0 +1,7 @@
+cfg_field,cfg_value,required,used_by_writer,recorded_in_output,notes
+runLabel,F7R2_FM_METADATA_SMOKE_30ROW,YES (smoke),createRunContext run directory prefix,source_artifact_path contains run root,no physics interpretation
+branch_id,FM_O_30row_B,YES (explicit hardened smoke),appendFmTauLineageHardeningColumns,branch_id every row,
+datasetPath,results_old/.../211204/.../aging_observable_dataset.csv,YES,loadObservableDataset + provenance columns,datasetPath every row,Absolute path in smoke script
+dipTauPath,results/.../231444/.../tau_vs_Tp.csv,YES,compareTauStructures etc.,dipTauPath every row,
+failedDipClockMetricsPath,results_old/.../005134/.../fm_collapse_using_dip_tau_metrics.csv,YES,loadFailedDipClockMetrics,failedDipClockMetricsPath + failed_dip_clock_* columns,
+failedDipClockRunId,(empty in smoke),optional,run id resolution for failed-clock metrics,failed_dip_clock_run_id_report_ref,Smoke uses path-derived token DERIVED_FROM_METRICS_PATH_TOKEN

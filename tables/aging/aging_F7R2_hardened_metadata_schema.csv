@@ -1,0 +1,23 @@
+field_name,present_in_smoke_output,level,meaning,expected_value_or_rule,source_of_value,required_for_model_use,required_for_ratio_use,notes
+branch_id,YES,row,Deterministic branch label for this tau extract,cfg.branch_id or UNKNOWN_BRANCH_REQUIRE_EXPLICIT_CFG,cfg.branch_id / conservative default,YES,YES,Must not silently infer a model-safe branch
+datasetPath,YES,row,Observable dataset CSV used for FM tau extraction,Absolute path to aging_observable_dataset.csv,cfg.datasetPath,YES,YES,
+dipTauPath,YES,row,Dip tau table path paired with this analysis run,Absolute path to tau_vs_Tp.csv,cfg.dipTauPath,YES,YES,
+failedDipClockMetricsPath,YES,row,Failed dip-clock metrics CSV used for lineage reference,Absolute path to fm_collapse_using_dip_tau_metrics.csv,cfg.failedDipClockMetricsPath,YES,YES,
+source_run_id,YES,row,Per-row dataset batch id (alias of source_run for consumers),Matches source_run when present; empty when has_fm=0,dataset column source_run duplicated in hardening,YES,YES,Legacy column source_run retained
+source_writer_script,YES,row,MATLAB writer responsible for this artifact,Aging/analysis/aging_fm_timescale_analysis.m,F7G meta,YES,YES,
+writer_family_id,YES,row,Writer family token,WF_TAU_FM_CURVEFIT,F7G meta,YES,YES,
+tau_domain,YES,row,Semantic tau domain,FM_ABS_CURVEFIT,F7G meta,YES,YES,
+tau_or_R_flag,YES,row,Tau vs R discriminator,TAU,F7G meta,YES,YES,
+FM_abs_convention,YES,row,How FM_abs is interpreted in this writer,FM_ABS_AS_READ_NO_WRITER_ABS_TRANSFORM_PENDING_SIGNED_SOURCE,hardening constant,YES,YES,Does not claim full signed convention closure (F7Q partial)
+FM_input_column,YES,row,Numeric column used as logistic/stretch fit input,FM_abs,hardening constant,YES,YES,
+FM_signed_source_column,YES,row,Signed FM provenance column if present,NOT_PROVIDED_IN_MINIMAL_DATASET_SCHEMA,hardening constant,YES,YES,
+absolute_transform_applied_in_writer,YES,row,Whether writer applied abs() to FM inputs,NO,hardening constant,YES,YES,
+model_use_allowed,YES,row,Global policy flag from F7G,NO_UNLESS_LINEAGE_RESOLVED,F7G meta,YES,NO,Conservative global gate
+ratio_use_allowed,YES,row,Explicit ratio-use gate,NO,hardening constant,NO,YES,Always NO for F7R2
+row_model_use_allowed,YES,row,Per-row model-use permission,NO with documented reasons,hardening rules,YES,YES,
+row_ratio_use_allowed,YES,row,Per-row ratio-use permission,NO,hardening rules,NO,YES,
+row_exclusion_reason,YES,row,Why row is blocked or globally gated,NO_FM_POINTS_AT_TP / NONFINITE_OR_NONPOSITIVE_TAU_EFFECTIVE / FRAGILE_SPARSE_FM_POINTS_CONSERVATIVE_BLOCK / GLOBAL_POLICY_PENDING_F7S_ROW_TECHNICALLY_FIT_OK,hardening rules,YES,YES,
+lineage_status,YES,row,F7G lineage state including hardening note,LINEAGE_METADATA_HARDENED_PENDING_F7S,F7G meta,YES,YES,
+canonical_status,YES,row,Canonical branch readiness,non_canonical_pending_lineage,F7G meta,YES,YES,
+failed_dip_clock_run_id_report_ref,YES,row,Resolved run id token for failed-clock metrics,run_* token or CFG override,loadFailedDipClockMetrics,YES,YES,
+failed_dip_clock_run_id_source,YES,row,How run id was obtained,CFG_FAILED_DIP_CLOCK_RUN_ID or DERIVED_FROM_METRICS_PATH_TOKEN,loadFailedDipClockMetrics,YES,YES,

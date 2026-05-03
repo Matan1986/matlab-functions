@@ -1,0 +1,6 @@
+output_path,branch_id,Tp,has_fm,tau_value_present,row_model_use_allowed,row_ratio_use_allowed,row_exclusion_reason,pass,notes
+C:\Dev\matlab-functions\results\aging\runs\run_2026_05_03_095534_F7R2_FM_METADATA_SMOKE_30ROW\tables\tau_FM_vs_Tp.csv,FM_O_30row_B,6,0,NO,NO,NO,NO_FM_POINTS_AT_TP,YES,
+C:\Dev\matlab-functions\results\aging\runs\run_2026_05_03_095534_F7R2_FM_METADATA_SMOKE_30ROW\tables\tau_FM_vs_Tp.csv,FM_O_30row_B,10,0,NO,NO,NO,NO_FM_POINTS_AT_TP,YES,
+C:\Dev\matlab-functions\results\aging\runs\run_2026_05_03_095534_F7R2_FM_METADATA_SMOKE_30ROW\tables\tau_FM_vs_Tp.csv,FM_O_30row_B,14,1,YES,NO,NO,GLOBAL_POLICY_PENDING_F7S_ROW_TECHNICALLY_FIT_OK,YES,finite tau; globally blocked
+C:\Dev\matlab-functions\results\aging\runs\run_2026_05_03_095534_F7R2_FM_METADATA_SMOKE_30ROW\tables\tau_FM_vs_Tp.csv,FM_O_30row_B,30,1,YES,NO,NO,FRAGILE_SPARSE_FM_POINTS_CONSERVATIVE_BLOCK,YES,n_points=3 fragile flag
+C:\Dev\matlab-functions\results\aging\runs\run_2026_05_03_095534_F7R2_FM_METADATA_SMOKE_30ROW\tables\tau_FM_vs_Tp.csv,FM_O_30row_B,34,1,YES,NO,NO,FRAGILE_SPARSE_FM_POINTS_CONSERVATIVE_BLOCK,YES,same fragile policy

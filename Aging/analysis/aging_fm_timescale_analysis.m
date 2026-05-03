@@ -54,12 +54,13 @@ f7gMeta = struct( ...
     'canonical_status', 'non_canonical_pending_lineage', ...
     'model_use_allowed', 'NO_UNLESS_LINEAGE_RESOLVED', ...
     'semantic_status', 'tau_effective_seconds_is_legacy_alias_FM_ABS_CURVEFIT', ...
-    'lineage_status', 'REQUIRES_DATASET_PATH_AND_FM_CONVENTION_RESOLUTION');
+    'lineage_status', 'LINEAGE_METADATA_HARDENED_PENDING_F7S');
 fmTauTbl = appendF7GTauRMetadataColumns(fmTauTbl, f7gMeta);
+failedDipClock = loadFailedDipClockMetrics(cfg.failedDipClockMetricsPath, cfg);
+fmTauTbl = appendFmTauLineageHardeningColumns(fmTauTbl, cfg, failedDipClock);
 tauPath = save_run_table(fmTauTbl, 'tau_FM_vs_Tp.csv', runDir);
 
 dipTauTbl = loadDipTauTable(cfg.dipTauPath);
-failedDipClock = loadFailedDipClockMetrics(cfg.failedDipClockMetricsPath);
 comparison = compareTauStructures(fmTauTbl, dipTauTbl);
 curves = buildCollapseCurves(dataTbl, fmTauTbl);
 validCurves = curves([curves.has_tau_fm]);
@@ -135,6 +136,8 @@ cfg = setDefault(cfg, 'rawFigurePosition', [2 2 18.6 11.8]);
 cfg = setDefault(cfg, 'rescaledFigurePosition', [2 2 21.2 12.4]);
 cfg = setDefault(cfg, 'tauFigurePosition', [2 2 12.5 8.8]);
 cfg = setDefault(cfg, 'compareFigurePosition', [2 2 19.0 9.5]);
+cfg = setDefault(cfg, 'branch_id', '');
+cfg = setDefault(cfg, 'failedDipClockRunId', '');
 end
 
 function ensureStandardSubdirs(runDir)
@@ -194,7 +197,10 @@ end
 tauTbl = sortrows(tauTbl, 'Tp');
 end
 
-function failed = loadFailedDipClockMetrics(metricsPath)
+function failed = loadFailedDipClockMetrics(metricsPath, cfg)
+if nargin < 2 || isempty(cfg)
+    cfg = struct();
+end
 T = readtable(metricsPath, 'TextType', 'string', 'VariableNamingRule', 'preserve');
 for vn = {'deltaT_K','rmse_log_before','rmse_log_after','rmse_improvement_pct','variance_before','variance_after','variance_improvement_pct','mean_pair_overlap_before','mean_pair_overlap_after'}
     name = vn{1};
@@ -205,7 +211,14 @@ end
 row = T(string(T.scenario) == "baseline_all_fm", :);
 assert(~isempty(row), 'Could not find baseline_all_fm row in failed Dip-clock metrics: %s', metricsPath);
 failed = struct();
-failed.run_id = "run_2026_03_13_005134_aging_fm_using_dip_clock";
+if isfield(cfg, 'failedDipClockRunId') && ~isempty(cfg.failedDipClockRunId)
+    failed.run_id = string(cfg.failedDipClockRunId);
+    failed.run_id_source = "CFG_FAILED_DIP_CLOCK_RUN_ID";
+else
+    failed.run_id = deriveRunIdTokenFromMetricsPath(metricsPath);
+    failed.run_id_source = "DERIVED_FROM_METRICS_PATH_TOKEN";
+end
+failed.metrics_path_resolved = string(metricsPath);
 failed.rmse_log_before = row.rmse_log_before(1);
 failed.rmse_log_after = row.rmse_log_after(1);
 failed.rmse_improvement_pct = row.rmse_improvement_pct(1);
@@ -214,6 +227,68 @@ failed.variance_after = row.variance_after(1);
 failed.variance_improvement_pct = row.variance_improvement_pct(1);
 failed.mean_pair_overlap_before = row.mean_pair_overlap_before(1);
 failed.mean_pair_overlap_after = row.mean_pair_overlap_after(1);
+end
+
+function tok = deriveRunIdTokenFromMetricsPath(metricsPath)
+s = char(string(metricsPath));
+found = regexp(s, 'run_\d{4}_\d{2}_\d{2}_\d{6}_[^\\/]+', 'once', 'match');
+if isempty(found)
+    tok = "RUN_ID_UNKNOWN_FROM_PATH_NOT_MODEL_SAFE";
+else
+    tok = string(found);
+end
+end
+
+function tbl = appendFmTauLineageHardeningColumns(tbl, cfg, failedDipClock)
+n = height(tbl);
+if isempty(cfg.branch_id)
+    branchLabel = "UNKNOWN_BRANCH_REQUIRE_EXPLICIT_CFG";
+else
+    branchLabel = string(cfg.branch_id);
+end
+ds = string(cfg.datasetPath);
+dip = string(cfg.dipTauPath);
+fdm = string(cfg.failedDipClockMetricsPath);
+tbl.branch_id = repmat(branchLabel, n, 1);
+tbl.datasetPath = repmat(ds, n, 1);
+tbl.dipTauPath = repmat(dip, n, 1);
+tbl.failedDipClockMetricsPath = repmat(fdm, n, 1);
+tbl.source_run_id = tbl.source_run;
+tbl.ratio_use_allowed = repmat("NO", n, 1);
+tbl.FM_abs_convention = repmat("FM_ABS_AS_READ_NO_WRITER_ABS_TRANSFORM_PENDING_SIGNED_SOURCE", n, 1);
+tbl.FM_input_column = repmat("FM_abs", n, 1);
+tbl.FM_signed_source_column = repmat("NOT_PROVIDED_IN_MINIMAL_DATASET_SCHEMA", n, 1);
+tbl.absolute_transform_applied_in_writer = repmat("NO", n, 1);
+tbl.failed_dip_clock_run_id_report_ref = repmat(failedDipClock.run_id, n, 1);
+tbl.failed_dip_clock_run_id_source = repmat(failedDipClock.run_id_source, n, 1);
+rowModel = strings(n, 1);
+rowRatio = strings(n, 1);
+rowReason = strings(n, 1);
+for i = 1:n
+    hf = tbl.has_fm(i);
+    te = tbl.tau_effective_seconds(i);
+    fragile = tbl.fragile_low_point_count(i);
+    if ~hf
+        rowModel(i) = "NO";
+        rowRatio(i) = "NO";
+        rowReason(i) = "NO_FM_POINTS_AT_TP";
+    elseif ~isfinite(te) || te <= 0
+        rowModel(i) = "NO";
+        rowRatio(i) = "NO";
+        rowReason(i) = "NONFINITE_OR_NONPOSITIVE_TAU_EFFECTIVE";
+    elseif fragile
+        rowModel(i) = "NO";
+        rowRatio(i) = "NO";
+        rowReason(i) = "FRAGILE_SPARSE_FM_POINTS_CONSERVATIVE_BLOCK";
+    else
+        rowModel(i) = "NO";
+        rowRatio(i) = "NO";
+        rowReason(i) = "GLOBAL_POLICY_PENDING_F7S_ROW_TECHNICALLY_FIT_OK";
+    end
+end
+tbl.row_model_use_allowed = rowModel;
+tbl.row_ratio_use_allowed = rowRatio;
+tbl.row_exclusion_reason = rowReason;
 end
 
 function tauTbl = buildFmTauTable(dataTbl)

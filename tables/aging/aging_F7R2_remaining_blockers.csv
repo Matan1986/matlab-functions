@@ -1,0 +1,5 @@
+blocker_id,blocker_type,current_status,required_next_step,blocks_model_use,blocks_R_age_or_clock_ratio,feeds_F7S,notes
+SIGNED_FM_SOURCE,convention,partial,F7Q/F7S closure on signed FM column if needed beyond name-based FM_abs,YES,YES,YES,FM_signed_source_column stays NOT_PROVIDED_IN_MINIMAL_DATASET_SCHEMA
+GLOBAL_MODEL_GATE,policy,pending F7S,F7S post-repair readiness audit on lineage + metadata contract,YES,N/A,YES,model_use_allowed remains NO_UNLESS_LINEAGE_RESOLVED
+RATIO_GATE,policy,blocked by design,No change until explicit future charter,ratio N/A,YES,YES,ratio_use_allowed NO all rows
+CANONICAL_BRANCH,policy,non_canonical,Explicit canonical selection out of F7R2 scope,YES,YES,YES,canonical_status non_canonical_pending_lineage

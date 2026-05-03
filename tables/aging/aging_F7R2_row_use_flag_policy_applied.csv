@@ -1,0 +1,5 @@
+condition,row_model_use_allowed,row_ratio_use_allowed,row_exclusion_reason,implemented,verified_in_smoke,notes
+has_fm equals 0,NO,NO,NO_FM_POINTS_AT_TP,YES,YES,Tp 6 and 10 in smoke CSV
+nonfinite or nonpositive tau_effective,NO,NO,NONFINITE_OR_NONPOSITIVE_TAU_EFFECTIVE,YES,PARTIAL,no smoke row solely this case unless engineered
+fragile_low_point_count true,NO,NO,FRAGILE_SPARSE_FM_POINTS_CONSERVATIVE_BLOCK,YES,YES,Tp 30 and 34 smoke rows
+otherwise finite tau fit,NO,NO,GLOBAL_POLICY_PENDING_F7S_ROW_TECHNICALLY_FIT_OK,YES,YES,Example Tp 14 18 22 26
