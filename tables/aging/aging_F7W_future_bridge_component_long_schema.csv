@@ -1,0 +1,26 @@
+column_name,required,type,allowed_values,description,why_required,example_value,notes
+bridge_row_id,YES,string,non-empty UUID or deterministic hash,Stable unique id per exported row.,Dedupe joins audits reproducibility.,BR7W_00001ab2,deterministic_from(source_run component_id Tp tw idx)
+branch_family,YES,enum,TRACK_A_SUMMARY|TRACK_B_STAGE4|TRACK_B_CONSOLIDATION|DIAGNOSTIC|OTHER,Routed branch family per aging observable router.,Preserves non-unification of tracks.,TRACK_B_STAGE4,must not collapse Track A into Track B
+decomposition_path_id,YES,string,non-empty opaque id,Pipeline path instance e.g. Main_Aging stage4 derivative variant.,Aligns with F7U path inventory.,PATH_STAGE4_MAIN,vendor-defined enumeration
+component_id,YES,string,non-empty token,Canonical component label aligned with F7V contracts.,Join key to index and pairing policy.,C_FM_ABS_B,F7V-style ids preferred
+component_role,YES,enum,FM|AFM_DIP|OTHER,Sector role for pairing and ratio gates.,FM vs dip-sector pairing rules.,FM,"AFM_DIP covers dip AFM-like scalars; do not rename to FM"
+Tp,YES*,numeric or sentinel,double or NA,Temperature pause index or physical T_p per pipeline manifest.,Grid alignment for curves/summaries.,32.0,NA allowed only if schema declares scalar-only stream
+tw,OPTIONAL,numeric or sentinel,double or NA,Within-pause time axis sample when row is curve-point.,Distinguishes curve rows vs per-Tp summaries.,125.4,empty when grid_type is PER_TP_SUMMARY_ONLY
+value,YES,numeric or NA,double or NA,Exported numeric observation.,Core payload.,0.042,missingness allowed if disclosed in metadata_status
+value_units,YES,string,e.g. arbitrary|Magnitude_AU|see_manifest,Declared units or arbitrary scale tag.,Prevents silent dimensional swap.,arbitrary,freeze-aligned naming only in notes not substitution
+sign_convention,YES,enum,SIGNED_PLUS_ABS|SIGNED_ONLY|ABS_ONLY|UNKNOWN|NOT_APPLICABLE,Declared sign basis for the stored value.,FM reversal visibility vs FM_abs traps.,SIGNED_PLUS_ABS,UNKNOWN blocks ratio eligibility unless gated
+signed_value_available,YES,boolean,TRUE|FALSE,Whether a signed counterpart exists for this row.,F7J FM policy FM_abs not signed FM.,TRUE,if FALSE do not infer reversal from value alone
+absolute_value_used,YES,boolean,TRUE|FALSE,Whether magnitude-only branch feeds value.,Guards FM_abs vs FM_signed misuse.,TRUE,must match producer semantics
+scalar_type,YES,enum,AMPLITUDE|DEPTH|AREA|ENERGY|PLATEAU_STEP|SUMMARY_SCALAR|OTHER|UNKNOWN,Semantic scalar class.,Blocks mistaken area vs amplitude pairing.,AMPLITUDE,F7V scalar_type risk carries here
+grid_type,YES,enum,TW_CURVE_PER_TP|PER_TP_SUMMARY_ONLY|MIXED|UNKNOWN,Tw curve vs summary classification.,Tau reader contracts differ.,TW_CURVE_PER_TP,MISMATCH blocks naive tau without reader
+fit_direct_class,YES,enum,FIT|DIRECT|CONSOL_EXPORT|MIXED|UNKNOWN,Whether row comes from fit-heavy Track A or direct stage4 or consolidated export.,Core alignment dimension.,DIRECT,never infer from column name alone
+producer,YES,string,non-empty,e.g. stage4_analyzeAFM_FM stage6_extractMetrics consolidation_script.,Answers how produced.,stage4_analyzeAFM_FM,code-anchor string optional in notes
+source_artifact,YES,string,non-empty path or logical name,File/table the row was read from.,Lineage for audits.,observable_matrix.csv,must be stable within run
+source_run,YES,string,non-empty,Run id / output directory id for reproducibility.,F7R2 style lineage.,run_2026_01_15_aging_main,policy TBD in implementation
+lineage_status,YES,enum,COMPLETE|PARTIAL|MISSING,Whether parent cfg snapshot and upstream ids are present.,Blocks ratio robustness if incomplete.,PARTIAL,implementation must list missing fields
+metadata_status,YES,enum,OK|DEGRADED|BLOCKED,Row-level gate for missing critical metadata.,Eligibility rollups.,DEGRADED,blocked_reason populated when BLOCKED
+eligible_for_tau,YES,enum,YES|NO|PARTIAL|UNKNOWN,Whether this row shape matches an existing tau extractor contract.,Downstream tau without silent remap.,PARTIAL,Track A often PARTIAL per F7V
+eligible_for_fit_direct_comparison,YES,enum,YES|NO|PARTIAL|DIAGNOSTIC_ONLY,Gates cross-track comparison not substitution.,Enforces pairing policy.,DIAGNOSTIC_ONLY,F7V comparable_status echo
+eligible_for_ratio_robustness,YES,enum,YES|NO|PARTIAL|NO_UNPAIRED,Whether this row may feed multipath ratio executor.,Multipath blocked until paired tau paths.,NO,default NO until pairing+tau closure
+blocked_reason,OPTIONAL,string,free text,Machine-human reason codes when eligibility not YES.,Audit trail.,MISSING_TAU_READER_FOR_TRACK_A,column allowed empty when all YES
+notes,OPTIONAL,string,free text,Non-authoritative clarifications.,Operator hints.,paired_with FM_like audit row,

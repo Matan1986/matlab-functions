@@ -1,0 +1,22 @@
+column_name,required,type,allowed_values,description,why_required,example_value,notes
+component_stream_id,YES,string,non-empty opaque id,Stable id for one producer-path-component branch.,Join target for pairing policy.,STREAM_FM_ABS_B_MAIN,stability across runs via registry rule TBD
+branch_family,YES,enum,TRACK_A_SUMMARY|TRACK_B_STAGE4|TRACK_B_CONSOLIDATION|DIAGNOSTIC|OTHER,Same semantics as long table.,Preserves track identity.,TRACK_B_STAGE4,
+decomposition_path_id,YES,string,non-empty,Pipeline path id shared with long rows.,Links streams within path.,PATH_STAGE4_MAIN,
+component_id,YES,string,non-empty,F7V-aligned component token.,Canonical vocabulary.,C_DIP_DEPTH_B,
+component_role,YES,enum,FM|AFM_DIP|OTHER,Role for FM vs dip ratio logic.,Pairing and claims scoping.,AFM_DIP,
+producer,YES,string,non-empty,Authoritative producer name or script id.,Provenance.,stage4_analyzeAFM_FM,
+upstream_basis,YES,string,non-empty|UNKNOWN|PARTIAL,Inputs basis per source comments.,Semantic contract grounding.,FM_signed FM_step_raw fallback,must cite freeze where applicable
+operational_definition,YES,string,non-empty|SEE_SOURCE,Short operational definition or pointer.,Claims boundary.,Dip_depth stage4 minimum vs plateau rule,"SHORT TEXT pointer not physics interpretation"
+fit_direct_class,YES,enum,FIT|DIRECT|CONSOL_EXPORT|MIXED|UNKNOWN,Classification for charter alignment.,Core dimension.,DIRECT,
+sign_policy,YES,string,enum or policy token,F7J-aligned sign posture for stream.,FM reversal traps.,FM_SHORT_TW_POLICY_ABS_MAG,routing doc cross-ref only
+scalar_type,YES,enum,AMPLITUDE|DEPTH|AREA|ENERGY|PLATEAU_STEP|SUMMARY_SCALAR|OTHER|UNKNOWN,Scalar class for stream default.,Pairing and transform policy.,DEPTH,
+grid_type,YES,enum,TW_CURVE_PER_TP|PER_TP_SUMMARY_ONLY|MIXED|UNKNOWN,Default grid for this stream.,Tau method match.,TW_CURVE_PER_TP,
+output_artifact_family,YES,string,non-empty,Where this stream usually materializes e.g. observables.csv five-column.,Reader contract.,observable_matrix_plus_sidecar,
+source_artifact,YES,string,non-empty,Typical source file role not hard path.,Index documentation.,observables.csv,
+source_run,YES,string,non-empty|RUNTIME,Example or policy for run id field.,Lineage pattern.,run_2026_01_15_aging_main,
+allowed_claims,YES,string,controlled text,What may be said about this stream per F7J allowlist.,Prevents over-claiming.,magnitude trend compare within Track B,
+forbidden_claims,YES,string,controlled text,Explicit non-claims e.g. identity to Track A.,Freeze alignment.,not identical to AFM_like,
+tau_reader_status,YES,enum,AVAILABLE|MISSING|PARTIAL|CHARTER_REQUIRED,Readiness of tau extraction for this stream.,F7V tau path echo.,PARTIAL,Track A often CHARTER_REQUIRED
+ratio_use_status,YES,enum,BASELINE_F7T_ONLY|MULTIPATH_NOT_READY|DIAGNOSTIC_ONLY|FORBIDDEN,Eligibility for ratio use cases.,Downstream gating.,MULTIPATH_NOT_READY,
+blockers,OPTIONAL,string,free text,Stream-level blockers.,Rollup to F7W_remaining_blockers.,no standard Track A tau reader,
+notes,OPTIONAL,string,free text,Operator notes.,,BRIDGE_LONG_COMPONENT_TABLE linkage,

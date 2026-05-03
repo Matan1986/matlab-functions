@@ -1,0 +1,17 @@
+column_name,required,type,allowed_values,description,why_required,example_value,notes
+pairing_id,YES,string,non-empty opaque id,Stable id for a directed fit-vs-direct pairing intent.,Machine pairing audits.,PAIR_P_FM_SUMMARY_V3,cross-ref F7V pair_id where applicable
+fit_component_stream_id,YES,string,non-empty,Index stream id for Track A or fit-class stream.,Align tracks without renaming.,STREAM_FM_LIKE_A_MAIN,
+direct_component_stream_id,YES,string,non-empty,Index stream id for Track B or direct-class stream.,Dual identity preserved.,STREAM_FM_ABS_B_MAIN,
+component_role,YES,enum,FM|AFM_DIP|OTHER,Sector alignment for the pairing.,FM vs dip pairing gates.,FM,
+pairing_status,YES,enum,ALLOWED|FORBIDDEN|CONDITIONAL|DIAGNOSTIC_ONLY|UNKNOWN,Gate for export rows referencing both streams.,Carries F7V comparable_status intent.,DIAGNOSTIC_ONLY,
+pairing_class,YES,enum,DIRECTLY_COMPARABLE|COMPARABLE_AFTER_BRIDGE|DIAGNOSTIC_ONLY|NOT_COMPARABLE|UNKNOWN_PENDING_SOURCE_AUDIT,F7V taxonomy echo.,Documentation consistency.,NOT_COMPARABLE,
+requires_bridge_transform,YES,boolean,TRUE|FALSE,Whether explicit transform doc exists beyond export join.,Area vs depth mapping etc.,TRUE,
+allowed_for_tau_comparison,YES,boolean,TRUE|FALSE,Whether tau-from-each-stream comparison is chartered.,Prevents mixed readers.,FALSE,
+allowed_for_ratio_robustness,YES,boolean,TRUE|FALSE,Whether pairing may feed multipath ratio after tau closure.,Hard gate default FALSE.,FALSE,
+forbidden_substitution_risk,YES,enum,LOW|MEDIUM|HIGH|CRITICAL,Freeze violation severity if misused.,Risk banners.,HIGH,
+sign_policy_match,YES,enum,ALIGNED|MISMATCH|UNKNOWN|NOT_APPLICABLE,Sign visibility compatibility.,FM_signed vs FM_abs.,MISMATCH,
+scalar_type_match,YES,enum,ALIGNED|MISMATCH|UNKNOWN|BRIDGED,Scalar class compatibility.,Area vs depth mismatch.,MISMATCH,
+grid_match,YES,enum,ALIGNED|MISMATCH|UNKNOWN|BRIDGED,Tw vs per-Tp alignment.,Tau reader dependency.,MISMATCH,
+lineage_match,YES,enum,COMPLETE|PARTIAL|MISSING,Both streams have source_run linkage.,Multipath blocker if MISSING.,PARTIAL,
+required_resolution,OPTIONAL,string,free text,What must happen before upgrading pairing status.,Operator checklist.,implement BRIDGE_LONG_COMPONENT_TABLE export v1,
+notes,OPTIONAL,string,free text,Cross-links to F7V bridge_id.,,BRIDGE_SIGN_VISIBILITY,

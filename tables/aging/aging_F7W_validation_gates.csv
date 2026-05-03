@@ -1,0 +1,13 @@
+gate_id,gate_name,required_for_bridge_success,validation_rule,failure_action,notes
+VG_SCHEMA_LONG,Long table schema completeness,YES,"Every row column defined in aging_F7W_future_bridge_component_long_schema required=TRUE must exist populated or NA policy.",BLOCK_IMPLEMENTATION_REPORT,"implementation cannot claim success"
+VG_SCHEMA_INDEX,Index schema completeness,YES,"Index columns per schema required=TRUE present per stream.",BLOCK_IMPLEMENTATION_REPORT,
+VG_SCHEMA_PAIRING,Pairing schema completeness,YES,"Pairing policy table conforms to aging_F7W_future_bridge_pairing_policy_schema.csv.",BLOCK_IMPLEMENTATION_REPORT,
+VG_SOURCE_PATHS,Source paths recorded,YES,"Every long row has non-empty producer source_artifact source_run where lineage_status allows.",BLOCK_MERGE_TO_MAIN,"emit lineage_status MISSING rows only as exceptions"
+VG_TRACK_IDENTITY,Track identity preserved,YES,"No row uses Track B component_id with branch_family TRACK_A_SUMMARY or inverse collision.",REJECT_BUILD,"hard guardrail"
+VG_SIGN_COLUMN,Sign convention populated,YES,"sign_convention signed_value_available absolute_value_used non-null per schema enums.",FLAG_ROWS_BLOCKED,"UNKNOWN allowed only with blocked_reason"
+VG_SCALAR_GRID,Scalar and grid populated,YES,"scalar_type and grid_type never default UNKNOWN without explicit waiver column.",FLAG_ROWS_BLOCKED,
+VG_FORBIDDEN_PAIRINGS,Forbidden substitutions absent from ratio flags,YES,"eligible_for_ratio_robustness YES only where pairing_policy allows_for_ratio_robustness TRUE for both streams.",REJECT_RATIO_HOOK,"multipath stays NO"
+VG_ROW_COUNTS,Row counts by path reported,YES,"Implementation report lists counts per decomposition_path_id branch_family.",WARN_ONLY,"must disclose imbalance"
+VG_MISSING_COMPONENTS,Missing components disclosed,YES,"Explicit manifest of components absent per path vs index.",WARN_ONLY,
+VG_PAIRING_MACHINE_READABLE,Pairing policy emitted,YES,"Machine-readable pairing table aging_F7W_bridge_pairing_policy.csv exists matching schema.",BLOCK_IMPLEMENTATION_REPORT,
+VG_STATUS_VERDICT,Bridge implemented verdict honest,YES,"aging_F7W_bridge_status.csv F7W_BRIDGE_IMPLEMENTED YES only when output files exist on disk.",REVOKE_VERDICT,"charter honesty"

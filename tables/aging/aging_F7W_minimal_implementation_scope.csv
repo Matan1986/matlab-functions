@@ -1,0 +1,11 @@
+scope_item,required,allowed_in_future_implementation,forbidden_in_future_implementation,rationale,notes
+READ_EXISTING_STRUCTURED_EXPORTS,YES,TRUE,introducing new decomposition math in the bridge job,Thin layer over observable_matrix observables pauseRuns outputs per freeze.,prefer aging_structured_results_export artifacts
+CONSOLIDATION_JOIN_ONLY,YES,TRUE,replacing stage4 outputs with stage6 summaries in the same stream id,Preserves Track A vs Track B separation.,join keys Tp optional tw case id
+LINEAGE_COLUMNS,YES,TRUE,omitting source_run when known to exist,Audits require reproducibility.,F7R2 hardened paths when present
+EXPLICIT_MISSINGNESS,YES,TRUE,silent row drop for missing components without NA metadata,Disclosed gaps are success criterion.,emit NA plus metadata_status DEGRADED
+PAIRING_POLICY_EMIT,YES,TRUE,auto-flip FORBIDDEN pairings to ALLOWED without governance review,Pairing is governance not heuristic.,emit from F7V tables plus vetted override file
+BRIDGE_REPORT_MD,YES,TRUE,physics interpretation or model claims in implementation report,Implementation summary counts lineage gates only.,optional future filename aging_F7W_bridge_implementation_report.md
+NO_FITTING,YES,FALSE,any regression refit or fit tuning inside bridge job,Charter excludes fitting.,pass-through values only
+NO_TAU,YES,FALSE,tau extraction inside bridge job,Tau is downstream charter.,eligible_for_tau flags only
+NO_RATIO,YES,FALSE,R_age or clock-ratio columns in long export,Ratio executor separate.,downstream F7T executor
+NO_STAGE_RERUN,YES,FALSE,invoking stage4-6 reruns inside bridge job unless explicitly out-of-scope orchestration,Bridge reads artifacts.,rerun is separate task

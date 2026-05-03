@@ -1,0 +1,7 @@
+blocker_id,blocker_type,current_status,blocks_bridge_implementation,blocks_tau_charter,blocks_multipath_ratio,blocks_physics_claims,required_resolution,notes
+B_EXPORT_IGNORED_PATHS,DATA_COVERAGE,PARTIAL,TRUE,FALSE,FALSE,FALSE,enumerate all paths in F7U inventory with explicit absent streams in index,F7U alignment
+B_TRACK_A_CURVE_MATERIALIZATION,SCHEMA,PRESENT,TRUE,PARTIAL,FALSE,FALSE,materialize FM_like AFM_like per pause or document summary-only waiver,F7V tau gap
+B_PAIRING_GOVERNANCE_SYNC,GOVERNANCE,PRESENT,FALSE,FALSE,FALSE,FALSE,keep pairing_policy manual override file reviewed versus freeze,F7V pairs
+B_LINEAGE_SNAPSHOT_POLICY,LINEAGE,PARTIAL,FALSE,FALSE,FALSE,FALSE,align source_run with F7R2 hardened convention across labs,repo policy
+B_GRID_MISMATCH,TW_GRID,PRESENT,TRUE,FALSE,TRUE,FALSE,complete BRIDGE_GRID_ALIGN join audit from F7V,F7V bridge contract
+B_TAU_READER_TRACK_A,TAU,PRESENT,FALSE,TRUE,TRUE,FALSE,separate Track A tau charter after bridge export,F7V BRIDGE_TAU_TRACK_A
