@@ -1,0 +1,3 @@
+policy_item,dip_tau_status,required_pairing_check,allowed_use,forbidden_use,required_action,status
+dip tau does not enter FM tau fit,F7Q YES numeric independence,datasetPath branch matches dipTauPath branch label per F7N,dip as comparison figure report overlap inputs,rerun dip extraction without evidence of mismatch,manifest dipTauPath beside FM output when consumed downstream,DEFINED
+ratio uses FM tau with dip elsewhere,INPUT_COMPATIBILITY,Same_run manifest OR explicit pairing table,two_stream_per_branch_analysis,mix_branch dip reference with FM tau other branch,charter pairing checks before ratio,DEFINED

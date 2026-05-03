@@ -1,0 +1,6 @@
+row_condition,model_use_allowed,ratio_use_allowed,required_flag,exclusion_reason,status
+has_fm equals 0,NO,NO,has_fm must be 0,NO_FM_POINTS_AT_TP,DEFINED
+tau_effective_seconds missing or nonfinite,NO,NO,finite tau check,NONFINITE_TAU_FM,DEFINED
+n_points below minimum policy threshold e.g. less than 4,SCOPED_ONLY,SCOPED_ONLY,fragile_low_point_count,FRAGILE_LOW_POINT_COUNT,DEFINED
+passes finite tau and has_fm 1 but global lineage OPEN,PENDING_HARDENING,PENDING_HARDENING,row_model_use_allowed after manifest,TABLE_LINEAGE_NOT_CLOSED,DEFINED
+cross_branch row pairing for ratio,NO unless chartered,NO unless chartered,manifest proves same branch triple,CROSS_BRANCH_PAIRING_FORBIDDEN,DEFINED

@@ -1,0 +1,5 @@
+branch_policy_item,policy_decision,forbidden_use,required_metadata,required_action,status
+22_row_consolidation_stream,FM_O_22row_A or successor ID,Silent use of 30_row dip tau or dataset with 22_row tau,branch_id datasetPath dipTauPath failed path on output,CARRY_BRANCH_TAG_IN_RUN_AND_TABLE,DEFINED
+30_row_archival_stream,FM_O_30row_B or successor ID,Silent use of 22_row dip tau or dataset with 30_row tau,same,same,DEFINED
+cross_branch_merge headline ratios,MERGE_FORBIDDEN_WITHOUT_CHARTER,Single published ratio implying one tau_FM without branch scope,explicit parallel_branch ratio policy doc,NO_DEFAULT_MERGE,DEFINED
+untagged tau_FM consumption,USETAG_REQUIRED,Import tau_FM CSV without branch_id or manifest,branch_id OR sidecar run_manifest.json linkage,enforce consumer checks,DEFINED

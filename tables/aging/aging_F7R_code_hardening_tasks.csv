@@ -1,0 +1,6 @@
+task_id,target_file_or_artifact,issue,required_change,implementation_scope,required_before_model_use,required_before_R_age,status
+CHR01,Aging/analysis/aging_fm_timescale_analysis.m hard-coded failed.run_id in loadFailedDipClockMetrics,run_id string embedded,"Derive display id from metricsPath or cfg field",small_local_helper change,RECOMMENDED,RECOMMENDED,OPEN
+CHR02,tau_FM_vs_Tp.csv plus appendF7GTauRMetadataColumns pipeline,missing cfg triple and branch_id on rows,"Extend meta append OR emit parallel aging_fm_lineage_manifest.json",writer_metadata_scope,YES,YES,OPEN
+CHR03,appendF7GTauRMetadataColumns OR caller,different row-level model_use vs global,"Add optional row vectors OR second pass writer for row_model_use_allowed",metadata enhancement,YES,YES,OPEN
+CHR04,createRunContext sidecar,partial snapshot missing failed path in JSON snippet seen F7O,"Ensure full triple plus branch_id in config_snapshot run_manifest",infra_contract,YES,YES,OPEN
+CHR05,AGING_OBSERVABLE_DATASET_PATH,NFM ignored per F7N,document only OR optional guard warning if env set mismatch,documentation,OPTIONAL,OPTIONAL,OPEN

@@ -1,0 +1,11 @@
+audit_item,scope,evidence_required,pass_condition,fail_condition,blocks_next_analysis,notes
+F7_N_through_Q artifacts tracked and referenced,module,git ls-files reports aging tables aging committed,presence confirmed,missing committed artifact,YES,
+Status CSV keys consistent,F7 series,cross compare F7P F7Q F7R status,no contradictory READY YES for ratio while gates BLOCKED,contradiction found,YES,
+tau_FM metadata hardened or explicit BLOCKED,FM tau consumer,tau CSV sample OR manifest after implementation,hardened columns OR waiver doc signed,silent gap,YES,
+Row-use rules explicit,FM tau,aging_F7R_row_use_policy.csv adopted in audit checklist,policy acknowledged,policy absent,YES,
+Branch identity machine-readable,FM tau,branch_id present on outputs or manifest,YES untagged use prevented,no branch tag,YES,
+dip tau compatibility,dip FM pairing,pairing manifest examples,checks documented,cross branch pairing undocumented,YES,
+failedDipClock policy,auxiliary,written decision NEEDS_POLICY resolved or waived,explicit CLOSED OR BLOCKED_FOR_MODEL_RATIO,ambiguous auxiliary,YES,
+No silent old artifact reuse,module,rerun inventory or path guards,documented forbidden paths,implicit reuse paths,YES,
+Allowed next uses documented,governance,F7S report section NEXT_SAFE_STEP,clear permitted blocked,unclear go_no_go,YES,
+R_age clock_ratio proceed,module,F7R gates plus F7S audit,R_age cleared only if all gates GREEN,ratio approved prematurely,YES,F7S is module health not ratio-only

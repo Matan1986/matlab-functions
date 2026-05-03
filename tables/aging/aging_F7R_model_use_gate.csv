@@ -1,0 +1,5 @@
+gate_item,current_status,required_to_pass,allowed_after_pass,forbidden_until_pass,status
+dataset FM_abs convention signed,dataset_contract_OPEN,documented nonnegative or signed reconciliation,scoped model use per branch,inference ABS from name only,BLOCKED
+tau row lineage triple,MACHINE_READABLE_PARTIAL,branch_id plus triple on row or manifest,downstream trust uplift,silent CSV consumption,BLOCKED
+row eligibility flags,MISSING,row_model_use_allowed computed from has_fm tau fragile,promotion beyond NO_UNLESS,treating has_fm 0 rows as usable,BLOCKED
+global model_use_allowed flag,NO_UNLESS_LINEAGE_RESOLVED,governance upgrades lineage_status after hardening,explicit YES_SCOPED_OR_YES after charter, blanket YES,BLOCKED

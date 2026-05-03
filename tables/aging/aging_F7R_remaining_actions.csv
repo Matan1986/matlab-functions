@@ -1,0 +1,5 @@
+action_id,action_type,priority,blocker_addressed,exact_next_step,expected_output,required_before_model_use,required_before_R_age,feeds_F7S,notes
+F7R_IMPL_METADATA,IMPLEMENTATION,HIGH,missing fields in aging_F7R_required_metadata_fields.csv,"Implement CHR02 CHR03 CHR04 in chartered PR",updated writer outputs plus manifest,YES,YES,YES,before F7S
+F7R_DATASET_CONTRACT,DOCUMENTATION,HIGH,FM_abs convention PARTIAL,"Publish aging_observable FM_abs definition signed vs stored",markdown plus optional schema,YES,YES,YES,
+F7R_FAILED_CLOCK_GOVERNANCE,GOVERNANCE,MEDIUM,NEEDS_POLICY,"Approve shared archival vs regen signed memo",policy closure artifact,CONDITIONAL,CONDITIONAL,YES,
+F7S_RUN_POST_REPAIR,AUDIT,HIGH,F7S spec,"After implementation run F7S checklist",aging_F7S report tables,NO until prior complete,NO until prior complete,N/A,checkpoint name F7S_AGING_MODULE_POST_REPAIR_READINESS_AUDIT

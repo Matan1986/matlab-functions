@@ -1,0 +1,5 @@
+policy_item,current_evidence,policy_decision,required_action,model_use_implication,ratio_use_implication,status
+FM_abs column read without abs(),Code uses y=sub.FM_abs(:) no abs(),Treat FM_abs as numeric column AS_STORED not enforced absolute,"Dataset contract states whether values are nonnegative by construction",PARTIAL until contract,PARTIAL until contract,PARTIAL
+FM_abs naming implies absolute semantics,Name only in header/code comments,Do not infer absolute physics from name alone,Documentation alongside dataset build,NO_GENERAL_MODEL_USE,NO_GENERAL_RATIO_USE,PARTIAL
+Signed FM observable,Signed column not in minimal loader unless added,If signed FM exists elsewhere reconcile before comparing to FM_abs,Optional dual-column dataset schema,CONDITIONAL,CONDITIONAL,OPEN
+tau_domain FM_ABS_CURVEFIT,F7G literal,Maintain domain label as curve-fit on FM_abs stream not convention proof,None beyond metadata,NO_UPGRADE,NO_UPGRADE,YES

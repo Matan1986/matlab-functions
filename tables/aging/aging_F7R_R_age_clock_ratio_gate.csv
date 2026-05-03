@@ -1,0 +1,5 @@
+gate_item,current_status,required_to_pass,allowed_after_pass,forbidden_until_pass,status
+FM tau metadata hardened per F7R spec,NO_PENDING_IMPLEMENTATION,manifest plus row_ratio_use_allowed,per_branch ratio runners,single headline ratio without branch scope,BLOCKED
+failedDipClock policy for ratio,NEEDS_POLICY,policy row CLOSED or BLOCKED,AUX_ALLOWED_WITH_DISCLOSURE,implicit auxiliary closure,BLOCKED
+dip tau pairing manifest,NO_PASS_WITHOUT_MANIFEST,same_run cfg triple stored with ratio inputs,ratio with documented dip FM pairing,mixed_branch inputs,BLOCKED
+R_age writer charter,NOT_RUN,explicit aging_clock_ratio_analysis scope after F7S,scoped execution,general_ratio_go,BLOCKED
