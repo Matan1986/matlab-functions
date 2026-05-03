@@ -1,0 +1,12 @@
+check,result,evidence,risk_level,recommendation,notes
+Target diff inspected,YES,git diff -- docs/cross_module_switching_relaxation_AX_index_draft.md,INFO,None,
+Diff is whitespace-only,NO,Two substantive lines added after H1,INFO,None,
+Improves navigation to canonical,YES,New bold Navigation line names official index path,LOW,Aligns with AX-21A goal,
+Clarifies canonical authoritative,YES,Prefer official index for current routing,LOW,None,
+Adds unique useful content,YES,Explicit stub role + 3b750a8 lineage reference,LOW,Not duplicated in same form on committed HEAD,
+Removes unique content,NO,No deletions of P0 table or neighbors section,INFO,None,
+Forbidden AX wording introduced,NO,No physical law / universal exponent / mechanism / replace X_eff / all ruled out / Aging tau KWW in added text,LOW,Grep implicit from diff text,
+Contradicts canonical index,NO,Points to same canonical path as AX-20B registration,LOW,None,
+Weakens prefer-official message,NO,Strengthens it vs prior committed draft (which lacked this line per diff),LOW,HEAD had no Navigation block,
+Scientific claims changed,NO,Housekeeping navigation only,LOW,None,
+Relaxation-only ambiguity worsened,NO,No edits to that section,INFO,None,

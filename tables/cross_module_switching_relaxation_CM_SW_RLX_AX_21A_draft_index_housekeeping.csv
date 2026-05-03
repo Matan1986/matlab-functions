@@ -1,0 +1,13 @@
+check,result,evidence,risk_level,recommendation,notes
+Draft file exists,YES,Read path docs/cross_module_switching_relaxation_AX_index_draft.md,INFO,Keep per policy; do not delete/rename,
+Draft git status,TRACKED_MODIFIED,git status --short shows M docs/..._AX_index_draft.md,LOW,"Inspect git diff on draft; commit or discard local edits intentionally",Diff not opened in audit beyond existencegrep
+Canonical file exists,YES,Read path docs/cross_module_switching_relaxation_AX_index.md,INFO,Use as entry point,
+Canonical git status,TRACKED_CLEAN,no M line for canonical path in targeted status,INFO,None,
+Draft duplicates canonical,NO,Draft is short stub; canonical includes AX-20A block and longer tables,LOW,Readers directed to canonical in draft line 3,
+Draft stale vs canonical,PARTIAL,Draft lacks AX-20A synthesis table; canonical has post-20B content,LOW,Expected for stub; pointer mitigates,
+Draft unique content,YES,Navigation prefer-official; relaxation-only neighbor warning,INFO,Retain stub value,
+Draft contradicts canonical,NO,No opposing scaling claims in draft,LOW,None,
+Forbidden wording in draft,NO,rg -i on draft: no matches for listed forbidden themes,LOW,None,
+Canonical contains EMPIRICAL_INVD_POWERLIKE_SCALING,YES,Grep/read canonical section lines 31-35,INFO,None,
+Canonical contains invD formula and alpha NO physical law,YES,Canonical lines 31-35 and 58-67,INFO,None,
+Reader confusion risk,LOW_MEDIUM,Similar filenames; draft M may confuse vs main,LOW,"Editor hygiene: open canonical first; resolve draft M",Do not edit in this task

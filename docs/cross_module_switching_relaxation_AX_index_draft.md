@@ -1,5 +1,7 @@
 # Cross-module Switching–Relaxation AX index (draft)
 
+**Navigation:** Prefer the official index **`docs/cross_module_switching_relaxation_AX_index.md`** for current routing; this file stays as a lightweight stub per **`3b750a8`**.
+
 **Status:** Draft pointer shell — expand when artifact paths are harvested from latest runs.  
 **Classification rule:** If an artifact uses **Switching `X_eff` / `X_eff_nonunique`** or Switching-matched tables with Relaxation scalars, it is **CROSS_MODULE_SWITCHING_RELAXATION**, **not** Relaxation-only, **even if stored under `reports/relaxation/` or `tables/relaxation/`**.
 
