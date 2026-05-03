@@ -1,0 +1,4 @@
+decision_scope,tau_FM_model_use_allowed_after_F7S,allowed_use,forbidden_use,required_conditions,next_action,status
+GLOBAL_UNCONSTRAINED,NO,None,Treating tau_FM rows as lineage-closed or physics-valid without reading metadata,,Continue blocking until convention + governance closed,BLOCKED
+EXPLICIT_CFG_SCOPED_RUN,YES_SCOPED_ONLY,Read outputs only with branch_id + full cfg triple + row filters in same analysis run,Cross-branch mixing or dropping provenance columns,Single declared datasetPath dipTauPath failedDipClockMetricsPath per run; honor row flags,F7S artifacts commit then consumer charter,BLOCKED_WITHOUT_CHARTER
+FM_PHYSICS_OR_PRODUCTION_MODEL,NO,None,Production model calibration on tau_FM alone,,Signed FM convention closure + canonical policy if ever needed,BLOCKED

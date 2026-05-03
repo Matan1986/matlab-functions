@@ -1,0 +1,5 @@
+failed_clock_item,current_handling,model_use_implication,ratio_use_implication,remaining_policy_need,status,notes
+metrics file path,failedDipClockMetricsPath on every row + metrics_path_resolved in loader,Auditable lineage only,Auditable lineage only,F7R_FAILED_CLOCK_GOVERNANCE archival memo still open per F7R remaining_actions,PARTIAL,
+run_id token,cfg.failedDipClockRunId or DERIVED_FROM_METRICS_PATH_TOKEN or UNKNOWN not model-safe,Non-model-safe if unknown,Non-model-safe if unknown,Optional governance standardization,CLOSED_WRITER,
+hard-coded embed removed,F7R2 deriveRunIdTokenFromMetricsPath,Reduces silent reuse,Reduces silent reuse,None for writer,CLOSED_WRITER,
+R_age unblock,None automatic,Does not unblock tau_FM general use,Does not unblock ratio — charter only,Explicit future charter + gates,LINEAGE_ONLY,

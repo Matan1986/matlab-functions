@@ -1,0 +1,23 @@
+field_name,present_in_smoke_tau_output,documented_in_F7R2_schema,required_for_model_use,required_for_ratio_use,status,notes
+branch_id,YES,YES,YES,YES,OK,FM_O_30row_B in smoke
+datasetPath,YES,YES,YES,YES,OK,absolute path repeated per row
+dipTauPath,YES,YES,YES,YES,OK,
+failedDipClockMetricsPath,YES,YES,YES,YES,OK,
+source_run_id,YES,YES,YES,YES,OK,aligns with source_run when has_fm
+source_writer_script,YES,YES,YES,YES,OK,F7G column
+writer_family_id,YES,YES,YES,YES,OK,
+tau_domain,YES,YES,YES,YES,OK,
+tau_or_R_flag,YES,YES,YES,YES,OK,
+FM_abs_convention,YES,YES,YES,YES,OK,
+FM_input_column,YES,YES,YES,YES,OK,
+FM_signed_source_column,YES,YES,YES,YES,OK,placeholder NOT_PROVIDED
+absolute_transform_applied_in_writer,YES,YES,YES,YES,OK,NO
+model_use_allowed,YES,YES,YES,NO,OK,NO_UNLESS_LINEAGE_RESOLVED
+ratio_use_allowed,YES,YES,NO,YES,OK,NO all rows
+row_model_use_allowed,YES,YES,YES,YES,OK,
+row_ratio_use_allowed,YES,YES,NO,YES,OK,
+row_exclusion_reason,YES,YES,YES,YES,OK,
+lineage_status,YES,YES,YES,YES,OK,LINEAGE_METADATA_HARDENED_PENDING_F7S
+canonical_status,YES,YES,YES,YES,OK,non_canonical_pending_lineage
+failed_dip_clock_run_id_report_ref,YES,YES,RECOMMENDED,RECOMMENDED,OK,extension beyond minimal 20 — audit lineage
+failed_dip_clock_run_id_source,YES,YES,RECOMMENDED,RECOMMENDED,OK,

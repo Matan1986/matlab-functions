@@ -1,0 +1,7 @@
+provenance_item,present_in_output,machine_readable,prevents_silent_mixing,status,notes
+branch_id per row,YES,YES,YES,OK,Explicit FM_O_30row_B in smoke; UNKNOWN_BRANCH if cfg empty
+datasetPath per row,YES,YES,YES,OK,
+dipTauPath per row,YES,YES,YES,OK,
+failedDipClockMetricsPath per row,YES,YES,YES,OK,
+22-row vs 30-row stream distinction,F7O matrix + cfg discipline,YES,YES,OK,F7O_series_branch_matrix lists distinct paths; metadata repeats cfg triple no merge
+canonical branch selection,NONE in outputs,NO selection,YES,OK,canonical_status non_canonical_pending_lineage

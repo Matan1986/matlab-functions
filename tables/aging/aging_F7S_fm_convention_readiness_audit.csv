@@ -1,0 +1,5 @@
+convention_item,current_evidence,readiness_status,model_use_implication,ratio_use_implication,notes
+FM_abs as fit input column,FM_input_column FM_abs; tau_domain FM_ABS_CURVEFIT,EXPLICIT,Does not authorize unconstrained use,Does not authorize ratio,
+Signed FM vs stored FM_abs,F7Q PARTIAL; FM_signed_source_column NOT_PROVIDED_IN_MINIMAL_DATASET_SCHEMA,PARTIAL,Blocks general model use until dataset schema closure,Blocks unconstrained ratio cross-branch,
+Writer abs() transform,absolute_transform_applied_in_writer NO,CLOSED_FOR_THIS_WRITER,No silent abs in writer,Same,
+Name-based convention string,FM_ABS_AS_READ_NO_WRITER_ABS_TRANSFORM_PENDING_SIGNED_SOURCE,CONSERVATIVE,Pending signed-source closure per F7R2 table,Pending governance,

@@ -1,0 +1,7 @@
+blocker_id,blocker_type,current_status,blocks_model_use,blocks_R_age_or_clock_ratio,required_next_step,priority,notes
+SIGNED_FM_SOURCE,convention,partial,YES,YES,Dataset/schema closure for signed FM beyond name-based FM_abs,HIGH,F7R2 remaining_blockers echo
+GLOBAL_MODEL_GATE,policy,gates explicit,YES,PARTIAL,Keep NO_UNLESS_LINEAGE_RESOLVED until governance,MEDIUM,F7G global column
+CANONICAL_BRANCH,policy,non_canonical,YES,YES,Explicit canonical selection remains out of scope,MEDIUM,
+FAILED_CLOCK_GOVERNANCE,governance,F7R NEEDS_POLICY,PARTIAL,CONDITIONAL,Archival vs regen memo per F7R_remaining_actions,MEDIUM,Writer lineage OK; policy closure optional for ratio charter
+CHR_TABLE_DRIFT,documentation,F7R_code_hardening_tasks OPEN vs impl,NO,NO,Refresh aging_F7R_code_hardening_tasks.csv post-F7R2,LOW,Does not rollback code
+CONSUMER_DISCIPLINE,process,N/A,YES if ignored,YES if ignored,Bind consumers in separate charter,MEDIUM,

@@ -1,0 +1,6 @@
+condition,observed_in_smoke,row_model_use_allowed,row_ratio_use_allowed,row_exclusion_reason_present,silent_use_risk,status,notes
+has_fm equals 0 at Tp 6 and 10,YES,NO,NO,YES,NO,OK,NO_FM_POINTS_AT_TP
+finite tau fragile sparse points Tp 30 34,YES,NO,NO,YES,NO,OK,FRAGILE_SPARSE_FM_POINTS_CONSERVATIVE_BLOCK
+finite tau fit_ok row global gate,YES,NO,NO,YES,NO,OK,GLOBAL_POLICY_PENDING_F7S_ROW_TECHNICALLY_FIT_OK
+nonfinite tau hypothetical,N/A in smoke,N/A,N/A,N/A,NO design,NO_PENDING_ROW,rule implemented in code branch NONFINITE_OR_NONPOSITIVE_TAU_EFFECTIVE
+consumer ignores columns hypothetical,N/A,N/A,N/A,N/A,HIGH if downstream strips metadata,RISK,Downstream misuse out of writer scope; charter must bind consumers,

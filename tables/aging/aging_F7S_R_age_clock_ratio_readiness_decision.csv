@@ -1,0 +1,4 @@
+decision_scope,R_age_or_clock_ratio_allowed_after_F7S,allowed_next_charter,forbidden_use,required_conditions,next_action,status
+UNCONSTRAINED_RATIO_HEADLINE,NO,None,Publishing a single ratio implying canonical tau_FM without branch manifest,,Not met,BLOCKED
+SCOPED_CHARTER_ONLY,YES_SCOPED_CHARTER_ONLY,Future chartered runner that reads hardened tau_FM + manifest + explicit cfg,Ad-hoc ratio merge across branches or silent old artifact reuse,Hardened CSV contract + explicit branch_id + governance memo for failed-clock where required,Author scoped charter document before any writer execution,BLOCKED_UNTIL_CHARTER
+IMMEDIATE_EXECUTION,NO,None,Any ratio or R_age run in this audit lane,,N/A — not executed here,BLOCKED

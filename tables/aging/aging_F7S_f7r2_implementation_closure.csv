@@ -1,0 +1,8 @@
+hardening_item,required_by_F7R,implemented_in_F7R2,verified_by_smoke,evidence_artifact,closure_status,notes
+CHR01 failed-clock run_id parameterized / derived,Aging_F7R_code_hardening_tasks CHR01,YES,YES,aging_fm_timescale_analysis.m loadFailedDipClockMetrics; smoke failed_dip_clock_* columns,CLOSED_WRITER,deriveRunIdTokenFromMetricsPath + cfg.failedDipClockRunId
+CHR02 cfg triple + branch_id on tau rows,Aging_F7R_required_metadata_fields / CHR02,YES,YES,smoke tau_FM_vs_Tp.csv branch_id datasetPath dipTauPath failedDipClockMetricsPath,CLOSED_WRITER,appendFmTauLineageHardeningColumns
+CHR03 row-level model/ratio use vectors,Aging_F7R_row_use_policy / CHR03,YES,YES,smoke row_model_use_allowed row_ratio_use_allowed row_exclusion_reason,CLOSED_WRITER,all rows NO with reasons
+CHR04 run manifest full triple + branch in sidecar,Aging_F7R_remaining_actions F7R_IMPL partial,PARTIAL,N/A,createRunContext standard outputs; branch_id in cfg not automatically duplicated to JSON artifact beyond normal run files,PARTIAL,Infra contract may still want explicit manifest row — out of F7R2 minimal scope
+CHR05 NFM env guard,Aging_F7R_code_hardening_tasks CHR05,NO change required,N/A,F7N/F7R documentation track,OPEN_OPTIONAL,Optional per F7R table
+F7G lineage_status hardened pending F7S,F7R plan,YES,YES,lineage_status LINEAGE_METADATA_HARDENED_PENDING_F7S on tau rows,CLOSED_WRITER,
+FM convention explicit columns,F7R fm convention policy,YES,YES,FM_abs_convention FM_input_column absolute_transform_applied_in_writer,CLOSED_WRITER,Conservative strings

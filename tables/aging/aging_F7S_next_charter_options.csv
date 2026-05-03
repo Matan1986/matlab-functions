@@ -1,0 +1,4 @@
+option_id,option_name,allowed_after_F7S,required_scope_limits,forbidden_actions,recommended,notes
+OPT_COMMIT_F7S,COMMIT_F7S_AUDIT_ARTIFACTS_ONLY,YES,Stage only reports/tables F7S paths; no results,Staging results/ runs,NO,Housekeeping after audit
+OPT_SCOPED_RATIO,DEFINED_SCOPED_R_AGE_OR_CLOCK_RATIO_CHARTER,CONDITIONAL,Explicit cfg triple; branch_id; row_use gates; no canonical merge; manifest input binding,Unconstrained headline ratios or cross-branch blend,YES_NEXT,Natural successor after F7S
+OPT_REFRESH_CHR_TABLE,UPDATE_F7R_CODE_HARDENING_TASK_CSV,YES,Editorial refresh only to CLOSED where implemented,broad code edits,NO_OPTIONAL,Clears DRIFT vs F7R2
