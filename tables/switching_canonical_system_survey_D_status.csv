@@ -1,0 +1,16 @@
+status_key,status_value,notes
+TASK_COMPLETED,YES,Survey D deliverables written; static inspection sufficient
+AUDIT_ONLY,YES,No code or governance file edits beyond these four new artifacts
+MATLAB_RUN,NO,Not required per brief
+PYTHON_RUN,NO,Not required per brief
+NODE_RUN,NO,Not required per brief
+FILES_MODIFIED,YES,Four new files under reports/ and tables/ only
+SWITCHING_SCOPE_ONLY,NO,Cross-module AX and P0 pipelines referenced where they bound Switching claims
+OLD_ANALYSIS_COMPONENTS_IDENTIFIED,YES,From switching_analysis_map and related tables
+CANONICAL_COVERAGE_ASSESSED,YES,Against governance manifest and current_state entrypoint
+FULL_OLD_ANALYSIS_RECONSTRUCTED,NO,Phi2/kappa2 authoritative; TASK_002B; full publication chain outstanding
+BLOCKERS_FOUND,YES,Legacy AX functional blocked; TASK_002B not done; publication PARTIAL; quarantined figures
+DEPRECATED_OR_QUARANTINED_COMPONENTS_FOUND,YES,PHI2_KAPPA2_HYBRID manuscript quarantine; quarantined corrected-old PNGs; CANON_GEN PT/CDF not selected main backbone
+REMAINING_WORK_IDENTIFIED,YES,See switching_canonical_system_survey_D_remaining_work.csv
+SAFE_TO_STAGE_SURVEY_OUTPUTS,YES,Stage only the four survey paths if isolating survey work from dirty tree
+SAFE_TO_COMMIT_SURVEY_OUTPUTS,CONDITIONAL,Commit survey alone is safe content-wise; repo has unrelated modified/untracked files — operator should commit survey in dedicated commit after review

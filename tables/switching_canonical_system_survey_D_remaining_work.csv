@@ -1,0 +1,16 @@
+work_item,category,priority,blocking_dependency,recommended_agent_type,notes
+TASK_002B_backbone_parity_bridge,reconstruction_comparison,P1,TASK_001 complete + legacy comparison inputs available,Narrow Switching comparison agent,Produces explicit namespace-labeled old-vs-corrected backbone table per switching_missing_reconstruction_tasks_aligned.csv
+Authoritative_Phi2_kappa2_corrected_old,reconstruction_physics,P1,Charter for mode-2+ under CORRECTED_CANONICAL_OLD_ANALYSIS,Narrow Switching validation agent,Artifact index marks MISSING; separate from PHI2_KAPPA2_HYBRID diagnostic script
+TASK_002A_visual_QA_refinement_run,QA_diagnostic,P2,TASK_001,Switching QA agent,Status READY_PENDING_USER_RUN in authoritative artifact index
+TASK_003_asymmetry_LR_replay,reconstruction,P1,TASK_001,Narrow Switching replay agent,Per aligned task table
+TASK_004_T22_crossover_refresh,audit,P2,TASK_003,Narrow Switching diagnostic agent,
+TASK_005_WI_X_gauge_reconstruction,coordinate_governance,P2,TASK_003; optional tables/switching_P0_effective_observables_values.csv,Narrow Switching coordinate agent,TASK row lists P0 values CSV as input — verify presence before claiming P0 numeric closure
+TASK_006_gauge_atlas_regrounding,atlas,P3,TASK_005,Narrow Switching gauge agent,
+TASK_007_mode2plus_claim_boundary,governance,P3,TASK_001,Narrow Switching mode-governance agent,
+TASK_008_stale_corrected_old_cleanup_plan,governance,P1,TASK_002B,Narrow Switching governance agent,Non-destructive registry per task table
+TASK_009_figure_provenance_remap,publication,P2,TASK_008,Narrow Switching figure-provenance agent,
+TASK_010_manuscript_claim_audit_finalization,publication,P3,TASK_002B;TASK_004;TASK_007,Broad Switching claim-audit agent,
+TASK_011_legacy_PT_CDF_diagnostic_doc_refresh,documentation,P3,TASK_002B,Narrow Switching documentation agent,
+TASK_012_publication_figure_authorization,release_gate,P4,TASK_009;TASK_010,Broad Switching release-gate agent,Unblocks SAFE_TO_CREATE_PUBLICATION_FIGURES from PARTIAL when approved
+Restore_or_document_LEGACY_AX_FUNCTIONAL_outputs,cross_module,P2,AX_aligned_data.csv / numeric AX CSV restoration where applicable,Cross-module agent,docs/cross_module_switching_relaxation_AX_index.md marks BLOCKED_MISSING_OUTPUTS
+Working_tree_phase4B_deleted_figures,repository_hygiene,P3,None (optional),Maintenance agent,git status shows D on phase4B_C01/C02 figures — not a coverage gap in docs but affects reproducibility if those paths were cited

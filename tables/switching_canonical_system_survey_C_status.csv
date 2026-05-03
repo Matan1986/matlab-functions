@@ -1,0 +1,17 @@
+status_key,value,notes
+TASK_COMPLETED,YES,Deliverables written under reports/ and tables/
+AUDIT_ONLY,YES,No edits to audited corpus; new survey files only
+MATLAB_RUN,NO,Per instructions
+PYTHON_RUN,NO,Per instructions
+NODE_RUN,NO,Per instructions
+FILES_MODIFIED,NO,No pre-existing tracked files edited; new survey artifacts added
+SWITCHING_SCOPE_ONLY,YES,Inspection limited to Switching readability; CM AX index used only where relevant
+USER_CAN_IDENTIFY_CANONICAL_STATE,PARTIAL,Yes if reader starts at switching_corrected_canonical_current_state and analysis_map; easy misroute via deprecated definition
+USER_CAN_IDENTIFY_REPLAY_VS_CANONICAL,PARTIAL,B03/B05 and map sections sufficient with effort; not one headline sentence in Switching-only hub
+USER_CAN_IDENTIFY_LEGACY_QUARANTINE,YES,LEGACY_OLD_TEMPLATE plus quarantine_index and misleading artifacts registry
+USER_CAN_IDENTIFY_BLOCKERS,PARTIAL,Phi terminology blocked; science gaps in current_state table
+USER_CAN_IDENTIFY_SAFE_VARIABLES,PARTIAL,Allowed evidence by use case plus observables doc; no single scalar safety sheet
+MAJOR_CLARITY_GAPS_FOUND,YES,Deprecated canonical definition vs narrative contract conflict
+INDEX_OR_ROADMAP_MISSING,YES,No single ordered Switching reader index across protocol narrative quarantine CM
+SAFE_TO_STAGE_SURVEY_OUTPUTS,YES,Stage only the four survey artifacts; verify git diff --cached empty before staging other work
+SAFE_TO_COMMIT_SURVEY_OUTPUTS,YES,Subject to repo policy; survey outputs are documentation-only additions

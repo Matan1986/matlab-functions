@@ -1,0 +1,15 @@
+status_key,value,notes
+TASK_COMPLETED,YES,Survey A map inventory groups and status artifacts written
+AUDIT_ONLY,YES,Repo survey read-only; only four survey deliverables added no other edits
+MATLAB_RUN,NO,Per survey instructions
+PYTHON_RUN,NO,Per survey instructions
+NODE_RUN,NO,Per survey instructions
+FILES_MODIFIED,YES,Four new survey output paths under reports/ and tables/
+SWITCHING_SCOPE_ONLY,YES,Cross-module scripts noted but not expanded
+INVENTORY_CREATED,YES,tables/switching_canonical_system_survey_A_inventory.csv
+SOURCE_OF_TRUTH_CANDIDATES_IDENTIFIED,YES,See report section 4
+CANONICAL_ENTRYPOINTS_IDENTIFIED,YES,run_switching_canonical.m plus orchestrators listed in report
+STALE_OR_DUPLICATE_CANDIDATES_FOUND,YES,Deprecated docs missing canonical/xy_switching duplicate narrative surfaces
+LEGACY_OR_QUARANTINE_BOUNDARIES_FOUND,YES,quarantine index results_old LEGACY_OLD_TEMPLATE namespaces
+SAFE_TO_STAGE_SURVEY_OUTPUTS,YES,Stage only the four explicit paths if tree remains dirty
+SAFE_TO_COMMIT_SURVEY_OUTPUTS,CONDITIONAL,Content-safe; commit only when isolated from unrelated working tree changes

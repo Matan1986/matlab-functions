@@ -1,0 +1,91 @@
+path,exists,git_status_if_observed,artifact_type,conceptual_group,namespace_if_any,likely_role,source_of_truth_level,notes
+docs/switching_analysis_map.md,YES,,doc,governance/naming/source-of-truth,multiple,Narrative and technical namespace map,PRIMARY_HUB,Cites many downstream tables/reports
+docs/switching_governance_persistence_manifest.md,YES,,doc,governance/naming/source-of-truth,CORRECTED_CANONICAL_OLD_ANALYSIS etc.,Durable anti-confusion manifest,PRIMARY_HUB,Lists pointer chain to current_state and quarantine
+docs/switching_canonical_reality.md,YES,,doc,governance/naming/source-of-truth,survey_flags,Factual lock from survey tables,SECONDARY_LOCK,Documents CANONICAL_S_OBJECT_EXISTS style flags
+docs/switching_canonical_definition.md,YES,,doc,governance/naming/source-of-truth,deprecated,Banner DEPRECATED v1.2 definition,DEPRECATED_POINTER,Points to canonical/xy_switching not found in workspace
+docs/switching_canonical_direction.md,YES,,doc,governance/naming/source-of-truth,,Strategic direction narrative,SUPPORTING_DOC,
+docs/switching_pre_replay_contract_reset.md,YES,,doc,canonical replay,,Pre-replay contract,SUPPORTING_DOC,
+docs/switching_system_alignment.md,YES,,doc,governance/naming/source-of-truth,,Alignment narrative,SUPPORTING_DOC,
+docs/switching_backend_definition.md,YES,,doc,canonical generation/decomposition,,Backend scope for canonical run,SUPPORTING_DOC,Cited from canonical definition (deprecated)
+docs/switching_physics_audit_spec.md,YES,,doc,validation/status/manifest/fingerprint,,Physics audit specification,SUPPORTING_DOC,
+docs/switching_artifact_policy.md,YES,,doc,governance/naming/source-of-truth,,Artifact policy,SUPPORTING_DOC,
+docs/switching_layer_boundary.md,YES,,doc,governance/naming/source-of-truth,,Layer boundary,SUPPORTING_DOC,
+docs/switching_dependency_boundary.md,YES,,doc,governance/naming/source-of-truth,,Cross-module dependency rules,SUPPORTING_DOC,
+docs/switching_phi1_terminology_contract.md,YES,,doc,governance/naming/source-of-truth,"Phi1_corrected_old vs diagnostic",Phi1 naming contract,PRIMARY_HUB,Blocks ambiguous Phi1_canon phrasing
+docs/decisions/switching_main_narrative_namespace_decision.md,YES,,doc,governance/naming/source-of-truth,CORRECTED_CANONICAL_OLD_ANALYSIS,Adopted manuscript namespace decision,PRIMARY_HUB,
+docs/templates/switching_analysis_namespace_header.md,YES,,doc,governance/naming/source-of-truth,,Script header template,REGISTRY,
+docs/observables/switching_observables.md,YES,,doc,X_eff / effective observables,,Observable registry slice,SUPPORTING_DOC,
+docs/cross_module_switching_relaxation_canonical_placement_contract.md,YES,??,doc,governance/naming/source-of-truth,CM-SW-RLX,Untracked draft from git snapshot,Draft_UNTRACKED,Out of strict Switching-only scope boundary
+docs/cross_module_switching_relaxation_global_closure_08.md,YES,??,doc,governance/naming/source-of-truth,CM-SW-RLX,Untracked draft,Draft_UNTRACKED,
+docs/cross_module_switching_relaxation_index_draft.md,YES,??,doc,governance/naming/source-of-truth,CM-SW-RLX,Untracked draft,Draft_UNTRACKED,
+reports/switching_corrected_canonical_current_state.md,YES,,report,governance/naming/source-of-truth,read_first,Current state entry per manifest,PRIMARY_HUB,Cited from run_switching_canonical.m header
+reports/switching_quarantine_index.md,YES,,report,legacy quarantine,QUARANTINED_MISLEADING,Quarantine visibility index,QUARANTINE_INDEX,
+reports/switching_stale_governance_supersession.md,YES,,report,governance/naming/source-of-truth,,Supersedes stale governance wording,SECONDARY_LOCK,
+reports/switching_backbone_decomposition_simple_map.md,YES,,report,canonical generation/decomposition,OLD vs CANON,Consolidated backbone map narrative,SUPPORTING_DOC,
+reports/switching_corrected_old_authoritative_artifact_index.md,YES,,report,old/corrected-old reconstruction,CORRECTED_CANONICAL_OLD_ANALYSIS,Human-readable index companion,SUPPORTING_DOC,Pairs with tables CSV
+reports/switching_canonical_system_survey_A_map.md,YES,,report,validation/status/manifest/fingerprint,,This survey map output,SURVEY_OUTPUT,Written by SW-CANON-SURVEY-A
+tables/switching_canonical_system_survey_A_inventory.csv,YES,,table,validation/status/manifest/fingerprint,,Survey inventory,SURVEY_OUTPUT,
+tables/switching_canonical_system_survey_A_groups.csv,YES,,table,validation/status/manifest/fingerprint,,Survey group rollup,SURVEY_OUTPUT,
+tables/switching_canonical_system_survey_A_status.csv,YES,,table,validation/status/manifest/fingerprint,,Survey status keys,SURVEY_OUTPUT,
+tables/switching_canonical_entrypoint.csv,YES,,table,governance/naming/source-of-truth,CANON_GEN_SOURCE,Registers canonical MATLAB entrypoint,REGISTRY,Row points to Switching/analysis/run_switching_canonical.m
+tables/switching_canonical_entrypoint_candidates.csv,YES,,table,governance/naming/source-of-truth,,Entrypoint candidate ranking,SUPPORTING_TABLE,
+tables/switching_analysis_namespace_clean_map.csv,YES,,table,governance/naming/source-of-truth,multiple,Machine-readable namespace superset,PRIMARY_HUB,Cited from switching_analysis_map.md
+tables/switching_analysis_claim_boundary_map.csv,YES,,table,governance/naming/source-of-truth,B09 etc.,Claim boundaries,SUPPORTING_TABLE,
+tables/switching_corrected_old_authoritative_artifact_index.csv,YES,,table,old/corrected-old reconstruction,CORRECTED_CANONICAL_OLD_ANALYSIS,Authoritative artifact paths,PRIMARY_HUB,References results and results_old runs
+tables/switching_corrected_old_authoritative_builder_status.csv,YES,,table,old/corrected-old reconstruction,,Builder gate status,SUPPORTING_TABLE,Cited in governance manifest
+tables/switching_quarantine_index.csv,YES,,table,legacy quarantine,,Machine quarantine rows,QUARANTINE_INDEX,
+tables/switching_misleading_or_dangerous_artifacts.csv,YES,,table,legacy quarantine,,Quarantine recommendations,SUPPORTING_TABLE,Cited in governance manifest
+tables/switching_phi1_terminology_registry.csv,YES,,table,governance/naming/source-of-truth,,Phi1 wording registry,SUPPORTING_TABLE,
+tables/switching_phi1_source_of_truth_pointer.csv,YES,,table,governance/naming/source-of-truth,,Phi1 SoT pointers,SUPPORTING_TABLE,
+tables/switching_canonical_output_view_contracts.csv,YES,,table,canonical generation/decomposition,,Mixed-output view contracts,SUPPORTING_TABLE,Cited in run_switching_canonical.m header
+tables/switching_*.csv (aggregate 801 files under tables/),YES,,aggregate,validation/status/manifest/fingerprint,many,Phase audits inventories status corpora,DIAGNOSTIC_ARCHIVE,Count from survey: Get-ChildItem tables -Filter switching*.csv = 801
+reports/switching_*.md (aggregate corpus under reports/),YES,,aggregate,validation/status/manifest/fingerprint,many,Human-readable audit and phase narratives,DIAGNOSTIC_ARCHIVE,Large set; use current_state as hub
+Switching/analysis/,YES,,directory,canonical generation/decomposition,,Primary MATLAB analysis module root,STRUCTURE,Contains run_switching_canonical.m and phase audits
+Switching/diagnostics/,YES,,directory,validation/status/manifest/fingerprint,,Diagnostics scripts,STRUCTURE,cdf backbone repair aggressiveness corrected-old QA
+Switching/utils/,YES,,directory,canonical generation/decomposition,,Helpers run roots writers,STRUCTURE,switchingCanonicalRunRoot switchingWriteTableBothPaths
+Switching/analysis/experimental/,YES,,directory,canonical generation/decomposition,EXPERIMENTAL,Non-canonical experiments per docs,EXPERIMENTAL,
+Switching/validation/,NO,,directory,validation/status/manifest/fingerprint,,Expected by some prompts; not present,MISSING_PATH,Validation lives in analysis/diagnostics/reports instead
+Switching/analysis/run_switching_canonical.m,YES,,matlab_script,canonical generation/decomposition,"CANON_GEN_SOURCE plus diagnostics columns",Canonical mixed producer entrypoint,PRIMARY_HUB,ASCII governance header lines 4-12
+Switching/analysis/run_minimal_canonical.m,YES,,matlab_script,canonical generation/decomposition,,Minimal wiring only,SUPPORTING_SCRIPT,Explicitly not canonical entrypoint per deprecated definition doc
+Switching/analysis/run_switching_canonical_collapse_hierarchy.m,YES,,matlab_script,collapse/collapse-failure analysis,CANON_COLLAPSE_FAMILY,Collapse hierarchy consumer,SUPPORTING_SCRIPT,Uses switchingResolveLatestCanonicalTable per maintenance tables
+Switching/analysis/run_switching_canonical_collapse_visualization.m,YES,,matlab_script,collapse/collapse-failure analysis,,Collapse visualization,SUPPORTING_SCRIPT,
+Switching/analysis/run_switching_phase4B_C01_X_like_panel_orientation_lock.m,YES,,matlab_script,collapse/collapse-failure analysis,phase4B_C01,X-like panel orientation audit,SUPPORTING_SCRIPT,
+Switching/analysis/run_switching_phase4B_C02_collapse_like_panel_range_lock.m,YES,,matlab_script,collapse/collapse-failure analysis,phase4B_C02,Collapse-like panel range lock,SUPPORTING_SCRIPT,
+Switching/analysis/run_switching_phase4B_C02B_primary_collapse_variant_audit.m,YES,,matlab_script,collapse/collapse-failure analysis,phase4B_C02B,Primary collapse variant audit,SUPPORTING_SCRIPT,
+Switching/analysis/run_switching_collapse_subrange_analysis.m,YES,,matlab_script,collapse/collapse-failure analysis,,Subrange collapse analysis,SUPPORTING_SCRIPT,
+Switching/analysis/run_switching_corrected_old_builder_readiness_check.m,YES,,matlab_script,old/corrected-old reconstruction,,Builder readiness,SUPPORTING_SCRIPT,
+Switching/analysis/run_switching_canonical_state_audit.m,YES,??,matlab_script,validation/status/manifest/fingerprint,,Canonical state audit,Untracked_in_git_snapshot,Appeared as untracked in initial git status
+Switching/diagnostics/run_switching_cdf_backbone_repair_aggressiveness_audit.m,YES,??,matlab_script,validation/status/manifest/fingerprint,,CDF repair aggressiveness audit,Untracked_in_git_snapshot,
+Switching/diagnostics/run_switching_corrected_old_task002_quality_QA_and_closure.m,YES,,matlab_script,old/corrected-old reconstruction,,Corrected-old QA closure,SUPPORTING_SCRIPT,
+Switching/diagnostics/run_switching_corrected_old_task002_visual_QA_refinement.m,YES,,matlab_script,old/corrected-old reconstruction,,Visual QA refinement,SUPPORTING_SCRIPT,
+scripts/run_switching_corrected_old_authoritative_builder.ps1,YES,,ps1_script,old/corrected-old reconstruction,,Orchestrates authoritative builder,ORCHESTRATOR,
+scripts/run_switching_canonical_output_separation.ps1,YES,,ps1_script,canonical generation/decomposition,,Post-run mixed-output split,ORCHESTRATOR,Referenced from authoritative artifact index
+scripts/run_switching_canonical_map_spine.ps1,YES,M,ps1_script,canonical replay,,Map spine runner,ORCHESTRATOR,git status snapshot showed modified tracked
+scripts/run_switching_P0_effective_observables_recipe_parity.ps1,YES,,ps1_script,X_eff / effective observables,P0,P0 recipe parity,ORCHESTRATOR,
+scripts/run_switching_P0_old_collapse_freeze.ps1,YES,,ps1_script,collapse/collapse-failure analysis,P0,Old collapse freeze,ORCHESTRATOR,
+scripts/run_switching_P1_asymmetry_LR_replay.ps1,YES,,ps1_script,canonical replay,P1,P1 asymmetry replay,ORCHESTRATOR,
+scripts/run_switching_phase4C_collapse_stress_tests.ps1,YES,,ps1_script,collapse/collapse-failure analysis,phase4C,Collapse stress tests,ORCHESTRATOR,
+scripts/run_switching_Xeff_width_validity_atlas.ps1,YES,,ps1_script,X_eff / effective observables,,Xeff width atlas,ORCHESTRATOR,
+scripts/run_switching_old_collapse_apples_to_apples.ps1,YES,,ps1_script,old/corrected-old reconstruction,OLD_FULL_SCALING,Legacy collapse comparison replay,ORCHESTRATOR,Cited in namespace decision as example
+scripts/run_switching_old_WI_recipe_replay.ps1,YES,,ps1_script,old/corrected-old reconstruction,,Width-interaction recipe replay,ORCHESTRATOR,
+scripts/run_switching_oldX_functional_replay_audit.ps1,YES,,ps1_script,old/corrected-old reconstruction,,Old X functional replay audit,ORCHESTRATOR,
+scripts/run_switching_semantic_phase3_preflight.py,YES,,python_script,governance/naming/source-of-truth,semantic,Semantic preflight,ORCHESTRATOR,Python present; not executed in survey
+scripts/run_switching_canonical_X_panel_orientation_repair.m,YES,??,matlab_script,visualization/publication figures,,X panel orientation repair,Untracked_in_git_snapshot,
+scripts/run_switching_stabilized_gauge_figure_replay.m,YES,??,matlab_script,canonical replay,,Stabilized gauge figure replay,Untracked_in_git_snapshot,
+run_switching_fixed_T_current_cuts_canonical_replay.m,YES,??,matlab_script,canonical replay,,Root-level canonical replay runner,Untracked_in_git_snapshot,
+tools/run_matlab_safe.bat,YES,,tool,validation/status/manifest/fingerprint,,Repo-wide MATLAB wrapper,INFRA_LOCK,Per docs/repo_execution_rules.md
+tools/switching_canonical_run_closure.m,YES,,tool,validation/status/manifest/fingerprint,,Canonical run closure helper,SUPPORTING_TOOL,
+tools/switching_canonical_control_scan.ps1,YES,,tool,validation/status/manifest/fingerprint,,Control scan script,SUPPORTING_TOOL,
+analysis/switching/xy/status.md,YES,,deprecated_stub,governance/naming/source-of-truth,,Deprecated status stub,DEPRECATED_POINTER,References missing canonical/xy_switching
+analysis/switching/xx/status.md,YES,,deprecated_stub,governance/naming/source-of-truth,,Deprecated status stub,DEPRECATED_POINTER,
+results/switching/,YES,,directory,canonical generation/decomposition,,Canonical run output root,RUN_OUTPUT_REF,Exists on disk per Test-Path
+results_old/switching/,YES,,directory,legacy quarantine,OLD_BARRIER_PT etc.,Legacy run outputs,RUN_OUTPUT_REF,Cited in authoritative artifact index
+figures/switching/,YES,,directory,visualization/publication figures,,Figure assets directory,STRUCTURE,Some tracked files shown deleted D in git snapshot
+figures/switching/phase4B_C01_X_like_panel_orientation_lock.png,YES,D,visualization/publication figures,phase4B,Deleted in working tree per git status,STALE_WORKING_TREE,User snapshot showed D
+figures/switching/phase4B_C02_collapse_like_panel_range_lock.png,YES,D,visualization/publication figures,phase4B,Deleted in working tree,STALE_WORKING_TREE,
+figures/switching/phase4B_C02_collapse_like_panel_range_lock.fig,YES,D,visualization/publication figures,phase4B,Deleted in working tree,STALE_WORKING_TREE,
+reports/maintenance/switching_source_of_truth_owner_decision_audit.md,YES,,maintenance_report,governance/naming/source-of-truth,,Maintenance SoT audit,CROSS_CUT_MAINT,
+reports/maintenance/switching_identity_resolver_patch_design_review.md,YES,,maintenance_report,validation/status/manifest/fingerprint,,Identity resolver design,CROSS_CUT_MAINT,
+tables/maintenance_switching_identity_resolver_consumers.csv,YES,,table,validation/status/manifest/fingerprint,,Scripts consuming canonical tables,CROSS_CUT_MAINT,
+canonical/xy_switching/,NO,,directory,governance/naming/source-of-truth,,Promised hub in deprecated docs,MISSING_PATH,Glob found no canonical/xy_switching in workspace
+docs/repo_execution_rules.md,YES,,doc,validation/status/manifest/fingerprint,,MATLAB execution rules for agents,INFRA_LOCK,Survey followed read-only; no runs performed
