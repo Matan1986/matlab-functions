@@ -1,0 +1,6 @@
+readiness_item,verdict,evidence,blockers,next_required_action,notes
+A_single_scoped_F7T_ratio,READY_TECHNICAL,F7T charter plus F7R2 hardened schema plus explicit dip path,F7R2 global ratio NO row flags,multipath clarity optional before run,BASELINE_RATIO_TECHNICALLY_READY YES
+B_multipath_decomposition_tau_robustness,NOT_READY,F7J multi-branch map inventory exists,No executable paired artifact grid for all paths,multipath robustness charter + registry,
+C_fit_vs_direct_decomposition_comparison,PARTIAL,F7J fit vs direct section both families exist,Measurement freeze forbids naive substitution,mapping diagnostic or alignment charter,
+D_direct_tau_extraction_implementation,PARTIAL,Standard tau is curvefit on exported scalars,Non-curvefit direct tau path limited in inventory,audit direct halftime extractors if required,
+BASELINE_RATIO_SCIENTIFICALLY_INSUFFICIENT_FOR_ROBUSTNESS_GOAL,YES,user goal needs multiple decomposition tau paths,baseline single ratio insufficient by design,execute baseline only as bookkeeping or defer until multipath plan,

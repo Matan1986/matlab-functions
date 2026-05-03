@@ -1,0 +1,6 @@
+blocker_id,blocker_type,current_status,blocks_baseline_ratio,blocks_multipath_robustness,blocks_physics_claims,required_resolution,notes
+TRACK_AB_VS_CONSOLIDATION_SEMANTICS,governance,frozen mismatch,PARTIAL naive compare,NO if mapped,PARTIAL claims,controlled bridge or charter mapping,F7J freeze
+FM_ABS_SIGN_COLLAPSE,observable,FM_abs magnitude only in five-column,NO for sign physics,NO,PARTIAL,signed FM audits parallel paths,F7J FM_short_tw sign policy
+MULTIPATH_REGISTRY,process,absent,NO,NO,NO,define ratio_path_id registry CSV,N/A
+TAU_EXTRACTOR_GAP_TRACK_A,tooling,FM_like no standard fm tau INPUT,NO,PARTIAL,NO,new extractor or rename bridge per charter,
+ROW_RATIO_GLOBAL_NO,policy,F7R2 conservative,PARTIAL permission,PARTIAL,NO,CEL disclosure per F7T,F7T charter note

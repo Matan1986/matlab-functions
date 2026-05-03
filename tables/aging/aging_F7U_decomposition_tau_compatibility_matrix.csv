@@ -1,0 +1,7 @@
+compatibility_id,decomposition_path_id,tau_method_id,component_domain,existing_artifact_available,semantic_match,required_new_implementation,eligible_pairing,pairing_type,blockers,notes
+CX001,DP_THIN_CONSOLIDATION,TAU_DIP_CURVEFIT_ZOO,Dip_memory_curve,YES consolidated Dip_depth curves implied,YES if same dataset snapshot,PARTIAL reader alignment,YES scoped,F7T_DIP_FAMILY,five-column contract must match tau extraction dataset path,
+CX002,DP_THIN_CONSOLIDATION,TAU_FM_CURVEFIT_ZOO,FM_abs_memory_curve,YES FM_abs column,YES under FM_abs convention caveat,PARTIAL,F7T baseline YES,F7T_FM_FAMILY,F7R2 metadata row_ratio NO,
+CX003,DP_STAGE6_TRACK_A,TAU_FM_CURVEFIT_ZOO,FM_like vs FM_abs,MISMATCH,FM_like not FM_abs input to fm tau reader,YES adapter or alternate extractor,NO pending,FORBIDDEN_SEMANTIC,freeze Track A vs consolidation,
+CX004,DP_STAGE6_TRACK_A,TAU_DIP_CURVEFIT_ZOO,AFM_like vs Dip_depth,MISMATCH,different dip scalar identity vs Dip_depth,PARTIAL alternate dip tau reader spec,NO pending,FORBIDDEN_WITHOUT_SPEC,
+CX005,DP_STAGE4_DIRECT_CORE,TAU_FM_CURVEFIT_ZOO,FM_abs from orchestrator,YES if exported to consolidation first,YES after export,PARTIAL pipeline hop,DIAGNOSTIC_ONLY unless consolidated,
+CX006,DP_STAGE4_DIRECT_CORE,TAU_DIP_CURVEFIT_ZOO,Dip_depth,YES after mapping Dip_depth,YES,PARTIAL,DIAGNOSTIC_PAIRING,same run export required,

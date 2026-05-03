@@ -1,0 +1,5 @@
+option_id,option_name,allowed_now,recommended,prerequisites,expected_outputs,risks,notes
+OPT_COMMIT_F7U,COMMIT_F7U_SURVEY_ARTIFACTS_ONLY,YES,YES,none,reports tables F7U committed,narrow scope creep,housekeeping
+OPT_MULTIPATH_CHARTER,AUTHOR_F7U_FOLLOWON_MULTIPATH_ROBUSTNESS_CHARTER,YES,YES,F7U survey accepted,charter md tables,no execution without gates,governance first
+OPT_BASELINE_EXECUTE,EXECUTE_BASELINE_F7T_RATIO_BOOKKEEPING_ONLY,CONDITIONAL,NO default until multipath clarity,F7T gates pass,R_age CSV under results/,misleading headline if sold as robustness,scientific insufficiency flag
+OPT_DECOMP_ALIGNMENT,DECOMPOSITION_ALIGNMENT_DIAGNOSTIC_RUN,CONDITIONAL,PARTIAL,mapped inputs per freeze,diagnostic tables mapping layers,silent substitution if misconfigured,feeds multipath later
