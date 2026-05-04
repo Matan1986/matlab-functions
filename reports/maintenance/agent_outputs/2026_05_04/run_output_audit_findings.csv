@@ -1,0 +1,2 @@
+"finding_id","module","severity","description"
+"8d8e38ff7a974e8f52fe03b356a78846420a90f7","multi_module","MEDIUM","No results/<experiment>/runs/run_* directories were accessible in this Codex workspace, so full run-output completeness checks could not be performed."
