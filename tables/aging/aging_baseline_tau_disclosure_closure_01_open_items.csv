@@ -1,0 +1,6 @@
+open_item_id,open_item,blocking_level,blocks_tau_extraction,blocks_ratio_reentry,recommended_resolution,notes
+B003-W1,Automated writers still need to emit full F7X5 sidecar rows adjacent to every tau CSV save,MEDIUM,YES for authoritative,MEDIUM,Implement manifest write in aging_timescale_extraction.m and aging_fm_timescale_analysis.m per writer_requirements,Metadata gate report flagged PARTIAL until consumers consistently emit and check bundle
+B003-W2,Human-readable reports may still headline tau_effective_seconds without bundle repetition,LOW,NO if labeled,PARTIAL,Copy domain_map + builder_rule into run notes markdown append,closure defines policy; enforcement is separate review
+GRID-01,missing tw=3 at Tp 30 and Tp 34 per dip_fm inventory,MEDIUM,PARTIAL symmetric multi-Tp modeling,PARTIAL cross-Tp ratio interpretation,Narrow scope to shared tw ladder or regenerate consolidation rows,disclosed in aging_dip_fm_tw_inventory_01
+OLD-ROUTE-01,Track A AFM_like FM_like not comparable to tau outputs without bridge,HIGH,NO for baseline tau lane,HIGH if mistaken substitution,F7V bridge before any cross-route ratio,aging_old_fit_summary_method_audit_01
+PAIR-01,Paired tau runs must cite same source_dataset_id or explicit mismatch rationale,MEDIUM,PARTIAL,MEDIUM,Sidecar source_dataset_id + dipRunName fmRunName in clock-ratio cfg,aging_clock_ratio_analysis paths
