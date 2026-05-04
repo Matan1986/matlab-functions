@@ -1,0 +1,16 @@
+metadata_field,required_for,mandatory,definition,allowed_values_or_examples,missing_risk,notes
+tau_domain,tau_output interpretation or ratio tau inputs,YES,Curve family and sector for tau row,DIP_MEMORY_CURVEFIT FM_ABS_CURVEFIT AGING_CLOCK_RATIO_ANALYSIS,mislabel dip vs FM or ratio vs tau,R-TAU-001 F7X5 sec16
+tau_method,tau_output,YES,Recipe for tau_effective_seconds and components,CURVEFIT_ZOO consensus_median_log half_range_primary logistic_log_tw stretched_exp,half_range vs consensus confusion,F7X5 schema row tau_method
+tau_input_object,tau_output,YES,Consolidated observable column driving the tw curve fit,Dip_depth for aging_timescale_extraction FM_abs for aging_fm_timescale_analysis,mix-up with Track A summaries or wrong branch,F7X5 tau_input_object schema row
+producer_script,tau_output ratio_output,YES,Reproducible MATLAB path,Aging/analysis/aging_timescale_extraction.m Aging/analysis/aging_fm_timescale_analysis.m,re-run impossible,F7X5 producer_script
+source_artifact,tau_output ratio_output,YES,Basename and run-scoped path to CSV,tau_vs_Tp.csv tau_FM_vs_Tp.csv table_clock_ratio.csv,wrong run pairing,F7X5 source_artifact
+grain,tau_output,YES,Per-curve vs per-Tp summary,per_Tp_summary per tw-curve internal steps,reader mismatch,F7X5 grain
+units,tau_output,YES,Physical dimension of tau columns,seconds for tau_effective_seconds arbitrary for Dip_depth ordinate,unit error,F7X5 tau_units
+tau_event_or_feature,tau_output,CONDITIONAL,Feature extracted along tw,half_range logistic stretched half_time,cannot audit method,F7X5 tau_event_or_feature
+lineage_status,tau_output ratio_output,YES,Completeness of dataset and run linkage,COMPLETE PARTIAL MISSING REQUIRES_DATASET_PATH_AND_DIP_BRANCH_RESOLUTION,multipath and ratio eligibility,F7I F7G gates
+ratio_inputs,ratio_output,YES,Which tau artifacts and columns feed R,tau_vs_Tp:tau_effective_seconds tau_FM_vs_Tp:tau_effective_seconds,ratio from mismatched runs,F7X5 ratio_inputs R-RAT-001
+pairing_keys,ratio_output,YES,Stable merge discipline,Tp required; dipRunName fmRunName cfg paths; optional bridge Tp join,ratio undefined at misaligned Tp,aging_clock_ratio_analysis buildClockRatioTable
+stage_or_route,tau_output,YES,Pipeline lane,tau_script TRACK_B_CONSOLIDATION,square Track B with wrong stage,F7X5 stage_or_route
+tau_consensus_methods,tau_output,YES,Disclosure for effective tau,comma method list or half_range_primary,same column name two algorithms,F7X5 bundle R-TAU-002
+object_name,tau_output future contract,YES,Logical name for row,tau_vs_Tp tau_FM_vs_Tp,join errors,F7X5 object_name
+sign_policy,FM tau input only,CONDITIONAL,FM_abs ABS_ONLY for consolidation,ABS_ONLY,signed FM misread,user guide FM_abs

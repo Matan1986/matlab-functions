@@ -1,0 +1,13 @@
+Tp,observable,n_points,has_short_tw,has_mid_tw,has_long_tw,ready_for_tau_fit_later,readiness_status,blocking_reason,metadata_required_before_tau,notes
+14,Dip_depth,4,YES,YES,YES,YES,READY_WITH_METADATA,,"F7X5 tau gate: domain/method/lineage bundle (B-003 dual-builder disclosure); cite source_run and observable_matrix lineage via sidecar when extracting; Dip_depth sign disclosure at Tp14 tw=360.","Inventory-only snapshot; no tau extracted here."
+14,FM_abs,4,YES,YES,YES,YES,READY_WITH_METADATA,,"FM_abs is ABS_ONLY magnitude (user guide); same metadata spine as other tau CSV lanes before authoritative tau claims; F7R2 row_ratio discipline if ratios are built later.","Inventory-only snapshot."
+18,Dip_depth,4,YES,YES,YES,YES,READY_WITH_METADATA,,"F7X5 B-003 metadata bundle; source_run lineage.","Inventory-only snapshot."
+18,FM_abs,4,YES,YES,YES,YES,READY_WITH_METADATA,,"ABS_ONLY caption discipline; metadata bundle before authoritative tau.","Inventory-only snapshot."
+22,Dip_depth,4,YES,YES,YES,YES,READY_WITH_METADATA,,"F7X5 B-003 metadata bundle; source_run lineage.","Inventory-only snapshot."
+22,FM_abs,4,YES,YES,YES,YES,READY_WITH_METADATA,,"ABS_ONLY; metadata bundle before authoritative tau.","Inventory-only snapshot."
+26,Dip_depth,4,YES,YES,YES,YES,READY_WITH_METADATA,,"F7X5 B-003 metadata bundle; source_run lineage.","Inventory-only snapshot."
+26,FM_abs,4,YES,YES,YES,YES,READY_WITH_METADATA,,"ABS_ONLY; metadata bundle before authoritative tau.","Inventory-only snapshot."
+30,Dip_depth,3,NO,YES,YES,PARTIAL,PARTIAL_GRID,missing tw=3 short-wait anchor versus symmetric lower-Tp ladder,"Even after metadata closure, symmetric short-time tau modeling across all Tp may require regenerating/filling tw=3 at Tp 30.","Three sampled tw values only; compare multipath status baseline lane."
+30,FM_abs,3,NO,YES,YES,PARTIAL,PARTIAL_GRID,missing tw=3 short-wait anchor versus symmetric lower-Tp ladder,"Same as Dip_depth row; ABS_ONLY retained.","Three sampled tw values only."
+34,Dip_depth,3,NO,YES,YES,PARTIAL,PARTIAL_GRID,missing tw=3 short-wait anchor versus symmetric lower-Tp ladder,"Same partial-grid caveat as Tp 30.","Three sampled tw values only."
+34,FM_abs,3,NO,YES,YES,PARTIAL,PARTIAL_GRID,missing tw=3 short-wait anchor versus symmetric lower-Tp ladder,"ABS_ONLY; partial grid at short tw.","Three sampled tw values only."

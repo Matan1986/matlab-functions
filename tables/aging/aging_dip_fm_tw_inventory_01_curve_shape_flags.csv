@@ -1,0 +1,13 @@
+Tp,observable,n_points,tw_values,direction_first_to_last,monotonic_status,largest_step_location,has_missing_short_tw,descriptive_shape_flag,notes
+14,Dip_depth,4,"3|36|360|3600",DECREASE,NON_MONOTONIC,36_to_360,NO,NON_MONOTONIC_WAIT_TIME_CURVE,"Sorted by increasing tw; sequence decreases then increases (includes negative dip cell at tw=360)."
+14,FM_abs,4,"3|36|360|3600",INCREASE,NON_MONOTONIC,360_to_3600,NO,NON_MONOTONIC_WAIT_TIME_CURVE,"Sorted by increasing tw; local peak at tw=36."
+18,Dip_depth,4,"3|36|360|3600",INCREASE,NON_MONOTONIC,360_to_3600,NO,NON_MONOTONIC_WAIT_TIME_CURVE,"Sorted by increasing tw; mid-range non-monotonic segment."
+18,FM_abs,4,"3|36|360|3600",DECREASE,NON_MONOTONIC,360_to_3600,NO,NON_MONOTONIC_WAIT_TIME_CURVE,"Sorted by increasing tw; magnitude-only FM_abs per Track B contract."
+22,Dip_depth,4,"3|36|360|3600",INCREASE,NON_MONOTONIC,360_to_3600,NO,NON_MONOTONIC_WAIT_TIME_CURVE,"Sorted by increasing tw."
+22,FM_abs,4,"3|36|360|3600",INCREASE,NON_MONOTONIC,360_to_3600,NO,NON_MONOTONIC_WAIT_TIME_CURVE,"Sorted by increasing tw."
+26,Dip_depth,4,"3|36|360|3600",INCREASE,NON_MONOTONIC,360_to_3600,NO,NON_MONOTONIC_WAIT_TIME_CURVE,"Sorted by increasing tw; first step decreases."
+26,FM_abs,4,"3|36|360|3600",INCREASE,MONOTONIC_INCREASE,360_to_3600,NO,MONOTONIC_INCREASE_WAIT_TIME_CURVE,"Sorted by increasing tw; strictly increasing across sampled tw."
+30,Dip_depth,3,"36|360|3600",INCREASE,MONOTONIC_INCREASE,36_to_360,YES,MONOTONIC_INCREASE_WAIT_TIME_CURVE,"Only three tw points; tw=3 absent for this Tp."
+30,FM_abs,3,"36|360|3600",INCREASE,MONOTONIC_INCREASE,360_to_3600,YES,MONOTONIC_INCREASE_WAIT_TIME_CURVE,"Only three tw points; tw=3 absent for this Tp."
+34,Dip_depth,3,"36|360|3600",INCREASE,NON_MONOTONIC,36_to_360,YES,NON_MONOTONIC_WAIT_TIME_CURVE,"Three tw points; non-monotonic due to mid vs long tw ordering."
+34,FM_abs,3,"36|360|3600",INCREASE,MONOTONIC_INCREASE,360_to_3600,YES,MONOTONIC_INCREASE_WAIT_TIME_CURVE,"Three tw points; tw=3 absent for this Tp."

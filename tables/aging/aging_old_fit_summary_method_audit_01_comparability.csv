@@ -1,0 +1,5 @@
+old_object,candidate_baseline_counterpart,directly_comparable,requires_bridge,requires_replay,forbidden_substitution,reason,recommended_action,notes
+AFM_like,Dip_depth,NO,YES,YES,YES,Track A summary picks Dip_A or Dip_area_selected or extrema path versus consolidation dip depth from stage4 reader chain,Pair via F7V bridge or dual export with full cfg disclosure; optional canonical stage6 replay,Extrema branch is further from Dip_depth
+FM_like,FM_abs,NO,YES,YES,YES,FM_like tracks FM_E fit RMS not abs(FM_signed) consolidation FM,Use bridge row or adapter before shared tau or ratio tables,Default config mirrors FM_E
+Dip_area_selected,Dip_depth,NO,YES,YES,YES,Integrated or direct selected area is not the same scalar as signed dip depth in thin consolidation,Document dipAreaSource and compare only with explicit mapping study,May correlate but not interchangeable
+FM_E,FM_abs,NO,YES,YES,YES,Fit-window step energy metric versus stage4 FM_abs magnitude contract,Run aging_fm_timescale on FM_abs not FM_E without new extractor; see F7U CX003,Proxy diagnostics exist for Track A but are not canonical tau
