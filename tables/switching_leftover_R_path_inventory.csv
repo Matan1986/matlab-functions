@@ -1,0 +1,38 @@
+path,git_status_code,tracked_state,likely_role_summary
+Switching/analysis/run_switching_canonical_state_audit.m,??,untracked,Repository-level Switching canonical state audit; writes tables/switching/* and reports/switching/*.
+Switching/diagnostics/run_switching_cdf_backbone_repair_aggressiveness_audit.m,??,untracked,Audits CDF-like backbone repair aggressiveness in corrected-canonical analysis path; emits switching_cdf_backbone_repair_*.csv.
+run_switching_fixed_T_current_cuts_canonical_replay.m,??,untracked,Canonical replay of fixed-T current cuts; writes figures/switching/canonical and replay CSVs.
+scripts/run_switching_baseline_X_panel_style_fix.m,??,untracked,Runner name implies baseline X-panel styling fixes for Switching figures.
+scripts/run_switching_canonical_X_panel_orientation_repair.m,??,untracked,Runner name implies canonical X-panel orientation repair (panel hygiene theme).
+scripts/run_switching_corrected_old_replay_inventory_and_phi1_visual_sanity.m,??,untracked,Forensic inventory / phi1 visual sanity for corrected-old replay lineage.
+scripts/run_switching_gauge_component_numeric_summary.m,??,untracked,Numeric summary of gauge/stabilized-gauge components.
+scripts/run_switching_gauge_component_stability_preview.m,??,untracked,Stability preview for gauge components.
+scripts/run_switching_normalized_X_robustness.m,??,untracked,Robustness exercise for normalized X (Switching context).
+scripts/run_switching_oldX_functional_replay_audit.ps1,??,untracked,PowerShell audit for old-X functional replay (legacy lineage).
+scripts/run_switching_old_fig_forensic_and_canonical_replot.m,??,untracked,Forensic review and canonical replot of older Switching figures.
+scripts/run_switching_stabilized_gauge_figure_replay.m,??,untracked,Replay harness for stabilized gauge figures.
+scripts/run_switching_stabilized_gauge_robustness_summary.m,??,untracked,Robustness summary for stabilized gauge outputs.
+scripts/run_switching_stabilized_gauge_xpanel_style_fix.m,??,untracked,X-panel style fix pass on stabilized gauge outputs.
+scripts/run_sw_corr_old_replay_auth.m,??,untracked,Authentication-oriented replay check for Switching correlation / old replay path (filename signal).
+scripts/run_sw_old_inv_phi1_viz.m,??,untracked,Visualization helper for legacy phi1 / inventory-style diagnostics (high-touch; separate review).
+scripts/run_cross_module_switching_relaxation_CM_SW_RLX_AX_10.m,??,untracked,Governed CM-SW-RLX AX replay entrypoint (Switching P0 + Relaxation tables).
+scripts/run_cross_module_switching_relaxation_CM_SW_RLX_AX_11_deep_diag.m,??,untracked,Deep diagnostic companion for CM-SW-RLX AX-11 lineage.
+scripts/run_cross_module_switching_relaxation_X_defense_replay_10.m,??,untracked,Cross-module X-defense replay runner (Switching–Relaxation).
+scripts/run_cross_module_switching_relaxation_X_defense_replay_10.py,??,untracked,Python twin for X-defense replay 10 (cross-module).
+scripts/run_cross_module_switching_relaxation_X_denominator_role_11B.m,??,untracked,Denominator-role analysis (11B) across modules.
+scripts/run_cross_module_switching_relaxation_X_eff_deep_dive_11A.m,??,untracked,Deep dive on effective/X coupling (11A) across modules.
+scripts/run_CM_SW_RLX_AX_12_strict_domain_repaired.m,??,untracked,AX-12 strict-domain repaired replay (cross-module contract).
+scripts/run_CM_SW_RLX_AX_13_xeff_invd_decision.m,??,untracked,AX-13 effective-X / inverse-diameter style decision audit.
+scripts/run_CM_SW_RLX_AX_14B_current_altwidth_robustness.m,??,untracked,AX-14B current / alt-width robustness bridge.
+scripts/run_CM_SW_RLX_AX_15_paper_variable_uniqueness.m,??,untracked,AX-15 paper-variable uniqueness audit (cross-module).
+scripts/run_CM_SW_RLX_AX_16A_dimensional_consistency_audit.m,??,untracked,AX-16A dimensional consistency audit.
+scripts/run_CM_SW_RLX_AX_17B_visual_comparison.m,??,untracked,AX-17B visual comparison harness.
+scripts/run_CM_SW_RLX_AX_18B_turnover_shape_audit.ps1,??,untracked,AX-18B turnover-shape audit (PowerShell).
+scripts/run_CM_SW_RLX_AX_19A_closure.m,??,untracked,AX-19A closure / wrap-up runner.
+docs/cross_module_switching_relaxation_canonical_placement_contract.md,??,untracked,Draft/contract prose on canonical placement for cross-module artifacts.
+docs/cross_module_switching_relaxation_global_closure_08.md,??,untracked,Draft global closure notes (CM Switching–Relaxation).
+docs/cross_module_switching_relaxation_index_draft.md,??,untracked,Draft index enumerating cross-module runners and placement rules.
+reports/maintenance/phase5C_switching_leftover_review.md,??,untracked,Phase 5C read-only review artifact: leftover grouping and commit policy at dated snapshot.
+tables/maintenance_phase5C_switching_leftover_review.csv,??,untracked,Machine-readable phase5C leftover review table (maintenance evidence).
+tables/maintenance_phase5C_switching_leftover_review_status.csv,??,untracked,Status companion for phase5C leftover review.
+scripts/tmp_run_switching_canonical_paper_figures.m,??,untracked,Temporary harness for canonical paper figures (hardcoded paths; high-touch).
