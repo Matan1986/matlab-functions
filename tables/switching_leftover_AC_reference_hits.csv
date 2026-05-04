@@ -1,0 +1,6 @@
+referencing_path,kind,notes
+tables/maintenance_dirty_tree_retention_decision_audit.csv,maintenance_table,Row references scripts/run_sw_old_inv_phi1_viz.m ARCHIVE_OR_QUARANTINE_LATER
+reports/maintenance/dirty_tree_retention_decision_audit.md,maintenance_report,Bullet lists scripts/run_sw_old_inv_phi1_viz.m
+reports/maintenance/phase4A_diff_review.md,maintenance_review,Classifies script as EXPERIMENTAL_PTCDF_DIAGNOSTIC hazard viz
+reports/maintenance/phase3_human_review_refinement.md,maintenance_review,Groups with other corrected-old replay scripts for quarantine alignment
+tables/maintenance_phase3_human_review_refinement.csv,maintenance_table,MOVE_TO_QUARANTINE_LATER high severity
