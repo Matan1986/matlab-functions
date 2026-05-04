@@ -1,0 +1,12 @@
+check_id,check_name,status,evidence,blocks_comparison,blocks_runner,failure_mode,notes
+CHK_BRIDGE_LEDGER_PRESENT,Bridge ledger artifact exists with baseline co-registration keys,PASS,tables/aging/aging_prb02b_f7v_bridge_ledger.csv committed rows BL_* and FORENSIC placeholder,NO_FOR_MULTIPATH,NO,none,PRB02 audit design CHK_BRIDGE_LEDGER_PRESENT
+CHK_ID_BRIDGE_CO_REGISTERED,Rows carry bridge_row_id pathway_id co_registered_group_id for baseline pairings,PARTIAL,12 baseline rows have ID_TAU_VS_TP_ROW and CO_REG_BASELINE_TP_* groups; no left_row_uid right_row_uid pauseRun UIDs,YES_FOR_PAUSE_RUN_CROSS_FAMILY,NO,INCOMPLETE_UID_LAYER,F7V full ID_BRIDGE_CO_REGISTERED also names bridge_id bridge_run_id UIDs for non-tau rows—future tranche
+CHK_PATHWAY_IDS_REGISTERED,pathway_id values are subset of PRB01 registry,PASS,aging_prb01_pathway_registry.csv contains AGN_WF_CONSOL_* and AGN_WF_FORENSIC_*,NO,NO,none,
+CHK_NO_TRACK_LABEL_IDS,No Track A or Track B as pathway_id,PASS,ledger pathway_id column only AGN_WF_*,NO,NO,none,Alias policy in registry aliases
+CHK_NO_TAU_EFFECTIVE_SECONDS_AS_ID,tau_effective_seconds appears only in tau_value_field,PASS,pathway_id never tau_effective_seconds,YES if violated,NO,TAU_HEADLINE_MERGE_FORBID,
+CHK_TP_TW_PRESENT_OR_EXPLICITLY_MISSING,Tp present for baseline; tw explicit N/A for tp-summary export,PASS,Tp 14-34; tw NOT_APPLICABLE_TP_SUMMARY_EXPORT,NO,NO,none,matches ID_TAU_VS_TP_ROW from PRB02 identity keys
+CHK_SOURCE_RUN_OR_DATASET_DISCLOSED,source_run and source_dataset_id from sidecars for baseline,PASS,strings copied from on-disk sidecars; forensic row UNKNOWN markers,YES for forensic row,NO,NAIVE_LEGACY_JOIN,Forensic row intentionally UNKNOWN
+CHK_ONE_TO_ONE_OR_EXPLICIT_PARTIAL,Co-reg groups are pairs per Tp; forensic explicit BLOCKED,PASS,one Dip + one FM per Tp; forensic single blocked row,YES for unsafe joins,NO,SILENT_FAMILY_MERGE,
+CHK_OLD_FIT_FORENSIC_ONLY,Forensic pathway blocked without source rows,PASS,FORENSIC_F6_NO_ROW_LEDGER row_identity_status BLOCKED,YES for canonical F6 replace,NO,NAIVE_LEGACY_JOIN,
+CHK_MULTIPATH_COMPARISON_BLOCKED,No multipath robustness claim,PASS,ledger scope baseline+placeholder only,YES_FOR_MULTIPATH,NO,FAIL_PREMATURE_MULTIPATH,
+CHK_RUNNER_BLOCKED,Runner not implied by ledger,PASS,aging_prb02b_f7v_bridge_status COMPARISON_RUNNER_READY_TO_IMPLEMENT NO,YES until manifest,NO,none,

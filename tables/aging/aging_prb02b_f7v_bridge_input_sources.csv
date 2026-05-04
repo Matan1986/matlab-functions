@@ -1,0 +1,11 @@
+input_role,artifact_path,exists,used,source_type,pathway_id,fields_used,limitations,notes
+PRB02_design,reports/aging/aging_prb02_f7v_bridge_audit_design.md,YES,YES,REPORT,N_A,identity key names,read-only,Audit flow reference
+PRB02_identity_keys,tables/aging/aging_prb02_f7v_bridge_identity_keys.csv,YES,YES,CSV_SPEC,N_A,ID_TAU_VS_TP_ROW ID_FORENSIC_LEGACY_ROW,read-only,Join rules
+F7V_bridge_contract,tables/aging/aging_F7V_required_bridge_contract.csv,YES,YES,CSV_SPEC,N_A,bridge_id list,future emitters,Implementation_allowed_now flags vary by bridge_id
+PRB01_registry,tables/aging/aging_prb01_pathway_registry.csv,YES,YES,REGISTRY,mixed,pathway_id pathway_family,read-only,Three pathways registered
+Baseline_emission_runs,tables/aging/aging_baseline_tau_sidecar_emission_validation_01_runs.csv,YES,YES,VALIDATION_CSV,baseline,main_output_path sidecar path,run roots under results/ may be local,Resolves paths for source_artifact
+Dip_tau_sidecar_on_disk,c:/Dev/matlab-functions/results/aging/runs/run_2026_05_04_134220_aging_timescale_extraction/tables/tau_vs_Tp_sidecar.csv,YES,YES,RESULT_SIDECAR,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,source_run source_dataset_id tau_method grid_disclosure,not in git if results deleted,Read in session to populate ledger strings
+FM_tau_sidecar_on_disk,c:/Dev/matlab-functions/results/aging/runs/run_2026_05_04_135134_aging_fm_timescale_analysis/tables/tau_FM_vs_Tp_sidecar.csv,YES,YES,RESULT_SIDECAR,AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,source_run source_dataset_id tau_method grid_disclosure,not in git if results deleted,
+Consolidation_dataset,c:/Dev/matlab-functions/tables/aging/aging_observable_dataset.csv,YES,YES,DATA_CSV,baseline,implicit through source_dataset_id,path environment may differ on other machines,Hash future G007
+Output_sanity_pairing,tables/aging/aging_baseline_tau_output_sanity_01_pairing.csv,YES,YES,VALIDATION_CSV,baseline,Tp pairable=YES,per-Tp not per artifact file,Confirms six Tp overlap
+Forensic_F6_source_rows,MISSING,NA,NO,NOT_AVAILABLE,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0,none,No single committed row-level F6 file selected for PRB02B,Placeholder row in ledger with BLOCKED
