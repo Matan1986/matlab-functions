@@ -1,0 +1,7 @@
+﻿predecessor_task_id,successor_task_id,dependency_reason,dependency_type
+AGING-TAU-FIX-01-SHARED-DATASET-LINEAGE,AGING-TAU-FIX-02-DIP-COMPONENT-BRANCH,Dip branch closure requires shared dataset identity closure,hard
+AGING-TAU-FIX-01-SHARED-DATASET-LINEAGE,AGING-TAU-FIX-03-FM-COMPONENT-BRANCH,FM branch closure requires shared dataset identity closure,hard
+AGING-TAU-FIX-02-DIP-COMPONENT-BRANCH,AGING-TAU-FIX-04-SIDECAR-HARDENING,Dip sidecar canonical token cannot close before Dip branch closure,hard
+AGING-TAU-FIX-03-FM-COMPONENT-BRANCH,AGING-TAU-FIX-04-SIDECAR-HARDENING,FM sidecar canonical token cannot close before FM branch closure,hard
+AGING-TAU-FIX-04-SIDECAR-HARDENING,AGING-TAU-FIX-05-ROW-IDENTITY-COREGISTRATION,Identity eligibility should be evaluated on hardened sidecar lineage state,hard
+AGING-TAU-FIX-05-ROW-IDENTITY-COREGISTRATION,AGING-TAU-FIX-06-CANONICAL-READINESS-GATE,Readiness gate depends on closed identity and co-registration evidence,hard
