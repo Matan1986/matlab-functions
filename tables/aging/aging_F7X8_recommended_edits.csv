@@ -1,0 +1,9 @@
+edit_id,target_artifact,edit_type,description,priority,safe_to_apply_without_new_analysis,requires_contract_change,notes
+E-001,reports/aging/aging_F7X7_user_observable_guide_draft.md,STRUCTURE,Insert Quick start first 5 minutes subsection after Purpose with ordered steps cheatsheet misreadings checklist,HIGH,YES,NO,Editorial only F7X7 edit is future task not done here
+E-002,reports/aging/aging_F7X7_user_observable_guide_draft.md,LANGUAGE,Add mini glossary pauseRuns MATLAB pause-run output table cfg agingMetricMode includes misleading fit flag,HIGH,YES,NO,
+E-003,reports/aging/aging_F7X7_user_observable_guide_draft.md,WARNING,Add consolidated Do not compare bullets cross-branch FM tau consolidation Track A,MEDIUM,YES,NO,
+E-004,reports/aging/aging_F7X7_user_observable_guide_draft.md,TABLE,Add prose legend for safe_use_matrix tokens WITH_QUALIFIER WITH_METADATA NOT_CLAIMED NA,HIGH,YES,NO,Could mirror one row from matrix inline
+E-005,reports/aging/aging_F7X7_user_observable_guide_draft.md,EXAMPLE,Embed one cheatsheet good bad pair for FM_abs vs FM_signed in Sign section,LOW,YES,NO,
+E-006,reports/aging/aging_F7X7_user_observable_guide_draft.md,METADATA,Optional boxed fake tau metadata panel example three lines,MEDIUM,YES,NO,
+E-007,reports/aging/aging_F7X7_user_observable_guide_draft.md,SCOPE,When docs promoted add inherited F7X5 blockers banner B-001..B-006,MEDIUM,YES,PARTIAL,Disclosure only not blocker resolution
+E-008,tables/aging/aging_F7X7_safe_use_matrix.csv,OTHER,No change required for editorial gate legend lives in prose,MEDIUM,YES,NO,Matrix already correct optional footnote row in CSV future

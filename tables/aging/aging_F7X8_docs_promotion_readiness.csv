@@ -1,0 +1,11 @@
+readiness_area,status,required_edit_before_promotion,blocks_docs_promotion,priority,notes
+quick-start section,READY_WITH_EDITS,Add first-screen Quick start five bullets after Purpose,PARTIAL,HIGH,Biggest gap for naive readers
+cheatsheet completeness,READY,None blocking links already in guide,NO,LOW,Cheatsheet stands alone well
+terminology clarity,READY_WITH_EDITS,Glossary pauseRuns cfg agingMetricMode stage labels,PARTIAL,MEDIUM,Jargon without one-line definitions
+warning clarity,READY,Warnings concrete not alarmist,NO,LOW,
+metadata checklist usability,READY_WITH_EDITS,Optional fake metadata panel example one tau row,PARTIAL,MEDIUM,Heavy CSV acceptable if guided
+common misreadings coverage,READY,MR table sufficient,NO,LOW,
+safe-use matrix clarity,PARTIAL,Prose legend for WITH_QUALIFIER WITH_METADATA NOT_CLAIMED NA,PARTIAL,HIGH,Blocking until decode added for casual docs reader
+physical-claim separation,READY,NOT_CLAIMED column honest,NO,LOW,
+open blocker disclosure,READY_WITH_EDITS,Banner listing F7X5 B-001..B-006 when promoting docs,PARTIAL,MEDIUM,Inherited blockers not resolved here
+length structure,READY,Under 200 lines main body acceptable,NO,LOW,

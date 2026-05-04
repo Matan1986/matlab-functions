@@ -1,0 +1,11 @@
+question_id,user_question,answered_by_current_guide,where_answered,gap,recommended_edit,blocking_for_docs_promotion
+UQ-001,What is this observable?,PARTIAL,"Guide How to read name + cheatsheet plain_language_meaning","Does not define every symbol in one place","Add cheatsheet-first pointer in Quick start",NO
+UQ-002,Where did it come from?,PARTIAL,"Quick map + sections stage4 tau ratio","pauseRuns not glossed","Add glossary pauseRuns equals MATLAB run output struct",PARTIAL
+UQ-003,Is this measured directly or computed downstream?,YES,"Tau Ratio sections + cheatsheet object_kind","Nuanced for FM_step_mag","Keep matrix decode for layered answers",NO
+UQ-004,Is this a bridge export object?,YES,"Bridge section + misreadings MR-002","None major","Optional figure caption template bridge export",NO
+UQ-005,Is it safe for physical interpretation?,YES,"What is safe + safe_use_matrix NOT_CLAIMED","Matrix file not summarized in prose","Add legend NOT_CLAIMED equals contracts do not certify physics",PARTIAL
+UQ-006,What metadata must accompany it?,PARTIAL,"Minimal checklist CSV reference","Reader must open CSV","Quick start say open checklist CSV for your quantity_type",PARTIAL
+UQ-007,What does Track A or Track B mean?,YES,"Track A B warning + misreadings MR-001","None","Optional rename section to Track labels are lanes not names",NO
+UQ-008,What does tau_effective_seconds mean?,PARTIAL,"Tau observables + tau metadata warning","Dual-builder detail only one paragraph","Add one sentence two contexts share column consult tau_domain",NO
+UQ-009,What is the sign convention?,YES,"Sign and magnitude warning + cheatsheet FM rows","FM_step_mag exception easy to miss","Bold FM_step_mag bullet or repeat cheatsheet MR-004",NO
+UQ-010,What should I not compare directly?,PARTIAL,"Multiple warnings cross-branch substitution","No single consolidated dont compare list","Add bullet list: cross-branch FM swaps tau vs pauseRuns five-column vs Track A summaries bridge pairing",PARTIAL

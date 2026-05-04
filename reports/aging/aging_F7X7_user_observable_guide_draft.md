@@ -12,6 +12,57 @@ The F7X2--F7X6 artifacts record surveys, definitions, and governance rules in de
 
 ---
 
+## Quick start (first ~5 minutes)
+
+1. Open **`tables/aging/aging_F7X7_user_observable_cheatsheet.csv`** and find the row whose **display_family** matches what you are looking at.
+2. Read **object_kind** on that row: decomposition field on a pause run, bridge/export row, tau table row, ratio output, or a diagnostic/label-only concept.
+3. Note **typical_source_or_stage** and your actual script/stage so **source**, **stage**, and **branch** match (stage 4 mode is not the same as stage 5 fit output).
+4. For FM-related fields, check **sign or magnitude** using this guide's Sign section and the cheatsheet **main_caveat** column.
+5. For **tau** or **ratio** quantities, do **not** interpret numbers until **metadata** (domain, method, inputs, lineage) is present or cited.
+6. Open **`tables/aging/aging_F7X7_safe_use_matrix.csv`** and use the legend below to separate **allowed display** from **physical interpretation** (`NOT_CLAIMED`).
+7. Skim **`tables/aging/aging_F7X7_common_misreadings.csv`** before comparing two columns or two branches -- most hazardous substitutions are listed there.
+
+---
+
+## Short glossary
+
+- **`pauseRuns`** -- MATLAB structure/table of **per-pause-temperature** outputs from the Aging pipeline (not a CSV name). Fields depend on stage and config.
+- **`DeltaM`** -- Delta magnetization step observable naming family in prose; in code comments **`dM`** often refers to **`pauseRuns.DeltaM`** as the pipeline analysis trace.
+- **`dM`** -- In stage 4 direct decomposition, **`dM`** is the **`pauseRuns.DeltaM(:)`** vector used for sharp residual math unless documented otherwise.
+- **`DeltaM_signed`** -- Signed delta-M field when present; may fall back to **`dM`** depending on run -- **do not assume** identity with **`dM`** without checking.
+- **`stage4`** -- Pause-run **decomposition** stage (direct, derivative, or extrema modes, plus stage 4 "direct family" when `cfg.agingMetricMode` is `direct` / `model` / `fit`).
+- **`stage5`** -- **Parametric fit** stage that writes fit-interface scalars to pause runs (distinct from confusing **`cfg.agingMetricMode='fit'`**, which still routes **stage 4 direct-family** code).
+- **`stage6`** -- **Summary/metrics** stage (for example **Track A**-style summary vectors), not the five-column consolidation file by itself.
+- **`cfg.agingMetricMode`** -- Configuration switch for **which stage 4 branch** runs. The value **`fit` here does not mean** "stage 5 Gaussian fit object" -- verify against stage numbering above.
+- **`Track A`** -- **Router label** for the **stage 6 summary / figure lane** -- **not** a physical quantity name by itself.
+- **`Track B`** -- **Router label** for the **five-column consolidation reader** lane -- **not** a physical quantity name by itself.
+- **`bridge/export`** -- Long-form **pairing** identifiers and rows for cross-stream alignment (for example bridge component IDs) -- **bridge-only** semantics, not default standalone observables.
+- **`tau output`** -- A row from a **tau script CSV** (for example `tau_vs_Tp.csv`) summarizing curves -- **downstream** of pause-run decomposition.
+- **`ratio output`** -- A quantity such as **`R_age`** built from **prior tau CSVs** -- **downstream combinator**, not a raw pause-run measurement.
+- **`NOT_CLAIMED`** -- In the safe-use matrix, **physical interpretation is not certified** by this guide or contract (see legend -- **not** the same as "false").
+- **`WITH_METADATA`** -- Allowed only when the listed **metadata fields** are present or explicitly cited for that use (tau/ratio/bridge paths).
+- **`WITH_QUALIFIER`** -- Allowed for display or use only when **branch/stage/source** context is shown -- names alone are insufficient.
+
+---
+
+## How to read the safe-use matrix (`aging_F7X7_safe_use_matrix.csv`)
+
+The CSV uses short tokens in each **policy column**. Plain meanings:
+
+| Token | Meaning |
+|-------|---------|
+| **YES** | Allowed as stated **when** lineage/config gates for that column are satisfied (read the **notes** column on that row). |
+| **NO** | Not allowed for that column on that family row. |
+| **`WITH_QUALIFIER`** | Only safe when **stage/route/source** context is attached -- **do not** use the bare column name as a full story. |
+| **`WITH_METADATA`** | Do **not** treat the numeric cell as meaningful until **required metadata** (tau bundle, ratio inputs, bridge ids, etc.) is present. |
+| **`NOT_CLAIMED`** | **Does not mean the quantity is false or useless.** It means this guide and the **partial contracts do not certify** a **physical interpretation** for that cell -- study-specific claims stay outside this matrix. |
+| **`NA`** | Not applicable for that gate on that row (for example tau input for a row that is not a tau-ingest path). |
+| **`BRIDGE_ONLY`**, **`DOWNSTREAM_ONLY`**, **`DISPLAY_ONLY`**, **`DIAGNOSTIC_ONLY`** | Vocabulary-style gates from annexes: **bridge/export** use only; **downstream** combined outputs; **display** only until bundle complete; **diagnostic** scripts or labels -- check family **notes** when these appear in companion tables. |
+
+**Core rules:** **`WITH_METADATA`** means **do not interpret** without the required fields. **`WITH_QUALIFIER`** means **unsafe** without **branch/stage/source** context. **`NOT_CLAIMED`** means **no certified physics read** here, not disproof.
+
+---
+
 ## What this guide is / is not
 
 | This guide **is** | This guide **is not** |
@@ -145,7 +196,7 @@ Any plot or table that shows **tau** fields must show **which curve family** (di
 
 ## What is safe to use for what
 
-Use **`tables/aging/aging_F7X7_safe_use_matrix.csv`** as the machine-oriented summary. Distilled user guidance:
+Use **`tables/aging/aging_F7X7_safe_use_matrix.csv`** as the machine-oriented summary. **Read the token legend under "How to read the safe-use matrix" earlier in this guide** first -- especially **`NOT_CLAIMED`** (not certified for physical interpretation, **not** "false") and **`WITH_METADATA`**. Distilled user guidance:
 
 - **Decomposition fields** -- usable for within-branch diagnostics and exports when stage/mode is documented; **cross-branch substitution** requires explicit pairing (often bridge), not assumed equality.
 - **Five-column consolidation** -- usable as a **standard reader input** for tau dip scripts **when** lineage pointers are satisfied -- **not** a signed-FM carrier.

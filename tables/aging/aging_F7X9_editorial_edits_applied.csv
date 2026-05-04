@@ -1,0 +1,7 @@
+edit_id,source_F7X8_edit,target_file,edit_applied,section_added_or_modified,summary,new_analysis_required,contract_change_required,notes
+E-001,E-001,reports/aging/aging_F7X7_user_observable_guide_draft.md,YES,Quick start (first ~5 minutes),Seven-step onboarding cheatsheet object kind stage sign tau ratio safe-use matrix misreadings,NO,NO,Placed after Purpose
+E-002,E-002,reports/aging/aging_F7X7_user_observable_guide_draft.md,YES,Short glossary,Plain entries for pauseRuns DeltaM dM DeltaM_signed stages cfg Track A B bridge tau ratio NOT_CLAIMED WITH_METADATA WITH_QUALIFIER,NO,NO,Matrix tokens also in legend table
+E-004,E-004,reports/aging/aging_F7X7_user_observable_guide_draft.md,YES,How to read the safe-use matrix,Legend for YES NO WITH_QUALIFIER WITH_METADATA NOT_CLAIMED NA BRIDGE_ONLY DOWNSTREAM_ONLY DISPLAY_ONLY DIAGNOSTIC_ONLY plus NOT_CLAIMED meaning,NO,NO,What is safe section cross-references legend
+E-003,N/A,reports/aging/aging_F7X7_user_observable_guide_draft.md,NO,—,Consolidated do-not-compare bullets not in F7X9 scope,N/A,N/A,Optional later
+E-005,N/A,reports/aging/aging_F7X7_user_observable_guide_draft.md,NO,—,Inline FM good bad example not required for F7X9,N/A,N/A,Optional later
+E-006,N/A,reports/aging/aging_F7X7_user_observable_guide_draft.md,NO,—,Fake tau panel not required for F7X9,N/A,N/A,Optional later
