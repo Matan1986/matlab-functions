@@ -1,0 +1,6 @@
+task_id,task_name,task_type,blocking_dependency,allowed_now,expected_outputs,must_not_do,notes
+T001,Implement F7V semantic bridges (Track A↔B row mapping),implementation,G001 bridge design rows in F7V CSV,NO until chartered,F7V bridge CSV executed code + validation artifacts,Treat outputs as canonical physics without separate audit,F7V_BRIDGE_IMPLEMENTED currently NO
+T002,Author decomposition×tau pathway registry (opaque ids),documentation/registry,G002 naming dimensions,NO conflicting taxonomy edits,Machine CSV keyed by pathway_id + producer tokens,Rename production MATLAB identifiers without freeze,T003 dependency for runner
+T003,Draft comparison-runner manifest schema only,survey/spec,G006,NO runner code,draft markdown + example JSON rows,Execute MATLAB or compute tau,R prepares COMPARISON_RUNNER readiness
+T004,Multipath clock-ratio robustness charter (rerun plan),charter/plan,G004,NO tau reruns,charter doc + paired-run checklist,Implicit ranking of physics winners,F7U suggested next step
+T005,Baseline ratio re-entry execution (scoped),execution,F7T gates + sidecars,NO until governance accepts CEL,clock_ratio outputs only under charter,General model use without branch mode,Baseline lane validated separately

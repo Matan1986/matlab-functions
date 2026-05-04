@@ -1,0 +1,16 @@
+artifact_path,artifact_role,read_success,relevant_to_decomposition,relevant_to_tau_method,relevant_to_naming,relevant_to_lineage,key_takeaway,status,notes
+reports/aging/aging_baseline_tau_sidecar_emission_validation_01.md,Validated baseline Dip/FM run evidence,YES,YES,YES,YES,YES,c7e5d41 pair run; wrapper vs batch wiring; sidecar domains; no ratio in run dirs,OK,Authoritative for BASELINE_DIRECT validated lane only
+tables/aging/aging_baseline_tau_sidecar_emission_validation_01_status.csv,Emission validation status keys,YES,YES,YES,NO,YES,READY_FOR_RATIO_REENTRY PARTIAL; MATLAB_RUN YES on emission (historical),OK,Reflects validation runs not this read-only survey
+tables/aging/aging_baseline_tau_sidecar_emission_validation_01_sidecar_fields.csv,Per-field sidecar checks (referenced),YES,NO,YES,YES,YES,17 metadata keys verified in emission task,OK,Read via validation packet; field-level OK in prior task
+tables/aging/aging_baseline_tau_sidecar_emission_validation_01_runs.csv,Resolved artifact paths for Dip/FM,YES,NO,YES,NO,YES,FM001 uses matlab -batch cfg; DIP001 wrapper,OK,Paths anchor baseline artifact roles
+reports/aging/aging_baseline_tau_output_sanity_01.md,Read-only QA on four baseline tau files,YES,NO,YES,YES,YES,Tp overlap 6; tau_effective_seconds pairing; partial grid disclosure,OK,OUTPUT-SANITY-01
+reports/aging/aging_F7U_decomposition_tau_path_readiness_survey.md,F7U decomposition/tau/ratio inventory,YES,YES,YES,YES,YES,Multipath not ready; baseline F7T lane YES_BASELINE_ONLY,OK,Core prior survey — do not duplicate
+tables/aging/aging_F7U_status.csv,F7U machine verdicts,YES,YES,YES,NO,NO,FIT_VS_DIRECT PARTIAL; MULTIPATH NO,OK,
+reports/aging/aging_F7V_fit_vs_direct_decomposition_alignment_charter.md,F7V alignment + bridge requirement,YES,YES,YES,YES,NO,Direct substitution forbidden; bridge required; multipath ratio not ready now,OK,
+tables/aging/aging_F7V_status.csv,F7V verdicts,YES,YES,YES,NO,NO,BRIDGE_REQUIRED YES IMPLEMENTED NO,OK,
+reports/aging/aging_F7X2_route_name_method_survey.md,F7X2 naming + route inventory,YES,YES,YES,YES,YES,Track labels insufficient; tau_effective_seconds legacy alias risks,OK,
+reports/aging/aging_F7S_post_repair_readiness_audit.md,F7S post-F7R2 readiness,YES,NO,YES,YES,YES,FM convention PARTIAL; ratio not executed; conservative flags,OK,Tau metadata discipline context
+reports/aging/aging_F7T_scoped_R_age_clock_ratio_charter.md,F7T scoped ratio charter,YES,NO,YES,NO,YES,CEL; branch modes; row_ratio_use_allowed conservative,OK,Future ratio only — defines gates not execution
+reports/aging/aging_canonical_reentry_map_01.md,Canonical re-entry route map,YES,YES,YES,YES,YES,B-003 tau bundle; B-004 bridge lineage; route families summarized,OK,
+tables/aging/aging_tau_metadata_gate_01_tau_effective_seconds_policy.csv,tau_effective_seconds policy rows,YES,NO,YES,YES,YES,Shared column unsafe without tau_domain and bundle,OK,
+reports/aging/aging_decomposition_summary.md,Legacy short decomposition summary,YES,YES,NO,NO,NO,High-level entrypoint only; superseded by F7 inventories,PARTIAL,Keep as historical; not sufficient alone
