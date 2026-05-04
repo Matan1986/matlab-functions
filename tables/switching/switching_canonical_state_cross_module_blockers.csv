@@ -1,0 +1,4 @@
+blocker_id,source_artifact,rationale_switching_only
+RELAXATION_COMPARE_DEFAULT_NO,tables/switching_geocanon_descriptor_status.csv (SAFE_TO_COMPARE_TO_RELAXATION NO),Explicit NO across geocanon + canonical spine scripts unless a future gate sets YES.
+GEOCANON_INTERPRETATION_BLOCKED,tables/switching_geocanon_T1_weighted_ridge_status.csv (SAFE_TO_WRITE_GEOCANON_INTERPRETATION NO),T1 lock completes ridge center but forbids interpretation narrative at this step.
+GAUGE_BUNDLE_INCOMPLETE,tables/maintenance_phase5A_gauge_atlas_review_status.csv (SAFE_TO_PROCEED_PHASE5B NO),Cross-module placement tightening should wait for Switching-only gauge classification review closure.

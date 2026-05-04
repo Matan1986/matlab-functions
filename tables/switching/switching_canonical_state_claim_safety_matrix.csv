@@ -1,0 +1,9 @@
+claim_topic,safe_main_text,safe_supplement,blocked_or_note,primary_evidence_pointer
+Manuscript backbone narrative (Phi-kappa collapse),PARTIAL,YES,Full closure blocked; Stage E5B limited claims only,tables/switching_stage_e5b_claim_boundary_review.csv; docs/switching_analysis_map.md
+Canonical S maps / identity,PARTIAL,YES,Must cite CANON_GEN_SOURCE + run id,tables/switching_canonical_identity.csv; Switching/analysis/run_switching_canonical.m
+Geocanon ridge descriptors physical interpretation,NO,PARTIAL,SAFE_TO_WRITE_GEOCANON_INTERPRETATION NO at T1 and descriptor audit PARTIAL,tables/switching_geocanon_descriptor_status.csv; tables/switching_geocanon_T1_weighted_ridge_status.csv
+Scaling coordinate tests beyond T,NO,PARTIAL,Conflicting gates: coordinate audit YES vs map spine NO — document before tests,scripts/run_switching_phase4A_scaling_coordinate_screening.ps1; scripts/run_switching_canonical_map_spine.ps1
+Phase4B collapse QA panels,NO,YES,SAFE_TO_INTERPRET_PHYSICS NO in C02B status,tables/switching_phase4B_C02B_status.csv
+Rank-2 residual hierarchy leading order,PARTIAL,YES,CLAIMS_ALLOWED_LIMITED YES; CLAIMS_BLOCKED_FULL_CLOSURE YES,tables/switching_stage_e5b_claim_boundary_review.csv
+Rank-3 / Phi3 promotion,NO,DIAGNOSTIC_ONLY,RANK3_PROMOTION_ALLOWED NO,tables/switching_stage_e5b_claim_boundary_review.csv
+Relaxation comparison readiness,NO,NO,Multiple artifacts: SAFE_TO_COMPARE_TO_RELAXATION NO,tables/switching_geocanon_descriptor_status.csv; scripts/run_switching_canonical_map_spine.ps1

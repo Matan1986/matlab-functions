@@ -1,0 +1,10 @@
+change_id,location,change_summary
+X1,File header,Expanded governance header: no physics/inference; Aging/utils = execution infra only; static vs live verdict disclaimer
+X2,addpath Aging/utils,Single-line INFRA_ONLY comment (createRunContext)
+X3,buildFamilyInventory,Entry comment: STATIC_EDITORIAL + note on missing_expected exist() scope
+X4,buildClaimSafetyMatrix,Entry comment: STATIC_EDITORIAL policy matrix
+X5,buildCompletedTests,Entry comment: LIVE_REPO_PROBE via exist() only
+X6,buildOpenTasks,Entry comment: STATIC_EDITORIAL / DECLARED_OPEN_WORK
+X7,buildCrossModuleBlockers,Entry comment: STATIC_EDITORIAL blocker narrative
+X8,buildStatusVerdicts,Block comment: STATIC_DECLARED; legacy keys; not live gate scrape
+X9,writeMarkdownReport,Entry comment: STATIC_EDITORIAL prose + same provenance as verdicts

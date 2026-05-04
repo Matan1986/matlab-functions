@@ -1,0 +1,20 @@
+path,include_in_commit,git_add_command
+Switching/analysis/run_switching_canonical_state_audit.m,YES,git add --
+reports/switching_state_X_runner_semantic_repair.md,YES,git add -f --
+tables/switching_state_X_changes.csv,YES,git add -f --
+tables/switching_state_X_status.csv,YES,git add -f --
+reports/switching_state_Y_runner_test_run.md,YES,git add -f --
+tables/switching_state_Y_outputs.csv,YES,git add -f --
+tables/switching_state_Y_status.csv,YES,git add -f --
+reports/switching_state_Z_promotion_slice_plan.md,YES,git add -f --
+tables/switching_state_Z_candidate_paths.csv,YES,git add -f --
+tables/switching_state_Z_stage_plan.csv,YES,git add -f --
+tables/switching_state_Z_status.csv,YES,git add -f --
+tables/switching/switching_canonical_state_claim_safety_matrix.csv,YES,git add -f --
+tables/switching/switching_canonical_state_completed_tests.csv,YES,git add -f --
+tables/switching/switching_canonical_state_cross_module_blockers.csv,YES,git add -f --
+tables/switching/switching_canonical_state_family_inventory.csv,YES,git add -f --
+tables/switching/switching_canonical_state_open_tasks.csv,YES,git add -f --
+tables/switching/switching_canonical_state_status.csv,YES,git add -f --
+reports/switching/switching_canonical_state_audit.md,YES,git add -f --
+results/switching/runs/run_2026_05_04_231550_switching_canonical_state_audit/,NO,do not stage

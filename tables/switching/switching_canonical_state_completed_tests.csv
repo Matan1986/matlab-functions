@@ -1,0 +1,11 @@
+test_name,artifact_present,evidence_path,notes
+Main narrative namespace decision recorded,YES,tables\switching_main_narrative_namespace_decision.csv,
+Artifact policy family separation,YES,docs\switching_artifact_policy.md,
+Geocanon descriptor audit emitted durable tables,YES,tables\switching_geocanon_descriptor_status.csv,
+Geocanon partial-status diagnosis,YES,tables\switching_geocanon_partial_status_diagnosis.csv,
+T1 weighted ridge primary lock,YES,tables\switching_geocanon_T1_weighted_ridge_status.csv,
+S observable identity audit (PS gate),YES,scripts\run_switching_S_observable_identity_audit.ps1,Verdict keys emitted by runner pattern — see script for SAFE_TO_* defaults
+Canonical map spine (PS),YES,scripts\run_switching_canonical_map_spine.ps1,Declares diagnostic-only use for PT/CDF columns
+Phase4B C02B primary collapse variant audit + human review,YES,tables\switching_phase4B_C02B_status.csv,SAFE_TO_INTERPRET_PHYSICS NO
+Stage E5B claim boundary review,YES,tables\switching_stage_e5b_claim_boundary_review.csv,Rank-2 allowed limited; rank-3 blocked promotion
+Phi1 terminology registry + authoritative artifact index,YES,tables\switching_phi1_terminology_registry.csv,

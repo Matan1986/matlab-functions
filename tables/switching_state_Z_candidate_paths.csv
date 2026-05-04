@@ -1,0 +1,20 @@
+path,classification,git_notes
+Switching/analysis/run_switching_canonical_state_audit.m,STAGE_RUNNER,untracked not ignored
+reports/switching_state_X_runner_semantic_repair.md,STAGE_X_AUDIT,ignored reports/** force-add
+tables/switching_state_X_changes.csv,STAGE_X_AUDIT,ignored tables/** force-add
+tables/switching_state_X_status.csv,STAGE_X_AUDIT,ignored tables/** force-add
+reports/switching_state_Y_runner_test_run.md,STAGE_Y_AUDIT,ignored reports/** force-add
+tables/switching_state_Y_outputs.csv,STAGE_Y_AUDIT,ignored tables/** force-add
+tables/switching_state_Y_status.csv,STAGE_Y_AUDIT,ignored tables/** force-add
+reports/switching_state_Z_promotion_slice_plan.md,STAGE_Z_PLAN,ignored reports/** force-add
+tables/switching_state_Z_candidate_paths.csv,STAGE_Z_PLAN,ignored tables/** force-add
+tables/switching_state_Z_stage_plan.csv,STAGE_Z_PLAN,ignored tables/** force-add
+tables/switching_state_Z_status.csv,STAGE_Z_PLAN,ignored tables/** force-add
+tables/switching/switching_canonical_state_claim_safety_matrix.csv,STAGE_DURABLE_STATE_OUTPUT,ignored tables/** force-add
+tables/switching/switching_canonical_state_completed_tests.csv,STAGE_DURABLE_STATE_OUTPUT,ignored tables/** force-add
+tables/switching/switching_canonical_state_cross_module_blockers.csv,STAGE_DURABLE_STATE_OUTPUT,ignored tables/** force-add
+tables/switching/switching_canonical_state_family_inventory.csv,STAGE_DURABLE_STATE_OUTPUT,ignored tables/** force-add
+tables/switching/switching_canonical_state_open_tasks.csv,STAGE_DURABLE_STATE_OUTPUT,ignored tables/** force-add
+tables/switching/switching_canonical_state_status.csv,STAGE_DURABLE_STATE_OUTPUT,ignored tables/** force-add
+reports/switching/switching_canonical_state_audit.md,STAGE_DURABLE_STATE_OUTPUT,ignored reports/** force-add
+results/switching/runs/run_2026_05_04_231550_switching_canonical_state_audit/,DO_NOT_STAGE_RUN_DIR_SIDECAR,ignored results/** default exclude from commit

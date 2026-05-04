@@ -1,0 +1,15 @@
+output_kind,path,notes
+durable_csv,C:/Dev/matlab-functions/tables/switching/switching_canonical_state_family_inventory.csv,writetable
+durable_csv,C:/Dev/matlab-functions/tables/switching/switching_canonical_state_claim_safety_matrix.csv,writetable
+durable_csv,C:/Dev/matlab-functions/tables/switching/switching_canonical_state_completed_tests.csv,writetable
+durable_csv,C:/Dev/matlab-functions/tables/switching/switching_canonical_state_open_tasks.csv,writetable
+durable_csv,C:/Dev/matlab-functions/tables/switching/switching_canonical_state_cross_module_blockers.csv,writetable
+durable_csv,C:/Dev/matlab-functions/tables/switching/switching_canonical_state_status.csv,writetable
+durable_report,C:/Dev/matlab-functions/reports/switching/switching_canonical_state_audit.md,markdown synthesis
+run_execution_status,C:/Dev/matlab-functions/results/switching/runs/run_2026_05_04_231550_switching_canonical_state_audit/execution_status.csv,SUCCESS final row
+run_manifest,C:/Dev/matlab-functions/results/switching/runs/run_2026_05_04_231550_switching_canonical_state_audit/run_manifest.json,createRunContext
+run_config_snapshot,C:/Dev/matlab-functions/results/switching/runs/run_2026_05_04_231550_switching_canonical_state_audit/config_snapshot.m,
+run_log,C:/Dev/matlab-functions/results/switching/runs/run_2026_05_04_231550_switching_canonical_state_audit/log.txt,
+run_probe,C:/Dev/matlab-functions/results/switching/runs/run_2026_05_04_231550_switching_canonical_state_audit/execution_probe_top.txt,SCRIPT_ENTERED
+run_tables_copy,C:/Dev/matlab-functions/results/switching/runs/run_2026_05_04_231550_switching_canonical_state_audit/tables/switching_canonical_state_status.csv,copyfile from durable
+run_reports_copy,C:/Dev/matlab-functions/results/switching/runs/run_2026_05_04_231550_switching_canonical_state_audit/reports/switching_canonical_state_audit.md,copyfile from durable

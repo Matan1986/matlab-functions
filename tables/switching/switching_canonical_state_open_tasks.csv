@@ -1,0 +1,6 @@
+task_id,priority,description
+GEOCANON_T2_WIDTH_FRAME_INDEX,P0,Promote durable width-frame tables/reports under explicit namespace once T2 completes.
+SCALING_COORDINATE_GATE_RECONCILIATION,P0,Resolve SAFE_TO_TEST_SCALING_COORDINATES YES vs NO across coordinate screening vs map spine.
+GAUGE_ATLAS_PHASE5B_STAGING,P1,tables/maintenance_phase5A_gauge_atlas_review_status.csv: SAFE_TO_PROCEED_PHASE5B NO.
+SEMANTIC_CONTRACT_REPORTS_PRESENT,P2,Expected paths from scripts (e.g. switching_semantic_contract_materialization.md) missing — register or retire pointers.
+CURRENT_STATE_REPORT_PRESENT,P2,Spine references reports/switching_corrected_canonical_current_state.md — ensure exists or update spine pointer.
