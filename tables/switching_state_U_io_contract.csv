@@ -1,0 +1,12 @@
+artifact,io_direction,purpose_or_notes
+repoRoot-relative paths in buildCompletedTests,READ,exist(file) checks for artifact_present column
+tables/switching/switching_canonical_state_family_inventory.csv,WRITE,writetable durable inventory
+tables/switching/switching_canonical_state_claim_safety_matrix.csv,WRITE,writetable claim boundaries
+tables/switching/switching_canonical_state_completed_tests.csv,WRITE,writetable completed-tests register
+tables/switching/switching_canonical_state_open_tasks.csv,WRITE,writetable open tasks
+tables/switching/switching_canonical_state_cross_module_blockers.csv,WRITE,writetable blocker narrative
+tables/switching/switching_canonical_state_status.csv,WRITE,writetable machine verdict keys
+reports/switching/switching_canonical_state_audit.md,WRITE,fprintf markdown synthesis
+runDir/execution_probe_top.txt,WRITE,one-line SCRIPT_ENTERED probe
+runDir tables/reports copies + execution status,WRITE,writeSwitchingExecutionStatus and copyfile from durable outputs
+Relaxation/** or Aging/data inputs,NONE,No reads of Relaxation or Aging analysis inputs per inspection

@@ -1,0 +1,13 @@
+finding_id,category,detail
+F1,tracking,File Switching/analysis/run_switching_canonical_state_audit.m exists locally and is untracked (git status ??).
+F2,purpose,Repository-level Switching canonical state audit: writes governance CSVs under tables/switching/ and report reports/switching/switching_canonical_state_audit.md; uses createSwitchingRunContext for run-scoped sidecars.
+F3,governance_vs_science,Explicitly governance/audit synthesis; header states no physics fits and no Relaxation inputs; no numerical fitting in script body.
+F4,inputs,Reads repo via exist() checks on listed relative paths in buildCompletedTests; embedded string inventories in other builders reference docs/tables/scripts paths without fopen content parsing.
+F5,outputs,Durable: six switching_canonical_state_*.csv files plus switching_canonical_state_audit.md; run directory: execution status copies probe file execution_probe_top.txt.
+F6,pattern,Outputs follow durable tables + reports/switching markdown + status-style CSV pattern consistent with Switching governance runners.
+F7,canonical_scope,Primary artifacts are Switching/docs/tables paths; createRunContext requires Aging/utils on path (shared infrastructure not Aging data).
+F8,cross_module_content,Tables and narrative reference Relaxation comparison blockers and maintenance gauge CSVs as policy documentation; no Relaxation code execution or data read.
+F9,paths,No hardcoded drive letters; repoRoot derived from mfilename fullpath.
+F10,debug,execution_probe_top.txt writes SCRIPT_ENTERED marker; minor debug-style probe.
+F11,try_catch,catch block writes FAILED execution status then rethrow(ME); not silent.
+F12,static_verdicts,buildStatusVerdicts and parts of other builders use fixed cell literals; risk of drift from live CSV gate columns without reconciliation policy.
