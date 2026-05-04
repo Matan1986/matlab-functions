@@ -1,0 +1,6 @@
+artifact_path,artifact_role,exists,created_or_updated_in_this_task,required,status,notes
+c:/Dev/matlab-functions/results/aging/runs/run_2026_05_04_134220_aging_timescale_extraction/tables/tau_vs_Tp.csv,Dip main tau output,YES,YES,YES,OK,
+c:/Dev/matlab-functions/results/aging/runs/run_2026_05_04_134220_aging_timescale_extraction/tables/tau_vs_Tp_sidecar.csv,Dip sidecar metadata,YES,YES,YES,OK,
+c:/Dev/matlab-functions/results/aging/runs/run_2026_05_04_135134_aging_fm_timescale_analysis/tables/tau_FM_vs_Tp.csv,FM main tau output,YES,YES,YES,OK,
+c:/Dev/matlab-functions/results/aging/runs/run_2026_05_04_135134_aging_fm_timescale_analysis/tables/tau_FM_vs_Tp_sidecar.csv,FM sidecar metadata,YES,YES,YES,OK,
+N/A,table_clock_ratio or other ratio table in these run roots,NO,N/A,N/A,OK,No clock_ratio artifact in either run tables/ directory; scripts are not ratio writers
