@@ -1,0 +1,7 @@
+Tp,n_rows,n_unique_tw,tw_min,tw_max,tw_values_summary,n_duplicate_Tp_tw_source_run,n_missing_Dip_depth,n_missing_FM_abs,Dip_depth_min,Dip_depth_max,FM_abs_min,FM_abs_max,source_run_values,grid_status,notes
+14,4,4,3,3600,"3|36|360|3600",0,0,0,-8.9536837772524e-08,6.20548853847195e-07,6.40037056358776e-07,2.04702904491693e-06,single_manifest_family,READY_FOR_CONVERGENCE,four tw decades for wait-time curve
+18,4,4,3,3600,"3|36|360|3600",0,0,0,2.35916177149297e-07,7.45154109451268e-07,8.77517129158269e-08,2.13307781340364e-06,single_manifest_family,READY_FOR_CONVERGENCE,same
+22,4,4,3,3600,"3|36|360|3600",0,0,0,2.79803042621795e-07,8.86583711594106e-07,7.08380502820365e-08,1.27269122876671e-06,single_manifest_family,READY_FOR_CONVERGENCE,same
+26,4,4,3,3600,"3|36|360|3600",0,0,0,5.19789946401978e-07,1.58953335101602e-06,6.01447161069129e-07,2.07427201171414e-06,single_manifest_family,READY_FOR_CONVERGENCE,same
+30,3,3,36,3600,"36|360|3600",0,0,0,9.87530105806022e-07,1.52008292659831e-06,8.44001163675723e-07,2.0014423840081e-06,single_manifest_family,PARTIAL_BUT_USABLE,missing tw=3 short-time row versus lower Tp stops
+34,3,3,36,3600,"36|360|3600",0,0,0,3.18578938210271e-07,1.17648694772181e-06,8.58403730646882e-08,4.6750098273508e-07,single_manifest_family,PARTIAL_BUT_USABLE,same gap at tw=3

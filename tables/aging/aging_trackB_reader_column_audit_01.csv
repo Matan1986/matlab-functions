@@ -1,0 +1,6 @@
+column_name,present,numeric_or_parseable,n_missing,n_unique,example_values,role,status,notes
+Tp,YES,YES,0,6,"14;18;22;26;30;34",pause_temperature_axis,PASS,integer Kelvin stops as expected F7J coverage class
+tw,YES,YES,0,4,"3;36;360;3600",wait_time_seconds_axis,PASS,positive finite span orders of magnitude
+Dip_depth,YES,YES,0,22,"~(-9e-08 to 1.59e-06) raw span",Dip_memory_curve_input,PASS,magnitude includes small negative row at Tp14 tw360 disclose in plots
+FM_abs,YES,YES,0,22,"~(7e-08 to 2.13e-06) raw span",FM_magnitude_only_input,PASS_WITH_DISCLOSURE,ABS_ONLY sign collapsed per user guide
+source_run,YES,YES_string_nonempty,0,22,"aggregate_structured_export...MG119...",lineage_join_key,PASS,stable UTF8-safe concatenated ids per contract row

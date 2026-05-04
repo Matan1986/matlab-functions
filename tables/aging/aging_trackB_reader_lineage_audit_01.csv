@@ -1,0 +1,10 @@
+lineage_item,answer,evidence_artifact,status,notes
+PRIMARY_SOURCE_PATH_IDENTIFIED,tables/aging/aging_observable_dataset.csv,tables/aging/consolidation_structured_run_dir.txt; Aging/analysis/run_aging_observable_dataset_consolidation.m,YES,pointer file names aggregate structured export bundle
+SOURCE_RUN_COLUMN_PRESENT,nonempty string per row with manifest and sample tokens,aging_observable_dataset.csv column source_run,YES,22 distinct rows same export family
+TRACKB_READER_CONTRACT_MATCH,five columns align with aging_observable_dataset_contract.csv,tables/aging/aging_observable_dataset_contract.csv,YES_WITH_METADATA,contract CSV defines semantics; sidecar optional FM plateau validity not in five columns
+DIP_DEPTH_ALLOWED_FOR_WAIT_TIME_ANALYSIS,numeric nonzero-span curves vs tw at each Tp where four tw points,aging_trackB_reader_grid_audit_01.csv,YES_WITH_METADATA,use rows as inventory first not physics claim
+FM_ABS_ALLOWED_FOR_WAIT_TIME_ANALYSIS,same grid FM_abs magnitude only,aging_trackB_reader_grid_audit_01.csv,YES_WITH_METADATA,sign-blind per FM_abs convention
+TAU_EXTRACTION_ALLOWED_FROM_THIS_SOURCE_LATER,allowed only after tau writer metadata bundle policy F7X5 B-003,docs/aging_observable_user_guide_draft.md; aging_F7X5_open_blockers,YES_WITH_METADATA,reader contract OK ingest path metadata gate separate
+RATIO_ALLOWED_FROM_THIS_SOURCE_LATER,downstream requires paired tau CSV manifest not this table alone,aging_canonical_reentry_map_01.md,NO,ratio re-entry blocked until tau artifacts lineage-complete
+BRIDGE_EXPORT_NOT_USED_AS_PRIMARY,primary is consolidation CSV not F7X long bridge row,user task scope,YES,
+TRACKA_NOT_USED_AS_PRIMARY,summaries AFM_like FM_like not in five-column file,F7U compatibility CX003 CX004,YES,

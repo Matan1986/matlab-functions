@@ -1,0 +1,7 @@
+readiness_question,answer,status,evidence,next_requirement,notes
+TRACKB_PRIMARY_SOURCE_READY,tables/aging/aging_observable_dataset.csv passes column and duplicate checks,PASS,aging_trackB_reader_column_audit_01.csv,none for thin inventory step,
+DIP_TW_INVENTORY_READY_NEXT,yes plot Dip_depth versus tw per Tp using TB001,YES,grid audit six Tp groups,optional fill tw=3 for Tp30 34 if short-time science requires symmetry,
+FM_TW_INVENTORY_READY_NEXT,yes plot FM_abs versus tw per Tp using TB001,YES,same grid,FM_abs ABS_ONLY caption on figures,
+DIP_FM_CONVERGENCE_READY_AFTER_INVENTORY,Tp14-26 four tw points ready; Tp30 Tp34 three tw points partial,PARTIAL,aging_trackB_reader_grid_audit_01.csv,decide policy for high-T short-tw gap or restrict convergence claims,
+TAU_METADATA_STILL_REQUIRED,B-003 dual tau_effective disclosure still governance gate before tau authority,YES,F7X5 open blockers B-003,writer-level metadata completion before tau extraction runs,
+RATIO_REENTRY_STILL_BLOCKED,R_age needs tau pairing manifest downstream not reader CSV,YES,F7U survey baseline ratio scientifically insufficient for robustness,complete tau outputs then clock-ratio pairing task,

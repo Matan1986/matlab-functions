@@ -1,0 +1,4 @@
+candidate_id,path,artifact_type,contains_Tp,contains_tw,contains_Dip_depth,contains_FM_abs,contains_source_run,row_count,is_primary_candidate,why_or_why_not,notes
+TB001,tables/aging/aging_observable_dataset.csv,repo_trackB_consolidation_output,YES,YES,YES,YES,YES,22,YES,"Five-column header matches Stage D contract; pointed by consolidation_structured_run_dir.txt","Current workspace consolidation snapshot MG119 aggregate export 2026_04_26"
+TB002,results_old/aging/runs/run_2026_03_12_211204_aging_dataset_build/tables/aging_observable_dataset.csv,archived_run_output,YES,YES,YES,YES,YES,31,NO,"FM_abs column historically NaN for many rows; superseded for tau ingest by contract discussions","Kept for replay parity only per F6J narrative"
+TB003,tables/aging/aging_observable_dataset_contract.csv,contract_definition,N_A,N_A,N_A,N_A,N_A,N_A,NO,"Schema doc not data table","Defines column semantics for TB001"
