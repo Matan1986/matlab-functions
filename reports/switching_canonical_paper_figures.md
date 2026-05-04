@@ -16,8 +16,10 @@ No scientific logic, recipes, metrics, or claim boundaries were modified.
 ## Outputs
 - `C:\Dev\matlab-functions\results\switching\figures\canonical_paper\switching_main_candidate_map_cuts_collapse.png`
 - `C:\Dev\matlab-functions\results\switching\figures\canonical_paper\switching_main_candidate_map_cuts_collapse.pdf`
+- `C:\Dev\matlab-functions\results\switching\figures\canonical_paper\switching_main_candidate_map_cuts_collapse.fig`
 - `C:\Dev\matlab-functions\results\switching\figures\canonical_paper\switching_supp_Xeff_components.png`
 - `C:\Dev\matlab-functions\results\switching\figures\canonical_paper\switching_supp_Xeff_components.pdf`
+- `C:\Dev\matlab-functions\results\switching\figures\canonical_paper\switching_supp_Xeff_components.fig`
 - `C:\Dev\matlab-functions\tables\switching_canonical_paper_figures_manifest.csv`
 - `C:\Dev\matlab-functions\tables\switching_canonical_paper_figures_status.csv`
 
