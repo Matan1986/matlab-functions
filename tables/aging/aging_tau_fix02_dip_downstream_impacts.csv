@@ -1,0 +1,9 @@
+downstream_target,previous_status,updated_status_after_fix02,impact_summary,still_blocked_by,next_required_task
+DIP_BRANCH_LINEAGE_DOCUMENTATION,PARTIAL_PENDING_BRANCH_FREEZE,CLOSED_IN_FIX02,Dip pathway token component definition extraction tau linkage collapse independence explicitly consolidated in FIX-02 artifacts,PRB03 WARN lineage partial; sidecar tokens on disk; row identity,AGING-TAU-FIX-04-SIDECAR-HARDENING
+DIP_TAU_CANONICAL_READY,PARTIAL,PARTIAL,Branch definition documented; canonical readiness still gated by sidecar identity policy,FIX-04 FIX-05 FIX-06 FX19 policy WARN,AGING-TAU-FIX-06-CANONICAL-READINESS-GATE
+FM_TAU_CANONICAL_READY,PARTIAL,PARTIAL,FIX-02 does not alter FM branch,FM gates unchanged,AGING-TAU-FIX-03-FM-COMPONENT-BRANCH
+TAU_CANONICAL_SET_READY,NO,NO,Dip documentation closure does not clear joint tau set,no multipath eligibility PRB03,AGING-TAU-FIX-06-CANONICAL-READINESS-GATE
+SAFE_TO_USE_TAU_AS_CANONICAL_EVIDENCE,NO,NO,Explicit conservative block retained,policy WARN legacy lineage tokens,AGING-TAU-FIX-06-CANONICAL-READINESS-GATE
+SAFE_TO_RUN_RATIOS,NO,NO,No ratio clearance,DIP_B01 class lineage WARN comparison eligibility zero,AGING-TAU-FIX-06-CANONICAL-READINESS-GATE
+SAFE_TO_RUN_COMPARISON_RUNNER,NO,NO,No runner clearance,same,AGING-TAU-FIX-06-CANONICAL-READINESS-GATE
+READINESS_FOR_FM_FIX03,PARTIAL,READY_DEFINITIONALLY,Dip lane documented so FM work can proceed serially per fixplan,FM-specific blockers remain,AGING-TAU-FIX-03-FM-COMPONENT-BRANCH
