@@ -1,0 +1,11 @@
+check_id,check_name,target,status,evidence,notes
+V001,Dip writer invokes sidecar after main CSV,Aging/analysis/aging_timescale_extraction.m,PASS,Static read: writeAgingBaselineTauSidecarDip called immediately after save_run_table tau_vs_Tp.csv,
+V002,FM writer invokes sidecar after main CSV,Aging/analysis/aging_fm_timescale_analysis.m,PASS,Static read: writeAgingBaselineTauSidecarFm called immediately after save_run_table tau_FM_vs_Tp.csv,
+V003,Sidecar filenames and location,tools/save_run_table.m contract,PASS,tau_vs_Tp_sidecar.csv and tau_FM_vs_Tp_sidecar.csv via save_run_table under run_root/tables/,
+V004,Required metadata keys present dip,writeAgingBaselineTauSidecarDip,PASS,17 rows match aging_baseline_tau_disclosure_closure_01 minimum field set plus tau_input_axis,
+V005,Required metadata keys present FM,writeAgingBaselineTauSidecarFm,PASS,Same 17 keys FM domain labels,
+V006,Numerical tau path untouched,buildConsensusTau buildEffectiveFmTau,PASS,Grep: no edits inside buildConsensusTau or buildEffectiveFmTau bodies in this task,
+V007,Existing tau CSV columns unchanged,tau_vs_Tp tau_FM_vs_Tp schema,PASS,No changes to appendF7GTauRMetadataColumns inputs beyond call order unchanged; no VariableNames renames,
+V008,End-to-end MATLAB run with outputs repo,run_matlab_safe.bat,SKIP,Default aging_observable_dataset.csv path not verified present in workspace; no execution attempt,
+V009,source_run unresolved policy,aggregateSourceRunForSidecar,PASS,Empty or missing source_run yields UNRESOLVED string per policy,
+V010,MATLAB Code Analyzer smoke check,two .m files via matlab -batch checkcode,PASS,Exit code 0; messages only on pre-existing lines not in new sidecar helpers,

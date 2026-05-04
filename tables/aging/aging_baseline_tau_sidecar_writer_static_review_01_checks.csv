@@ -1,0 +1,10 @@
+review_id,question_short,result,evidence
+R01,Only allowed code files in sidecar patch,YES,git diff scoped to two Aging/analysis scripts shows only those files; no other paths in that diff
+R02,Sidecar call after main tau CSV save,YES,writeAgingBaselineTauSidecar* immediately follows save_run_table for tau_vs_Tp.csv and tau_FM_vs_Tp.csv
+R03,Numerical tau logic unchanged,YES,Diff adds post-save hook and helpers only; buildConsensusTau buildEffectiveFmTau and fit paths not in diff
+R04,Existing output columns unchanged,YES,No VariableNames or schema changes to main tau table; sidecar is separate CSV
+R05,Ratio code untouched,YES,aging_clock_ratio_analysis.m not modified
+R06,Helpers local and non-invasive,YES,Subfunctions at file bottom; save_run_table only; no mutation of tauTbl for main outputs
+R07,Required 17 sidecar metadata_field keys present,YES,mf lists tau_domain through output_artifact per closure naming
+R08,MATLAB validation described as static checkcode not full wrapper,YES,aging_baseline_tau_sidecar_writer_01.md lines state no run_matlab_safe full run; checkcode used
+R09,Patch safe to archive,YES,Single-purpose additive metadata write; isolation clear for commit slice
