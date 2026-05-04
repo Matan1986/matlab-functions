@@ -1,0 +1,7 @@
+alias,alias_type,maps_to_pathway_id,allowed_as_pathway_id,reason,notes
+Track A,ROUTING_AND_SUMMARY_LABEL,N_A,NO,Routing shorthand for stage6 fit-summary vectors; charter forbids as pathway_id,F7X2; use AGN_WF_STAGE6_* when registered in later PRB versions
+Track B,ROUTING_AND_READER_LABEL,N_A,NO,Five-column consolidation reader shorthand; not a machine pathway_id,Maps to consolidation consumers—assign AGN_WF_CONSOL_* after pathway chosen
+C_DIP_DEPTH_B,BRIDGE_STREAM_ID,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,NO,F7X compact id for Dip_depth stream; tau comparisons require AGN_WF_CONSOL_* not bridge row alone,aging_pathway_registry_bridge_charter_01 pathway_id_contract
+C_FM_ABS_B,BRIDGE_STREAM_ID,AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,NO,F7X compact id for FM_abs stream; same as above
+CONSOLIDATED_TAU_INPUT,INPUT_FAMILY_LABEL,N_A,NO,Descriptor for inputs to tau scripts—not an pathway_id; Dip vs FM are distinct rows,tau_effective_seconds does not imply pathway without bundle
+tau_effective_seconds,TAU_COLUMN_NAME,N_A,NO,Legacy shared column in tau_vs_Tp and tau_FM_vs_Tp; forbidden as pathway identifier,G003 tau bundle required per charter

@@ -1,0 +1,8 @@
+check_id,check_name,status,evidence,failure_mode,notes
+V001,pathway_ids_unique,PASS,aging_prb01_pathway_registry.csv three distinct pathway_id values,Duplicate pathway_id would break registry uniqueness,
+V002,no_track_AB_pathway_ids,PASS,Registry pathway_id column contains only AGN_WF_* tokens,Track A or B as pathway_id would violate charter,
+V003,no_tau_effective_seconds_pathway_id,PASS,No row uses tau_effective_seconds as pathway_id,Would confuse column with identity,
+V004,baseline_rows_evidence_commits,PASS,Dip and FM rows list c7e5d41 and e58b237 in evidence_commits,Baseline claims without commits would be INVALID,
+V005,forensic_row_not_validated_baseline,PASS,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0 readiness_status FORENSIC_PARTIAL; forensic_only YES,Treating F6 as VALIDATED_EVIDENCE_COMMITTED would be FALSE,
+V006,comparison_runner_not_enabled,PASS,implementation_status REGISTRY_ARTIFACT_ONLY on all rows; no runner in repo from this task,Runner would require PRB_05 and validator,
+V007,multipath_comparison_not_allowed_now,PASS,comparison_allowed_now only CONDITIONAL pairwise baseline or forensic audit; CMP_ROBUSTNESS_MULTIPATH remains NO in charter,Would contradict aging_pathway_registry_bridge_charter_01_allowed_comparisons,
