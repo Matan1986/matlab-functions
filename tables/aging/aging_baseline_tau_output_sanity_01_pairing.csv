@@ -1,0 +1,7 @@
+Tp,dip_present,fm_present,pairable,dip_tau_finite_positive,fm_tau_finite_positive,status,notes
+14,YES,YES,YES,YES,YES,OK,Overlap row; both tau_effective_seconds finite and > 0
+18,YES,YES,YES,YES,YES,OK,
+22,YES,YES,YES,YES,YES,OK,
+26,YES,YES,YES,YES,YES,OK,
+30,YES,YES,YES,YES,YES,OK,
+34,YES,YES,YES,YES,YES,OK,

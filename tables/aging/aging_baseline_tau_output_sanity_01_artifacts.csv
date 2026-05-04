@@ -1,0 +1,5 @@
+artifact_role,artifact_path,exists,source_from_validation_table,read_success,status,notes
+Dip main tau vs Tp,c:/Dev/matlab-functions/results/aging/runs/run_2026_05_04_134220_aging_timescale_extraction/tables/tau_vs_Tp.csv,YES,YES,YES,OK,main_output_path from runs.csv DIP001
+Dip sidecar,c:/Dev/matlab-functions/results/aging/runs/run_2026_05_04_134220_aging_timescale_extraction/tables/tau_vs_Tp_sidecar.csv,YES,YES,YES,OK,sidecar_output_path from runs.csv DIP001
+FM main tau FM vs Tp,c:/Dev/matlab-functions/results/aging/runs/run_2026_05_04_135134_aging_fm_timescale_analysis/tables/tau_FM_vs_Tp.csv,YES,YES,YES,OK,main_output_path from runs.csv FM001
+FM sidecar,c:/Dev/matlab-functions/results/aging/runs/run_2026_05_04_135134_aging_fm_timescale_analysis/tables/tau_FM_vs_Tp_sidecar.csv,YES,YES,YES,OK,sidecar_output_path from runs.csv FM001
