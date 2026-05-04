@@ -1,0 +1,11 @@
+bundle_item_id,artifact_path,artifact_role,source_inputs,should_be_committed,closes_gap,known_limitation
+F01C-B01,reports/aging/aging_tau_fix01c_dataset_evidence_promotion.md,PROMOTION_REPORT,"reports/aging/aging_tau_fix01_shared_dataset_lineage.md; reports/aging/aging_tau_fix01b_dataset_evidence_promotion_plan.md; PRB03; PRB02B",YES,COMMITTED_DATASET_LINEAGE_NARRATIVE,
+F01C-B02,tables/aging/aging_tau_fix01c_dataset_lineage_evidence.csv,LINEAGE_EVIDENCE_TABLE,"tables/aging/aging_tau_fix01_shared_dataset_lineage_evidence.csv; tables/aging/aging_prb03_tau_bundle_inventory.csv; tables/aging/aging_prb02b_f7v_bridge_ledger.csv",YES,SHARED_FACT_ROWS_WITH_PROVENANCE,
+F01C-B03,tables/aging/aging_tau_fix01c_source_token_mapping.csv,SOURCE_TOKEN_MAPPING,"tables/aging/aging_prb03_tau_bundle_inventory.csv; tables/aging/aging_prb02b_f7v_bridge_ledger.csv",YES,SOURCE_RUN_AND_PATHWAY_MAPPING,Token is summary text not a single OS path
+F01C-B04,tables/aging/aging_tau_fix01c_promoted_bundle_manifest.csv,BUNDLE_MANIFEST,F01C promotion scope,YES,MANIFEST_SELF_REFERENCE,Lists inputs and roles only
+F01C-B05,tables/aging/aging_tau_fix01c_blocker_resolution.csv,BLOCKER_RESOLUTION,"tables/aging/aging_tau_fix01_shared_dataset_lineage_blocker_resolution.csv; FIX-01B decisions",YES,BLOCKER_DELTA_AFTER_FIX01C,
+F01C-B06,tables/aging/aging_tau_fix01c_status.csv,STATUS_GATE,FIX-01C field schema,YES,MACHINE_READABLE_VERDICTS,
+F01C-R01,tables/aging/aging_prb03_tau_bundle_inventory.csv,REFERENCE_COMMITTED_ANCHOR,PRB03 validator export,NO,N_A,Already committed pre-FIX-01C
+F01C-R02,tables/aging/aging_prb02b_f7v_bridge_ledger.csv,REFERENCE_COMMITTED_ANCHOR,PRB02B export,NO,N_A,Already committed pre-FIX-01C
+F01C-R03,tables/aging/aging_prb02b_f7v_bridge_input_sources.csv,REFERENCE_COMMITTED_ANCHOR,PRB02B input audit,NO,N_A,Already committed pre-FIX-01C
+F01C-R04,tables/aging/aging_prb01_pathway_registry.csv,REFERENCE_COMMITTED_ANCHOR,PRB01 registry,NO,N_A,Already committed pre-FIX-01C
