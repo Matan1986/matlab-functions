@@ -1,0 +1,9 @@
+downstream_target,previous_status,updated_status_after_fix03,impact_summary,still_blocked_by,next_required_task
+FM_BRANCH_LINEAGE_DOCUMENTATION,PARTIAL_PENDING_BRANCH_FREEZE,CLOSED_IN_FIX03,FM pathway token FM_abs semantics extraction tau linkage independence explicitly consolidated in FIX-03 artifacts,F7S WARN lineage partial; sidecar tokens on disk; identity bridge,AGING-TAU-FIX-04-SIDECAR-HARDENING
+FM_TAU_CANONICAL_READY,PARTIAL,PARTIAL,Documentation closed; canonical readiness still gated by policy sidecar identity,policy WARN FM_B01 FM_B02,AGING-TAU-FIX-06-CANONICAL-READINESS-GATE
+DIP_TAU_CANONICAL_READY,PARTIAL,PARTIAL,FIX-03 does not alter Dip closure,Dip sidecar identity gates unchanged,AGING-TAU-FIX-04-SIDECAR-HARDENING
+TAU_CANONICAL_SET_READY,NO,NO,Joint set still blocked,multipath eligibility zero PRB03,AGING-TAU-FIX-06-CANONICAL-READINESS-GATE
+SAFE_TO_USE_TAU_AS_CANONICAL_EVIDENCE,NO,NO,Explicit conservative block,warn policy tokens,AGING-TAU-FIX-06-CANONICAL-READINESS-GATE
+SAFE_TO_RUN_RATIOS,NO,NO,No ratio clearance,comparison eligibility partial,AGING-TAU-FIX-06-CANONICAL-READINESS-GATE
+SAFE_TO_RUN_COMPARISON_RUNNER,NO,NO,No runner clearance,same,AGING-TAU-FIX-06-CANONICAL-READINESS-GATE
+READINESS_FIX04_SIDECAR,PARTIAL,READY,FM branch narrative complete for hardening entry,F7S closure work,AGING-TAU-FIX-04-SIDECAR-HARDENING
