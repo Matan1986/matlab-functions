@@ -1,0 +1,5 @@
+blocker_id,component_scope,pre_fix04_status,evidence_used,post_fix04_status,closed_by_fix04,remaining_gap,next_required_task
+SC_META_INV_COMPLETE,DIP_FM_sidecar_metadata_inventory,OPEN_GOVERNANCE_GAP,PRB03 FV + inventory + pathway summary + FIX-04 tables,CLOSED_METADATA_FIELD_MAP_AND_DISCLOSURE_WRITTEN,YES,PRB03 pathway_summary tau_bundle_status still WARN snapshot,AGING-TAU-FIX-06-CANONICAL-READINESS-GATE
+FX09_DIP_SIDECAR_TOKEN,DIP,lineage_status open in FV,FIX-04 documentation,DOCUMENTED_WARN_STATE unchanged,NO,lineage COMPLETE token requires PRB03 refresh or charter,AGING-TAU-FIX-06-CANONICAL-READINESS-GATE
+FX13_FM_SIDECAR_POLICY,FM,F7S pending in FV,FIX-04 documentation,DOCUMENTED_WARN_STATE unchanged,NO,F7S closure out of FIX-04 scope,AGING-TAU-FIX-03-follow-on-F7S-or-FIX-06
+PRB03_DOMINANT_BLOCKER,DIP_FM,LINEAGE_NOT_COMPLETE vs F7S per pathway summary,FIX-04 crosswalk,UNCHANGED_IN_REPO,NO,dominant blocker row not edited,AGING-TAU-FIX-05-ROW-IDENTITY-COREGISTRATION

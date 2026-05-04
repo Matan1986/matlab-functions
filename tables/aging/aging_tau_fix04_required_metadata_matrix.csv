@@ -1,0 +1,29 @@
+pathway_id,component,required_field,required_reason,present,present_in_committed_evidence,present_only_run_local,missing,evidence_path,gap,fix04_resolution
+AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,DIP,sidecar_artifact_path,closure rule 1,YES,YES,YES disk path only,NO,tables/aging/aging_prb03_tau_bundle_inventory.csv; FV,absolute path portability,Harden path tokens in inventory reference
+AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,DIP,source_dataset_id,closure rule 2,YES,YES,NO,NO,PRB03 FV_00013,none,Documented
+AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,DIP,source_run_token,closure rule 3,YES,YES,NO,NO,PRB03 FV_00012,none,Documented
+AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,DIP,source_artifact_path_tau_table,closure rule 4,YES,YES,YES run-local CSV,NO,PRB03 FV_00011,file not in git,Disclosed run-local
+AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,DIP,component_observable_id,closure rule 5,YES,YES,NO,NO,PRB03 FV_00007,none,Documented
+AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,DIP,tau_method_id,closure rule 6,YES,YES,PARTIAL full text on disk,NO,PRB03 FV_00004,abbrev + pointer in inventory,Documented pointer contract
+AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,DIP,tau_domain,closure rule 7,YES,YES,NO,NO,PRB03 FV_00003,none,Documented
+AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,DIP,tau_units,closure rule 8,YES,YES,NO,NO,PRB03 FV_00002,none,Documented
+AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,DIP,tau_input_object,closure rule 9,YES,YES,NO,NO,PRB03 FV_00005,none,Documented
+AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,DIP,tau_input_axis,closure rule 10,YES,YES,NO,NO,PRB03 FV_00006,none,Documented
+AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,DIP,lineage_status_token,closure rule 11,YES,YES,NO,NO,PRB03 FV_00014,not COMPLETE token until FIX-06,Documented WARN state
+AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,DIP,policy_bundle_status_token,closure rule 12,YES,YES,NO,NO,tables/aging/aging_prb03_tau_bundle_pathway_summary.csv,WARN_LINEAGE_PARTIAL persists,Documented PRB03 snapshot
+AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,DIP,local_run_dependency_disclosure,closure rule 13,YES,YES,in FIX-04 report,NO,reports/aging/aging_tau_fix04_sidecar_hardening.md,none,Explicit disclosure written
+AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,DIP,no_tau_recompute_statement,closure rule 14,YES,YES,NO,NO,reports/aging/aging_tau_fix04_sidecar_hardening.md sec 13,none,Explicit in FIX-04 report
+AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,FM,sidecar_artifact_path,closure rule 1,YES,YES,YES disk path only,NO,tables/aging/aging_prb03_tau_bundle_inventory.csv; FV,absolute path portability,Harden path tokens in inventory reference
+AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,FM,source_dataset_id,closure rule 2,YES,YES,NO,NO,PRB03 FV_00037,none,Documented
+AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,FM,source_run_token,closure rule 3,YES,YES,NO,NO,PRB03 FV_00036,none,Documented
+AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,FM,source_artifact_path_tau_table,closure rule 4,YES,YES,YES run-local CSV,NO,PRB03 FV_00035,file not in git,Disclosed run-local
+AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,FM,component_observable_id,closure rule 5,YES,YES,NO,NO,PRB03 FV_00031,none,Documented
+AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,FM,tau_method_id,closure rule 6,YES,YES,PARTIAL full text on disk,NO,PRB03 FV_00028,abbrev + pointer in inventory,Documented pointer contract
+AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,FM,tau_domain,closure rule 7,YES,YES,NO,NO,PRB03 FV_00027,none,Documented
+AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,FM,tau_units,closure rule 8,YES,YES,NO,NO,PRB03 FV_00026,none,Documented
+AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,FM,tau_input_object,closure rule 9,YES,YES,NO,NO,PRB03 FV_00029,none,Documented
+AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,FM,tau_input_axis,closure rule 10,YES,YES,NO,NO,PRB03 FV_00030,none,Documented
+AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,FM,lineage_status_token,closure rule 11,YES,YES,NO,NO,PRB03 FV_00038,F7S pending token,Documented WARN state
+AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,FM,policy_bundle_status_token,closure rule 12,YES,YES,NO,NO,tables/aging/aging_prb03_tau_bundle_pathway_summary.csv,WARN_LINEAGE_PARTIAL persists,Documented PRB03 snapshot
+AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,FM,local_run_dependency_disclosure,closure rule 13,YES,YES,in FIX-04 report,NO,reports/aging/aging_tau_fix04_sidecar_hardening.md,none,Explicit disclosure written
+AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,FM,no_tau_recompute_statement,closure rule 14,YES,YES,NO,NO,reports/aging/aging_tau_fix04_sidecar_hardening.md sec 13,none,Explicit in FIX-04 report

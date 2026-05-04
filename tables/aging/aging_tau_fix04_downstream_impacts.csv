@@ -1,0 +1,6 @@
+downstream_target,previous_status,updated_status_after_fix04,impact_summary,still_blocked_by,next_required_task
+SIDECAR_METADATA_DOCUMENTATION,PARTIAL,HARDENED_FIX04_V2,Committed inventory matrix policy crosswalk and explicit no-recompute statement,PRB03 WARN rows unchanged until governance refresh,AGING-TAU-FIX-05-ROW-IDENTITY-COREGISTRATION
+BASELINE_DIP_BUNDLE_STATUS,WARN_LINEAGE_PARTIAL,WARN_LINEAGE_PARTIAL,PRB03 status CSV not modified by FIX-04,lineage row_identity grid,AGING-TAU-FIX-06-CANONICAL-READINESS-GATE
+BASELINE_FM_BUNDLE_STATUS,WARN_LINEAGE_PARTIAL,WARN_LINEAGE_PARTIAL,same,F7S identity comparison,AGING-TAU-FIX-06-CANONICAL-READINESS-GATE
+READY_FOR_FIX05_ROW_ID,PARTIAL,READY_DECLARATIVE,Metadata sufficient to start row-identity work; identity UID bridge still partial,PRB02B bridge partial,AGING-TAU-FIX-05-ROW-IDENTITY-COREGISTRATION
+RATIO_REENTRY,NO,NO,No ratio clearance from FIX-04,WARN lineage flags,AGING-TAU-FIX-06-CANONICAL-READINESS-GATE
