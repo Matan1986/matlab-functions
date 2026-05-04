@@ -1,0 +1,31 @@
+key,value,notes
+AGING_PRB03_TAU_BUNDLE_VALIDATOR_COMPLETE,YES,Prototype inventory + field validation + pathway summary + this status emitted in-repo
+MATLAB_RUN,NO,No MATLAB executed for PRB03 artifact generation
+PYTHON_RUN,NO,No Python executed for PRB03 artifact generation
+NODE_RUN,NO,No Node executed for PRB03 artifact generation
+REPLAY_RUN,NO,No replay harness executed
+CODE_CREATED,NO,No run_aging_prb03_tau_bundle_validator.m added; tables authored from existing ledger and sidecars
+TAU_COMPUTED,NO,Validator reads metadata only
+TAU_REFIT,NO,No refit or curve reruns
+RATIO_COMPUTED,NO,No ratio mathematics
+METRICS_RECOMPUTED,NO,No metric recomputation
+VISUALIZATION_GENERATED,NO,No figures
+PRB02B_LEDGER_USED,YES,Primary row source tables/aging/aging_prb02b_f7v_bridge_ledger.csv
+TAU_BUNDLE_INVENTORY_CREATED,YES,tables/aging/aging_prb03_tau_bundle_inventory.csv
+TAU_BUNDLE_FIELD_VALIDATION_CREATED,YES,tables/aging/aging_prb03_tau_bundle_field_validation.csv
+TAU_BUNDLE_PATHWAY_SUMMARY_CREATED,YES,tables/aging/aging_prb03_tau_bundle_pathway_summary.csv
+REQUIRED_TAU_FIELDS_VALIDATED,YES,Charter tau-bundle fields plus PRB governance columns checked per representative rows
+PATHWAY_IDS_VALIDATED,YES,Against PRB01 registry and PRB02B ledger pathway_id column
+TRACK_LABELS_ALIAS_ONLY,NO,Pathway identifiers are canonical PRB01 pathway_id tokens from ledger; not alias-only labels
+TAU_EFFECTIVE_SECONDS_NOT_PATHWAY_ID,YES,tau_value_field names an observable column token; distinct from pathway_id
+OLD_FIT_REMAINS_FORENSIC,YES,FORENSIC_F6_NO_ROW_LEDGER remains blocked without committed row-level sources
+BASELINE_DIP_BUNDLE_STATUS,WARN_LINEAGE_PARTIAL,Required sidecar fields present; lineage_status not COMPLETE; row_identity partial
+BASELINE_FM_BUNDLE_STATUS,WARN_LINEAGE_PARTIAL,FM sidecar present; LINEAGE_METADATA_HARDENED_PENDING_F7S; conditional comparison only
+OLD_FIT_REPLAY_BUNDLE_STATUS,FAIL_BLOCKED,Missing committed row-level source artifact and tau bundle fields per ledger
+ANY_PATHWAY_COMPARISON_ELIGIBLE_NOW,PARTIAL,Baseline rows PARTIAL_PENDING_VALIDATION; forensic NO; no pathway fully eligible now
+MULTIPATH_COMPARISON_ALLOWED_NOW,NO,This validator does not authorize multipath comparison
+RATIO_REENTRY_ALLOWED_NOW,NO,Lineage and governance block authoritative ratio re-entry
+COMPARISON_RUNNER_READY_TO_IMPLEMENT,NO,Runner remains future work; blocking rules not cleared
+READY_FOR_COMPARISON_MATRIX_DESIGN,YES,Pass or warn or fail states defined at field and pathway level for declarative matrix work only
+READY_FOR_ARCHIVE_COMMIT,YES,Five Aging artifacts present and cross-referenced consistently
+RECOMMENDED_NEXT_ACTION,"Archive PRB03 bundle validator outputs; use matrix design for eligibility grammar only—keep runners ratios and multipath claims blocked until lineage closes per pathway notes"

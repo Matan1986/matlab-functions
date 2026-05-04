@@ -1,0 +1,73 @@
+validation_row_id,bundle_row_id,pathway_id,field_name,field_value_status,field_value,required,status,blocks_comparison,blocks_runner,notes
+FV_00001,TB_INV_BL_DIP_TP14,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,tau_value_field,PRESENT,tau_effective_seconds,YES,PASS,NO,NO,Charter field; matches PRB02B and sidecar intent
+FV_00002,TB_INV_BL_DIP_TP14,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,tau_units,PRESENT,seconds,YES,PASS,NO,NO,From tau_vs_Tp_sidecar units
+FV_00003,TB_INV_BL_DIP_TP14,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,tau_domain,PRESENT,DIP_DEPTH_CURVEFIT,YES,PASS,NO,NO,Sidecar tau_domain
+FV_00004,TB_INV_BL_DIP_TP14,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,tau_method,PRESENT,CURVEFIT_ZOO with buildConsensusTau (full text in tau_vs_Tp_sidecar.csv),YES,PASS,NO,NO,Full method string lives in sidecar; inventory abbreviates with pointer
+FV_00005,TB_INV_BL_DIP_TP14,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,tau_input_object,PRESENT,Dip_depth,YES,PASS,NO,NO,Sidecar
+FV_00006,TB_INV_BL_DIP_TP14,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,tau_input_axis,PRESENT,tw,YES,PASS,NO,NO,Sidecar grain per_Tp_summary
+FV_00007,TB_INV_BL_DIP_TP14,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,source_observable,PRESENT,Dip_depth,YES,PASS,NO,NO,PRB02B ledger
+FV_00008,TB_INV_BL_DIP_TP14,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,decomposition_method,PRESENT,Stage4 structured export five-column consolidation reader (PRB01 registry),YES,PASS,NO,NO,Synthesized from PRB01 pathway row; not contradicted by sidecar
+FV_00009,TB_INV_BL_DIP_TP14,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,component_definition,PRESENT,Dip_depth scalar per Tp summary over tw curves,YES,PASS,NO,NO,PRB02B ledger text
+FV_00010,TB_INV_BL_DIP_TP14,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,producer_script,PRESENT,Aging/analysis/aging_timescale_extraction.m,YES,PASS,NO,NO,Sidecar producer_script
+FV_00011,TB_INV_BL_DIP_TP14,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,source_artifact,PRESENT,c:/Dev/matlab-functions/results/aging/runs/run_2026_05_04_134220_aging_timescale_extraction/tables/tau_vs_Tp.csv,YES,PASS,NO,NO,PRB02B ledger path
+FV_00012,TB_INV_BL_DIP_TP14,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,source_run,PRESENT,aggregate_structured_export_aging_Tp_tw_2026_04_26_085033|MG119|MG119_3sec | aggregate_structured_export_aging_Tp_tw_2026_04_26_085033|MG119|MG119_36sec,YES,PASS,NO,NO,Sidecar and ledger aligned
+FV_00013,TB_INV_BL_DIP_TP14,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,source_dataset_id,PRESENT,c:/Dev/matlab-functions/tables/aging/aging_observable_dataset.csv,YES,PASS,NO,NO,Sidecar source_dataset_id
+FV_00014,TB_INV_BL_DIP_TP14,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,lineage_status,PRESENT,REQUIRES_DATASET_PATH_AND_DIP_BRANCH_RESOLUTION,YES,WARN,YES,YES,Not COMPLETE; conservative block for authoritative multipath or ratio re-entry
+FV_00015,TB_INV_BL_DIP_TP14,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,sign_or_magnitude_disclosure,PRESENT,Dip_depth is a signed consolidation column; negative cells possible,YES,PASS,NO,NO,Sidecar sign_or_magnitude_disclosure
+FV_00016,TB_INV_BL_DIP_TP14,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,grid_disclosure,PRESENT,GRID_DISCLOSURE_REF PARTIAL_GRID Tp30 Tp34 tw ladder,YES,WARN,YES,YES,Explicit partial grid; blocks blanket cross-grid claims without qualification
+FV_00017,TB_INV_BL_DIP_TP14,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,output_artifact,PRESENT,tau_vs_Tp.csv,YES,PASS,NO,NO,Sidecar output_artifact
+FV_00018,TB_INV_BL_DIP_TP14,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,pathway_id,PRESENT,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,YES,PASS,NO,NO,PRB02B ledger
+FV_00019,TB_INV_BL_DIP_TP14,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,pathway_family,PRESENT,CONSOLIDATION_CURVEFIT,YES,PASS,NO,NO,PRB02B ledger
+FV_00020,TB_INV_BL_DIP_TP14,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,row_identity_key,PRESENT,ID_TAU_VS_TP_ROW,YES,PASS,NO,NO,PRB02B ledger
+FV_00021,TB_INV_BL_DIP_TP14,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,co_registered_group_id,PRESENT,CO_REG_BASELINE_TP_14_PRB02B,YES,PASS,NO,NO,PRB02B ledger
+FV_00022,TB_INV_BL_DIP_TP14,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,row_identity_status,PRESENT,OK_LINEAGE_PARTIAL_REQUIRES_F7S,YES,WARN,YES,YES,Not validated complete per charter conservative rule
+FV_00023,TB_INV_BL_DIP_TP14,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,forensic_only,PRESENT,NO,YES,PASS,NO,NO,PRB02B ledger
+FV_00024,TB_INV_BL_DIP_TP14,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1,allowed_for_comparison,PRESENT,CONDITIONAL,YES,WARN,YES,YES,Not unconditional YES; blocks until policy closes
+FV_00025,TB_INV_BL_FM_TP14,AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,tau_value_field,PRESENT,tau_effective_seconds,YES,PASS,NO,NO,PRB02B and FM sidecar
+FV_00026,TB_INV_BL_FM_TP14,AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,tau_units,PRESENT,seconds,YES,PASS,NO,NO,FM sidecar units
+FV_00027,TB_INV_BL_FM_TP14,AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,tau_domain,PRESENT,FM_ABS_CURVEFIT,YES,PASS,NO,NO,FM sidecar tau_domain
+FV_00028,TB_INV_BL_FM_TP14,AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,tau_method,PRESENT,CURVEFIT_ZOO with buildEffectiveFmTau (full text in tau_FM_vs_Tp_sidecar.csv),YES,PASS,NO,NO,Full method string in sidecar
+FV_00029,TB_INV_BL_FM_TP14,AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,tau_input_object,PRESENT,FM_abs,YES,PASS,NO,NO,FM sidecar
+FV_00030,TB_INV_BL_FM_TP14,AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,tau_input_axis,PRESENT,tw,YES,PASS,NO,NO,FM sidecar grain per_Tp_summary
+FV_00031,TB_INV_BL_FM_TP14,AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,source_observable,PRESENT,FM_abs,YES,PASS,NO,NO,PRB02B ledger
+FV_00032,TB_INV_BL_FM_TP14,AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,decomposition_method,PRESENT,Stage4 structured export five-column consolidation reader with paired Dip tau path in runner cfg (PRB01 registry),YES,PASS,NO,NO,Synthesized from PRB01 FM pathway row
+FV_00033,TB_INV_BL_FM_TP14,AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,component_definition,PRESENT,FM_abs magnitude per Tp summary over tw curves,YES,PASS,NO,NO,PRB02B ledger text
+FV_00034,TB_INV_BL_FM_TP14,AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,producer_script,PRESENT,Aging/analysis/aging_fm_timescale_analysis.m,YES,PASS,NO,NO,FM sidecar producer_script
+FV_00035,TB_INV_BL_FM_TP14,AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,source_artifact,PRESENT,c:/Dev/matlab-functions/results/aging/runs/run_2026_05_04_135134_aging_fm_timescale_analysis/tables/tau_FM_vs_Tp.csv,YES,PASS,NO,NO,PRB02B ledger path
+FV_00036,TB_INV_BL_FM_TP14,AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,source_run,PRESENT,aggregate_structured_export_aging_Tp_tw_2026_04_26_085033|MG119|MG119_3sec | aggregate_structured_export_aging_Tp_tw_2026_04_26_085033|MG119|MG119_36sec,YES,PASS,NO,NO,Aligned with Dip baseline row
+FV_00037,TB_INV_BL_FM_TP14,AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,source_dataset_id,PRESENT,c:/Dev/matlab-functions/tables/aging/aging_observable_dataset.csv,YES,PASS,NO,NO,FM sidecar source_dataset_id
+FV_00038,TB_INV_BL_FM_TP14,AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,lineage_status,PRESENT,LINEAGE_METADATA_HARDENED_PENDING_F7S,YES,WARN,YES,YES,Pending F7S hardening; not COMPLETE
+FV_00039,TB_INV_BL_FM_TP14,AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,sign_or_magnitude_disclosure,PRESENT,FM_abs ABS_ONLY magnitude collapsed from consolidation,YES,PASS,NO,NO,FM sidecar
+FV_00040,TB_INV_BL_FM_TP14,AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,grid_disclosure,PRESENT,GRID_DISCLOSURE_REF PARTIAL_GRID Tp30 Tp34 tw ladder,YES,WARN,YES,YES,Same partial grid disclosure family as Dip pathway
+FV_00041,TB_INV_BL_FM_TP14,AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,output_artifact,PRESENT,tau_FM_vs_Tp.csv,YES,PASS,NO,NO,FM sidecar output_artifact
+FV_00042,TB_INV_BL_FM_TP14,AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,pathway_id,PRESENT,AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,YES,PASS,NO,NO,PRB02B ledger
+FV_00043,TB_INV_BL_FM_TP14,AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,pathway_family,PRESENT,CONSOLIDATION_CURVEFIT,YES,PASS,NO,NO,PRB02B ledger
+FV_00044,TB_INV_BL_FM_TP14,AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,row_identity_key,PRESENT,ID_TAU_VS_TP_ROW,YES,PASS,NO,NO,PRB02B ledger (same key token as Dip ledger column)
+FV_00045,TB_INV_BL_FM_TP14,AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,co_registered_group_id,PRESENT,CO_REG_BASELINE_TP_14_PRB02B,YES,PASS,NO,NO,PRB02B ledger
+FV_00046,TB_INV_BL_FM_TP14,AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,row_identity_status,PRESENT,OK_LINEAGE_PARTIAL_PENDING_F7S,YES,WARN,YES,YES,Not validated complete
+FV_00047,TB_INV_BL_FM_TP14,AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,forensic_only,PRESENT,NO,YES,PASS,NO,NO,PRB02B ledger
+FV_00048,TB_INV_BL_FM_TP14,AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,allowed_for_comparison,PRESENT,CONDITIONAL,YES,WARN,YES,YES,Not unconditional YES
+FV_00049,TB_INV_FORENSIC_F6_NO_ROW_LEDGER,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0,tau_value_field,EXPLICIT_MISSING,NOT_APPLICABLE_NO_SOURCE_ROW,YES,FAIL,YES,YES,No tau-bearing committed row; ledger explicit token
+FV_00050,TB_INV_FORENSIC_F6_NO_ROW_LEDGER,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0,tau_units,MISSING,UNKNOWN,YES,FAIL,YES,YES,Cannot establish units without tau bundle source
+FV_00051,TB_INV_FORENSIC_F6_NO_ROW_LEDGER,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0,tau_domain,MISSING,UNKNOWN,YES,FAIL,YES,YES,No sidecar or output path registered for forensic row
+FV_00052,TB_INV_FORENSIC_F6_NO_ROW_LEDGER,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0,tau_method,EXPLICIT_MISSING,NOT_APPLICABLE_NO_SOURCE_ROW,YES,FAIL,YES,YES,Ledger explicit not applicable
+FV_00053,TB_INV_FORENSIC_F6_NO_ROW_LEDGER,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0,tau_input_object,MISSING,UNKNOWN,YES,FAIL,YES,YES,No committed observable column reference
+FV_00054,TB_INV_FORENSIC_F6_NO_ROW_LEDGER,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0,tau_input_axis,MISSING,UNKNOWN,YES,FAIL,YES,YES,No committed axis reference
+FV_00055,TB_INV_FORENSIC_F6_NO_ROW_LEDGER,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0,source_observable,MISSING,UNKNOWN,YES,FAIL,YES,YES,PRB02B ledger UNKNOWN for forensic placeholder
+FV_00056,TB_INV_FORENSIC_F6_NO_ROW_LEDGER,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0,decomposition_method,MISSING,UNKNOWN,YES,FAIL,YES,YES,Cannot prove method identity from artifacts for this row
+FV_00057,TB_INV_FORENSIC_F6_NO_ROW_LEDGER,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0,component_definition,MISSING,UNKNOWN,YES,FAIL,YES,YES,No component definition registered
+FV_00058,TB_INV_FORENSIC_F6_NO_ROW_LEDGER,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0,producer_script,MISSING,UNKNOWN,YES,FAIL,YES,YES,No producer registered for this ledger placeholder
+FV_00059,TB_INV_FORENSIC_F6_NO_ROW_LEDGER,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0,source_artifact,PRESENT,MISSING_COMMITTED_ROW_LEVEL_SOURCE,YES,FAIL,YES,YES,Explicit missing committed source per PRB02B
+FV_00060,TB_INV_FORENSIC_F6_NO_ROW_LEDGER,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0,source_run,PRESENT,UNKNOWN,YES,WARN,YES,YES,Placeholder unknown run token
+FV_00061,TB_INV_FORENSIC_F6_NO_ROW_LEDGER,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0,source_dataset_id,PRESENT,UNKNOWN,YES,WARN,YES,YES,Placeholder unknown dataset id
+FV_00062,TB_INV_FORENSIC_F6_NO_ROW_LEDGER,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0,lineage_status,MISSING,UNKNOWN,YES,FAIL,YES,YES,No lineage closure artifact for forensic bundle
+FV_00063,TB_INV_FORENSIC_F6_NO_ROW_LEDGER,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0,sign_or_magnitude_disclosure,MISSING,UNKNOWN,YES,FAIL,YES,YES,No disclosure path without source artifact
+FV_00064,TB_INV_FORENSIC_F6_NO_ROW_LEDGER,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0,grid_disclosure,MISSING,UNKNOWN,YES,FAIL,YES,YES,No grid disclosure without committed grid-bearing artifact
+FV_00065,TB_INV_FORENSIC_F6_NO_ROW_LEDGER,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0,output_artifact,MISSING,UNKNOWN,YES,FAIL,YES,YES,No tau output table registered for this row
+FV_00066,TB_INV_FORENSIC_F6_NO_ROW_LEDGER,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0,pathway_id,PRESENT,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0,YES,PASS,NO,NO,Registry pathway present
+FV_00067,TB_INV_FORENSIC_F6_NO_ROW_LEDGER,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0,pathway_family,PRESENT,FORENSIC_F6,YES,PASS,NO,NO,PRB02B ledger
+FV_00068,TB_INV_FORENSIC_F6_NO_ROW_LEDGER,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0,row_identity_key,PRESENT,ID_FORENSIC_LEGACY_ROW,YES,WARN,YES,YES,Legacy forensic identity not equivalent to baseline row keying
+FV_00069,TB_INV_FORENSIC_F6_NO_ROW_LEDGER,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0,co_registered_group_id,PRESENT,N_A,YES,WARN,YES,YES,Explicit N_A per ledger; no co-registration group
+FV_00070,TB_INV_FORENSIC_F6_NO_ROW_LEDGER,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0,row_identity_status,PRESENT,BLOCKED_NO_REGISTERED_FORENSIC_ROWS,YES,FAIL,YES,YES,Hard block per PRB02B
+FV_00071,TB_INV_FORENSIC_F6_NO_ROW_LEDGER,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0,forensic_only,PRESENT,YES,YES,PASS,NO,NO,Rule: forensic_only forces comparison_eligibility NO
+FV_00072,TB_INV_FORENSIC_F6_NO_ROW_LEDGER,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0,allowed_for_comparison,PRESENT,NO,YES,PASS,NO,NO,Explicit NO per ledger
