@@ -1,0 +1,5 @@
+blocker_id,component_scope,pre_fix05_status,evidence_used,post_fix05_status,closed_by_fix05,remaining_gap,next_required_task
+RI_DOC_SEMANTICS,DIP_FM_baseline,DOCUMENTATION_OPEN,PRB02B ledger PRB03 inventory FIX-05 tables,CLOSED_COMMITTED_ROW_KEY_AND_PAIRING_MAP,YES,none for metadata semantics,AGING-TAU-FIX-06-CANONICAL-READINESS-GATE
+RI_BODY_RUN_LOCAL,DIP_FM_baseline,UNVERIFIED_IN_GIT,disclosure in FIX-05,DISCLOSED_RUN_LOCAL_TAU_TABLES,YES,numeric tau cell alignment not proven from repo files alone,optional regeneration or FIX-06 body audit
+FX15_ROW_UID_BRIDGE,shared_row_identity_layer,ID_BRIDGE_CO_REGISTERED_SATISFIED_EQ_PARTIAL,PRB03 row_identity_status WARN,UNCHANGED_POLICY_PARTIAL,PARTIAL,full UID bridge per charter not PASS,AGING-TAU-FIX-06-CANONICAL-READINESS-GATE
+PRB03_COMP_ELIG,PRB03_bundle,rows_comparison_eligible_now_EQ_0,pathway summary,UNCHANGED,PARTIAL,policy gate blocks eligibility until FIX-06,AGING-TAU-FIX-06-CANONICAL-READINESS-GATE

@@ -1,0 +1,5 @@
+downstream_target,previous_status,updated_status_after_fix05,impact_summary,still_blocked_by,next_required_task
+ROW_IDENTITY_GOVERNANCE,PARTIAL_PENDING_PAIRING_AUDIT,CLOSED_SEMANTICS_PARTIAL_BODY,Formal keys co-reg groups and overlap domain documented; run-local body caveat stated,PRB03 WARN comparison eligibility zero,AGING-TAU-FIX-06-CANONICAL-READINESS-GATE
+READY_FOR_FIX06_GATE,PARTIAL,READY,Serial prerequisite for documentation satisfied,lineage policy rows,AGING-TAU-FIX-06-CANONICAL-READINESS-GATE
+TAU_CANONICAL_SET,NO,NO,FIX-05 does not authorize canonical tau,policy and FIX-06,AGING-TAU-FIX-06-CANONICAL-READINESS-GATE
+RATIOS,NO,NO,No ratio clearance,comparison runner blocked,AGING-TAU-FIX-06-CANONICAL-READINESS-GATE
