@@ -1,0 +1,4 @@
+input_path,generator_command,exit_code,exists_after_run,nonzero_bytes,valid_content_note
+tables/alpha_structure.csv,tools/run_matlab_safe.bat analysis/run_alpha_structure_agent19f.m,1,NO,N/A,Blocked missing switching_alignment_core_data.mat
+tables/phi2_structure_metrics.csv,tools/run_matlab_safe.bat Switching/analysis/run_phi2_shape_physics_test.m,0,YES,408,FAIL path same missing MAT placeholder NaN row
+tables/kappa1_from_PT.csv,tools/run_matlab_safe.bat analysis/run_kappa1_from_pt_agent20a.m,1,NO,N/A,Blocked missing PT_matrix.csv default path

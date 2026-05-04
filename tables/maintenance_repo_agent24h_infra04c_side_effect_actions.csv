@@ -1,0 +1,9 @@
+path,action_taken,rationale
+tables/phi2_structure_metrics.csv,DELETED_WORKING_TREE,untracked ignored invalid NaN placeholder created on INFRA-04C attempt date
+tables/phi2_kernel_comparison.csv,DELETED_WORKING_TREE,same
+tables/phi2_regime_stability.csv,DELETED_WORKING_TREE,same
+reports/run_phi2_shape_physics_test.md,DELETED_WORKING_TREE,FAIL-only stub same session
+matlab_error.log,PRESERVE_DOCUMENT_OPTIONAL_DELETE,diagnostic not placeholder owners may keep or delete manually
+figures/alpha_vs_T.png,NO_ACTION,pre-existing March mtime not attributed to failed May INFRA-04C alpha path
+reports/alpha_structure_report.md,NO_ACTION,same
+INFRA_04C maintenance report and tables,NO_ACTION,required maintenance evidence

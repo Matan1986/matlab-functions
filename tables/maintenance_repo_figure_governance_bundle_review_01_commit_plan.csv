@@ -1,0 +1,4 @@
+commit_order,commit_title_short,commit_split_option,includes_classification,notes
+1,Figure governance INFRA and CV07 evidence,B,governance,"INFRA-01B 02 03 03B 04 04B 04C 04C-CLEAN 04D SW-FIG-INFRA-01 tables tools/agent24h_render_figures_matlab_replacement.m"
+2,SW canonical paper figures PS1 and tracked outputs,B,cv06,"scripts/run_switching_canonical_paper_figures.ps1 reports/switching_canonical_paper_figures.md tables/switching_canonical_paper_figures_manifest.csv results canonical_paper pdf png"
+3_optional,Optional force-add canonical paper fig,B or defer,cv06_fig_binary,"git add -f results/switching/figures/canonical_paper/*.fig only if policy tracks ignored results"

@@ -1,0 +1,14 @@
+path,exists_after_audit_end,git_tracked,git_ignored,pattern_infra04c_session,classification,notes
+tables/phi2_structure_metrics.csv,NO,NO,YES,YES_datetime_2026_05_04,invalid_placeholder_removed,NaN-only row from failed run_phi2_shape_physics_test catch
+tables/phi2_kernel_comparison.csv,NO,NO,YES,YES_datetime_2026_05_04,invalid_placeholder_removed,NA NaN stub
+tables/phi2_regime_stability.csv,NO,NO,YES,YES_datetime_2026_05_04,invalid_placeholder_removed,NA NaN stub
+reports/run_phi2_shape_physics_test.md,NO,NO,YES,YES_datetime_2026_05_04,invalid_placeholder_removed,FAIL only
+matlab_error.log,YES,NO,YES,YES_datetime_2026_05_04,diagnostic_side_effect_preserved,phi2 stack trace to missing alignment MAT
+tables/alpha_structure.csv,NO,N/A,N/A,N/A,absent_no_side_effect,INFRA-04C alpha run failed before writetable
+tables/kappa1_from_PT.csv,NO,N/A,N/A,N/A,absent_no_side_effect,20A failed before write
+figures/infra_04_agent24h_replacement/,NO,N/A,N/A,N/A,absent_no_side_effect,replacement did not run
+tables/infra_04_agent24h_replacement_correlations.csv,NO,N/A,N/A,N/A,absent_no_side_effect,replacement did not run
+figures/alpha_vs_T.png,YES,NO,YES,NO_mtime_march_2026,pre_existing_local_not_infra04c_may,Ignored figures path older than May INFRA-04C phi2 stamp
+reports/alpha_structure_report.md,YES,NO,YES,NO_mtime_march_2026,pre_existing_local_not_infra04c_may,Ignored reports path older than May phi2 stamp
+reports/maintenance/repo_agent24h_matlab_replacement_INFRA_04C.md,YES,NO,NO,N/A,valid_maintenance_evidence,preserved
+tables/maintenance_repo_agent24h_matlab_replacement_INFRA_04C_*.csv,YES,NO,NO,N/A,valid_maintenance_evidence,preserved

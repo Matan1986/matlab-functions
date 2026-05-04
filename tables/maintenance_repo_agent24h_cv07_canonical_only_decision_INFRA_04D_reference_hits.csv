@@ -1,0 +1,14 @@
+basename_or_pattern,file_path,hit_type,one_line_context
+latent_vs_observable_proxy_comparison.png,reports/maintenance/repo_nonmatlab_P0_figure_mandatory_remediation_INFRA_03B.md,policy,CV07 mandatory MATLAB replacement or retirement
+latent_vs_observable_proxy_comparison.png,tables/maintenance_repo_nonmatlab_P0_figure_quarantine_INFRA_03.csv,quarantine,Q03-05 System.Drawing output
+latent_vs_observable_proxy_comparison.png,tools/agent24h_render_figures.ps1,code,Bitmap save path panel one
+latent_vs_observable_proxy_comparison.png,tools/agent24h_render_figures_matlab_replacement.m,code,infra_04 replacement export stem
+latent_vs_observable_proxy_comparison.png,analysis/run_agent24h_figures.m,code,Legacy MATLAB exporter to figures root
+phi1_phi2_in_experimental_language.png,tables/maintenance_repo_nonmatlab_P0_figure_quarantine_INFRA_03.csv,quarantine,Q03-06 interpretive layout
+phi1_phi2_in_experimental_language.png,tools/agent24h_render_figures.ps1,code,Bitmap save path panel two
+observable_replacement_summary.png,tables/maintenance_repo_nonmatlab_P0_figure_quarantine_INFRA_03.csv,quarantine,Q03-07 literals in script
+observable_replacement_summary.png,tools/agent24h_render_figures.ps1,code,Panel three hardcoded y1a y1b y2a y2b
+INFRA-04C maintenance,reports/maintenance/repo_agent24h_matlab_replacement_INFRA_04C.md,infra_evidence,Legacy PNG paths unchanged blocked run
+INFRA-04C-CLEAN,reports/maintenance/repo_agent24h_infra04c_side_effect_cleanup.md,infra_cleanup,Placeholder phi2 side effects removed legacy CV07 preserved
+switching_canonical_paper,reports/switching_canonical_paper_figures.md,canonical_paper_doc,No CV07 PNG stems in outputs list inspected
+reader_hub,docs/switching_canonical_reader_hub.md,canonical_router,Namespace map no CV07 trio citation inspected

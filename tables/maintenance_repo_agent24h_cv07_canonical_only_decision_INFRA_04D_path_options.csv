@@ -1,0 +1,5 @@
+option_id,short_label,viable_default_without_old_chain_repair,recommended_in_canonical_only_audit,requires_future_charter_note
+A,Retarget MATLAB replacement to current canonical tables,NO,NO,YES_explicit_mapping_and_namespace_decision
+B,Supersede CV07 by canonical paper figures and hub registers,YES,YES,NO
+C,Formal retirement of CV07 canonical authority documentation,YES,YES,NO
+D,Keep MATLAB replacement blocked document dependencies,YES,YES,NO

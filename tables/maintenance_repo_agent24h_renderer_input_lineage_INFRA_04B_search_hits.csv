@@ -1,0 +1,28 @@
+query,path,hit_type,line_or_context,lineage_relevance,notes
+alpha_structure.csv,tools/agent24h_render_figures.ps1,code,Import-Csv ... alpha_structure.csv,high,Direct input to System.Drawing figure path
+alpha_structure.csv,analysis/run_alpha_structure_agent19f.m,code,writetable(... alpha_structure.csv),high,Documented writer for table
+alpha_structure.csv,tools/agent24h_render_figures_matlab_replacement.m,code,alphaCsv = ... alpha_structure.csv,high,MATLAB replacement read path
+alpha_structure.csv,reports/maintenance/repo_agent24h_renderer_resolution_INFRA_04.md,doc,Lists columns used by renderer,medium,INFRA-04 cross-reference
+phi2_structure_metrics.csv,tools/agent24h_render_figures.ps1,code,Import-Csv ... phi2_structure_metrics.csv,high,Direct input figure 2
+phi2_structure_metrics.csv,Switching/analysis/run_phi2_shape_physics_test.m,code,writetable(metricsTbl metricsPath),high,metricsPath targets tables/phi2_structure_metrics.csv
+phi2_structure_metrics.csv,tools/agent24h_render_figures_matlab_replacement.m,code,phi2Csv = ... phi2_structure_metrics.csv,high,MATLAB replacement read path
+phi2_structure_metrics.csv,source_of_truth_audit_no_run_classified.csv,audit,path marked NO_RUN_BACKING,medium,Confirms no committed snapshot
+kappa1_from_PT.csv,tools/agent24h_render_figures.ps1,code,Import-Csv ... kappa1_from_PT.csv,high,Used for correlation rows and kappa1 PT columns
+kappa1_from_PT.csv,analysis/run_kappa1_from_pt_agent20a.m,code,Writes tables/kappa1_from_PT.csv via PS1 delegation,high,Documented regeneration entrypoint
+kappa1_from_PT.csv,tools/run_kappa1_from_pt_agent20a.ps1,code,OUT path tables/kappa1_from_PT.csv,high,PowerShell writer invoked by Agent 20A
+kappa1_from_PT.csv,run_kappa1_pt_vs_speak_test.m,code,Finds kappa1_from_PT.csv in tables,medium,Reader test path
+agent24h_correlations.csv,tools/agent24h_render_figures.ps1,code,Export-Csv ... agent24h_correlations.csv,high,Renderer output not input
+agent24h_correlations.csv,tools/agent24h_render_figures_matlab_replacement.m,comment,Writes infra_04 replacement correlations instead,high,Non-destructive export filename
+agent24h_correlations.csv,source_of_truth_audit.csv,audit,NO backing flag,medium,Historical audit row
+latent_vs_observable_proxy_comparison.png,tools/agent24h_render_figures.ps1,code,bmp1.Save ... latent_vs_observable_proxy_comparison.png,high,Legacy output path
+latent_vs_observable_proxy_comparison.png,tools/agent24h_render_figures_matlab_replacement.m,code,exportgraphics ... latent_vs_observable_proxy_comparison.png,high,Replacement export under infra folder
+latent_vs_observable_proxy_comparison.png,analysis/run_agent24h_figures.m,code,exportgraphics ... same stem,medium,Alternate MATLAB implementation reference
+phi1_phi2_in_experimental_language.png,tools/agent24h_render_figures.ps1,code,Save path figure 2,high,Legacy output path
+phi1_phi2_in_experimental_language.png,tools/agent24h_render_figures_matlab_replacement.m,code,exportgraphics phi1_phi2 stem,high,Replacement export path
+observable_replacement_summary.png,tools/agent24h_render_figures.ps1,code,Save path figure 3 literals section,high,Embeds numeric literals not CSV
+observable_replacement_summary.png,tools/agent24h_render_figures_matlab_replacement.m,code,y1a y1b y2a y2b constants,high,Same literals as PS1
+agent24h_render_figures,reports/maintenance/repo_nonmatlab_P0_figure_mandatory_remediation_INFRA_03B.md,doc,CV07 mandatory resolution,high,Policy anchor
+agent24h_render_figures,tables/maintenance_repo_agent24h_renderer_resolution_INFRA_04_source_audit.csv,table,Row for tools/agent24h_render_figures.ps1,medium,Prior INFRA-04 audit link
+agent24h_render_figures,tools/agent24h_render_figures.ps1,path,self path System.Drawing renderer,high,Original non-MATLAB renderer
+.gitignore,.gitignore,code,tables/** ignore rule,high,Explains why tables CSVs not tracked when present
+artifact_cleanup_list.csv,artifact_cleanup_list.csv,manifest,tables/kappa1_from_PT.csv canonical keep note,low,Historical artifact list not execution proof

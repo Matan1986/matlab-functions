@@ -1,0 +1,8 @@
+artifact_path,artifact_role,relation_to_cv07,notes
+results/switching/figures/canonical_paper/switching_main_candidate_map_cuts_collapse.fig,Switching paper-candidate main MAT output,supersedes CV07 for endorsed map or collapse visualization,Per switching_canonical_paper_figures closed P0 P1 P2 inputs
+results/switching/figures/canonical_paper/switching_main_candidate_map_cuts_collapse.png,Raster companion for main candidate,same,Different layout than CV07 four-panel scatter
+results/switching/figures/canonical_paper/switching_supp_Xeff_components.fig,Supplement X_eff components MAT,orthogonal supplement,AX and X_eff labeling discipline
+docs/switching_canonical_reader_hub.md,Read order and namespace router,replaces ad hoc CV07 as routing authority,CANON_GEN vs diagnostic vs corrected-old pointers
+tables/switching_corrected_old_authoritative_artifact_index.csv,Corrected-old authoritative register,not drop-in CSV inputs for CV07 renderer,different contracts than alpha_structure phi2_metrics kappa1_from_PT generators
+results/switching/runs/run_2026_04_03_000147_switching_canonical/tables/switching_canonical_S_long.csv,Canonical S long source for paper pass,input family for canonical_paper per report,Not same table as legacy alpha_structure pipeline
+docs/switching_analysis_map.md,Producer and namespace map,prevents naive retarget without charter,cited from reader hub

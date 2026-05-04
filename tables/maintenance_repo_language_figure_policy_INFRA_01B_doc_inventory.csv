@@ -1,0 +1,14 @@
+document_path,exists,inspected_yes_no,role_summary
+reports/relaxation/relaxation_language_figure_policy_INFRA_01.md,YES,YES,Prior Relaxation-only policy report; superseded in scope by INFRA_01B; not deleted or invalidated.
+tables/relaxation/relaxation_language_figure_policy_INFRA_01_doc_inventory.csv,YES,YES,Prior Relaxation-only doc inventory reference list.
+tables/relaxation/relaxation_language_figure_policy_INFRA_01_node_inventory.csv,YES,YES,Prior Relaxation-focused Node script inventory.
+tables/relaxation/relaxation_language_figure_policy_INFRA_01_policy_matrix.csv,YES,YES,Prior Relaxation-scoped policy matrix.
+tables/relaxation/relaxation_language_figure_policy_INFRA_01_future_prompt_block.csv,YES,YES,Prior Relaxation-scoped agent prompt; superseded for repo-wide use by INFRA_01B future prompt.
+tables/relaxation/relaxation_language_figure_policy_INFRA_01_status.csv,YES,YES,Prior task completion status for Relaxation-only INFRA_01.
+docs/repo_execution_rules.md,YES,YES,Strict MATLAB execution rules for agents; not modified by this task.
+docs/visualization_rules.md,YES,YES,Repository-wide visualization principles; publication paths must align.
+docs/figure_style_guide.md,YES,YES,Publication-style figure requirements.
+docs/figure_style_audit_report.md,YES,YES,Audit of MATLAB figure code against guides across modules including Relaxation.
+docs/figure_export_infrastructure.md,YES,YES,Export stack planning; references save_run_figure and run-root conventions.
+docs/templates/matlab_run_template.m,YES,YES,Runnable template with execution signaling contract for MATLAB runs.
+tools/save_run_figure.m,YES,YES,Canonical MATLAB helper for PDF PNG FIG export under run figures directory.

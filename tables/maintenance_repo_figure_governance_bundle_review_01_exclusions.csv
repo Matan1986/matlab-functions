@@ -1,0 +1,21 @@
+exclusion_category,path_or_pattern,reason
+MATLAB_ERROR_LOG,matlab_error.log,Local diagnostic ignored *.log per INFRA-04C series
+LEGACY_CV07_PNG,figures/latent_vs_observable_proxy_comparison.png,System.Drawing legacy quarantined not bundle promotion
+LEGACY_CV07_PNG,figures/phi1_phi2_in_experimental_language.png,Same
+LEGACY_CV07_PNG,figures/observable_replacement_summary.png,Same
+PLACEHOLDER_PHI2,tables/phi2_structure_metrics.csv,Removed INFRA-04C-CLEAN absent do not commit
+PLACEHOLDER_PHI2,tables/phi2_kernel_comparison.csv,Removed absent
+PLACEHOLDER_PHI2,tables/phi2_regime_stability.csv,Removed absent
+PLACEHOLDER_PHI2,reports/run_phi2_shape_physics_test.md,Removed absent
+RELAXATION_BACKLOG,Relaxation ver3/**,Unrelated Relaxation drafts
+AGING_BACKLOG,reports/aging/aging_F7X7_user_observable_guide_draft.md,Unrelated modified Aging draft
+AGING_BACKLOG,run_aging_F6*.m,Unrelated untracked Aging audits
+SWITCHING_BACKLOG,Switching/analysis/*.m untracked,Unrelated Switching analysis backlog per charter
+SWITCHING_BACKLOG,scripts/run_switching_*.m untracked except canonical paper PS1,Scoped exclusion broad scripts
+UNRELATED_MAINTENANCE,reports/maintenance/governor_summary_latest.md,Modified non-INFRA bundle
+UNRELATED_MAINTENANCE,tables/maintenance_findings_latest.csv,Modified non-INFRA bundle
+UNRELATED_MAINTENANCE,tables/maintenance_governor_summary.csv,Untracked inventory not in bundle list
+TMP,tmp_f7o_*_UNTRACKED/,Temp dirs
+DELETED_FIGURES,figures/switching/phase4B_*.png,Deleted tracked files manual review do not bundle blindly
+DELETED_FIGURES,figures/switching/phase4B_*.fig,Deleted tracked files manual review
+BROAD_CLEANUP,Any git clean or git add -,Forbidden by charter

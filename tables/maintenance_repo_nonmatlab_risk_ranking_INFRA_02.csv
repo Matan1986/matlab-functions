@@ -1,0 +1,17 @@
+rank,script_path,module,related_task,risk_level,reason_for_risk,recommended_action,priority,notes
+1,scripts/run_switching_canonical_paper_figures.ps1,Switching,canonical_paper_figures,HIGH,Non-MATLAB PNG/PDF publication-oriented outputs under results/,convert_to_matlab,P0,Target MATLAB runner under Switching with fig+png export per INFRA-01B
+2,tools/agent24h_render_figures.ps1,Tools,agent24h,HIGH,System.Drawing PNG from CSV without MATLAB fig baseline,convert_to_matlab,P0,Explicit non-MATLAB path in header; not default for scientific figures
+3,analysis/switching_collapse_kernel_analysis.ps1,Switching,collapse_kernel,HIGH,Many Chart SaveImage PNG panels from computed kernels,matlab_full_replay,P1,Quarantine for manuscript until MATLAB collapse pipeline validated
+4,analysis/switching_barrier_projection_native.ps1,Switching,barrier_projection,HIGH,Multi-panel WinForms chart PNG exports,matlab_full_replay,P1,Switching analysis visualization outside MATLAB
+5,analysis/aging_time_rescaling_collapse.ps1,Aging,aging_collapse,HIGH,Chart SaveImage from rescaling experiment,matlab_full_replay,P1,Aging module specific parity task
+6,scripts/run_relaxation_universal_time_spectrum_23.mjs,Relaxation,RLX-23,HIGH,Smoothing and central rate estimates on log-time,matlab_full_replay,P1,RELAXATION_RLX23_REQUIRES_MATLAB_PARITY YES
+7,scripts/run_relaxation_slow_tail_robustness_24.mjs,Relaxation,RLX-24,HIGH,Derivative-free and quadratic derivative comparisons plus charter,matlab_full_replay,P1,Charter tables reference RLX-23 lineage
+8,scripts/run_relaxation_plateau_timewarp_22B.mjs,Relaxation,RLX-22B,HIGH,Interpolation and timewarp gain metrics on shared grids,matlab_full_replay,P1,RELAXATION_RLX22B_REQUIRES_MATLAB_PARITY PARTIAL timewarp or plateau heavy
+9,scripts/run_cm_sw_rlx_ax_18c_t_scaling_baseline.mjs,CrossModule,AX-18C,HIGH,OLS and LOOCV in A-space baseline construction,matlab_full_replay,P1,Cross-module scaling evidence needs parity
+10,tools/agent24b_aging_prediction.py,Tools,agent24b,HIGH,matplotlib Aging prediction and residual PNG exports,convert_to_matlab,P1,Paired PS1 runner exists; unify evidence language
+11,tools/pt_width_spread_from_audit.py,Tools,spread_audit,HIGH,matplotlib PNG and PDF figure outputs from audit aggregates,convert_to_matlab,P1,Dual raster formats without MATLAB fig source
+12,tools/run_kappa2_state_vs_geometry.py,Tools,kappa2_geometry,HIGH,matplotlib PNG under figures/ from scientific CSV joins,convert_to_matlab,P1,Pairs with PS1 wrapper and markdown report
+13,scripts/run_relaxation_phase2_A_canon_lock.py,Relaxation,phase2_canon_lock,HIGH,Optional matplotlib diagnostics beside MATLAB lock runner,matlab_spotcheck,P1,Ensure diagnostics remain non-authoritative unless parity-checked
+14,scripts/run_relaxation_canonical_timescale_22.mjs,Relaxation,RLX-22,HIGH,Fit-free and parametric tau summaries drive downstream RLX-21/22B,matlab_full_replay,P1,Fitting domain triggers parity gate per INFRA-01B
+15,scripts/relaxation_phase3A0C_signal_threshold_envelope.ps1,Relaxation,phase3A0C,HIGH,System.Drawing bitmap diagnostics for envelope visualization,convert_to_matlab,P2,Relaxation visualization pathway outside MATLAB default policy
+16,scripts/relaxation_phase3A0D_recovered_mask.ps1,Relaxation,phase3A0D,HIGH,System.Drawing bitmap diagnostics for mask visualization,convert_to_matlab,P2,Pairs with Phase3A envelope tooling

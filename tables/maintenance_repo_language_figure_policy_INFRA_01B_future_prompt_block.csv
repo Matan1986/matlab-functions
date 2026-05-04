@@ -1,0 +1,10 @@
+block_id,prompt_text
+INFRA_01B_DEFAULT,"Language and figure policy:
+- MATLAB is the default scientific analysis language for this repository.
+- MATLAB is mandatory for scientific figure generation unless the user explicitly approves another language for that specific task.
+- Every scientific figure task must export both `.fig` and `.png` unless the user explicitly overrides this task.
+- Do not create JavaScript/Node/Python figures for scientific or publication/review outputs unless explicitly approved.
+- Non-MATLAB scripts may be used only for table-only acceleration/audit work unless explicitly approved.
+- Any non-MATLAB result involving smoothing, derivatives, interpolation, fitting, time-warping, rate-spectrum extraction, reconstruction, decomposition, or model selection requires MATLAB parity/review before canonical or manuscript use.
+- Existing non-MATLAB diagnostic outputs are not automatically invalid, but must be labeled provisional until reviewed or parity-checked.
+- Publication/review figures must follow docs/visualization_rules.md and docs/figure_style_guide.md."

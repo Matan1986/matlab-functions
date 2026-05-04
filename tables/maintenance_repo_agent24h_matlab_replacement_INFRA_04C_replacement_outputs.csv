@@ -1,0 +1,8 @@
+expected_output_path,created,file_size_note
+figures/infra_04_agent24h_replacement/latent_vs_observable_proxy_comparison.fig,NO,N/A
+figures/infra_04_agent24h_replacement/latent_vs_observable_proxy_comparison.png,NO,N/A
+figures/infra_04_agent24h_replacement/phi1_phi2_in_experimental_language.fig,NO,N/A
+figures/infra_04_agent24h_replacement/phi1_phi2_in_experimental_language.png,NO,N/A
+figures/infra_04_agent24h_replacement/observable_replacement_summary.fig,NO,N/A
+figures/infra_04_agent24h_replacement/observable_replacement_summary.png,NO,N/A
+tables/infra_04_agent24h_replacement_correlations.csv,NO,N/A
