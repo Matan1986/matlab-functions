@@ -12,6 +12,23 @@ The F7X2--F7X6 artifacts record surveys, definitions, and governance rules in de
 
 ---
 
+## At a glance: what not to misread
+
+| If you see | Read it as | Do not assume |
+|------------|------------|---------------|
+| `Track A` | stage 6 summary / figure lane | a physical observable name |
+| `Track B` | five-column consolidation reader lane | a full analysis route or physics object |
+| `FM_abs` | magnitude-only FM quantity | signed FM behavior |
+| `FM_step_mag` | route-dependent legacy FM field | magnitude-only semantics from `_mag` alone |
+| `tau_effective_seconds` | legacy tau summary requiring metadata | authoritative time scale without tau domain/method/lineage |
+| bridge IDs such as `C_DIP_DEPTH_B` / `C_FM_ABS_B` | bridge/export pairing objects | standalone canonical physics observables |
+| `R_age` or ratio outputs | downstream ratios built from prior tau tables | raw measured observables |
+| background / baseline / residual | branch/stage-specific constructions | universal standalone terms |
+
+Use this table as the first screen check. If the row says "do not assume," the quantity may still be useful, but only with the required stage/source/metadata context.
+
+---
+
 ## Quick start (first ~5 minutes)
 
 1. Open **`tables/aging/aging_F7X7_user_observable_cheatsheet.csv`** and find the row whose **display_family** matches what you are looking at.
