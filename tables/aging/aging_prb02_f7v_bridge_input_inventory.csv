@@ -1,0 +1,12 @@
+input_role,artifact_path,exists,artifact_type,pathway_id,pathway_family,required_for_bridge,readiness_status,notes
+Charter row-identity contract,c:/Dev/matlab-functions/tables/aging/aging_pathway_registry_bridge_charter_01_row_identity_contract.csv,YES,CSV_SPEC,N_A,N_A,YES,COMMITTED_3c2b084,Canonical identity_key definitions for audit mapping
+Charter allowed comparisons,c:/Dev/matlab-functions/tables/aging/aging_pathway_registry_bridge_charter_01_allowed_comparisons.csv,YES,CSV_SPEC,N_A,N_A,YES,COMMITTED_3c2b084,Which pairs require which bridges
+Tau bundle contract,c:/Dev/matlab-functions/tables/aging/aging_pathway_registry_bridge_charter_01_tau_bundle_contract.csv,YES,CSV_SPEC,N_A,N_A,YES,COMMITTED_3c2b084,Companion to identity when tau rows compared
+F7V required bridge contract,c:/Dev/matlab-functions/tables/aging/aging_F7V_required_bridge_contract.csv,YES,CSV_SPEC,N_A,N_A,YES,REPO_COMMITTED,bridge_id rows BRIDGE_* referenced by audit
+PRB01 pathway registry,c:/Dev/matlab-functions/tables/aging/aging_prb01_pathway_registry.csv,YES,REGISTRY_TABLE,N_A,mixed,YES,COMMITTED_1da9829,Authoritative pathway_id list PRB01_V1
+PRB01 aliases,c:/Dev/matlab-functions/tables/aging/aging_prb01_pathway_registry_aliases.csv,YES,ALIAS_TABLE,N_A,N_A,YES,COMMITTED_1da9829,Track A/B and tau_effective_seconds policy
+Consolidation observable dataset,c:/Dev/matlab-functions/tables/aging/aging_observable_dataset.csv,YES,DATA_CSV,mixed,CONSOLIDATION_CURVEFIT,YES_FOR_BASELINE_VS_BASELINE,LOCAL_PRESENT,Tw/Tp grid rows for ID_CONSOL_TW_CURVE
+Baseline emission validation report,c:/Dev/matlab-functions/reports/aging/aging_baseline_tau_sidecar_emission_validation_01.md,YES,REPORT,mixed,CONSOLIDATION_CURVEFIT,RECOMMENDED_CONTEXT,c7e5d41,Wiring and sidecar policy reference
+Baseline tau output sanity report,c:/Dev/matlab-functions/reports/aging/aging_baseline_tau_output_sanity_01.md,YES,REPORT,mixed,CONSOLIDATION_CURVEFIT,RECOMMENDED_CONTEXT,e58b237,Tp pairing reference for ID_TAU_VS_TP_ROW
+Bridge long dual-track output,N_A,NO,FUTURE_BRIDGE_OUTPUT,mixed,mixed,YES_WHEN_CROSS_FAMILY,NOT_EMITTED,Target artifact family matching BRIDGE_LONG_COMPONENT_TABLE required_outputs when implemented
+Bridge co-registration ledger,N_A,NO,FUTURE_BRIDGE_OUTPUT,mixed,mixed,YES_WHEN_CROSS_FAMILY,NOT_EMITTED,ID_BRIDGE_CO_REGISTERED populated rows per bridge_run_id
