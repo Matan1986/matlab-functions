@@ -1,0 +1,6 @@
+eligibility_check,result,evidence_path,blocks_execution,required_resolution,notes
+BASELINE_DIP_ROWS_COMPARISON_ELIGIBLE_NONZERO,NO,tables/aging/aging_prb03_tau_bundle_pathway_summary.csv,YES,Promote body-level canonical artifacts and update eligibility policy rows,rows_comparison_eligible_now=0 for Dip
+BASELINE_FM_ROWS_COMPARISON_ELIGIBLE_NONZERO,NO,tables/aging/aging_prb03_tau_bundle_pathway_summary.csv,YES,Promote body-level canonical artifacts and update eligibility policy rows,rows_comparison_eligible_now=0 for FM
+PRB03_WARN_STATUS_CLEARED_FOR_BASELINE,NO,tables/aging/aging_prb03_tau_bundle_pathway_summary.csv; tables/aging/aging_prb03_tau_bundle_status.csv,YES,Close lineage/policy warnings under approved canonicalization contract,baseline statuses remain WARN_LINEAGE_PARTIAL
+BODY_ARTIFACTS_COMMITTED_FOR_BASELINE_DIP_FM,NO,tables/aging/aging_prb02b_f7v_bridge_ledger.csv; git ls-files results/aging/runs/*/tables,YES,Create committed body promotion package or immutable manifest with hashes,Current references are run-local paths
+ROW_LINKS_TIED_TO_CANONICAL_BODY_SET,PARTIAL,tables/aging/aging_prb02b_f7v_bridge_ledger.csv; tables/aging/aging_tau_fix05_overlap_domain.csv,YES,Attach row keys to committed body artifacts not only ledger references,Metadata row links exist but canonical body set absent

@@ -1,0 +1,4 @@
+task_id,task_name,allowed_now,task_type,scope,forbidden_expansions,notes
+NEXT01,AGING-TAU-POST-FIX07-BODY-PROMOTION-AND-CANONICALIZATION-PACKAGE,YES,governance_promotion,Promote baseline Dip/FM row-body artifacts to committed canonical evidence and bind to FIX-05 row keys,No ratios no runner no collapse no forensic no nonbaseline,Must produce committed manifest and body-link proofs
+NEXT02,AGING-TAU-POST-FIX07-EXECUTION-READINESS-GATE,NO,readiness_gate,Decide execution authorization only after NEXT01 closes blockers,No execution before authorization,Can turn YES only if body canonicalization closed and comparison-eligible rows become nonzero
+NEXT03,AGING-TAU-POST-FIX07-GUARDED-RATIO-COMPARISON-EXECUTION,NO,execution,Run guarded ratio/comparison only after readiness gate explicitly approves,No scope expansion beyond baseline Dip/FM,Not allowed now

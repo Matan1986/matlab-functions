@@ -1,0 +1,5 @@
+blocker_id,blocker_name,pre_gate_status,gate_assessment,post_gate_status,blocks_ratio_execution,blocks_comparison_runner,next_required_task
+BG01,Body artifacts are run-local not committed,OPEN,Confirmed by ledger run-local paths and empty git tracking for body files,OPEN,YES,YES,AGING-TAU-POST-FIX07-BODY-PROMOTION-AND-CANONICALIZATION-PACKAGE
+BG02,Comparison-eligible rows remain zero for baseline Dip/FM,OPEN,Confirmed in PRB03 pathway summary,OPEN,YES,YES,AGING-TAU-POST-FIX07-BODY-PROMOTION-AND-CANONICALIZATION-PACKAGE
+BG03,PRB03 baseline WARN lineage/policy posture,OPEN,Confirmed WARN_LINEAGE_PARTIAL and ratio/runner NO flags,OPEN,YES,YES,AGING-TAU-POST-FIX07-EXECUTION-READINESS-GATE
+BG04,Row-body links canonicalized to committed body set,PARTIAL,Metadata links exist but no committed body package ties them to execution set,PARTIAL,YES,YES,AGING-TAU-POST-FIX07-BODY-PROMOTION-AND-CANONICALIZATION-PACKAGE
