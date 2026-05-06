@@ -51,10 +51,13 @@ See `tables/project_workstream_status.csv` (one row per active workstream).
 - Aging and Relaxation remain `NOT_CANONICAL` at module level; workstream `canonical_code_status=YES` must not be read as full module canonicalization closure.
 - Aging/Relaxation cross-module outputs are `WIP` / `ADVISORY` / `NOT_CANONICAL_SOURCE` until explicit module-level closure is recorded in canonical status tables.
 - Canonical/paper-ready wording in non-canonical module outputs is governance-risk phrasing, not closure evidence.
-- `tables/switching_canonical_identity.csv` is present, but Switching identity routing still requires consumer alignment; consumers must not infer canonical truth from newest-by-mtime selection or repo-root mirror filenames alone.
-- Canonical Switching data truth is the canonical run root: `results/switching/runs/run_2026_04_03_000147_switching_canonical/`.
+- `analysis/knowledge/run_registry.csv` is the authoritative nomination source for Switching canonical identity via the row tagged `canonical_identity_anchor` (currently `run_2026_04_03_000147_switching_canonical`); this authority is for anchor nomination, not full filesystem inventory.
+- `tables/switching_canonical_identity.csv` is an on-disk local identity file in some worktrees and is policy-defined as a future tracked governance mirror after F01D; before F01D, local presence is not equivalent to portable tracked repo truth.
+- If a future tracked `tables/switching_canonical_identity.csv` mirror conflicts with the `canonical_identity_anchor` nomination in `analysis/knowledge/run_registry.csv`, the registry anchor wins and the mirror must be reconciled.
+- Canonical Switching data truth is the nominated canonical run root: `results/switching/runs/run_2026_04_03_000147_switching_canonical/`.
 - Repo-root `tables/`/`reports/` named `switching_*` are reference mirrors or operational summaries unless explicitly tied back to canonical run identity and run-root provenance.
-- This clarification is documentation-only; resolver behavior, newest-by-mtime selection, root mirror production, and cross-module output ownership remain under owner-decision review.
+- Latest/newest-by-mtime resolver fallback must not be treated or described as canonical Switching identity behavior; resolver/caller enforcement is deferred to F01E.
+- This clarification is documentation-only; F01D (mirror portability via git tracking policy) and F01E (resolver/caller semantics) remain required implementation stages under owner-decision review.
 - `analysis/knowledge/run_registry.csv` is a query/discovery registry and is not a complete filesystem inventory of every run directory.
 - Do not build a new Switching context bundle before micro-integration is planned and executed.
 
