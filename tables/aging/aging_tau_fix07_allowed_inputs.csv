@@ -1,0 +1,11 @@
+input_id,input_path_or_token,input_type,allowed_for_design,allowed_for_execution,allowed_for_scientific_claims,reason,limitation
+INP01,reports/aging/aging_tau_fix06_readiness_gate.md,governance_report,YES,YES,NO,Authoritative readiness decision baseline,Does not provide numeric body-level tau proof
+INP02,tables/aging/aging_tau_fix06_readiness_decision.csv,decision_table,YES,YES,NO,Machine-readable FIX-06 gates,Execution still blocked by PARTIAL and NO fields
+INP03,tables/aging/aging_tau_fix05_overlap_domain.csv,overlap_metadata,YES,YES,NO,Defines finite Dip/FM overlap domain,Metadata-only overlap not numeric body validation
+INP04,tables/aging/aging_prb02b_f7v_bridge_ledger.csv,row_identity_ledger,YES,CONDITIONAL,NO,Provides row identity and co-registration anchors,Source artifacts include run-local paths and conditional comparison flags
+INP05,tables/aging/aging_prb03_tau_bundle_pathway_summary.csv,policy_summary,YES,CONDITIONAL,NO,Contains eligibility and safety flags for ratio/runner,Current values are NO or 0 for execution fields
+INP06,tables/aging/aging_prb03_tau_bundle_status.csv,policy_status,YES,CONDITIONAL,NO,Contains READY_FOR_COMPARISON_MATRIX_DESIGN and runner/ratio constraints,Not scientific authorization
+INP07,results/aging/runs/.../tau_vs_Tp.csv and tau_FM_vs_Tp.csv,run_local_row_bodies,YES,NO,NO,May be referenced only to document limitation existence,Cannot be canonical execution/scientific evidence until body-level gate passes
+INP08,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1|AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,pathway_scope_token,YES,YES,NO,Locks scope to baseline Dip/FM lane only,Any scope expansion requires separate governance gate
+INP09,AGN_WF_FORENSIC_OLD_FIT_REPLAY_F6_V0,forensic_pathway,NO,NO,NO,Explicitly excluded by FIX-06,Blocked pathway
+INP10,collapse_optimizer_or_nonbaseline_tau,excluded_pathway_group,NO,NO,NO,Out of allowed lane and excluded by policy,Blocked pathway

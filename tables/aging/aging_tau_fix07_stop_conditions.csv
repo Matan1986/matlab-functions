@@ -1,0 +1,9 @@
+stop_condition_id,condition,why_it_blocks,required_response,notes
+STOP01,Attempt to compute ratios during design or preflight task,Violates FIX-06 design-only allowance,STOP_AND_REPORT,No calculation paths allowed
+STOP02,Attempt to run or implement comparison runner,Runner explicitly not ready and blocked,STOP_AND_REPORT,Execution requires separate gate
+STOP03,BODY_LEVEL_CANONICALIZATION_GATE not PASS,Run-local bodies cannot be treated as canonical execution inputs,STOP_AND_REPORT,Do not promote scientific or execution claims
+STOP04,PRB03 execution fields remain blocked without approved exception,Risk of policy bypass and overclaim,STOP_AND_REPORT,Requires explicit approved exception contract
+STOP05,Pathway scope includes collapse optimizer old-fit forensic or nonbaseline tau,Out of allowed baseline governance lane,STOP_AND_REPORT,Excluded by FIX-06 and FIX-07
+STOP06,Missing or inconsistent 1:1 Dip/FM row pairing across baseline Tp domain,Invalid comparison basis,STOP_AND_REPORT,Re-run body-level pairing gate in later task
+STOP07,Staged set contamination by Switching Relaxation MT or reports/maintenance paths,Violates repository hygiene constraints for this fix,STOP_AND_REPORT,Do not auto-correct with forbidden git commands
+STOP08,Language claims scientific canonical tau readiness while status is NO,Overclaims beyond committed evidence,STOP_AND_REPORT_AND_REWRITE,Use governance-only phrasing

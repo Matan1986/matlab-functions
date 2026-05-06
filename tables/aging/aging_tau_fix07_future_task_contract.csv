@@ -1,0 +1,11 @@
+contract_field,required_value,required_reason,allowed,forbidden_expansion,notes
+future_task_name,AGING-TAU-POST-FIX07-BODY-GATE-AND-RATIO-COMPARISON-PREFLIGHT,Maintain design and gate separation before execution,YES,Ratios or runner in this task,Pre-execution gate only
+task_mode,DESIGN_OR_PREFLIGHT_ONLY,FIX-06 permits design not execution,YES,Execution computations,Must remain no-compute
+pathway_scope,AGN_WF_CONSOL_DS_DIP_DEPTH_CURVEFIT_V1|AGN_WF_CONSOL_DS_FM_ABS_CURVEFIT_V1,Limit to baseline Dip/FM lane,YES,Collapse forensic nonbaseline pathways,Scope lock is mandatory
+body_level_canonicalization_gate,BODY_LEVEL_CANONICALIZATION_GATE=PASS before execution,Run-local body limitation must be closed first,YES,Skip body gate and execute anyway,Execution gate prerequisite
+row_identity_gate,ID_TAU_VS_TP_ROW plus 1:1 Tp co-registration validated at body level,Prevent mismatched or drifted rows,YES,Metadata-only assumption for execution,Must prove with body-level evidence set
+comparison_policy_gate,PRB03 execution-related flags upgraded or explicit approved guarded exception,Prevent policy bypass,CONDITIONAL,Assume WARN/NO flags are acceptable for execution,Design can proceed while execution remains blocked
+scientific_claim_gate,BASELINE_DIP_FM_TAU_SCIENCE_READY=YES required for canonical scientific wording,Prevent overclaim,YES,Scientific-canonical claims when field is NO,Governance-only phrasing otherwise
+required_outputs,Preflight gate report plus status table plus blocker/exception table,Create auditable decision trail,YES,Runner outputs ratio outputs figures,No numeric result outputs
+execution_authorization_token,RATIO_COMPARISON_EXECUTION_ALLOWED=YES in dedicated later task,Hard separation of design and execution,CONDITIONAL,Implicit execution permission,Must be explicit and committed
+failure_response,STOP_AND_REPORT_NO_EXECUTION,Preserve governance safety on violations,YES,Continue after failed gate,Stop conditions are mandatory
