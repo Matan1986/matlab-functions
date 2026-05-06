@@ -1,0 +1,2 @@
+path,ignore_rule_before,exception_added,expected_tracking_behavior,risk,notes
+tables/switching_canonical_identity.csv,tables/**,!tables/switching_canonical_identity.csv,File can be tracked via explicit path add while other generated tables stay ignored,LOW,Narrow exception only; does not broadly unignore tables outputs

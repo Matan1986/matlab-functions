@@ -1,0 +1,8 @@
+field,value
+CANONICAL_RUN_ID,run_2026_04_03_000147_switching_canonical
+STATUS,LOCKED
+SOURCE,analysis/knowledge/run_registry.csv#role:canonical_identity_anchor
+ROLE,TRACKED_GOVERNANCE_MIRROR
+AUTHORITY_RULE,REGISTRY_ANCHOR_WINS_ON_CONFLICT
+LAST_VERIFIED,2026-05-06T11:13:00+03:00
+NOTES,F01D portability mirror only; resolver/caller semantics deferred to F01E

@@ -89,6 +89,7 @@ tables/**
 !tables/
 !tables/README.md
 !tables/maintenance_*.csv
+!tables/switching_canonical_identity.csv
 
 tables_old/**
 !tables_old/

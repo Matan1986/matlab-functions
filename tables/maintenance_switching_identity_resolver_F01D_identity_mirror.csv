@@ -1,0 +1,5 @@
+field,mirror_value,registry_value,match,source,notes
+CANONICAL_RUN_ID,run_2026_04_03_000147_switching_canonical,run_2026_04_03_000147_switching_canonical,YES,tables/switching_canonical_identity.csv|analysis/knowledge/run_registry.csv#canonical_identity_anchor,Mirror matches authoritative registry anchor row
+STATUS,LOCKED,LOCKED_EXPECTED_POLICY,YES,tables/switching_canonical_identity.csv,F01D keeps LOCKED compatible with existing schema
+ROLE,TRACKED_GOVERNANCE_MIRROR,TRACKED_GOVERNANCE_MIRROR,YES,tables/switching_canonical_identity.csv,F01D policy marker
+AUTHORITY_RULE,REGISTRY_ANCHOR_WINS_ON_CONFLICT,REGISTRY_ANCHOR_WINS_ON_CONFLICT,YES,tables/switching_canonical_identity.csv|F01B policy,Registry remains authoritative on conflicts
