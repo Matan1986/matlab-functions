@@ -1,0 +1,6 @@
+forbidden_task_id,forbidden_task,forbidden_reason,condition_to_unblock,notes
+FORBID-01,Run baseline Dip/FM tau ratios now,Scientific-canonical tau readiness is not granted at FIX-06,Close run-local body limitation and pass explicit post-fix execution gate,Design-only ratio planning is allowed
+FORBID-02,Run Dip/FM comparison runner now,PRB03 safe_for_runner_now remains NO and rows_comparison_eligible_now remains 0,Pass dedicated comparison execution readiness gate with updated eligibility,Do not implement or execute runner in FIX-06
+FORBID-03,Use collapse optimizer pathway as canonical tau lane,Out of baseline Dip/FM scope for this fix chain,N/A within this chain,Excluded pathway by policy
+FORBID-04,Use old-fit forensic replay as canonical tau lane,Forensic pathway marked FAIL_BLOCKED in PRB03 summary,Register committed row-level source and separate forensic policy gate,Excluded pathway by policy
+FORBID-05,Use nonbaseline tau pathways as canonical evidence,Fix chain governs baseline Dip/FM lane only,Separate pathway-specific canonicalization and readiness gate,Prevents scope creep and overclaim

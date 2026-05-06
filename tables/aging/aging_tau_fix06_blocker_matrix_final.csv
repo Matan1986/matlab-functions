@@ -1,0 +1,9 @@
+blocker_id,blocker_name,source_fix,pre_fix06_status,fix06_assessment,final_status,blocks_canonical_governance_evidence,blocks_canonical_scientific_tau_use,blocks_ratio_comparison_runner,evidence_path,limitation
+B01,Shared dataset lineage closure,FIX-01C,CLOSED,Committed and sufficient for governance chain,CLOSED,NO,NO,NO,tables/aging/aging_tau_fix01c_status.csv,
+B02,Dip branch lineage closure,FIX-02,CLOSED,Committed and sufficient for governance chain,CLOSED,NO,NO,NO,tables/aging/aging_tau_fix02_dip_status.csv,
+B03,FM branch lineage closure,FIX-03,CLOSED,Committed and sufficient for governance chain,CLOSED,NO,NO,NO,tables/aging/aging_tau_fix03_fm_status.csv,
+B04,Sidecar required metadata closure,FIX-04,CLOSED,Committed metadata layer complete,CLOSED,NO,NO,NO,tables/aging/aging_tau_fix04_status.csv,
+B05,Row identity semantics and co-registration,FIX-05,PARTIAL_BODY_RUN_LOCAL,Semantics closed and overlap finite; acceptable for governance evidence,ACCEPTED_WITH_LIMITATION,NO,YES,YES,tables/aging/aging_tau_fix05_status.csv,Body-level tau table verification remains run-local
+B06,PRB03 baseline pathway policy posture,PRB03,WARN_LINEAGE_PARTIAL,No fix06 file edits to PRB03 status; remains conservative,OPEN_POLICY_BLOCK,NO,YES,YES,tables/aging/aging_prb03_tau_bundle_pathway_summary.csv,rows_comparison_eligible_now remains 0 for baseline Dip and FM
+B07,Row-level body links committed in-repo,FIX-05,ROW_LEVEL_LINKS_RUN_LOCAL_REMAIN,Not required to close governance decision but blocks scientific canonical claims,OPEN_RUN_LOCAL_LIMITATION,NO,YES,YES,tables/aging/aging_tau_fix05_row_identity_blocker_resolution.csv,Run-local tau bodies are not canonical committed dataset artifacts
+B08,Excluded pathways scope guard,FIX-06,N_A,Explicitly excluded for this readiness lane,CLOSED_EXCLUDED,NO,NO,NO,tables/aging/aging_tau_fix06_forbidden_tasks.csv,Collapse optimizer old-fit forensic and nonbaseline tau excluded

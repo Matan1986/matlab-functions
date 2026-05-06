@@ -1,0 +1,3 @@
+task_id,task_name,allowed_now,allowed_scope,prerequisites_satisfied,forbidden_expansions,notes
+FIX06-NEXT-01,AGING-TAU-POST-FIX06-RATIO-COMPARISON-DESIGN,YES,Design-only eligibility matrix and governance guardrails for baseline Dip/FM lane,YES,No tau recompute no ratios no runner execution no figures no scientific publication claims,Must remain declarative and consume committed governance artifacts only
+FIX06-NEXT-02,AGING-TAU-POST-FIX06-BODY-CANONICALIZATION-PLAN,YES,Plan-only path to close run-local body dependency for baseline Dip/FM,YES,No execution on local run folders in this step,Intended to define evidence contract needed before scientific canonical use

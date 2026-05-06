@@ -1,0 +1,6 @@
+decision_id,decision_scope,decision,decision_value,allowed,evidence_basis,remaining_limitation,next_required_task
+D01,baseline_dip_fm_governance,BASELINE_DIP_FM_LANE_READY_AS_GOVERNANCE_EVIDENCE,YES,YES,FIX-01C..FIX-05 committed closure chain plus PRB02B/PRB03 metadata continuity,Scientific canonical value use still blocked,AGING-TAU-POST-FIX06-RATIO-COMPARISON-DESIGN
+D02,baseline_dip_fm_scientific,BASELINE_DIP_FM_TAU_READY_AS_SCIENTIFIC_EVIDENCE,NO,NO,PRB03 baseline remains WARN_LINEAGE_PARTIAL and row-level bodies remain run-local,Canonical scientific tau claims not authorized,Future body-level canonicalization task
+D03,tau_set,TAU_CANONICAL_SET_READY_AFTER_FIX06,NO,NO,Dip and FM not upgraded to scientific canonical-ready state in committed status artifacts,Row body and policy gaps remain,Future body-level canonicalization task
+D04,ratio_readiness,SAFE_TO_RUN_RATIOS_AFTER_FIX06,PARTIAL,YES,PRB03 recommends matrix design may proceed declaratively only,Execution and published claims remain blocked,AGING-TAU-POST-FIX06-RATIO-COMPARISON-DESIGN
+D05,comparison_runner_readiness,SAFE_TO_RUN_COMPARISON_RUNNER_AFTER_FIX06,NO,NO,PRB03 status rows_comparison_eligible_now=0 and safe_for_runner_now=NO,Runner implementation/execution blocked,Future comparison readiness execution gate
